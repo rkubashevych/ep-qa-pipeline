@@ -2,6 +2,18 @@
 
 Team-specific choices to confirm before running this skill.
 
+## 0. Run this in Claude Code, not Cowork
+
+This stage authenticates against the REST API using a `.env`, which lives
+in the **`e2e-testing` repo** (git-ignored). Cowork has no `.env`, so the
+skill pauses with "no .env" there. Run it — and the `qa-pipeline-code`
+orchestrator — from **Claude Code, in a directory that has the `.env`**,
+with `BB_EMAIL` / `BB_API_TOKEN` set for the PR. Cowork is for the docs
+half and browser `[UI]` testing; the API/code stages are Claude-Code
+stages. Never paste credentials into chat — they're read from `.env` at
+runtime. (See the plugin's `MAINTAINERS.md` → "Where to run each stage"
+and "Where things live".)
+
 ## 1. Credentials — from `.env` (never commit real values)
 
 The skill reads these at runtime from the e2e project `.env` (see the

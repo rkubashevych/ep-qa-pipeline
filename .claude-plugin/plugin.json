@@ -1,6 +1,6 @@
 {
   "name": "ep-qa-pipeline",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "ExpoPlatform QA pipeline - turns a Jira ticket into groomed requirements, a channel-tagged checklist, and test cases, then reviews the sub-task PRs, runs REST API testing ([API] cases), and runs browser UI testing ([UI] cases). Includes two one-command orchestrators (qa-pipeline-docs, qa-pipeline-code), a run-health analyzer, and Jira QA-sub-task publishing.",
   "author": { "name": "Roman Kubashevych" },
   "keywords": ["qa", "testing", "expoplatform", "jira", "bitbucket", "api", "pipeline"]

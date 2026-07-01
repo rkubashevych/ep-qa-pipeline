@@ -63,6 +63,47 @@ runs it:
 - `[mobile]` / `[export/email]` → routed to "Not executed here" (manual
   / device / export tooling)
 
+## Where to run each stage — Cowork vs Claude Code
+
+The stages need different things, so they run in different places:
+
+| Stage(s) | Needs | Run in |
+|---|---|---|
+| 1–4 docs (`task-context` … `qa-test-cases`) + `qa-pipeline-docs` | Jira/Confluence only | **Cowork** (or Claude Code) |
+| 5–6 `pr-summary`, `code-review` | the code: a **backend/portal-ui repo clone** OR a Bitbucket **API token** (`BB_EMAIL`+`BB_API_TOKEN`) | **Claude Code** |
+| 7 `api-testing` | the e2e **`.env`** (API creds) + a per-event frontend host | **Claude Code** |
+| 8 `web-testing` | a connected Chrome + logged-in test env | **Cowork** (Chrome extension) |
+
+**Why:** Cowork has no repo clone, no `BB_API_TOKEN`, and no `.env`, so
+5–7 can't authenticate there — `api-testing` will pause ("no .env"),
+and `code-review`/`pr-summary` can't reach a private Bitbucket PR. Those
+three are **Claude Code** stages. Run `qa-pipeline-code` from Claude Code
+in the repo that has the `.env`; keep Cowork for the docs half and, when
+Chrome cooperates, `[UI]` web-testing.
+
+## Where things live
+
+- **Credentials (`.env`)** — in the **`e2e-testing` repo** (git-ignored).
+  Holds `ADMIN_BASE_URL`, `ADMIN_USERNAME`/`ADMIN_PASSWORD`,
+  `ORGANIZER_API_KEY`, `EVENT_ID`, `BASE_URL`. `api-testing` reads it at
+  runtime — never paste these into chat. Point it at the target env
+  before running (e.g. `ADMIN_BASE_URL=https://api-alpha2.expoplatform.net`).
+- **Bitbucket auth** — `BB_EMAIL` + `BB_API_TOKEN` env vars (repository
+  read; add `read:pullrequest` for PR-URL mode). Branch mode uses the
+  branch = issue key.
+- **Code repos** — Bitbucket `expoplatform` workspace: backend monolith
+  = `expoplatform-main-ira`, frontend = `portal-ui`, admin = `admin-ui`.
+- **Per-event frontend host** — not discoverable; supply it per event
+  (see `skills/api-testing/references/api-testing-reference.md` §11.1).
+- **Pipeline output files** (`<KEY>-context.md` … `<KEY>-run-report.md`)
+  — written to the **working directory** of whatever chat/session runs
+  the stage; the next stage in the same session reads them. They are
+  git-ignored, not committed to this repo.
+- **Hand-off between docs and code** — docs publishes the checklist +
+  test cases to the Story's **QA sub-task** on Jira; `qa-pipeline-code`
+  reads them back from there, so you don't carry files between sessions
+  — you only need the same ticket key.
+
 ## How to update — recipe
 
 1. **Change the relevant `SKILL.md` / `references/`.** Keep `SKILL.md`
