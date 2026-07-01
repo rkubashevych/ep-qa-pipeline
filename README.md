@@ -65,3 +65,7 @@ Mobile (Android/iOS) and non-HTTP outputs (exports, emails, integrations) are ge
 ## Installing the skills
 
 This repo is a Claude **plugin** (`.claude-plugin/plugin.json`); each folder under `skills/` is one skill. Install the whole plugin (Settings → Capabilities / your plugin marketplace) so every stage plus the `qa-pipeline-docs` and `qa-pipeline-code` orchestrators arrive together. They run in sequence within a chat, each output file staying in the working directory for the next stage.
+
+## Maintaining / updating
+
+**This repo is the single source of truth** — the installed copy is a read-only cache; never edit it. To change, add, or wire a stage, and to publish a new version, follow **[MAINTAINERS.md](MAINTAINERS.md)** (it also has a "where to look when something's off" map and the known gotchas). Any fresh session should read that file first.
