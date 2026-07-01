@@ -1,0 +1,14 @@
+{
+  "name": "expoplatform-qa",
+  "owner": { "name": "Roman Kubashevych" },
+  "metadata": {
+    "description": "ExpoPlatform QA tooling marketplace — hosts the ep-qa-pipeline plugin."
+  },
+  "plugins": [
+    {
+      "name": "ep-qa-pipeline",
+      "source": "./",
+      "description": "End-to-end QA pipeline: Jira ticket -> groomed requirements -> checklist -> test cases -> PR review -> API testing -> UI testing, with orchestrators, a run-health analyzer, and Jira publishing."
+    }
+  ]
+}

@@ -107,12 +107,36 @@ runs it:
 - **api-testing pauses** if `.env` or a per-event frontend host is
   missing (the frontend host is per-event and not discoverable).
 
-## Publishing / updating the installed plugin
+## Publishing / updating — the no-drag way (marketplace)
 
-This repo is a Claude plugin. To ship a new version:
-1. Push this repo to its remote (the marketplace/git repo it's served
-   from).
-2. Update the plugin in the app so the cache refreshes to the new
-   version (Settings › Capabilities / your plugin marketplace).
-3. Verify the installed version matches `plugin.json` and remove any
-   stray standalone skill copies.
+This repo is BOTH a plugin (`.claude-plugin/plugin.json`) and a
+one-plugin **marketplace** (`.claude-plugin/marketplace.json`). Installing
+via the marketplace — not a loose `.plugin` file — is what makes updates
+automatic (no packaging, no drag-and-drop).
+
+**One-time setup (do once):**
+1. Make sure the repo is a git repo with a commit (it is).
+2. Add this folder as a marketplace:
+   - Claude Code CLI: `/plugin marketplace add D:\Coding\qa-pipeline-skill`
+   - Cowork: Settings › Capabilities → add/manage marketplaces → point at
+     this folder (local path) or its git URL.
+3. Install `ep-qa-pipeline` from the `expoplatform-qa` marketplace.
+4. Enable auto-update so it refreshes on startup — in `settings.json`
+   set the marketplace source `"autoUpdate": true` (local marketplaces
+   default to false; official Anthropic ones default to true).
+5. Remove any standalone copy of a skill that now ships in the plugin.
+
+**Every update after that:**
+1. Edit the skill/reference files here.
+2. Bump `version` in `.claude-plugin/plugin.json` (semver) — the version
+   bump is what signals an update.
+3. `git add -A && git commit` (push too if the marketplace is a remote).
+4. That's it — with `autoUpdate` on, the app pulls it on next startup;
+   or force it now: `/plugin marketplace update expoplatform-qa` (CLI) /
+   the "update" action in Cowork's marketplace UI.
+
+No searching folders, no `git archive`, no dragging `.plugin` files.
+
+> A loose `.plugin` bundle (`git archive … -o x.plugin`) is still handy
+> for a one-off hand-off to someone who hasn't added the marketplace —
+> but for your own machine, use the marketplace + autoUpdate.

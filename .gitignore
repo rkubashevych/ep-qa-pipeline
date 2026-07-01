@@ -13,3 +13,5 @@
 .env.local
 *.diff
 navigation_paths.json
+
+*.plugin
