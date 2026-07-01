@@ -1,0 +1,15 @@
+# pipeline run outputs
+*-context.md
+*-requirements.md
+*-checklist.md
+*-test-cases.md
+*-pr-summary.md
+*-code-review.md
+*-api-testing.md
+*-web-testing.md
+*-run-report.md
+# secrets / local
+.env
+.env.local
+*.diff
+navigation_paths.json
