@@ -8,6 +8,7 @@
     {
       "name": "ep-qa-pipeline",
       "source": "./",
+      "version": "0.5.0",
       "description": "End-to-end QA pipeline: Jira ticket -> groomed requirements -> checklist -> test cases -> PR review -> API testing -> UI testing, with orchestrators, a run-health analyzer, and Jira publishing."
     }
   ]
