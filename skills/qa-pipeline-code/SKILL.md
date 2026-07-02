@@ -38,6 +38,14 @@ a fresh chat (separate from the docs phase) for context/token health.
 
 ## Step 0 — Gather inputs
 
+**Environment check first.** Stages 5–7 need things Cowork usually
+does not have: a repo clone or `BB_EMAIL`+`BB_API_TOKEN` (stages 5–6)
+and the e2e `.env` (stage 7). Before running anything, check they are
+reachable (a mounted folder holding them, or the env vars set). If
+they are not, say so NOW and ask the user to either mount the folder
+that has them or run this phase from Claude Code (see MAINTAINERS
+"Where to run each stage") — do not discover this mid-run at stage 5.
+
 **Same-session shortcut:** if the `<STORY>-test-cases.md` (and
 checklist) files are already in the working directory — e.g. you ran
 `qa-pipeline-docs` in this same chat — use them directly and skip the
@@ -105,6 +113,17 @@ Execute each stage by reading its `SKILL.md` and following it in full.
      and the run-report summary. Use a comment (not a description
      overwrite) so nothing is lost.
 
+7. **Offer to file the confirmed bugs** -- if the run produced confirmed
+   bugs (web-testing `FAIL CONFIRMED` / api-testing `FAIL` or
+   `FAIL CONFIRMED`), offer to hand them to the `/knowledge-base` skill,
+   which searches for existing tickets/known issues first and then
+   creates properly routed Jira bugs. One offer listing all the bugs;
+   file only the ones the user confirms, and let knowledge-base's own
+   dedup check run before each creation. If the knowledge-base skill is
+   not installed, just list the bugs with their evidence so the user can
+   file them manually. Do not create bug tickets directly from this
+   orchestrator.
+
 ## Between stages
 
 - Keep chat output short: one line per hand-off.
@@ -114,5 +133,6 @@ Execute each stage by reading its `SKILL.md` and following it in full.
 
 After posting, report: the files produced, the code-review, api-testing
 and web-testing counters, the overall verdict and confirmed bugs, what
-was routed to non-UI channels, and confirmation that the QA sub-task was
-updated (with its key + URL).
+was routed to non-UI channels, confirmation that the QA sub-task was
+updated (with its key + URL), and which confirmed bugs were filed via
+knowledge-base (or listed for manual filing).

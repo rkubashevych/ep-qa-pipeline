@@ -21,3 +21,9 @@ PRs: <one line per PR — issue key (role): URL / branch>
 | File | Category | What changed |
 |------|----------|--------------|
 | <path> | <category> | <short description> |
+
+## Shared / high blast-radius files
+
+<"None", or one line per shared changed file:>
+- <path> — used by <other consumers visible in the code>; regression
+  risk: <one short line>

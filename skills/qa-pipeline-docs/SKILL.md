@@ -97,4 +97,25 @@ the next stage automatically (they share the working directory).
        (it becomes a plain bullet). Steps go in a numbered list so each is
        on its own line. Verified: siblings keep the box interactive AND
        the steps readable.
-     - Group by `### REQ-N — <label>  [channels]` 
+     - Group by `### REQ-N — <label>  [channels]` headings so the
+       tracker mirrors the test-cases file, and end the comment with
+       the statistics block from the test-cases file.
+   - **Machine-readable archive → one more comment**: post the full
+     `<ISSUEKEY>-checklist.md` and `<ISSUEKEY>-test-cases.md` contents,
+     each inside its own fenced code block, each preceded by a plain
+     line naming the file (e.g. `File: EP-1234-test-cases.md`). This is
+     what `qa-pipeline-code` reads back in a fresh chat (its Step 0
+     extracts these fenced blocks) — the checkbox tracker is for humans,
+     the fenced blocks are for the code phase. Do not shorten or
+     reformat the file contents inside the blocks.
+
+## Final response
+
+After publishing, report:
+- The paths of the four stage files + the run report.
+- The QA sub-task key + URL and what was posted (tracker comment +
+  archive comment).
+- The run-analyzer health verdict (🟢/🟡/🔴 per category) and any
+  ⚠ SPECIAL ATTENTION items the code phase should know about.
+- The next step: run `qa-pipeline-code` on the Story key in a fresh
+  chat.

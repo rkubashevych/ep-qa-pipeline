@@ -56,9 +56,11 @@ Stages 1–4 (ticket → context → requirements → checklist → test cases) 
 ExpoPlatform features span more than one surface and one repo, so the pipeline accounts for that:
 
 - **Sub-task gathering** — fed a parent Story, stage 1 pulls the child sub-tasks (backend / frontend / QA) and folds their detail in, since the concrete specs live there.
-- **Channel tags** — every checklist item and test case is tagged `[UI]`, `[API]`, `[mobile]`, or `[export/email]`. `[UI]` items run in the browser (web-testing); `[API]` items run against the REST API (api-testing); `[mobile]` / `[export/email]` are explicitly routed under "Not executed here" rather than dropped.
+- **Channel tags** — every checklist item and test case is tagged `[UI]`, `[API]`, `[mobile]`, or `[export/email]`. `[UI]` items run in the browser (web-testing); `[API]` items run against the REST API (api-testing); `[mobile]` / `[export/email]` are explicitly routed under "Not executed here" rather than dropped (exception: an `[export/email]` artifact fetchable over HTTP, like an XLS/CSV export endpoint, may be executed by api-testing).
 - **Multi-PR review** — stages 5–6 accept several sub-task PRs (one backend + one or more frontend) for a single Story and produce a combined review keyed by REQ-ID, with a PR column showing which PR each result came from.
 - **Per-task host** — web-testing accepts a task-specific test host (e.g. an alpha host named in the QA sub-task), overriding the default site in `login-config.md`.
+- **Blast radius** — stage 5 flags changed **shared** files ("Shared / high blast-radius files" in the pr-summary) and the run-analyzer surfaces them as a 🟡 regression-risk note, since the pipeline itself is strictly ticket-scoped.
+- **Bug filing** — after the code phase, `qa-pipeline-code` offers to hand confirmed bugs to the `/knowledge-base` skill (dedup + routed Jira bugs); it never files bugs directly.
 
 Mobile (Android/iOS) and non-HTTP outputs (exports, emails, integrations) are generated and tracked as test cases but are **not** auto-executed — they surface as routed work for the right tool or owner. (`[API]` cases are auto-executed by stage 7, `api-testing`.)
 

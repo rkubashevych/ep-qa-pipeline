@@ -11,8 +11,6 @@ description: >
 
 # Web Testing
 
-> Recommended settings: **Sonnet · Effort: High · Extended thinking: Off**
-
 Executes the QA and FAIL test cases in a real browser.
 QA — items that cannot be checked against the code.
 FAIL — items that code review flagged as problematic;
@@ -85,10 +83,10 @@ do not inspect code.
   enter it. If it does not say so — do not enter it. Do not create records,
   do not delete data, do not change settings unless that is
   an explicit step of the test case.
-- Test data is taken from the "Test data" column of the test-case
-  table. If a concrete value is there — use
-  it literally. If it is marked `[test data]`
-  with a realistic example — use that example.
+- Test data is taken from the test case's `[data: ...]` annotations
+  in the steps (older files may use a "Test data" column instead).
+  If a concrete value is there — use it literally. If it is marked
+  `[test data]` with a realistic example — use that example.
   Do not invent test data yourself.
 - After saving the file — stop. Do not continue
   into later skills or planning.
@@ -137,7 +135,8 @@ are not included in the scope — they are already checked against the code.
 Then read `<ISSUEKEY>-test-cases.md`. For each
 QA and FAIL test case, extract the full data:
 - Precondition
-- The steps table (step, test data, expected result)
+- The steps (numbered actions with `[data: ...]`) and the `Exp:`
+  block (older files may use a steps table instead)
 - Postcondition (if any)
 
 For FAIL items, additionally extract the finding from code review:
@@ -176,6 +175,16 @@ For the first (or only) group, extract `TARGET_PAGE_NAME`.
 ### Step 3 — Check the navigation memory
 
 Read `navigation_paths.json` from the working directory.
+
+> **Persistence note.** In Cowork the working directory is per-session
+> scratch, so a `navigation_paths.json` created there is lost when the
+> chat ends. If a persistent folder is mounted (e.g. the
+> `qa-pipeline-skill` repo, which keeps a git-ignored copy under
+> `skills/web-testing/`, or the e2e project folder), read and write
+> `navigation_paths.json` THERE instead, so the memory survives across
+> sessions. Only fall back to the working directory when no persistent
+> folder is available — and expect to rebuild the memory next session.
+
 If the file does not exist — create an empty structure:
 ```json
 {"navigation_paths": {}}
@@ -254,8 +263,8 @@ For each test case in the scope:
      page — go to it (check the memory
      or ask the user).
 
-2. **Execute the steps** — for each row of the test-case
-   table, interpreting the step as a browser action:
+2. **Execute the steps** — for each numbered step of the test
+   case, interpreting the step as a browser action:
 
    **How to interpret the steps:**
    - "Open [page/form/modal]" → `navigate`
@@ -277,10 +286,10 @@ For each test case in the scope:
    a. `read_page` or `find` — see the current state.
    b. Find the target element.
    c. Perform the action.
-   d. Verify the expected result from the "Expected result"
-      column of the table: look for the text,
-      element or state on the page via `find`,
-      `read_page` or `get_page_text`.
+   d. Verify the expected result — the per-step expected result if
+      the step has one, otherwise the case's `Exp:` block after the
+      final step: look for the text, element or state on the page via
+      `find`, `read_page` or `get_page_text`.
    e. Record the result of the step: it matches
       or it does not match.
 

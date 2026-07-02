@@ -11,8 +11,6 @@ description: >
 
 # QA Checklist
 
-> ⚙️ Recommended settings: **Sonnet · Effort: Medium · Extended thinking: Off**
-
 Decomposes numbered requirements into atomic checks and builds
 a reference QA checklist — the input for test cases and for
 manual testing.

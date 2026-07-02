@@ -14,8 +14,6 @@ description: >
 
 # QA Run Analyzer
 
-> Recommended settings: **Sonnet . Effort: Medium . Extended thinking: Off**
-
 A meta-review of the pipeline RUN, not the product. Read-only: it never
 edits the pipeline files, only inspects them and writes its own report.
 
@@ -56,6 +54,11 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   are neither in api-testing nor routed out.
 - BLOCKED test cases (web-testing / api-testing) and any
   empty/placeholder sections.
+- Blast radius: if the pr-summary's "Shared / high blast-radius files"
+  section is non-empty, surface it as 🟡 with a one-line note per file
+  ("shared file X changed — flows outside this ticket may be affected;
+  not covered by this ticket-scoped run"). This is a visibility flag
+  for regression risk, not a failure of the run.
 
 ### 2. Input quality (Input)
 - Missing-AC warning present (no Confluence acceptance criteria)?
@@ -88,3 +91,4 @@ the top issues worth fixing, newest concern first. Keep the chat
 message brief; the detail lives in the file.
 
 If the run is clean, say so plainly — do not invent issues.
+

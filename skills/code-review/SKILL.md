@@ -12,8 +12,6 @@ description: >
 
 # Code Review
 
-> ⚙️ Recommended settings: **Opus · Effort: High · Extended thinking: On**
-
 Checks each test case against the PR code. The output is a
 compact results table with findings for the FAIL items.
 
@@ -97,13 +95,11 @@ through the git CLI or the Bitbucket Cloud REST API.
   branch with `git`, and use the Bitbucket REST API
   (`https://api.bitbucket.org/2.0/...`) for PR metadata and diffs.
 
-> **Default to branch mode.** The configured API token has
-> `read:repository` scope but NOT `read:pullrequest`, so the REST
-> `/pullrequests/...` endpoints return 403, while git-CLI branch mode
-> (fetch/diff/show + the repository `src` endpoint) works fully. Prefer
-> branch mode: the branch name is the issue key (e.g. `EP-54610`). Only
-> use PR-URL / REST mode if the token has the `read:pullrequest:bitbucket`
-> scope.
+> **Default to branch mode** — the branch name is the issue key (e.g.
+> `EP-54610`). Token scopes, auth setup, repo names, and why PR-URL /
+> REST mode usually 403s: see
+> **`../pr-summary/references/bitbucket-access.md`** (the shared source
+> of truth for Bitbucket access — edit it there, not inline here).
 
 Rule: if the CLI is unavailable — stop and notify the user.
 Do not use workarounds (browser, curl as a substitute) instead.
@@ -170,20 +166,9 @@ Stop. Do not use git clone, curl, the browser
 or other tools as a substitute. Tell the user
 to install and authenticate the CLI.
 
-To authenticate against Bitbucket Cloud, configure git
-credentials (or an SSH key) for the workspace, and set the
-`BB_EMAIL` and `BB_API_TOKEN` environment variables for REST API
-access. `BB_EMAIL` is your Atlassian account email; `BB_API_TOKEN`
-is a Bitbucket Cloud API token with scopes.
-
-> Note: Bitbucket Cloud app passwords are deprecated — new ones could
-> not be created after September 2025, and all remaining app passwords
-> are permanently disabled as of June 9, 2026 (full removal July 28,
-> 2026). Use an API token, not an app password. Create one under
-> Atlassian account settings → "Create and manage API tokens" →
-> "Create API token with scopes", select Bitbucket as the app, and
-> grant at least repository read and pull-request read scopes. Use it
-> with Basic auth: `-u "$BB_EMAIL:$BB_API_TOKEN"`.
+Auth setup (git credentials, `BB_EMAIL`/`BB_API_TOKEN`, token scopes,
+the app-password deprecation) is in
+`../pr-summary/references/bitbucket-access.md`.
 
 ### Large PRs
 

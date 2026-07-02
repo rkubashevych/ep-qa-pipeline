@@ -10,8 +10,6 @@ description: >
 
 # Requirements Grooming
 
-> ⚙️ Recommended settings: **Opus · Effort: High · Extended thinking: On**
-
 Analyzes the requirements from the context file through a QA grooming
 lens, finds problems, aligns with the user, and produces the final
 numbered list of requirements — input for the next skills.

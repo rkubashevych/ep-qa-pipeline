@@ -11,8 +11,6 @@ description: >
 
 # QA Test Cases
 
-> ⚙️ Recommended settings: **Sonnet · Effort: High · Extended thinking: Off**
-
 Generates test cases with concrete steps, input data, and expected
 results based on the checklist.
 
@@ -226,4 +224,17 @@ human and by the code phase. Format for easy human scanning:
 
 - Do NOT use wide markdown tables (`| # | Step | ... |`). Wide rows force
   horizontal scrolling inside Jira code blocks.
-- Use a verti
+- Use a vertical block layout per test case (the exact shape is in
+  references/output-template.md): a `### TC-REQ-N.M — <name>` heading,
+  then `Pre:` / `Steps:` / `Exp:` / `Post:` lines.
+- Steps are a numbered list, one action per line. Inline short test
+  data as `[data: ...]`; break it onto its own line only if it is long.
+- Expected results live under a single `Exp:` block at the end of the
+  case. Attach a per-step expected result only when a mid-flow check is
+  essential.
+- Keep every line short (aim <= ~64 characters). Wrap a long step or
+  expected result onto the next indented line rather than writing one
+  long row.
+- `Post:` only when the system state changes; omit the line otherwise.
+- Channel tags go on the requirement group heading
+  (`## REQ-N — <label>  [UI]`), not on each test case.

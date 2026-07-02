@@ -21,4 +21,41 @@ Optimise for both: keep them **scannable top-to-bottom with short lines**.
 - **Steps are actions; results live in `Exp:`.** Put the expected
   outcome(s) under a single `Exp:` block at the end of the case. Only
   attach a per-step expected when a mid-flow check is essential.
-- **Channel tags go on the requirement heading**, not each line, e.g
+- **Channel tags go on the requirement heading**, not each line, e.g.
+  `## REQ-1 — State select filters leads  [UI]`.
+
+---
+
+## Structure
+
+```
+## REQ-N — <requirement label>  [<channel tag(s)>]
+
+Applied techniques: <technique(s) — once per requirement group>
+
+### TC-REQ-N.M — <scenario name>
+
+Pre: <precondition>
+Steps:
+1. <action> [data: <value, or a realistic example marked [test data]>]
+2. <action>
+Exp:
+- <concrete expected result — no "correctly"/"properly">
+- <concrete expected result>
+Post: <postcondition — only if the system state changes; omit otherwise>
+```
+
+Repeat `### TC-REQ-N.M` blocks per test case and `## REQ-N` groups per
+requirement, in the same order as the checklist file.
+
+---
+
+## Statistics
+
+Close the file with:
+
+- Requirements covered: <N> (<REQ-1, REQ-2, ...>)
+- Requirements needing clarification: <N>
+- Channel breakdown: [UI] <N> · [API] <N> · [mobile] <N> ·
+  [export/email] <N>
+- Total number of test cases: <N>

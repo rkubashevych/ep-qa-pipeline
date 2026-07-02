@@ -13,8 +13,6 @@ description: >
 
 # API Testing
 
-> Recommended settings: **Sonnet · Effort: High · Extended thinking: Off**
-
 Executes the `[API]` test cases against the running REST API, so the
 `[API]` items that web-testing cannot run (it only does `[UI]`) are
 actually verified instead of being dropped into "Not executed here".
@@ -75,11 +73,19 @@ web-testing) and do not inspect code (that is code-review).
   frontend-restriction cases). Leave `[mobile]` / `[export/email]` in a
   "Not executed here" section. Do not run `[UI]` cases — those are
   web-testing's.
+  - Exception: an `[export/email]` case whose artifact is fetchable
+    over HTTP (an XLS/CSV export endpoint) MAY be executed here —
+    download the file with the right auth context and verify its
+    contents (unzip/parse, check the expected columns/values). Report
+    it under a clearly-labelled "[export/email] executed via API"
+    group so the run-analyzer's reconciliation is not confused. Email
+    sends and external integration pushes stay in "Not executed here".
 - **Read-only by default.** Only perform a write (`saveSettings`, `set`,
   `photoSave`/`profileSave`, create/delete) when a test case's steps
   require it. Every write must snapshot-and-revert or use a throwaway
   entity (reference §9, §12) — never leave orphaned state on a shared env.
-- Take test data (ids, values) from the test-case "Test data" column;
+- Take test data (ids, values) from the test case's `[data: ...]`
+  annotations (older files may use a "Test data" column);
   when a ticket's ids are from another environment, resolve the real
   ids on the target event (reference §7). Do not invent data.
 - **Verify the endpoint actually does what the ticket claims** before

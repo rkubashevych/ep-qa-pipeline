@@ -133,12 +133,20 @@ Chrome cooperates, `[UI]` web-testing.
 | Browser interaction rules | `skills/web-testing/references/browser-rules.md` |
 | Test login / host | `skills/web-testing/references/login-config.md` |
 | Jira custom-field / AC source | `skills/task-context/references/field-maps.md` |
-| Bitbucket auth (token/scopes, branch vs PR mode) | README + `pr-summary`/`code-review` `SKILL.md` |
+| Bitbucket auth (token/scopes, branch vs PR mode) | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 
 ## Gotchas
 
 - **Installed cache is read-only** — edit here, re-publish. (Rule #1.)
+- **NEVER write skill files through the Cowork shell mount** — writes
+  through `/sessions/.../mnt/...` (bash/python/sed) can be silently
+  truncated mid-file or padded with NUL bytes. This is what originally
+  cut off `qa-test-cases/SKILL.md`, `qa-pipeline-docs/SKILL.md`, and
+  the qa-test-cases output-template mid-sentence, and it happened again
+  during the v0.5.0 cleanup. Edit files with Claude's host-side file
+  tools (Read/Write/Edit) or a local editor only; after any bulk change,
+  verify every touched file still ends with its final section.
 - **Git won't run on the Cowork network mount** — its `.git/config`
   gets corrupted on write. Commit from a normal local terminal.
 - **Windows PowerShell** doesn't accept `&&`; run git lines separately

@@ -12,12 +12,6 @@ description: >
 
 # Task Context
 
-> ⚙️ Recommended settings: **Sonnet · Effort: Medium · Extended thinking: Off**
-
-> Reminder: for this skill the cost-efficient setting is **Sonnet ·
-> Effort Medium · Extended thinking Off**. Adjust if needed, then carry
-> on — no need to stop and wait for confirmation.
-
 Collects task data from the tracker, cross-references information
 from all fields, and produces a single enriched Markdown context — the
 source of truth for the next skills in the chain.
