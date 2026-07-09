@@ -121,8 +121,11 @@ Chrome cooperates, `[UI]` web-testing.
    `fixtures/EP-0000-context.md` through grooming → checklist →
    test-cases (skip the Jira publish) and check the expectations listed
    at the bottom of the fixture still hold.
-4. **Bump the version** in `.claude-plugin/plugin.json` (semver) and
-   **add a `CHANGELOG.md` entry** for it.
+4. **Bump the version in BOTH manifests** — `.claude-plugin/plugin.json`
+   AND `.claude-plugin/marketplace.json` (the plugin entry's `version`).
+   The app decides update availability from the **marketplace** manifest;
+   if only plugin.json is bumped, the Update button stays inactive and
+   reinstalls keep serving the old version. Add a `CHANGELOG.md` entry.
 5. **Commit** (run git locally — see gotcha below):
    `git add -A && git commit -m "…"` then push.
 6. **Publish / update the installed plugin** (see below), and remove any

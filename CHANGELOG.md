@@ -32,6 +32,9 @@ pipeline stages themselves):
 - **New:** this CHANGELOG.
 - **.gitignore:** now covers `.env.*` (e.g. `.env.qa-agents`) and
   un-ignores `fixtures/`.
+- **Publishing gotcha found & documented:** the version must be bumped
+  in `marketplace.json` too, not just `plugin.json` — the app decides
+  update availability from the marketplace manifest.
 
 ## 0.5.0 — 2026-07-02
 
