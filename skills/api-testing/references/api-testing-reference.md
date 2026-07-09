@@ -32,6 +32,28 @@ The agent must load these from the e2e project `.env` (see `.env.example` for th
 | `EVENT_ID` | The event to select (sent as `x-sel-exhibition` on admin REST calls). |
 | `BASE_URL` / `BASE_PATH` | Visitor / exhibitor frontend host + path (for exhibitor-token calls). |
 
+**Shell-safety (passwords with `;` `?` `!` `$`…):** credentials may contain
+shell metacharacters — `ADMIN_PASSWORD` does. Mishandled, a `;` silently
+truncates the value (the rest runs as a command) and login fails with
+"incorrect password". Rules:
+
+- **Never retype a secret inline** into a command or an `export FOO=...`
+  line. Load it from the file programmatically.
+- Values in the env file may be single-quoted — strip the quotes when
+  parsing manually.
+- Safe load pattern (handles quotes and metacharacters):
+  ```bash
+  getenvvar() {  # getenvvar NAME FILE
+    grep -m1 "^$1=" "$2" | cut -d= -f2- | sed "s/^'//; s/'\$//; s/^\"//; s/\"\$//"
+  }
+  ADMIN_PASSWORD=$(getenvvar ADMIN_PASSWORD .env)
+  ```
+- Always expand as `"$ADMIN_PASSWORD"` (double-quoted). For JSON login
+  bodies prefer building the payload with `python3`/`jq --arg` so quotes
+  and backslashes in values cannot break the JSON.
+- The same applies to any exhibitor/visitor password taken from test
+  data.
+
 **Per-environment caveat:** `.env` must hold the values for the environment under test.
 The committed `.env` may point at a different alpha (e.g. `ep51796alphaalpha`, event 459),
 while alpha2 (`api-alpha2.expoplatform.net`) is in `.env.example`. Before running, confirm

@@ -1,8 +1,19 @@
 # Changelog
 
 All notable changes to the `ep-qa-pipeline` plugin. Versions follow
-semver; the version in `.claude-plugin/plugin.json` is what signals an
-update to installed copies.
+semver; bump BOTH `.claude-plugin/plugin.json` and
+`.claude-plugin/marketplace.json` — the marketplace manifest is what
+signals an update to installed copies.
+
+## 0.6.1 — 2026-07-09
+
+- **Shell-safety fix for credentials with special characters** (`;`,
+  `?`, `!`, `$`…): values in the env file are now single-quoted, and
+  the api-testing reference §0 explains how to load them safely —
+  never retype a secret inline into a shell command, never `export`
+  it unquoted (a `;` in a password silently truncates the value and
+  breaks login). Fixes agents failing to authenticate with the admin
+  password.
 
 ## 0.6.0 — 2026-07-09
 
