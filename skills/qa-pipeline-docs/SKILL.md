@@ -67,15 +67,11 @@ the next stage automatically (they share the working directory).
      the user a preview: the parent story, the new sub-task summary, the
      assignee, and what will be posted. Create only after an explicit
      yes. (Writing to the tracker is a change and must be confirmed.)
-   - Create with the Atlassian connector (`createJiraIssue`):
-     - project `EP`, issue type **"QA sub-task"** (id `10107`),
-       `parent` = the Story key.
-     - assignee = **Roman Kubashevych** (accountId
-       `712020:2647832a-3298-435d-afd6-18a9441a1909`; if it changes,
-       resolve `r.kubashevych@expoplatform.com` via
-       `lookupJiraAccountId`).
-     - summary = `[QA-PIPELINE] <story summary> — test cases`.
-     - label `qa-pipeline` (so the code phase can find it).
+   - Create with the Atlassian connector (`createJiraIssue`), using the
+     project key, issue type, assignee, summary format, and label from
+     **`references/publish-config.md`** (the per-team values live there —
+     edit that file, not this one, when adopting the plugin), with
+     `parent` = the Story key.
      - Always create a NEW sub-task (do not reuse an existing one).
    - **Description content** (keep it a summary, NOT a second tracker):
      - A link to the spec/Confluence AC and the parent story.

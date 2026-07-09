@@ -2,8 +2,17 @@
 
 A reusable playbook for exercising ExpoPlatform REST endpoints directly (curl / HTTP),
 so API `[API]` test cases from the QA pipeline can be executed without the browser.
-Uses the **logo restriction** feature (EP-54971) as a worked example, but the auth model,
-route-discovery method, and safety rules apply to **any** feature.
+
+The file has two kinds of content — treat them differently:
+
+- **Stable method** (§0–§7, §9, §10, and the §11.2/§12 techniques): the
+  auth model, route discovery, envelope, and safety rules. These apply
+  to any feature and rarely change.
+- **Worked-example data** (§8, the §11.1/§11.3 discoveries, the ids in
+  §12): recorded from the **logo restriction** feature (EP-54971) on
+  **alpha2 / event 3551, June 2026**. Hosts, entity ids, and category
+  ids WILL go stale — re-resolve them on the target event (§7) instead
+  of trusting them; keep the lessons, not the numbers.
 
 > **No secrets in this file.** All credentials are read at runtime from the project `.env`
 > (the same variables `env.ts` validates). Never hardcode username / password / API keys
@@ -133,6 +142,9 @@ done
 ---
 
 ## 8. Worked example — logo restriction (EP-54971), on alpha2 / event 3551
+
+> **Dated example (2026-06).** The method below is the model to copy;
+> the concrete ids/hosts are snapshots — re-resolve per §7 before use.
 
 Resolved test data on that env: exhibitor `9145077` (Critical Kit), category `13776`
 (Exhibitor Unlimited), default state (logo ON, no override).

@@ -117,10 +117,15 @@ Chrome cooperates, `[UI]` web-testing.
      — the input file list, the counts-reconcile check, and the
      findings-summary line.
    - `README.md` — the stage table + the "How the flow works" list.
-3. **Bump the version** in `.claude-plugin/plugin.json` (semver).
-4. **Commit** (run git locally — see gotcha below):
+3. **Smoke-test the docs stages** if you touched them: run
+   `fixtures/EP-0000-context.md` through grooming → checklist →
+   test-cases (skip the Jira publish) and check the expectations listed
+   at the bottom of the fixture still hold.
+4. **Bump the version** in `.claude-plugin/plugin.json` (semver) and
+   **add a `CHANGELOG.md` entry** for it.
+5. **Commit** (run git locally — see gotcha below):
    `git add -A && git commit -m "…"` then push.
-5. **Publish / update the installed plugin** (see below), and remove any
+6. **Publish / update the installed plugin** (see below), and remove any
    duplicate standalone install of the changed skill.
 
 ## Where to look when something's off
@@ -133,7 +138,9 @@ Chrome cooperates, `[UI]` web-testing.
 | Browser interaction rules | `skills/web-testing/references/browser-rules.md` |
 | Test login / host | `skills/web-testing/references/login-config.md` |
 | Jira custom-field / AC source | `skills/task-context/references/field-maps.md` |
-| Bitbucket auth (token/scopes, branch vs PR mode) | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
+| Bitbucket auth (token/scopes, branch vs PR mode) + the curl/git command workflows | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
+| Jira publish values (project, issue type id, assignee, label) | `skills/qa-pipeline-docs/references/publish-config.md` |
+| Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (see the recipe) |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 
 ## Gotchas

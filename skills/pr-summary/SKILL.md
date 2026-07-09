@@ -95,62 +95,20 @@ git CLI or the Bitbucket Cloud REST API.
 > shared source of truth for Bitbucket access — code-review points to
 > the same file; edit it there, not inline here).
 
-Rule: if the CLI is unavailable — stop and notify the user.
-Do not use workarounds (browser, curl as a substitute) instead.
-
 ### Workflow
 
-The flow below targets Bitbucket Cloud with the git CLI and
-the Bitbucket REST API.
+Use the shared command workflows in
+**references/bitbucket-access.md** ("Command workflows" section):
 
-**PR mode (PR URL provided):**
+- **PR mode:** parse the URL → metadata → diffstat → per-file diff →
+  full file from the head branch when the diff is not enough. Read
+  file by file, not the whole diff at once.
+- **Branch mode:** `git fetch` + `git diff --name-only` for the file
+  list, per-file `git diff`, `git show` for full content.
 
-1. Parse the PR URL → workspace, repo, id.
-2. Get the PR metadata:
-   ```
-   curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
-     "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}"
-   ```
-   (title, state, source branch, destination branch).
-3. Get the list of changed files:
-   ```
-   curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
-     "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diffstat"
-   ```
-4. For each file, get the diff:
-   ```
-   curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
-     "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diff?path={filepath}"
-   ```
-   Read file by file, not the whole diff at once.
-5. If the diff is not enough to understand the change — read
-   the full file from the PR branch:
-   ```
-   curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
-     "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/src/{head_branch}/{path}"
-   ```
-
-**Branch mode (branch name without a PR):**
-
-1. Ask the user for the workspace/repo if it is not clear
-   from context. The base branch is `master` unless the user
-   specifies another.
-2. Get the list of changed files (compare base against the branch):
-   ```
-   git fetch origin {branch} && git diff --name-only origin/master...origin/{branch}
-   ```
-3. Get the diff of a specific file:
-   ```
-   git diff origin/master...origin/{branch} -- {path}
-   ```
-4. The full content of a file from the branch:
-   ```
-   git show origin/{branch}:{path}
-   ```
-
-Read files only from the head branch of the PR.
-Do not read files from the base branch, master or other branches.
-Do not take code from the general repository context.
+Read files only from the head branch of the PR. Do not read files from
+the base branch, master or other branches. Do not take code from the
+general repository context.
 
 ### Large PRs
 
@@ -159,14 +117,13 @@ Read the diff only for the key files (components, logic,
 API). Configs, styles, tests — describe by file name
 without a diff.
 
-### If the CLI is unavailable
+### If authenticated access is unavailable
 
-Stop. Do not use git clone, curl, the browser
-or other tools as a substitute. Tell the user
-to install and authenticate the CLI.
-
-Auth setup (git credentials, `BB_EMAIL`/`BB_API_TOKEN`, token scopes,
-the app-password deprecation) is in references/bitbucket-access.md.
+Stop and tell the user to set up the auth (git credentials,
+`BB_EMAIL`/`BB_API_TOKEN`, token scopes, the app-password deprecation
+— all in references/bitbucket-access.md). Authenticated curl against
+the Bitbucket REST API is a supported path; what is forbidden is
+working around missing auth (the browser, scraping, other sources).
 
 ## What to describe for each file
 

@@ -108,6 +108,48 @@ Material UI (MUI). Account for MUI's behaviour:
 - **Toasts/snackbars** confirming success are transient — `find` the
   message promptly after the action.
 
+## Interpreting test-case steps
+
+How to translate a written test-case step into browser actions:
+
+- "Open [page/form/modal]" → `navigate` to a URL or `find` +
+  `computer left_click` on the element that opens it.
+- "Enter [value] into [field]" → `find` the field by description →
+  `form_input` or `computer type`.
+- "Click [button]" → `find` the button by text →
+  `computer left_click`.
+- "Select [option] in [dropdown]" → `find` the dropdown →
+  `computer left_click` → `find` the option → `computer left_click`.
+  Or `form_input` with the value (native `<select>` only).
+- "Check that [element/text] is displayed" → `find` the element or
+  `get_page_text` and look for the text.
+- "Scroll to [element]" → `computer scroll` or `find` +
+  `computer scroll_to`.
+
+For each step:
+a. `read_page` or `find` — see the current state.
+b. Find the target element.
+c. Perform the action.
+d. Verify the expected result — the per-step expected result if the
+   step has one, otherwise the case's `Exp:` block after the final
+   step: look for the text, element or state on the page via `find`,
+   `read_page` or `get_page_text`.
+e. Record the result of the step: it matches or it does not match.
+
+## Error handling
+
+- The page did not load (timeout, 500, blank) — try reloading once
+  via `navigate`. If it did not help — BLOCKED for all test cases of
+  that page.
+- Session expired during execution — repeat the login (per
+  login-config.md), continue from the current test case.
+- Element not found after 2 attempts (including scrolling) — BLOCKED
+  for that test case with a description of what was looked for and
+  where.
+- An alert or dialog appears — read the text, record it, close it and
+  continue. If the dialog blocks execution — BLOCKED.
+- The Chrome extension does not respond — stop, notify the user.
+
 ## Verifying expected results
 
 Methods for checking the expected result:

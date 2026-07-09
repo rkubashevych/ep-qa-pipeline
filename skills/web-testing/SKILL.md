@@ -93,26 +93,12 @@ do not inspect code.
 
 ## Chrome extension tools
 
-To work with the browser, use these tools:
-
-- **navigate** — go to a URL.
-- **find** — find an element on the page by a natural-language
-  description. The primary way to locate elements.
-- **read_page** — get the page structure (accessibility
-  tree). With `filter: "interactive"` — only the interactive
-  elements (buttons, fields, links).
-- **computer** with `action: "screenshot"` — take a screenshot.
-  Use it only as evidence for FAIL
-  and FAIL CONFIRMED. Do not take screenshots for PASS.
-- **computer** with `action: "left_click"` — click an element.
-- **computer** with `action: "type"` — enter text.
-- **computer** with `action: "key"` — press a key.
-- **computer** with `action: "scroll"` — scroll the page.
-- **form_input** — set the value of a form field by ref.
-- **get_page_text** — get the page text.
-- **tabs_context_mcp** — get the list of tabs.
-
-The full interaction rules are in references/browser-rules.md.
+The browser tool is the Claude in Chrome extension. The tool list, the
+see→locate→act→verify interaction pattern, waiting rules, element
+finding, data entry, MUI-specific notes, and screenshot rules are all
+in **references/browser-rules.md** — read it before executing any test
+case. Screenshots: only as evidence for FAIL / FAIL CONFIRMED, never
+for PASS.
 
 ## Workflow
 
@@ -264,34 +250,11 @@ For each test case in the scope:
      or ask the user).
 
 2. **Execute the steps** — for each numbered step of the test
-   case, interpreting the step as a browser action:
-
-   **How to interpret the steps:**
-   - "Open [page/form/modal]" → `navigate`
-     to a URL or `find` + `computer click` on the element
-     that opens it.
-   - "Enter [value] into [field]" → `find` the field
-     by description → `form_input` or `computer type`.
-   - "Click [button]" → `find` the button by text
-     → `computer left_click`.
-   - "Select [option] in [dropdown]" → `find` the dropdown
-     → `computer left_click` → `find` the option
-     → `computer left_click`. Or `form_input` with the value.
-   - "Check that [element/text] is displayed"
-     → `find` the element or `get_page_text` and look for the text.
-   - "Scroll to [element]" → `computer scroll`
-     or `find` + `computer scroll_to`.
-
-   **For each step:**
-   a. `read_page` or `find` — see the current state.
-   b. Find the target element.
-   c. Perform the action.
-   d. Verify the expected result — the per-step expected result if
-      the step has one, otherwise the case's `Exp:` block after the
-      final step: look for the text, element or state on the page via
-      `find`, `read_page` or `get_page_text`.
-   e. Record the result of the step: it matches
-      or it does not match.
+   case, interpret the step as a browser action and verify its
+   result, following the "Interpreting test-case steps" section of
+   references/browser-rules.md (see → locate → act → verify, with
+   the expected result checked against the per-step expectation or
+   the case's final `Exp:` block).
 
 3. **Classify the test case** according to the
    "Classification" section.
@@ -371,19 +334,9 @@ Rules:
 
 ## Browser error handling
 
-- The page did not load (timeout, 500, blank) —
-  try reloading once via `navigate`.
-  If it did not help — BLOCKED for all test cases
-  of that page.
-- Session expired during execution — repeat the login
-  according to step 4, continue from the current test case.
-- Element not found after 2 attempts (including scrolling) —
-  BLOCKED for that test case with a description of what was looked for and where.
-- An alert or dialog appears — read the text,
-  record it, close it and continue. If the dialog
-  blocks execution — BLOCKED.
-- The Chrome extension does not respond — stop, notify
-  the user.
+Follow the "Error handling" section of references/browser-rules.md
+(page failures, expired sessions, missing elements, blocking dialogs,
+unresponsive extension → when to retry, re-login, or mark BLOCKED).
 
 ## Additional checks (exploratory)
 

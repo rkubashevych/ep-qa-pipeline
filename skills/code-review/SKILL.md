@@ -101,50 +101,14 @@ through the git CLI or the Bitbucket Cloud REST API.
 > **`../pr-summary/references/bitbucket-access.md`** (the shared source
 > of truth for Bitbucket access — edit it there, not inline here).
 
-Rule: if the CLI is unavailable — stop and notify the user.
-Do not use workarounds (browser, curl as a substitute) instead.
-
 ### Recommended flow
 
-The flow below targets Bitbucket Cloud with the git CLI and
-the Bitbucket REST API.
-
-**PR mode (PR URL provided):**
-
-1. Parse the PR URL → workspace, repo, id.
-2. Get the PR metadata:
-   ```
-   curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
-     "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}"
-   ```
-   (title, state, source branch, destination branch).
-3. For each test case, use the PR summary to determine where
-   to look. Read the diff or the full file only for the
-   relevant files:
-   ```
-   curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
-     "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diff?path={filepath}"
-   ```
-4. When the diff is not enough and you need the full content
-   of a file from the PR branch:
-   ```
-   curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
-     "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/src/{head_branch}/{path}"
-   ```
-
-**Branch mode (branch name without a PR):**
-
-1. Ask the user for the workspace/repo if it is not clear
-   from context. The base branch is `master` unless the user
-   specifies another.
-2. Get the diff of a specific file:
-   ```
-   git fetch origin {branch} && git diff origin/master...origin/{branch} -- {path}
-   ```
-3. The full content of a file from the branch:
-   ```
-   git show origin/{branch}:{path}
-   ```
+Use the shared command workflows in
+**`../pr-summary/references/bitbucket-access.md`** ("Command
+workflows" section) — PR mode (metadata → per-file diff → full file)
+or branch mode (`git diff` / `git show`). In both modes, use the PR
+summary to determine where to look and read the diff or full file
+only for the files relevant to the test case at hand.
 
 Read files only from the head branch of the PR.
 Do not read files from the base branch, master or other branches.
@@ -160,15 +124,14 @@ in the files listed in the PR summary — look in the PR directly
 via CLI or API. The PR summary may be incomplete — that is
 not a reason to mark FAIL.
 
-### If the CLI is unavailable
+### If authenticated access is unavailable
 
-Stop. Do not use git clone, curl, the browser
-or other tools as a substitute. Tell the user
-to install and authenticate the CLI.
-
-Auth setup (git credentials, `BB_EMAIL`/`BB_API_TOKEN`, token scopes,
-the app-password deprecation) is in
-`../pr-summary/references/bitbucket-access.md`.
+Stop and tell the user to set up the auth (git credentials,
+`BB_EMAIL`/`BB_API_TOKEN`, token scopes, the app-password deprecation
+— all in `../pr-summary/references/bitbucket-access.md`).
+Authenticated curl against the Bitbucket REST API is a supported
+path; what is forbidden is working around missing auth (the browser,
+scraping, other sources).
 
 ### Large PRs
 

@@ -8,9 +8,11 @@
 *-api-testing.md
 *-web-testing.md
 *-run-report.md
+# fixtures are committed even though they match the patterns above
+!fixtures/*.md
 # secrets / local
 .env
-.env.local
+.env.*
 *.diff
 navigation_paths.json
 

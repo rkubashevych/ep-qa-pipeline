@@ -46,7 +46,51 @@ use PR-URL / REST mode if the token has been given the
 > as the app, and grant at least repository read (and pull-request read
 > if you want PR-URL mode).
 
-## If the CLI is unavailable
+## Command workflows (shared by pr-summary and code-review)
 
-Stop. Do not use git clone workarounds, curl-as-substitute, or the
-browser instead. Tell the user to install and authenticate the CLI.
+**PR mode (PR URL provided):** parse the URL → workspace, repo, id.
+
+```bash
+# PR metadata (title, state, source/destination branch)
+curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
+  "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}"
+
+# List of changed files
+curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
+  "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diffstat"
+
+# Diff of one file (read file by file, not the whole diff at once)
+curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
+  "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diff?path={filepath}"
+
+# Full content of a file from the PR head branch (when the diff is not enough)
+curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
+  "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo}/src/{head_branch}/{path}"
+```
+
+**Branch mode (branch name, no PR):** ask for workspace/repo if not
+clear from context; base branch is `master` unless the user says
+otherwise.
+
+```bash
+# List of changed files (base vs branch)
+git fetch origin {branch} && git diff --name-only origin/master...origin/{branch}
+
+# Diff of one file
+git diff origin/master...origin/{branch} -- {path}
+
+# Full content of a file from the branch
+git show origin/{branch}:{path}
+```
+
+Read files only from the head branch of the PR — never from the base
+branch, master, or the general repository context.
+
+## If authenticated access is unavailable
+
+Stop and tell the user to set up git credentials / the
+`BB_EMAIL`+`BB_API_TOKEN` token. (Authenticated `curl` against the
+Bitbucket REST API, as above, IS a supported access path — what is
+forbidden is working around missing auth: scraping the Bitbucket
+website, using the browser, or fetching code from anywhere other than
+the PR branch.)
