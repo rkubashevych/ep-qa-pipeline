@@ -30,3 +30,26 @@ If none: "No issues found — run is clean."
 ## Recommended next actions
 
 - <ordered, concrete follow-ups>
+
+---
+
+# Chat summary format
+
+After writing the file, the chat message is exactly this shape
+(≤10 lines, worst news first, omit empty lines):
+
+```
+Run health (<docs/code>): 🟢 coverage · 🟡 input · 🟢 process
+
+Top issues (max 3):
+1. 🔴 [Input] <one line> — fix: <one line>
+2. 🟡 [Pipeline] <one line> — fix: <one line>
+
+<docs: "N requirements → N checks → N test cases (N [UI] · N [API] · N routed); N need clarification.">
+<code: "Code review N/N pass · API N/N · Web N/N — N confirmed bugs.">
+
+Report: <ISSUEKEY>-run-report.md
+```
+
+If clean: replace the issues block with
+"Run is clean — no issues found." and keep the counters line.

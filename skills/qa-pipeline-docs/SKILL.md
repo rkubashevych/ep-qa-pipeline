@@ -32,6 +32,12 @@ reimplement them.
 
 ## How it runs
 
+**Session name first:** as soon as the ticket key is known, suggest the
+user rename this session to `QA-pipeline <KEY> — docs` (Claude Code:
+`/rename QA-pipeline <KEY> — docs`; Cowork: click the chat title).
+Sessions can't be renamed programmatically — one short reminder, then
+move on.
+
 Execute each stage by reading that stage's `SKILL.md` and following it
 **in full** -- do not summarise or shortcut it. Pass each output file to
 the next stage automatically (they share the working directory).
@@ -75,10 +81,14 @@ the next stage automatically (they share the working directory).
      - Always create a NEW sub-task (do not reuse an existing one).
    - **Description content** (keep it a summary, NOT a second tracker):
      - A link to the spec/Confluence AC and the parent story.
-     - A "How to use this ticket" note: track pass/fail on the test-case
-       checkboxes in the comment (the single source of truth for status);
-       the full checklist + requirements live in the pipeline files; the
-       code phase reads the test cases from the comment.
+     - A "How to use this ticket" note: the checkbox tracker in the
+       comment is the single source of truth for **manual** testing
+       status — tick as you verify by hand. Automated results arrive
+       later as two code-phase comments (machine archive + human
+       summary); the connector cannot tick checkboxes, so transfer
+       automated PASS/FAIL to the tracker by hand if you want one
+       combined view. The code phase reads the test cases from the
+       comment.
      - The `⚠ SPECIAL ATTENTION` list and a short run-report summary.
      - Do NOT paste the checklist here — it duplicates the test cases and
        is not the tracker. One tracker only.

@@ -86,9 +86,9 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 ## Output
 
 Write `<ISSUEKEY>-run-report.md` per references/output-template.md, then
-give a short chat summary: the run's health (🟢/🟡/🔴 per category) and
-the top issues worth fixing, newest concern first. Keep the chat
-message brief; the detail lives in the file.
+give a chat summary in the exact shape of the **"Chat summary format"**
+section of that template (≤10 lines: health line, top-3 issues, one
+counters line). The detail lives in the file, not the chat.
 
 If the run is clean, say so plainly — do not invent issues.
 

@@ -38,6 +38,11 @@ a fresh chat (separate from the docs phase) for context/token health.
 
 ## Step 0 — Gather inputs
 
+**Session name:** suggest the user rename this session to
+`QA-pipeline <STORY> — code` (Claude Code: `/rename QA-pipeline
+<STORY> — code`; Cowork: click the chat title). One short reminder,
+then move on.
+
 **Environment check first.** Stages 5–7 need things Cowork usually
 does not have: a repo clone or `BB_EMAIL`+`BB_API_TOKEN` (stages 5–6)
 and the e2e `.env` (stage 7). Before running anything, check they are
@@ -64,11 +69,31 @@ Otherwise, using the Atlassian connector and the Story key:
    the stage skills can consume them.
    - If no pipeline QA sub-task exists, tell the user to run
      `qa-pipeline-docs` first (or to attach the test-cases file).
+   - **Resume mode:** if the sub-task also has a results **archive
+     comment** from an earlier partial run (fenced blocks labeled
+     `File: <STORY>-code-review.md` etc. — see
+     `references/results-comment-template.md`), extract those files to
+     the working directory too. A stage whose report file exists is
+     done — skip it and continue from the first missing stage
+     (typically web-testing in Cowork after 5–7 ran in Claude Code),
+     unless the user asks to re-run. Tell the user which stages were
+     restored vs pending before continuing.
 2. **Dev branches.** `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype in ("Backend sub-task","Frontend
    sub-task")`. Each dev sub-task's **key is its branch name** (e.g.
    `EP-47975`, `EP-54610`). Use these as the branches for branch mode —
    no PR URLs needed. List them for the user before starting.
+
+## Split runs (Claude Code ↔ Cowork)
+
+Stages 5–7 need repo/API creds (Claude Code); stage 8 needs the Chrome
+extension (Cowork). When the current environment cannot run everything:
+run what it can, post the two step-6 comments marked **PARTIAL** (per
+the template — name the pending stages), then start a fresh chat in the
+other environment with the same Story key. Step 0's resume mode
+restores the finished reports from the archive comment, and the last
+environment posts the final archive + summary as a NEW pair — existing
+comments are never edited.
 
 ## How it runs
 
@@ -102,16 +127,31 @@ Execute each stage by reading its `SKILL.md` and following it in full.
 5. **qa-run-analyzer** -- run automatically; also reads
    `<STORY>-api-testing.md`. Writes `<STORY>-run-report.md`.
 
-6. **Post results back to the QA sub-task** -- 
-   - **REQUIRED PAUSE / CONFIRM.** Show what will be posted and to which
-     sub-task; post only after an explicit yes.
-   - Add a **comment** (`addCommentToJiraIssue`) to the same QA sub-task
-     used in Step 0, containing: the code-review verdict
-     (PASS/FAIL/QA/N/A), the api-testing verdict (PASS/FAIL/PARTIAL/
-     BLOCKED/QA + any endpoint-mapping corrections), the web-testing
-     verdict and confirmed bugs, what was routed to "Not executed here",
-     and the run-report summary. Use a comment (not a description
+6. **Post results back to the QA sub-task** -- TWO comments, per
+   **`references/results-comment-template.md`** (formats live there,
+   not here):
+   - **REQUIRED PAUSE / CONFIRM.** Show what will be posted (both
+     comments) and to which sub-task; post only after an explicit yes.
+   - **Comment 1 — machine archive (for agents):** the full
+     `<STORY>-code-review.md`, `<STORY>-api-testing.md`,
+     `<STORY>-web-testing.md` and `<STORY>-run-report.md`, each inside
+     its own fenced code block preceded by a plain `File: <name>` line —
+     the same convention as the docs-phase archive comment, so agents
+     can re-read the results from Jira. Do not shorten or reformat the
+     file contents.
+   - **Comment 2 — human summary (posted second, so it sits newest):**
+     a short formatted summary per the template: overall verdict up
+     top, stage-verdict table with counters, confirmed bugs (one line
+     each), what needs a human, what was not tested here, and the
+     run-health line. ≤30 lines, no walls of text — the detail lives
+     in comment 1. Always post it, pass or fail.
+   - Use comments (`addCommentToJiraIssue`, not a description
      overwrite) so nothing is lost.
+   - **Tracker note:** the connector cannot edit the docs-phase
+     checkbox tracker, so it is NOT auto-ticked. The human summary is
+     the source of truth for automated results; the tracker holds the
+     human's manual verification. Remind the user of this in the final
+     response so nobody expects ticked boxes.
 
 7. **Offer to file the confirmed bugs** -- if the run produced confirmed
    bugs (web-testing `FAIL CONFIRMED` / api-testing `FAIL` or
@@ -131,8 +171,9 @@ Execute each stage by reading its `SKILL.md` and following it in full.
 
 ## Final response
 
-After posting, report: the files produced, the code-review, api-testing
-and web-testing counters, the overall verdict and confirmed bugs, what
-was routed to non-UI channels, confirmation that the QA sub-task was
-updated (with its key + URL), and which confirmed bugs were filed via
-knowledge-base (or listed for manual filing).
+After posting, report: the files produced, the overall verdict and
+confirmed bugs, confirmation that BOTH comments (archive + human
+summary) were posted to the QA sub-task (with its key + URL), and
+which confirmed bugs were filed via knowledge-base (or listed for
+manual filing). In chat, reuse the human-summary content rather than
+writing a third format.

@@ -5,6 +5,39 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.7.0 — 2026-07-10
+
+- **qa-pipeline-code step 6 redesigned — results now posted as TWO
+  comments** (new `references/results-comment-template.md`):
+  - **Comment 1 — machine archive (agents):** the full code-review,
+    api-testing, web-testing and run-report files verbatim in labeled
+    fenced code blocks (`File: <name>` + block) — same convention the
+    docs phase already uses, machine-parseable, zero information loss.
+  - **Comment 2 — human summary (people):** ≤30 lines, posted second so
+    it sits newest: overall verdict (✅ PASS / ⚠ PASS WITH GAPS /
+    ❌ FAIL / ⛔ BLOCKED), stage-verdict table with counters, confirmed
+    bugs one line each, "Needs a human", "Not tested in this run", and
+    a run-health line. Always posted, pass or fail. Replaces the old
+    freeform single comment (the wall of text humans had to read).
+  - Final chat response now reuses the human summary instead of
+    inventing a third format.
+- **Split-run / resume support (qa-pipeline-code):** Step 0 now also
+  restores finished stage reports from a results archive comment
+  (resume mode), and a new "Split runs" section + PARTIAL comment
+  variant let 5–7 run in Claude Code and web-testing resume in Cowork
+  with only the Story key — no files carried between environments.
+  README + MAINTAINERS updated to match.
+- **Tracker/results drift fixed by role separation:** the docs-phase
+  checkbox tracker is now explicitly the manual-testing status; the
+  code phase documents that the connector cannot tick checkboxes and
+  points humans at the summary comment for automated results.
+- **Session-naming reminder:** both orchestrators now suggest renaming
+  the session to `QA-pipeline <KEY> — docs/code` at start (manual —
+  Claude/skills cannot rename sessions programmatically yet).
+- **qa-run-analyzer chat summary templated:** new "Chat summary format"
+  section in its output-template.md (≤10 lines: health line, top-3
+  issues, counters line) — the last freeform output is now specced.
+
 ## 0.6.1 — 2026-07-09
 
 - **Shell-safety fix for credentials with special characters** (`;`,

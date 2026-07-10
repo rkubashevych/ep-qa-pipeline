@@ -81,6 +81,12 @@ three are **Claude Code** stages. Run `qa-pipeline-code` from Claude Code
 in the repo that has the `.env`; keep Cowork for the docs half and, when
 Chrome cooperates, `[UI]` web-testing.
 
+**Split runs are supported:** run 5–7 in Claude Code, post the step-6
+comments marked PARTIAL, then resume in Cowork with the same Story key —
+`qa-pipeline-code` Step 0 restores the finished stage reports from the
+archive comment on the QA sub-task (see "Split runs" in its SKILL.md).
+No files need to be carried between environments.
+
 ## Where things live
 
 - **Credentials (`.env`)** — in the **`e2e-testing` repo** (git-ignored).
@@ -143,6 +149,7 @@ Chrome cooperates, `[UI]` web-testing.
 | Jira custom-field / AC source | `skills/task-context/references/field-maps.md` |
 | Bitbucket auth (token/scopes, branch vs PR mode) + the curl/git command workflows | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
 | Jira publish values (project, issue type id, assignee, label) | `skills/qa-pipeline-docs/references/publish-config.md` |
+| Results-comment format (code phase: agent archive + human summary) | `skills/qa-pipeline-code/references/results-comment-template.md` |
 | Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (see the recipe) |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 

@@ -49,7 +49,7 @@ Each skill folder still has a `setup-guide.md` with the remaining team-specific 
 
 ## Where to run each stage
 
-Stages 1–4 (ticket → context → requirements → checklist → test cases) chain naturally in **one chat**, since each output file stays in the working directory for the next skill. Stage 5 (`pr-summary`) switches from reading the ticket to reading code; the recommended practice is to **start a fresh chat there**, carrying the test-cases and checklist files with you, then continue through code-review (6) and web-testing (8).
+Stages 1–4 (ticket → context → requirements → checklist → test cases) chain naturally in **one chat**, since each output file stays in the working directory for the next skill. Stage 5 (`pr-summary`) switches from reading the ticket to reading code; the recommended practice is to **start a fresh chat there** — no files need carrying: `qa-pipeline-code` Step 0 reads the test cases (and, on resume, earlier stage reports) back from the QA sub-task's archive comments on Jira. Runs can be **split across environments** (5–7 in Claude Code, 8 in Cowork): the first environment posts PARTIAL results, the second resumes from them and posts the final pair.
 
 ## Multi-surface, multi-PR features
 
