@@ -21,8 +21,11 @@ Optimise for both: keep them **scannable top-to-bottom with short lines**.
 - **Steps are actions; results live in `Exp:`.** Put the expected
   outcome(s) under a single `Exp:` block at the end of the case. Only
   attach a per-step expected when a mid-flow check is essential.
-- **Channel tags go on the requirement heading**, not each line, e.g.
-  `## REQ-1 — State select filters leads  [UI]`.
+- **Channel tags:** the requirement heading carries the union of its
+  cases' tags (`## REQ-1 — State select filters leads  [UI]`); each
+  test-case heading carries exactly ONE tag
+  (`### TC-REQ-1.2 — Returning to the full list  [UI]`). The per-case
+  tag is what api-testing and web-testing route on.
 
 ---
 
@@ -33,7 +36,7 @@ Optimise for both: keep them **scannable top-to-bottom with short lines**.
 
 Applied techniques: <technique(s) — once per requirement group>
 
-### TC-REQ-N.M — <scenario name>
+### TC-REQ-N.M — <scenario name>  [<channel tag>]
 
 Pre: <precondition>
 Steps:

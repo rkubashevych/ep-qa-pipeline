@@ -48,10 +48,18 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 - REQ-ID traceability is intact across requirements -> checklist ->
   test-cases -> code-review -> web-testing. Flag IDs that appear in one
   file but vanish in the next.
-- Counts reconcile: code-review TC count == test-cases TC count;
+- Counts reconcile (where a shell is available, run
+  `scripts/reconcile_counts.py <ISSUEKEY>` from this skill's folder and
+  verify its ID sets / status counts instead of recounting by hand —
+  you still judge WHY a gap exists):
+  code-review TC count == test-cases TC count;
   web-testing executed == QA+FAIL `[UI]` items;
   api-testing executed == QA+FAIL `[API]` items. Flag `[API]` items that
   are neither in api-testing nor routed out.
+- Structural checklist items (`[UI]` presence/type/label checks with
+  no test case) appear in web-testing's "Structural checks" section —
+  as executed or explicitly "not visited". Flag structural checks
+  that are neither there nor explained by a Notes line.
 - BLOCKED test cases (web-testing / api-testing) and any
   empty/placeholder sections.
 - Blast radius: if the pr-summary's "Shared / high blast-radius files"
@@ -77,7 +85,8 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 - Docs phase: # requirements, # checks, # test cases, channel
   breakdown, # needing clarification.
 - Code phase: code-review PASS/FAIL/QA/N/A; api-testing PASS/FAIL/
-  FAIL CONFIRMED/FAIL REJECTED/PARTIAL/BLOCKED/QA plus any
+  FAIL CONFIRMED/FAIL REJECTED/PARTIAL/BLOCKED/NOT-TESTABLE (older
+  reports may use QA for this) plus any
   endpoint-mapping corrections (ticket endpoint != real endpoint);
   web-testing PASS/FAIL/FAIL CONFIRMED/FAIL REJECTED/BLOCKED/OBSERVATION;
   the list of confirmed bugs; what was routed to "Not executed here"

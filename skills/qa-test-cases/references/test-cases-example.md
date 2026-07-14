@@ -24,7 +24,7 @@ Requirements for the example (identical to checklist-example):
 
 Applied techniques: Use Case, EP
 
-### TC-REQ-1.1 — Filtering by state — main scenario
+### TC-REQ-1.1 — Filtering by state — main scenario  [UI]
 
 Pre: leads page open; list has leads from different states;
   State filter = "All States"
@@ -39,7 +39,7 @@ Exp:
 - The count matches the number of leads from California
 Post: State filter = California, list filtered
 
-### TC-REQ-1.2 — Returning to the full list
+### TC-REQ-1.2 — Returning to the full list  [UI]
 
 Pre: State filter = California [test data], list filtered
 Steps:
@@ -50,7 +50,7 @@ Exp:
 - Leads from all states are displayed
 Post: State filter = All States, list is full
 
-### TC-REQ-1.3 — A state with no leads — empty valid partition
+### TC-REQ-1.3 — A state with no leads — empty valid partition  [UI]
 
 Pre: leads page open; the database has states with no leads
 Steps:
@@ -66,7 +66,7 @@ Exp:
 
 Applied techniques: State Transition
 
-### TC-REQ-2.1 — Activating City when a state is selected
+### TC-REQ-2.1 — Activating City when a state is selected  [UI]
 
 Pre: leads page open; State = "All States"; City is inactive
 Steps:
@@ -81,7 +81,7 @@ Exp:
 Post: State = California, City = Los Angeles, list filtered
   by both filters
 
-### TC-REQ-2.2 — Changing the state resets the selected city
+### TC-REQ-2.2 — Changing the state resets the selected city  [UI]
 
 Pre: State = California, City = Los Angeles [test data]
 Steps:
@@ -95,7 +95,7 @@ Exp:
 - All leads from Texas are displayed, without filtering by city
 Post: State = Texas, City = empty
 
-### TC-REQ-2.3 — Deactivating City when All States is selected
+### TC-REQ-2.3 — Deactivating City when All States is selected  [UI]
 
 Pre: State = California, City = Los Angeles [test data]
 Steps:
@@ -114,7 +114,7 @@ Post: State = All States, City is inactive
 
 Applied techniques: Use Case
 
-### TC-REQ-3.1 — The State label is present above the select
+### TC-REQ-3.1 — The State label is present above the select  [UI]
 
 Pre: leads page open
 Steps:
@@ -129,7 +129,7 @@ Exp:
 
 Applied techniques: Use Case, EP
 
-### TC-REQ-4.1 — Reset with both filters active
+### TC-REQ-4.1 — Reset with both filters active  [UI]
 
 Pre: State = California, City = Los Angeles [test data],
   list filtered
@@ -143,7 +143,7 @@ Exp:
 - Leads from all states are displayed
 Post: State = All States, City is inactive, list is full
 
-### TC-REQ-4.2 — Reset with a partial filter
+### TC-REQ-4.2 — Reset with a partial filter  [UI]
 
 Pre: State = California [test data], City is not selected
 Steps:
@@ -160,5 +160,5 @@ Post: State = All States, City is inactive, list is full
 
 - Requirements covered: 4 (REQ-1, REQ-2, REQ-3, REQ-4)
 - Requirements needing clarification: 0
-- Channel breakdown: [UI] 8 · [API] 0 · [mobile] 0 · [export/email] 0
-- Total number of test cases: 8
+- Channel breakdown: [UI] 9 · [API] 0 · [mobile] 0 · [export/email] 0
+- Total number of test cases: 9

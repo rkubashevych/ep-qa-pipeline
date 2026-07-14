@@ -45,7 +45,9 @@ then move on.
 
 **Environment check first.** Stages 5–7 need things Cowork usually
 does not have: a repo clone or `BB_EMAIL`+`BB_API_TOKEN` (stages 5–6)
-and the e2e `.env` (stage 7). Before running anything, check they are
+and API credentials (stage 7). All of these can come from ONE file:
+`.env.qa-agents` in the mounted qa-pipeline-skill repo (preferred),
+falling back to the e2e project's `.env` / env vars. Before running anything, check they are
 reachable (a mounted folder holding them, or the env vars set). If
 they are not, say so NOW and ask the user to either mount the folder
 that has them or run this phase from Claude Code (see MAINTAINERS
@@ -64,9 +66,15 @@ Otherwise, using the Atlassian connector and the Story key:
    `parent = <STORY> AND issuetype = "QA sub-task"` (prefer the newest
    with label `qa-pipeline` or a `[QA-PIPELINE]` summary). Read its
    description (and comments) and extract the fenced code blocks holding
-   the checklist and test cases. Write them back to the working
-   directory as `<STORY>-checklist.md` and `<STORY>-test-cases.md` so
-   the stage skills can consume them.
+   the checklist and test cases. Large files may be split across
+   comments as `File: <name> (part i/N)` blocks — collect all parts and
+   concatenate them in order. Prefer running
+   `scripts/extract_archive.py` (in this skill's folder) on the saved
+   comment bodies — it handles labels, parts, and nested fences
+   deterministically; fall back to manual extraction only if the script
+   cannot run. Write the results to the working directory as
+   `<STORY>-checklist.md` and `<STORY>-test-cases.md` so the stage
+   skills can consume them.
    - If no pipeline QA sub-task exists, tell the user to run
      `qa-pipeline-docs` first (or to attach the test-cases file).
    - **Resume mode:** if the sub-task also has a results **archive
@@ -99,6 +107,28 @@ comments are never edited.
 
 Execute each stage by reading its `SKILL.md` and following it in full.
 
+### Stage isolation (context health)
+
+When the environment supports subagents (the Task tool in Claude Code,
+the Agent tool in Cowork), run stages 5-7 (pr-summary, code-review,
+api-testing) each as a SEPARATE subagent instead of inline, so a
+multi-PR story does not exhaust the orchestrator's context:
+
+- Give the subagent: the stage's SKILL.md path, the input file paths,
+  and the working directory. It follows the stage SKILL.md in full,
+  writes the stage's report file, and returns only a short summary
+  (<= 10 lines: counters, verdict, blockers). It must NOT paste the
+  report content into its reply.
+- Resolve everything that could pause BEFORE dispatching (step 0's
+  environment check: repo/creds, `.env`, hosts). Subagents cannot ask
+  the user - a subagent that hits a missing input stops and RETURNS
+  the blocker; the orchestrator asks the user, then re-dispatches.
+- Stage 8 (web-testing) stays in the main conversation - it needs the
+  browser extension and interactive pauses (login, navigation).
+  qa-run-analyzer is light; run it inline.
+- If subagents are not available, run everything inline as before,
+  and make sure stage 8 starts with enough context left.
+
 1. **pr-summary** -- run on the derived branches (branch mode; the
    repository-scoped token is enough). Groups changes per sub-task.
    Produces `<STORY>-pr-summary.md`.
@@ -116,7 +146,8 @@ Execute each stage by reading its `SKILL.md` and following it in full.
      admin creds) or a per-event frontend host is missing.
    - Produces `<STORY>-api-testing.md`.
 
-4. **web-testing** -- run on the code-review + test-cases.
+4. **web-testing** -- run on the code-review + test-cases + checklist
+   (the checklist supplies the `[UI]` structural checks).
    - Executes only `[UI]` test cases. `[API]` cases are handled by
      stage 3 (api-testing); only `[mobile]`/`[export/email]` remain
      under "Not executed here".
@@ -155,14 +186,39 @@ Execute each stage by reading its `SKILL.md` and following it in full.
 
 7. **Offer to file the confirmed bugs** -- if the run produced confirmed
    bugs (web-testing `FAIL CONFIRMED` / api-testing `FAIL` or
-   `FAIL CONFIRMED`), offer to hand them to the `/knowledge-base` skill,
-   which searches for existing tickets/known issues first and then
-   creates properly routed Jira bugs. One offer listing all the bugs;
-   file only the ones the user confirms, and let knowledge-base's own
-   dedup check run before each creation. If the knowledge-base skill is
-   not installed, just list the bugs with their evidence so the user can
-   file them manually. Do not create bug tickets directly from this
-   orchestrator.
+   `FAIL CONFIRMED`), make ONE offer listing all the bugs; file only
+   the ones the user confirms.
+   - **Preferred path (knowledge-base installed):** hand the confirmed
+     bugs to the `/knowledge-base` skill — it searches existing
+     tickets/known issues first and creates properly routed Jira bugs;
+     let its dedup check run before each creation.
+   - **Default path (knowledge-base not installed):** draft each bug
+     per **`references/bug-report-template.md`** (summary format,
+     steps-to-reproduce from the test case, expected vs actual with
+     the run evidence, environment/host, links to the story and QA
+     sub-task). Search Jira for duplicates first
+     (`searchJiraIssuesUsingJql` on the summary's key phrases + the
+     component); show every draft to the user; create via
+     `createJiraIssue` only after an explicit yes per bug. Never
+     file silently.
+
+8. **Close the loop — hand the story back.** After posting (and any
+   bug filing), offer the matching Jira handoff. Never transition or
+   reassign silently — show what will change and confirm first.
+   - **Verdict ❌ FAIL or ⚠ PASS WITH GAPS with confirmed bugs:** offer
+     to reassign the failing dev sub-tasks (or the story) back to
+     their dev assignees, with a comment linking the human summary and
+     the filed bug keys; apply the "back to dev" transition from
+     `qa-pipeline-docs/references/publish-config.md` if one is
+     configured there.
+   - **Verdict ✅ PASS:** offer to apply the "QA done" transition from
+     publish-config (if configured); the posted comments remain the
+     record.
+   - Transitions are optional: when publish-config has none
+     configured, skip transitions and only do the reassignment +
+     comment. Before attempting any transition, verify it exists via
+     `getTransitionsForJiraIssue`; if the configured name is not
+     available, list the available ones and ask the user.
 
 ## Between stages
 
@@ -173,7 +229,8 @@ Execute each stage by reading its `SKILL.md` and following it in full.
 
 After posting, report: the files produced, the overall verdict and
 confirmed bugs, confirmation that BOTH comments (archive + human
-summary) were posted to the QA sub-task (with its key + URL), and
-which confirmed bugs were filed via knowledge-base (or listed for
-manual filing). In chat, reuse the human-summary content rather than
-writing a third format.
+summary) were posted to the QA sub-task (with its key + URL), which
+confirmed bugs were filed (via knowledge-base or the default path) or
+listed for manual filing, and which handoff was performed (reassigned
+to whom / transition applied) or that the user skipped it. In chat,
+reuse the human-summary content rather than writing a third format.

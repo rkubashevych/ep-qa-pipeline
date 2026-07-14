@@ -17,3 +17,6 @@
 navigation_paths.json
 
 *.plugin
+# local investigation artifacts
+*-alpha-repro.md
+_vidframes/

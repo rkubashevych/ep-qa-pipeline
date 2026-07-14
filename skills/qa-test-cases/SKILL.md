@@ -38,9 +38,12 @@ From the checklist, the skill takes:
 - The channel tag on each check (`[UI]`, `[API]`, `[mobile]`,
   `[export/email]`) — carry it onto the test case. It tells later
   stages how the test case is executed: only `[UI]` test cases are
-  runnable by the browser-based web-testing skill; `[API]`, `[mobile]`,
-  and `[export/email]` need other tools or manual checking. Show the
-  channel in each test-case group heading.
+  runnable by the browser-based web-testing skill; `[API]` cases are
+  executed by the api-testing skill; `[mobile]` and `[export/email]`
+  need other tools or manual checking. Tag EVERY test case
+  individually on its `### TC-REQ-N.M` heading — a requirement can mix
+  channels (one `[UI]` check and one `[API]` check), and the executing
+  stages route per test case, not per requirement.
 
 Additional source:
 - The user's answers to questions asked before generation.
@@ -137,6 +140,18 @@ for the requirement, not in each test case separately.
 By default, use the standard coverage level (defined in
 references/test-case-design-rules.md). The extended level is only
 used if the user explicitly asks.
+
+### Combinatorial requirements (3+ interacting parameters)
+
+If a requirement's behaviour depends on the combination of three or
+more parameters (role × event type × setting), do not hand-derive the
+combinations: build a model and generate a pairwise set with
+`scripts/generate_pict_cases.py`, following
+references/combinatorial-testing.md. Parameter values come only from
+the requirement text. Each generated row becomes a normal TC block and
+must still pass the grounding rule; state the technique as
+"Pairwise (PICT)" with the model on a `Model:` line in the group
+heading.
 
 ### Grounding rule
 
@@ -236,5 +251,8 @@ human and by the code phase. Format for easy human scanning:
   expected result onto the next indented line rather than writing one
   long row.
 - `Post:` only when the system state changes; omit the line otherwise.
-- Channel tags go on the requirement group heading
-  (`## REQ-N — <label>  [UI]`), not on each test case.
+- Channel tags go on BOTH the requirement group heading — the union
+  of its cases' tags (`## REQ-N — <label>  [UI] [API]`) — and on each
+  test-case heading with exactly ONE tag
+  (`### TC-REQ-N.M — <name>  [UI]`). The per-case tag is what the
+  executing stages (api-testing, web-testing) route on.

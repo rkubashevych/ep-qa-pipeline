@@ -1,0 +1,25 @@
+{
+  "description": "Opt-in desktop notifications for long QA pipeline runs: fires when Claude finishes (Stop) or needs input (Notification). No-op unless QA_PIPELINE_NOTIFY=1 is set in the environment.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" done 2>/dev/null || python \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" done"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" attention 2>/dev/null || python \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" attention"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -13,13 +13,27 @@ Date: <YYYY-MM-DD>
 - FAIL (confirm the bug): <N>
 
 ## Not executed here
-> [API] / [mobile] / [export/email] test cases that this browser-based
-> skill cannot run. Routed to the right tool / owner. Omit if none.
+> [mobile] / [export/email] test cases this browser-based skill cannot
+> run — plus [API] cases ONLY if api-testing has not run. When
+> `<ISSUEKEY>-api-testing.md` exists, do not list [API] cases here;
+> add one line instead: "[API] cases executed by api-testing (stage
+> 7), see <ISSUEKEY>-api-testing.md". Omit the section if none.
 
 | TC | Name | Channel | Why not executable here |
 |----|------|---------|-------------------------|
-| TC-REQ-6.2 | <scenario name> | [API] | API-response check — verify with API tooling |
 | TC-REQ-6.3 | <scenario name> | [mobile] | mobile app — verify on Android/iOS |
+| TC-REQ-6.2 | <scenario name> | [API] | api-testing did not run in this flow — verify with API tooling |
+
+## Structural checks (from the checklist)
+> `[UI]` presence/type/label checks that have no test case, executed on
+> the pages this run visited. Checks on pages not visited are listed as
+> "not visited". Omit the section only if the checklist itself was
+> unavailable (then explain on the Notes line).
+
+| Check | Description | Status |
+|-------|-------------|--------|
+| REQ-3.1 | "State" label above the State select | PASS |
+| REQ-7.2 | Reset button has type "button" | not visited (settings page) |
 
 ## Results
 

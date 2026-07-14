@@ -21,15 +21,18 @@ The portal login is a **modal dialog**, not a separate page.
 - **Email field:** input with placeholder **"Your email or user name"**.
 - **Password field:** input with placeholder **"Your password"**.
 - **Login button:** the **"Log in"** button inside the dialog.
-- **Credentials (from env vars — do not inline):**
-  - Manual visitor (default for web testing): `VISITOR_EMAIL` /
-    `VISITOR_PASSWORD`. This is a shared persistent account created
-    specifically for manual / browser-based investigation; automation
-    never touches it, so it is safe to use here.
-  - Admin panel (only if a test case needs the admin side):
-    `ADMIN_USERNAME` / `ADMIN_PASSWORD` at the Admin URL below.
-  - Default: log in as the manual visitor. Use the admin account only
-    when a test case explicitly requires the admin panel.
+- **Credentials (from `.env.qa-agents` / env vars — do not inline):**
+  - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — superadmin. This is the
+    single credential set for web testing: it covers the admin panel
+    directly, and any visitor/exhibitor role via **impersonation**
+    (log into the admin panel, find the target user, use the
+    admin's "login as" impersonation to open the portal as them).
+  - Default: when a test case needs a non-admin role, impersonate a
+    suitable user from the admin panel rather than logging in with
+    separate role credentials. Record the impersonation path in
+    navigation_paths.json once learned.
+  - Legacy: older setups used a separate manual-visitor account
+    (`VISITOR_EMAIL` / `VISITOR_PASSWORD`); no longer required.
 - **Success indicator:** the page `header` is visible and the "Sign in"
   button is replaced by the logged-in state.
 

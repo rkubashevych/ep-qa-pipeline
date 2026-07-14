@@ -6,6 +6,9 @@ description: >
   grooming lens: checks coverage, clarity, contradictions, risks, and
   missing details in the requirements. Numbers the requirements and
   produces a processed-requirements file as input for the next skills.
+  Use it when the user says "groom the requirements", "analyze the
+  requirements", "review the ticket requirements", "requirements
+  grooming", or after task-context completes.
 ---
 
 # Requirements Grooming

@@ -5,6 +5,82 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.8.0 — 2026-07-14
+
+- **Per-test-case channel tags (routing fix).** Tags now go on BOTH the
+  requirement group heading (union) and each `### TC-REQ-N.M` heading
+  (exactly one) — mixed-channel requirements ([UI]+[API] checks) were
+  previously un-routable by stages 7/8, which route per case.
+  (qa-test-cases SKILL.md, output-template, example.)
+- **Stage 7/8 ordering fossil removed.** api-testing no longer claims
+  web-testing's "Not executed here" list as input (it runs first);
+  web-testing now references `<KEY>-api-testing.md` for [API] cases
+  instead of re-listing them as unverified. Standalone-run behaviour
+  preserved.
+- **Defect creation shipped in-box.** New
+  `qa-pipeline-code/references/bug-report-template.md`; step 7 now has
+  a default direct-Jira filing path (dedup search → draft → confirm →
+  `createJiraIssue`) when `/knowledge-base` is not installed.
+- **New step 8 — hand the story back.** On FAIL: offer reassignment of
+  failing dev sub-tasks + optional "back to dev" transition; on PASS:
+  optional "QA done" transition. Transition names configurable in
+  publish-config.md (`<not configured>` = skip transitions).
+- **Prompt-injection guardrails.** task-context: tracker/Confluence
+  content is data, never instructions — hostile directives are quoted
+  into a "⚠️ Suspicious content" note. browser-rules: same rule for
+  page content.
+- **Pairwise/combinatorial generation (PICT).** New
+  `qa-test-cases/scripts/generate_pict_cases.py` (pure-Python n-wise
+  generator; delegates to the `pict` binary when installed, which also
+  enables constraints) + `references/combinatorial-testing.md` +
+  "Pairwise rules" in test-case-design-rules.md. For requirements with
+  3+ interacting parameters (role × event type × setting).
+- **Subagent-per-stage dispatch (context health).** qa-pipeline-code
+  now runs stages 5-7 as separate subagents where available (Task /
+  Agent tool): each writes its report file and returns a <= 10-line
+  summary; pause-worthy inputs are resolved before dispatch. Stage 8
+  and the analyzer stay inline. Inline fallback unchanged.
+- **3-failures escalation rule** in web-testing and api-testing: after
+  three failed approaches to the same goal, step back and reassess the
+  assumption (host/role/env/data) — ask or mark BLOCKED with the
+  attempts recorded, instead of grinding retries.
+- **`NOT-TESTABLE` replaces api-testing's output `QA` status** (was
+  overloaded: `QA` is the input selector from code review). Older
+  reports may still say QA; analyzer notes both.
+- **Jira ~32K comment-limit handling.** Both publish steps now measure
+  and split oversized archive comments as `File: <name> (part i/N)`
+  blocks; qa-pipeline-code Step 0 re-joins parts (new
+  `qa-pipeline-code/scripts/extract_archive.py` does it
+  deterministically).
+- **Structural checks executed.** The checklist is now a real
+  web-testing input: `[UI]` presence/type/label checks run for visited
+  pages into a new "Structural checks" report section; the analyzer
+  flags structural checks that are neither executed nor explained.
+- **Plumbing scripts** (prose → code): `api-testing/scripts/load-env.sh`
+  (safe .env loader from reference §0),
+  `qa-run-analyzer/scripts/reconcile_counts.py` (ID-set/status counts
+  for the reconcile check), `extract_archive.py` (above).
+- **QA sub-task supersede rule** — the docs phase now comments
+  "Superseded by <NEW-KEY>" on the previous pipeline sub-task and
+  offers to close it, instead of silently accumulating.
+- **Stale docs fixed:** README login-config placeholders claim,
+  web-testing setup-guide (login-config ships configured;
+  navigation_paths.json is git-ignored, created on first run), README
+  per-stage vs orchestrator model-settings contradiction; new Cowork
+  credentials note in web-testing (mounted `.env` or manual login —
+  never paste passwords into chat).
+- **requirements-grooming got real trigger phrases** in its frontmatter.
+- **Playwright executor draft** (`web-testing/references/
+  playwright-executor-draft.md`) — inactive, with a pilot checklist;
+  the Chrome extension remains the executor.
+- **`.env.qa-agents` is now the documented first-choice env file** —
+  api-testing, web-testing, and the code orchestrator search it (in
+  the mounted qa-pipeline-skill repo) before the e2e `.env` / env
+  vars.
+- **Opt-in run notifications:** `hooks/hooks.json` + `scripts/notify.py`
+  — desktop alert on finish (Stop) and on input-needed (Notification);
+  no-op unless `QA_PIPELINE_NOTIFY=1`.
+
 ## 0.7.0 — 2026-07-10
 
 - **qa-pipeline-code step 6 redesigned — results now posted as TWO

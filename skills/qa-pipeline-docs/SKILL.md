@@ -79,6 +79,12 @@ the next stage automatically (they share the working directory).
      edit that file, not this one, when adopting the plugin), with
      `parent` = the Story key.
      - Always create a NEW sub-task (do not reuse an existing one).
+     - **Supersede the old one:** if an earlier pipeline QA sub-task
+       exists on this story (same label), add a comment to it after
+       creating the new one — "Superseded by <NEW-KEY> (newer pipeline
+       run)" — and offer to close/cancel it if the workflow allows.
+       The code phase already prefers the newest, but humans need the
+       pointer.
    - **Description content** (keep it a summary, NOT a second tracker):
      - A link to the spec/Confluence AC and the parent story.
      - A "How to use this ticket" note: the checkbox tracker in the
@@ -114,6 +120,11 @@ the next stage automatically (they share the working directory).
      extracts these fenced blocks) — the checkbox tracker is for humans,
      the fenced blocks are for the code phase. Do not shorten or
      reformat the file contents inside the blocks.
+     - **Size limit:** a Jira comment body maxes out around ~32,000
+       characters. Measure the assembled comment before posting; if it
+       exceeds ~30,000, split it into several comments with the same
+       shape, labelling split files `File: <name> (part i/N)` — split
+       only at line boundaries. The code phase re-joins parts in order.
 
 ## Final response
 

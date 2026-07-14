@@ -51,6 +51,13 @@ Include every report file that exists. If a stage produced no file
 (e.g. no `[API]` cases → no api-testing report), add a plain line
 instead: `File <STORY>-api-testing.md not produced — <reason>`.
 
+**Size limit:** a Jira comment body maxes out around ~32,000
+characters. If the assembled archive exceeds ~30,000, split it into
+several archive comments (posted in order, all before the human
+summary), each with the same shape, labelling split files
+`File: <name> (part i/N)`. Split only at line boundaries; parts
+re-join by simple concatenation.
+
 ## Comment 2 — human summary (for people)
 
 Target **≤ 30 lines**. No fenced file dumps, no per-TC tables of

@@ -30,9 +30,11 @@ For the ExpoPlatform event / admin site:
 - Which credentials to use and where to get them
 - What appears after a successful login
 
-Keep these as clearly-labelled placeholders
+The shipped login-config.md is already filled in for the ExpoPlatform
+e2e alpha and reads credentials from env vars / the e2e `.env`. When
+adapting to ANOTHER product, use clearly-labelled placeholders
 (`<LOGIN_URL>`, `<TEST_USER>`, `<TEST_PASSWORD>`) until the real
-environment values are supplied. Do not commit real credentials.
+values are supplied. Never commit real credentials.
 
 ### 3. Is registration of new users needed?
 
@@ -43,8 +45,8 @@ prepare an email template and the default data for registration.
 
 ### Step 1: references/login-config.md — login (REQUIRED)
 
-This is the only file that needs configuration.
-Replace all `<placeholders>` with real values:
+For ExpoPlatform the file is already configured — nothing to do.
+When adapting to another product/environment, replace its values:
 
 - The login URL
 - The descriptions of the login form fields
@@ -57,9 +59,11 @@ and the Default data section.
 
 ### Step 2: navigation_paths.json — the navigation memory
 
-The file is already present as an empty structure `{"navigation_paths": {}}`.
-Nothing needs to be changed — the skill fills it in itself
-during the first run when it learns the paths to the pages.
+The file is git-ignored (it accumulates environment-specific paths),
+so a fresh clone does not have it. Nothing to configure — the skill
+creates it on first run and fills it in as it learns paths. In Cowork,
+keep it in a mounted persistent folder (see the persistence note in
+SKILL.md Step 3) so the memory survives across sessions.
 
 ### Step 3 (optional): SKILL.md — the previous skill's name
 

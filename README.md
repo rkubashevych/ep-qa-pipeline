@@ -23,6 +23,8 @@ These skills were adapted for ExpoPlatform's stack:
 | 7 | `api-testing` | code-review + test-cases (+ `.env`) | `<KEY>-api-testing.md` | Sonnet · High |
 | 8 | `web-testing` | code-review + test-cases | `<KEY>-web-testing.md` | Sonnet · High |
 
+> Per-stage settings apply when running a stage on its own. The orchestrators (`qa-pipeline-docs`, `qa-pipeline-code`) instead recommend one setting for the whole run (Opus · High · thinking on) to avoid switching models mid-run — with subagent dispatch, heavy stages get fresh context anyway.
+
 > **Stage 7 = `api-testing`.** Executes the `[API]` test cases directly against the ExpoPlatform REST API (curl / HTTP, no browser), so API cases are verified instead of routed out. Credentials are read at runtime from the e2e `.env` — never hardcoded. Stage 8 (`web-testing`) then runs only `[UI]` cases; `[mobile]` / `[export/email]` remain routed out. See `skills/api-testing/references/api-testing-reference.md` for the full method (auth contexts, route discovery, write-safety, frontend/exhibitor-token cases).
 
 > Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post).
@@ -44,8 +46,9 @@ Each skill folder still has a `setup-guide.md` with the remaining team-specific 
 
 - **Confluence access** — Acceptance Criteria live on Confluence pages linked from the ticket, so the Atlassian connector must have **Confluence enabled**, not just Jira. (No custom-field ID needed — stage 1 reads the linked Confluence page directly.)
 - **Bitbucket API token** — set `BB_EMAIL` (your Atlassian email) and `BB_API_TOKEN`. App passwords no longer work (disabled June 9, 2026). A `read:repository`-scoped token (like the existing `bitbucket-git-cli`) is enough for **branch mode** (give the skill the branch = issue key, e.g. `EP-54610`). **PR-URL mode** also needs `read:pullrequest:bitbucket` — add it via a new "with scopes" token, or just use branch mode. Workspace/repo in PR URLs may be slugs or UUIDs — both are handled.
-- **web-testing login** — `web-testing/references/login-config.md` uses `<LOGIN_URL>`, `<TEST_USER>`, `<TEST_PASSWORD>` placeholders. Fill these with your `portal-ui` test-environment values (keep credentials in env vars / `.env`, do not commit them).
+- **web-testing login** — `web-testing/references/login-config.md` ships filled in for the ExpoPlatform e2e alpha (`e2e-testing-alpha2`), reading credentials from env vars / the e2e `.env` (`VISITOR_EMAIL`/`VISITOR_PASSWORD`, `ADMIN_USERNAME`/`ADMIN_PASSWORD`) — never inline them, never commit them. Adopting for another product: replace the URLs and field descriptions with yours.
 - **Trigger phrases** — adjust the `description` frontmatter in each `SKILL.md` to match how your team naturally phrases requests.
+- **Notifications (optional)** — set `QA_PIPELINE_NOTIFY=1` in your environment to get a desktop alert when a long run finishes or pauses for input (Claude Code hooks; `hooks/hooks.json` + `scripts/notify.py`). Off by default.
 
 ## Where to run each stage
 
@@ -60,7 +63,7 @@ ExpoPlatform features span more than one surface and one repo, so the pipeline a
 - **Multi-PR review** — stages 5–6 accept several sub-task PRs (one backend + one or more frontend) for a single Story and produce a combined review keyed by REQ-ID, with a PR column showing which PR each result came from.
 - **Per-task host** — web-testing accepts a task-specific test host (e.g. an alpha host named in the QA sub-task), overriding the default site in `login-config.md`.
 - **Blast radius** — stage 5 flags changed **shared** files ("Shared / high blast-radius files" in the pr-summary) and the run-analyzer surfaces them as a 🟡 regression-risk note, since the pipeline itself is strictly ticket-scoped.
-- **Bug filing** — after the code phase, `qa-pipeline-code` offers to hand confirmed bugs to the `/knowledge-base` skill (dedup + routed Jira bugs); it never files bugs directly.
+- **Bug filing** — after the code phase, `qa-pipeline-code` offers to file confirmed bugs: via the `/knowledge-base` skill when installed (dedup + routed Jira bugs), otherwise directly per `references/bug-report-template.md` (dedup search → draft → user confirms → `createJiraIssue`). Never silently. Step 8 then offers the handoff — reassign to dev on FAIL / "QA done" transition on PASS (configurable in publish-config.md).
 
 Mobile (Android/iOS) and non-HTTP outputs (exports, emails, integrations) are generated and tracked as test cases but are **not** auto-executed — they surface as routed work for the right tool or owner. (`[API]` cases are auto-executed by stage 7, `api-testing`.)
 

@@ -13,9 +13,10 @@ description: >
 
 # API Testing
 
-Executes the `[API]` test cases against the running REST API, so the
-`[API]` items that web-testing cannot run (it only does `[UI]`) are
-actually verified instead of being dropped into "Not executed here".
+Executes the `[API]` test cases against the running REST API. In the
+orchestrated flow this stage runs BEFORE web-testing and owns all
+`[API]` items — web-testing (stage 8) only does `[UI]` and will point
+at this stage's report instead of re-listing `[API]` cases.
 The input is the code-review and test-cases files; the output is a
 detailed report with the result of each `[API]` case, keyed by TC-ID.
 
@@ -29,13 +30,14 @@ reference is the how-to.
 
 From the user / working directory you need:
 1. `<ISSUEKEY>-code-review.md` — the source of which cases to run
-   (`[API]` items with status QA / FAIL, and any `[API]` routed to
-   "Not executed here" by web-testing). In the same chat it is present
-   automatically; in a new chat the user uploads it.
+   (`[API]` items with status QA / FAIL). In the same chat it is
+   present automatically; in a new chat the user uploads it.
 2. `<ISSUEKEY>-test-cases.md` — the steps, test data and expected
    results.
-3. **Environment config** — read at runtime from the e2e project `.env`
-   (see the reference §0): `ADMIN_BASE_URL`, `ADMIN_USERNAME` /
+3. **Environment config** — read at runtime from an env file, searched
+   in this order: `.env.qa-agents` in the mounted qa-pipeline-skill
+   repo, then the e2e project's `.env`, then plain environment
+   variables (see the reference §0): `ADMIN_BASE_URL`, `ADMIN_USERNAME` /
    `ADMIN_PASSWORD`, `ORGANIZER_API_KEY`, `EVENT_ID`, `BASE_URL` /
    `BASE_PATH`.
 4. For any frontend / exhibitor-token case: the **per-event frontend
@@ -91,16 +93,24 @@ web-testing) and do not inspect code (that is code-review).
 - **Verify the endpoint actually does what the ticket claims** before
   logging a result. A ticket's endpoint mapping can be *wrong*, not just
   shorthand (reference §11.3 — the `photoSave` lesson). If the mapped
-  endpoint does not exercise the behaviour, mark the case QA with a note,
-  not FAIL, and record the correct endpoint.
+  endpoint does not exercise the behaviour, mark the case NOT-TESTABLE
+  with a note, not FAIL, and record the correct endpoint.
+- Escalation: after 3 failed attempts at the same goal (auth, route
+  probing, data resolution) with different approaches — stop and
+  reassess the failed assumption (wrong env? wrong endpoint mapping?
+  missing data?) instead of retrying variations. Then ask the user or
+  mark the case BLOCKED, recording what was tried.
 - After saving the file — stop. Do not continue into later skills.
 
 ## Workflow
 
 ### Step 1 — Collect the scope
 Read `<ISSUEKEY>-code-review.md`. Copy any "Notes" line forward. Collect
-every test case that is `[API]` and has status QA or FAIL, plus any
-`[API]` case web-testing listed under "Not executed here". Read the full
+every test case that is `[API]` and has status QA or FAIL. (Standalone
+runs only: if web-testing already ran and its report lists `[API]`
+cases under "Not executed here", include those too — in the
+orchestrated flow this stage runs first, so that list does not exist
+yet.) Read the full
 data for each from `<ISSUEKEY>-test-cases.md` (precondition, steps,
 expected result, test data). For FAIL items, also pull the code-review
 finding.
@@ -155,19 +165,23 @@ Create `<ISSUEKEY>-api-testing.md` per `references/output-template.md`.
 - `PARTIAL` — some steps/surfaces pass, others do not (record which).
 - `BLOCKED` — could not be executed: missing auth/host/data, endpoint
   unreachable, or an unrevertible precondition.
-- `QA` — the case cannot be validated as written because the ticket's
-  endpoint mapping is wrong or ambiguous; record the correct endpoint
-  and what it actually does (reference §11.3).
+- `NOT-TESTABLE` — the case cannot be validated as written because the
+  ticket's endpoint mapping is wrong or ambiguous; record the correct
+  endpoint and what it actually does (reference §11.3). (Older reports
+  used `QA` for this — do not: `QA` is an INPUT status from code
+  review, never an output of this stage.)
 
-Rules: prefer BLOCKED/QA over a false PASS; never PASS with doubt; every
+Rules: prefer BLOCKED/NOT-TESTABLE over a false PASS; never PASS with
+doubt; every
 FAIL/PARTIAL needs the endpoint + observed vs expected; for code-review
 FAIL items use FAIL CONFIRMED / FAIL REJECTED, not plain PASS/FAIL.
 
 ## Verification before saving
 - Every `[API]` QA/FAIL case from code review appears in the results
   table (order matches the test-cases file).
-- Every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED / QA
-  has evidence (endpoint + observed vs expected, or the reason).
+- Every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED /
+  NOT-TESTABLE has evidence (endpoint + observed vs expected, or the
+  reason).
 - No secrets/tokens anywhere in the file.
 - Every write has a documented revert (or throwaway-entity cleanup).
 
@@ -178,6 +192,7 @@ append). The template is in `references/output-template.md`.
 
 ## Final answer
 After saving, report: the path, the PASS / FAIL / FAIL CONFIRMED / FAIL
-REJECTED / PARTIAL / BLOCKED / QA counters, the overall verdict, any
+REJECTED / PARTIAL / BLOCKED / NOT-TESTABLE counters, the overall
+verdict, any
 confirmed bugs, any endpoint-mapping corrections found, and what was
 left for `[mobile]` / `[export/email]`.

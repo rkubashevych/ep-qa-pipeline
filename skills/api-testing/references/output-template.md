@@ -27,11 +27,11 @@ Date: <YYYY-MM-DD>
 | TC-REQ-2.2 | <scenario name> | QA | PASS | GET /api/v1/exhibitorCategories/get | data.settings.logo.enabled = true |
 | TC-REQ-24.2 | <scenario name> | QA | FAIL | GET /api/v1/exhibitorSettings/get/{id} | expected logo.enabled=false, got true |
 | TC-REQ-32.2 | <scenario name> | QA | PARTIAL | GET /api/v2/exhibitor/get | parent suppressed, child not |
-| TC-REQ-22.1 | <scenario name> | QA | QA | POST /profile/photoSave | endpoint mapping wrong — see Findings |
+| TC-REQ-22.1 | <scenario name> | QA | NOT-TESTABLE | POST /profile/photoSave | endpoint mapping wrong — see Findings |
 | TC-REQ-30.1 | <scenario name> | QA | BLOCKED | — | precondition unreachable |
 
 ## Findings
-> For every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED / QA. PASS needs no entry.
+> For every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED / NOT-TESTABLE. PASS needs no entry.
 
 ### FAIL: TC-REQ-24.2 — <scenario name>
 - **Source:** QA
@@ -40,7 +40,7 @@ Date: <YYYY-MM-DD>
 - **Expected:** <expected field/value>
 - **Actual:** <observed field/value from .data>
 
-### QA (endpoint-mapping correction): TC-REQ-22.1 — <scenario name>
+### NOT-TESTABLE (endpoint-mapping correction): TC-REQ-22.1 — <scenario name>
 - **Source:** QA
 - **Ticket mapping:** <endpoint the ticket named>
 - **Reality:** <what that endpoint actually does + the correct endpoint>
@@ -75,7 +75,7 @@ Section rules:
 | FAIL REJECTED  | <N> |
 | PARTIAL | <N>  |
 | BLOCKED | <N>  |
-| QA (mapping) | <N> |
+| NOT-TESTABLE (mapping) | <N> |
 | Total  | <N>   |
 
 Verdict: <API testing successful (all PASS / FAIL REJECTED) / unsuccessful — N FAIL, N FAIL CONFIRMED / incomplete — N BLOCKED>

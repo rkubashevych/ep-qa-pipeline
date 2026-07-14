@@ -29,9 +29,14 @@ From the user you need:
 2. The test-cases file `<ISSUEKEY>-test-cases.md` created
    by the qa-test-cases skill. In the same chat it is available automatically.
 
+3. The checklist file `<ISSUEKEY>-checklist.md` — the source of the
+   `[UI]` structural checks (presence / type / label) that deliberately
+   have no test case. Execute them for the pages you visit and report
+   them in the report's "Structural checks" section. If the file is
+   genuinely unavailable, note that in the report's Notes line and
+   continue with test cases only.
+
 Optional input:
-- A checklist file `<ISSUEKEY>-checklist.md` — for structural
-  checks that did not make it into the test cases.
 - A per-task **base URL / test host**. Many tasks are tested on a
   task-specific alpha host (e.g. an `*alphanext*.expoplatform.net`
   host named in the QA sub-task or a dev-QA-guide comment), not the
@@ -41,11 +46,14 @@ Optional input:
   back to the `login-config.md` default and tell the user which host
   you are testing against.
 
-Only `[UI]` test cases are executable in the browser. Test cases tagged
-`[API]`, `[mobile]`, or `[export/email]` cannot be run by this skill —
-list them in the report's "Not executed here" section with their tag,
-so they are visibly routed to API tools / mobile / manual rather than
-silently dropped.
+Only `[UI]` test cases are executable in the browser. `[API]` cases
+belong to the api-testing skill (stage 7, which runs BEFORE this stage
+in the orchestrated flow): if `<ISSUEKEY>-api-testing.md` exists in
+the working directory, reference it in the report instead of
+re-listing those cases as unverified; only when it does not exist do
+`[API]` cases go into "Not executed here". `[mobile]` and
+`[export/email]` cases always go into "Not executed here" with their
+tag, so they are visibly routed rather than silently dropped.
 
 The issue key follows the Jira format `PROJECT-123` (for example `EP-1234`).
 
@@ -75,7 +83,9 @@ do not inspect code.
 - All communication and the entire content of the output file are in English.
 - Keep chat messages short.
 - Browser tool: the Claude in Chrome extension.
-  Do not use the Playwright MCP.
+  Do not use the Playwright MCP. (An experimental Playwright executor
+  draft exists at references/playwright-executor-draft.md — inactive;
+  use only if the user explicitly asks to pilot it.)
 - Test cases with PASS and N/A statuses in code review
   are not executed in the browser. Only QA and FAIL are executed.
 - Do not change data in the system without an explicit test-case step
@@ -129,10 +139,16 @@ For FAIL items, additionally extract the finding from code review:
 the file, the line, what was expected, what is actually in the code.
 This information helps to understand exactly what to check in the UI.
 
-Split the QA/FAIL scope by channel tag. Only `[UI]` test cases are
-executed in the browser. Put `[API]`, `[mobile]`, and `[export/email]`
-test cases in the report's "Not executed here" section (with their tag
-and why), so they are routed to the right tool/owner instead of being
+Split the QA/FAIL scope by channel tag. Each test case carries its
+own tag on the `### TC-REQ-N.M` heading; older files may tag only the
+requirement heading — then that tag applies to all its cases. Only
+`[UI]` test cases are executed in the browser. For `[API]` cases:
+if `<ISSUEKEY>-api-testing.md` is present, add one line to the report
+— "[API] cases executed by api-testing (stage 7), see
+<ISSUEKEY>-api-testing.md" — instead of listing them as unverified;
+if it is absent, put them in "Not executed here". `[mobile]` and
+`[export/email]` always go to "Not executed here" (with their tag and
+why), so they are routed to the right tool/owner instead of being
 lost.
 
 If there are no QA and FAIL items (all PASS/N/A) — notify
@@ -190,6 +206,15 @@ Look for `TARGET_PAGE_NAME` as a key in `navigation_paths`.
 ### Step 4 — Login (if needed)
 
 Read `references/login-config.md` from the skill directory.
+
+Credentials note (Cowork): login-config.md reads credentials from
+environment variables, which a Cowork session usually does not have.
+Get them from an env file in a mounted folder — search order:
+`.env.qa-agents` in the qa-pipeline-skill repo, then the e2e
+project's `.env` (ask the user to mount the folder if needed). Never
+ask the user to paste passwords into chat, and never print the
+values. If no mounted file provides them, ask the user to log in
+manually in the browser tab and continue from the logged-in state.
 
 **If the file is filled in** (contains a URL, field descriptions,
 the source of the credentials):
@@ -265,6 +290,14 @@ For each test case in the scope:
 
 5. **Continue to the next test case** without stopping.
 
+6. **Structural checks for the page:** after finishing a page group's
+   test cases, run the checklist's `[UI]` structural checks
+   (presence / type / label) that belong to that page, and record
+   PASS / FAIL per check ID (REQ-N.M) for the report's "Structural
+   checks" section. Do not navigate to extra pages only for
+   structural checks — cover the ones on the pages the run already
+   visits; list the rest as not visited.
+
 ### Step 7 — Save the navigation path (if new)
 
 If `IS_NEW_PATH = true`:
@@ -288,6 +321,8 @@ The template is in references/output-template.md.
 
 The report must be detailed:
 - A results table for each test case.
+- A "Structural checks" section with per-check results (or the
+  Notes-line explanation if the checklist was unavailable).
 - For each FAIL and FAIL CONFIRMED — specifically:
   which step, what was expected, what the agent actually saw.
 - For each FAIL REJECTED — what the code-review finding
@@ -337,6 +372,14 @@ Rules:
 Follow the "Error handling" section of references/browser-rules.md
 (page failures, expired sessions, missing elements, blocking dialogs,
 unresponsive extension → when to retry, re-login, or mark BLOCKED).
+
+Escalation rule: after 3 failed attempts at the same goal (a login, a
+navigation step, locating an element) using different approaches —
+stop trying. Step back and reassess the assumption that failed: wrong
+host? wrong role? feature flag off? data missing? Then either ask the
+user (one concise question listing what was tried) or mark the case
+BLOCKED with the attempts recorded. Repeated failure is information,
+not an obstacle to push through.
 
 ## Additional checks (exploratory)
 

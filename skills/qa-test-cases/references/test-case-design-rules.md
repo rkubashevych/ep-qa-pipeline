@@ -87,6 +87,20 @@ focus. Do not combine several independent checks into one test case.
 - Do not generate a full enumeration if some combinations produce
   the same behaviour.
 
+## Pairwise rules
+
+- Use for 3+ interacting parameters with closed value sets named in
+  the requirement. Generate with the skill's
+  `scripts/generate_pict_cases.py` (see
+  references/combinatorial-testing.md) — do not hand-derive and do
+  not enumerate exhaustively.
+- Every generated combination still needs a grounded expected result;
+  a row whose expected result cannot be determined from the
+  requirement is dropped and the requirement flagged for
+  clarification.
+- Record the model on a `Model:` line in the requirement group
+  heading so the set is reproducible.
+
 ## Anti-patterns (prohibited)
 
 - Test case without an expected result → do not generate

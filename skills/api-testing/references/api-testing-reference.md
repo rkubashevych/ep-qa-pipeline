@@ -22,7 +22,10 @@ The file has two kinds of content — treat them differently:
 
 ## 0. Config & credentials (read from `.env`)
 
-The agent must load these from the e2e project `.env` (see `.env.example` for the full list):
+The agent must load these from an env file — search order:
+`.env.qa-agents` in the mounted qa-pipeline-skill repo, then the e2e
+project's `.env` (see its `.env.example` for the full list), then
+plain environment variables:
 
 | Variable | Meaning |
 |---|---|
@@ -48,6 +51,8 @@ truncates the value (the rest runs as a command) and login fails with
   }
   ADMIN_PASSWORD=$(getenvvar ADMIN_PASSWORD .env)
   ```
+  This function ships as **`scripts/load-env.sh`** in the skill folder —
+  source it (or run `load-env.sh NAME FILE`) instead of retyping it.
 - Always expand as `"$ADMIN_PASSWORD"` (double-quoted). For JSON login
   bodies prefer building the payload with `python3`/`jq --arg` so quotes
   and backslashes in values cannot break the JSON.
