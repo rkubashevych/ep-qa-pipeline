@@ -30,6 +30,19 @@ reimplement them.
 - A Jira ticket key or URL (e.g. `EP-44730`). If the key given is itself
   a sub-task, use its parent Story as the story for publishing.
 
+## When to run (shift-left)
+
+The docs phase needs only the ticket — not the code. Run it as EARLY
+as possible: at refinement, or as soon as the ticket is written,
+ideally before or while dev is coding. Early, the grooming findings
+(stage 2) can still fix the spec and prevent bugs instead of catching
+them, and devs can self-check against the published test cases before
+handing off to QA. Run at QA time it still works, but grooming
+findings arrive after the code is written — strictly worse. If the
+ticket's status shows dev has not started or is in progress, say so
+and note the findings are in time to act on; never block the run on
+status.
+
 ## How it runs
 
 **Session name first:** as soon as the ticket key is known, suggest the
@@ -53,6 +66,17 @@ the next stage automatically (they share the working directory).
      any Confluence-vs-Jira conflicts) and **wait for the user's
      decisions.** Do not proceed until they answer or say to skip. This
      checkpoint must never be auto-resolved.
+   - **Offer to post the open items to the story (shift-left).** After
+     the user's decisions, if genuinely open items remain — questions
+     the user could not answer themselves, contradictions needing the
+     PM/analyst, spec gaps a dev must confirm — offer ONE comment on
+     the ticket listing them (`addCommentToJiraIssue`), so they get
+     resolved before/while the code is written instead of resurfacing
+     at QA time. Show the draft and post only after an explicit yes.
+     Keep it short and plain: one line per item, grouped
+     Questions / Contradictions / Gaps, no pipeline jargon, no file
+     dumps. Items the user already answered in chat are settled — do
+     not post those.
    - Produces `<ISSUEKEY>-requirements.md`.
 
 3. **qa-checklist** -- run the `qa-checklist` skill.

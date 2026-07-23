@@ -19,6 +19,13 @@ signals an update to installed copies.
   PARENT story, so managers and devs see the outcome without opening
   the QA sub-task. Template: results-comment-template.md → "Story
   note — QA passed".
+- **Shift-left guidance (qa-pipeline-docs).** New "When to run" section:
+  run the docs phase at refinement / before dev completes, so grooming
+  findings prevent bugs instead of catching them.
+- **Grooming findings → ticket (qa-pipeline-docs stage 2).** After the
+  grooming pause, offer to post the still-open questions /
+  contradictions / gaps as one confirm-first comment on the ticket, so
+  PM/dev resolve them before the code is written.
 
 ## 0.8.0 — 2026-07-14
 
