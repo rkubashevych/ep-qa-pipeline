@@ -114,8 +114,10 @@ Otherwise, using the Atlassian connector and the Story key:
 
 ## Split runs (Claude Code ↔ Cowork)
 
-Stages 5–7 need repo/API creds (Claude Code); stage 8 needs the Chrome
-extension (Cowork). When the current environment cannot run everything:
+Stages 5–7 need repo/API creds (Claude Code); stage 8 needs a browser
+backend — the Playwright MCP (works in Claude Code too, making a
+single-environment run possible) or the Chrome extension (Cowork).
+When the current environment cannot run everything:
 run what it can, post the two step-6 comments marked **PARTIAL** (per
 the template — name the pending stages), then start a fresh chat in the
 other environment with the same Story key. Step 0's resume mode
@@ -173,8 +175,12 @@ multi-PR story does not exhaust the orchestrator's context:
    - Executes only `[UI]` test cases. `[API]` cases are handled by
      stage 3 (api-testing); only `[mobile]`/`[export/email]` remain
      under "Not executed here".
-   - **PAUSE** for browser login (per `login-config.md`, or the per-task
-     host) and any unknown navigation path.
+   - Backend: Playwright MCP when available (headless, scripted login
+     from `.env.qa-agents`, FAIL screenshots + console evidence — no
+     login pause); Chrome extension otherwise.
+   - **PAUSE** (extension backend only) for browser login (per
+     `login-config.md`, or the per-task host) and any unknown
+     navigation path.
    - Produces `<STORY>-web-testing.md`.
 
 5. **qa-run-analyzer** -- run automatically; also reads

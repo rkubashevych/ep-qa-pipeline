@@ -35,6 +35,14 @@ signals an update to installed copies.
 - **CRUD completeness lens (grooming).** "Where can this break?" now
   checks entity lifecycle coverage — create/edit/delete effects on
   read, list, and export views.
+- **Playwright backend for web-testing (preferred).** The Playwright
+  MCP, when available, replaces the Chrome extension as the executor:
+  headless own browser (no active-window breakage), scripted login
+  from `.env.qa-agents` (no login pause), screenshot + console errors
+  captured on every FAIL. Extension stays as fallback; report format
+  unchanged. Promoted references/playwright-executor-draft.md →
+  playwright-executor.md. Stage 8 can now run in Claude Code too —
+  single-environment code-phase runs possible.
 - **Auto-default mode (qa-pipeline-docs).** The docs pipeline no longer
   stops to ask: grooming findings are shown but treated as "skip",
   stage clarifying questions become "needs clarification" notes in the

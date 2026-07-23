@@ -82,10 +82,8 @@ do not inspect code.
 
 - All communication and the entire content of the output file are in English.
 - Keep chat messages short.
-- Browser tool: the Claude in Chrome extension.
-  Do not use the Playwright MCP. (An experimental Playwright executor
-  draft exists at references/playwright-executor-draft.md — inactive;
-  use only if the user explicitly asks to pilot it.)
+- Browser tool: see "Execution backends" below — Playwright MCP
+  preferred when available, the Claude in Chrome extension otherwise.
 - Test cases with PASS and N/A statuses in code review
   are not executed in the browser. Only QA and FAIL are executed.
 - Do not change data in the system without an explicit test-case step
@@ -101,14 +99,26 @@ do not inspect code.
 - After saving the file — stop. Do not continue
   into later skills or planning.
 
-## Chrome extension tools
+## Execution backends
 
-The browser tool is the Claude in Chrome extension. The tool list, the
-see→locate→act→verify interaction pattern, waiting rules, element
-finding, data entry, MUI-specific notes, and screenshot rules are all
-in **references/browser-rules.md** — read it before executing any test
-case. Screenshots: only as evidence for FAIL / FAIL CONFIRMED, never
-for PASS.
+Pick the backend at the start of the run and say which one is used:
+
+1. **Playwright MCP (preferred)** — if Playwright MCP tools are
+   available in the session. Runs its own browser headless,
+   independent of the user's window (no focus/interference
+   breakage), logs in itself from `.env.qa-agents` (no login pause),
+   and captures a screenshot + console errors on every FAIL. Rules:
+   **references/playwright-executor.md**.
+2. **Claude in Chrome extension (fallback)** — the interactive path.
+   The tool list, the see→locate→act→verify pattern, waiting rules,
+   element finding, data entry, and MUI-specific notes are in
+   **references/browser-rules.md** — read it before executing any
+   test case.
+
+The workflow below is backend-neutral — where a step says "PAUSE for
+login", that applies to the extension path only (Playwright logs in
+scripted). Screenshots on both backends: only as evidence for
+FAIL / FAIL CONFIRMED, never for PASS.
 
 ## Workflow
 
@@ -204,6 +214,10 @@ Look for `TARGET_PAGE_NAME` as a key in `navigation_paths`.
 - Set `PATH_EXISTS = false`.
 
 ### Step 4 — Login (if needed)
+
+**Playwright backend:** log in scripted per
+references/playwright-executor.md ("Login") — do not ask the user
+unless the login fails. The rest of this step is the extension path.
 
 Read `references/login-config.md` from the skill directory.
 
