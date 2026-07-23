@@ -126,6 +126,10 @@ the next stage automatically (they share the working directory).
        combined view. The code phase reads the test cases from the
        comment.
      - The `⚠ SPECIAL ATTENTION` list and a short run-report summary.
+     - An "Open questions from grooming" list — the same open items
+       drafted for the story comment (questions / contradictions /
+       gaps, one line each), so a manual tester sees them without
+       opening the story. Omit if there are none.
      - Do NOT paste the checklist here — it duplicates the test cases and
        is not the tracker. One tracker only.
    - **Test cases → a follow-up comment (`addCommentToJiraIssue`), as an

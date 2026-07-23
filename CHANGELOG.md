@@ -40,7 +40,9 @@ signals an update to installed copies.
   stage clarifying questions become "needs clarification" notes in the
   files, and the shift-left open-items comment is bundled into the one
   remaining pause — the Jira publish confirmation. Say "interactive
-  mode" to get the grooming pause back.
+  mode" to get the grooming pause back. The open-items list is also
+  duplicated into the QA sub-task description ("Open questions from
+  grooming") so testers see it without opening the story.
 - **Impact scan (task-context).** New "Related functionality & bug
   history" step: searches product docs + EP bug history for the
   feature's keywords — via the knowledge-base skill's SCOUT endpoint
