@@ -35,6 +35,13 @@ signals an update to installed copies.
 - **CRUD completeness lens (grooming).** "Where can this break?" now
   checks entity lifecycle coverage — create/edit/delete effects on
   read, list, and export views.
+- **Impact scan (task-context).** New "Related functionality & bug
+  history" step: searches product docs + EP bug history for the
+  feature's keywords — via the knowledge-base skill's SCOUT endpoint
+  when installed, plain CQL/JQL fallback otherwise. Output feeds
+  grooming's dependency questions ("logo also appears in exports —
+  covered?") and grounds risk-likelihood ratings in real bug history.
+  Never a source of requirements; never blocks the run if unavailable.
 
 ## 0.8.0 — 2026-07-14
 

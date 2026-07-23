@@ -81,6 +81,35 @@ Status — per references/field-maps.md) and use
 6. Related issues — read them for context via
    `searchJiraIssuesUsingJql` or the linked-issues data, but process
    only the data of the current task.
+7. Run the impact scan (see "Related functionality & bug history"
+   below).
+
+## Related functionality & bug history (impact scan)
+
+The ticket says what changes; this scan says what else might be
+affected. It feeds grooming's dependency questions and risk ratings.
+
+1. Derive 1–2 keyword queries from the feature/entity the ticket
+   touches (e.g. "exhibitor logo", "session registration").
+2. **Primary — knowledge-base skill installed:** run its Step 1
+   "SCOUT — Search" primary endpoint with those keywords (read that
+   skill's SKILL.md for the current URL/token contract — do not copy
+   it here, it rotates). Take the top 3–5 documentation hits.
+3. **Fallback — SCOUT fails or knowledge-base not installed:** use the
+   Atlassian connector directly: `searchConfluenceUsingCql` on the
+   ExpoDoc space (`text ~ "<keywords>"`), and `searchJiraIssuesUsingJql`
+   for EP bugs, open and closed (`project = EP AND issuetype = Bug AND
+   text ~ "<keywords>"`), top 5 each.
+4. Write the results into the "Related functionality & bug history"
+   section of the output file: which other surfaces/features the
+   entity appears in (one line per doc hit, with link), and a bug
+   history line (N open / M closed bugs in this area, notable
+   recurring ones by key).
+
+Rules: this is background, NEVER a source of requirements — the
+anti-invention prohibitions apply unchanged. Keep it ≤10 lines. If
+both paths fail, write "Impact scan unavailable" and continue — do not
+block the run on it. Internal-only content stays internal.
 
 ## Sub-tasks (when the input is a parent Story)
 

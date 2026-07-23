@@ -124,7 +124,12 @@ For each requirement from the context file go through four questions:
 4. **What is not specified?**
    - Alternative and exceptional scenarios (the main flow exists, but
      what if something went wrong?)
-   - Dependencies between features: does the change affect other flows
+   - Dependencies between features: does the change affect other flows.
+     Check the context file's "Related functionality & bug history"
+     section: if the entity appears on other surfaces (mobile app,
+     exports, public site) and the requirements say nothing about
+     them, raise it as a question — do not silently assume they are
+     unaffected
    - Contradictions between requirements in the context file
 
 Broad or vague wording is a signal to check deeper. Examples: "where
@@ -167,7 +172,10 @@ as impact × likelihood:
 - Impact: what breaks if this fails — money, data loss/exposure, a
   blocked core flow, many users affected → higher.
 - Likelihood: complex logic, many conditions or integrations, a
-  historically buggy area, reworked legacy behavior → higher.
+  historically buggy area, reworked legacy behavior → higher. For
+  "historically buggy", use the context file's "Related functionality
+  & bug history" section — several past bugs in the same area is
+  evidence, not a guess.
 
 Default to Medium. High means "this failing hurts the event or the
 client"; Low is cosmetic or rare-path. Write the rating on each

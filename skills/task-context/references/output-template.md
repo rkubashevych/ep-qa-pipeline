@@ -44,6 +44,16 @@ Generated: <YYYY-MM-DD>
 
 - <ISSUEKEY>: <what it adds to understanding the current task>
 
+## Related functionality & bug history
+> Impact scan — background for grooming (dependencies + risk
+> likelihood). Not requirements.
+
+- Appears in: <other surface/feature where the entity shows up —
+  one line per documentation hit, with link>
+- Bug history: <N> open / <M> closed bugs in this area
+  <; notable: KEY-123 — one-line summary>
+- Source: <knowledge-base /search | connector fallback | unavailable>
+
 ## Attachments
 - `attachments/<file>`: <type and what it contains>
 
@@ -55,6 +65,7 @@ Section rules:
 - Sub-tasks — only when the input is a parent Story that has sub-tasks. Omit otherwise.
 - Additional requirements (from comments) — only when there are relevant comments with new requirements.
 - Related context — only when there are real linked issues in the tracker. Comments from the current task are not related context.
+- Related functionality & bug history — always attempt the impact scan; if it found nothing or was unavailable, keep the section with a single "Impact scan unavailable" or "No related hits" line.
 - Attachments — only when there is data.
 
 Formatting rules:
