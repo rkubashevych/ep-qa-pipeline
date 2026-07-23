@@ -5,6 +5,21 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.9.0 — 2026-07-23
+
+- **Main-issue PR fallback (qa-pipeline-code step 0).** Tickets with no
+  Backend/Frontend sub-tasks (Bugs, small Stories/Tasks) no longer
+  stall: branches/PRs are discovered on the main issue — remote/dev
+  links → PR URLs in description/comments → the issue key as branch
+  name → ask the user. In this case step 6 posts results to the main
+  issue instead of a QA sub-task.
+- **"QA passed" story note (step 8).** On ✅ PASS the pipeline now
+  offers to post a ≤10-line plain-language summary (what was tested,
+  environment, coverage, result, link to the full reports) to the
+  PARENT story, so managers and devs see the outcome without opening
+  the QA sub-task. Template: results-comment-template.md → "Story
+  note — QA passed".
+
 ## 0.8.0 — 2026-07-14
 
 - **Per-test-case channel tags (routing fix).** Tags now go on BOTH the

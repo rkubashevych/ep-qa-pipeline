@@ -135,3 +135,33 @@ Never edit or delete earlier comments — newest pair wins.
   stated expectations.
 - Numbers in the stage table must match the report files' Statistics
   blocks exactly.
+
+## Story note — QA passed (step 8)
+
+Posted to the **PARENT story** (not the QA sub-task) when the overall
+verdict is ✅ PASS, after the user confirms — managers and devs read
+the story, not the sub-task. ≤10 lines, plain words, no pipeline
+jargon.
+
+```markdown
+✅ QA passed — <STORY>: <feature in plain words>
+
+**What was tested:** <1 sentence — the user-facing behaviour>
+**Environment:** <host / alpha env from the run> · event <EVENT_ID if relevant>
+**Coverage:** <N> test cases (<N> UI, <N> API) + code review of <branches/PRs>
+**Result:** all passed<, N non-blocking notes: <one line each>>.
+**Not covered here:** <N [mobile]/[export] cases → manual check> *(omit if none)*
+**Details:** full reports on QA sub-task <KEY>
+**Status:** ready for <merge / release / next step>
+```
+
+Rules:
+
+- Numbers must match the human summary's stage table.
+- "Non-blocking notes" are FAIL REJECTED corrections or cosmetic
+  remarks — never confirmed bugs (a confirmed bug means the verdict
+  is not PASS).
+- Omit any line that would be empty (notes, Not covered).
+- Only for ✅ PASS. FAIL / PASS WITH GAPS use the reassignment path;
+  in the no-sub-task fallback (results already on the main issue),
+  still post this note — it is the manager-readable line on top.

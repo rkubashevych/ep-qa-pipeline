@@ -91,6 +91,26 @@ Otherwise, using the Atlassian connector and the Story key:
    sub-task")`. Each dev sub-task's **key is its branch name** (e.g.
    `EP-47975`, `EP-54610`). Use these as the branches for branch mode —
    no PR URLs needed. List them for the user before starting.
+   - **Fallback — no dev sub-tasks.** Some tickets (Bugs, small
+     Stories, Tasks) carry the dev work on the main issue itself, with
+     no backend/frontend sub-tasks. If the JQL returns none, look for
+     the PR/branch on the main issue, in this order:
+     1. **Remote / development links:** `getJiraIssueRemoteIssueLinks`
+        on `<STORY>` — collect any Bitbucket PR URLs.
+     2. **Description and comments:** scan the issue's description and
+        comments for Bitbucket PR URLs
+        (`bitbucket.org/<workspace>/<repo>/pull-requests/<id>`).
+     3. **Issue key as branch:** if no PR URL is found, try the issue
+        key itself as the branch name (branch mode) — devs branch as
+        `<KEY>` by convention, so `git fetch` / the Bitbucket API can
+        confirm whether such a branch exists in the backend and/or
+        frontend repo. Use each repo where it exists.
+     4. **Still nothing:** PAUSE and ask the user for the PR URL(s) or
+        branch name(s). Do not guess further.
+
+     Whatever the fallback finds, list the PRs/branches for the user
+     (with where each was found) before starting, same as the sub-task
+     path.
 
 ## Split runs (Claude Code ↔ Cowork)
 
@@ -130,7 +150,9 @@ multi-PR story does not exhaust the orchestrator's context:
   and make sure stage 8 starts with enough context left.
 
 1. **pr-summary** -- run on the derived branches (branch mode; the
-   repository-scoped token is enough). Groups changes per sub-task.
+   repository-scoped token is enough) or, when step 0's fallback found
+   PR URLs on the main issue, on those PRs directly. Groups changes
+   per sub-task (or per PR/branch when there are no sub-tasks).
    Produces `<STORY>-pr-summary.md`.
 
 2. **code-review** -- run on the test-cases + pr-summary across all the
@@ -178,6 +200,10 @@ multi-PR story does not exhaust the orchestrator's context:
      in comment 1. Always post it, pass or fail.
    - Use comments (`addCommentToJiraIssue`, not a description
      overwrite) so nothing is lost.
+   - If there is no QA sub-task (the no-sub-tasks fallback case) and
+     the test cases came from files or the main issue, post both
+     comments to the MAIN issue instead — same format, same confirm
+     pause.
    - **Tracker note:** the connector cannot edit the docs-phase
      checkbox tracker, so it is NOT auto-ticked. The human summary is
      the source of truth for automated results; the tracker holds the
@@ -211,9 +237,12 @@ multi-PR story does not exhaust the orchestrator's context:
      the filed bug keys; apply the "back to dev" transition from
      `qa-pipeline-docs/references/publish-config.md` if one is
      configured there.
-   - **Verdict ✅ PASS:** offer to apply the "QA done" transition from
-     publish-config (if configured); the posted comments remain the
-     record.
+   - **Verdict ✅ PASS:** offer to post the short "QA passed" note to
+     the PARENT story (template: "Story note — QA passed" in
+     `references/results-comment-template.md`) so managers and devs
+     see the outcome without opening the QA sub-task, and to apply
+     the "QA done" transition from publish-config (if configured);
+     the posted comments remain the record.
    - Transitions are optional: when publish-config has none
      configured, skip transitions and only do the reassignment +
      comment. Before attempting any transition, verify it exists via
