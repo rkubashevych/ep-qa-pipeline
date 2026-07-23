@@ -232,6 +232,11 @@ covers what matters most.
    changes. For an unresolved conflict, keep BOTH versions in the
    requirement text and mark it "(unresolved conflict)" so it is not
    silently lost.
+   - **Exception — auto-default mode:** when running under the
+     qa-pipeline-docs orchestrator (unless the user asked for
+     interactive mode), do not wait: treat every finding as "skip" per
+     the rules above and continue. The findings still get presented in
+     chat and resurface at the orchestrator's publish confirmation.
 9. Produce the final list: covered requirements unchanged + problem
    requirements rewritten taking the alignment into account, each with
    its risk rating (see "Risk rating"). Copy the "Goal" section from

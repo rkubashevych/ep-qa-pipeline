@@ -35,6 +35,12 @@ signals an update to installed copies.
 - **CRUD completeness lens (grooming).** "Where can this break?" now
   checks entity lifecycle coverage — create/edit/delete effects on
   read, list, and export views.
+- **Auto-default mode (qa-pipeline-docs).** The docs pipeline no longer
+  stops to ask: grooming findings are shown but treated as "skip",
+  stage clarifying questions become "needs clarification" notes in the
+  files, and the shift-left open-items comment is bundled into the one
+  remaining pause — the Jira publish confirmation. Say "interactive
+  mode" to get the grooming pause back.
 - **Impact scan (task-context).** New "Related functionality & bug
   history" step: searches product docs + EP bug history for the
   feature's keywords — via the knowledge-base skill's SCOUT endpoint

@@ -6,8 +6,9 @@ description: >
   requirements-grooming -> qa-checklist -> qa-test-cases, runs the
   run-analyzer, then creates a QA sub-task on the story holding the
   checklist + test cases so the code phase can pick them up without
-  manual file attaching. Auto-advances, pausing only where human input
-  is needed (grooming decisions, and confirming the Jira write). Use it
+  manual file attaching. Auto-advances with default decisions, pausing
+  only to confirm the Jira write (say "interactive mode" to get the
+  grooming pause back). Use it
   when the user says "run the QA docs pipeline", "build the test cases
   for a ticket", "groom and write test cases", or gives a ticket and
   wants the full checklist/test-case set without invoking each stage by
@@ -61,30 +62,35 @@ the next stage automatically (they share the working directory).
    - Produces `<ISSUEKEY>-context.md`.
 
 2. **requirements-grooming** -- run the `requirements-grooming` skill.
-   - **REQUIRED PAUSE.** Present the grooming findings (questions,
-     contradictions, potential bugs, uncovered requirements, risks, and
-     any Confluence-vs-Jira conflicts) and **wait for the user's
-     decisions.** Do not proceed until they answer or say to skip. This
-     checkpoint must never be auto-resolved.
-   - **Offer to post the open items to the story (shift-left).** After
-     the user's decisions, if genuinely open items remain — questions
-     the user could not answer themselves, contradictions needing the
-     PM/analyst, spec gaps a dev must confirm — offer ONE comment on
-     the ticket listing them (`addCommentToJiraIssue`), so they get
-     resolved before/while the code is written instead of resurfacing
-     at QA time. Show the draft and post only after an explicit yes.
-     Keep it short and plain: one line per item, grouped
-     Questions / Contradictions / Gaps, no pipeline jargon, no file
-     dumps. Items the user already answered in chat are settled — do
+   - **Auto-default (no pause).** Present the grooming findings
+     (questions, contradictions, potential bugs, uncovered
+     requirements, risks, Confluence-vs-Jira conflicts) in chat for
+     visibility, then continue WITHOUT waiting — treat every finding
+     as "skip": requirements stay as written, unresolved conflicts
+     keep both versions marked "(unresolved conflict)". The findings
+     resurface at the publish confirmation, where the user can still
+     answer them (then regenerate from stage 2) or post the open items
+     to the ticket. If the user asks for **interactive mode**, pause
+     here and wait for decisions as grooming's own SKILL.md describes.
+   - **Open items → ticket (shift-left), bundled with publish.** If
+     genuinely open items remain — questions, contradictions needing
+     the PM/analyst, spec gaps — do not ask about them separately:
+     include a drafted ticket comment (one line per item, grouped
+     Questions / Contradictions / Gaps, no pipeline jargon) in the
+     stage-6 publish preview, as an opt-out part of that single
+     confirmation. Items the user answered in chat are settled — do
      not post those.
    - Produces `<ISSUEKEY>-requirements.md`.
 
 3. **qa-checklist** -- run the `qa-checklist` skill.
-   - Pause only for a genuine clarifying question. Otherwise continue.
+   - Do not pause for clarifying questions: build on what is written,
+     note the ambiguity in the file ("needs clarification"), continue.
    - Produces `<ISSUEKEY>-checklist.md` (with channel tags).
 
 4. **qa-test-cases** -- run the `qa-test-cases` skill.
-   - Pause only for a genuine clarifying question. Otherwise continue.
+   - Do not pause for clarifying questions: the grounding rule already
+     handles ambiguity (no test case is invented; the requirement is
+     marked "needs clarification"). Continue.
    - Produces `<ISSUEKEY>-test-cases.md`.
 
 5. **qa-run-analyzer** -- run the `qa-run-analyzer` skill automatically.
