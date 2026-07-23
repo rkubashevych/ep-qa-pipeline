@@ -26,6 +26,15 @@ signals an update to installed copies.
   grooming pause, offer to post the still-open questions /
   contradictions / gaps as one confirm-first comment on the ticket, so
   PM/dev resolve them before the code is written.
+- **Risk-based prioritization (ISTQB TA Ch. 2).** Grooming now rates
+  each requirement High/Medium/Low (impact × likelihood); the marker
+  flows requirements → checklist → test-case group headings, and
+  api-testing/web-testing execute High-risk cases first — a truncated
+  or split run covers what matters most. Reports keep file order.
+  Markers are optional: files without them behave as before.
+- **CRUD completeness lens (grooming).** "Where can this break?" now
+  checks entity lifecycle coverage — create/edit/delete effects on
+  read, list, and export views.
 
 ## 0.8.0 — 2026-07-14
 

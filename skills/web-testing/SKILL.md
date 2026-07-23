@@ -256,6 +256,13 @@ Set `IS_NEW_PATH = true`.
 
 ### Step 6 — Execute the test cases
 
+Order: start with the page(s) whose cases carry `[risk: High]`, and
+within a page run higher-risk cases first — so if the session is cut
+short, the riskiest cases are already done. Keep grouping by page
+(do not ping-pong between pages for strict risk order); with no risk
+markers, use test-cases order. The report still lists cases in
+test-cases order.
+
 For each test case in the scope:
 
 1. **Check the precondition:**

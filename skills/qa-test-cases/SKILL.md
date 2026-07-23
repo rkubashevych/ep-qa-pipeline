@@ -35,6 +35,9 @@ From the checklist, the skill takes:
   are only about the presence, type, or label of an element, the
   requirement is structural and no test case is needed.
 - The REQ-ID — for traceability.
+- The `[risk: ...]` marker on each requirement heading (if present) —
+  copy it unchanged onto the `## REQ-N` group heading; the executing
+  stages run High-risk cases first.
 - The channel tag on each check (`[UI]`, `[API]`, `[mobile]`,
   `[export/email]`) — carry it onto the test case. It tells later
   stages how the test case is executed: only `[UI]` test cases are

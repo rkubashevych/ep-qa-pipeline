@@ -95,6 +95,10 @@ If a requirement already has sub-items (REQ-5a, REQ-5b), each
 sub-item is numbered separately: REQ-5a.1, REQ-5a.2, REQ-5b.1,
 REQ-5b.2.
 
+If a requirement carries a `[risk: High|Medium|Low]` marker in the
+requirements file, copy it unchanged onto that requirement's checklist
+heading — later stages use it to execute high-risk cases first.
+
 ## Channel tags
 
 ExpoPlatform features often span more than the web UI. Tag each check

@@ -12,7 +12,7 @@ Generated: <YYYY-MM-DD>
 
 ## Requirements
 
-- REQ-1: <requirement text>
-- REQ-2: <requirement text>
-- REQ-3: <requirement text — mark "(unresolved conflict)" if it still
-  holds two contradictory versions>
+- REQ-1: [risk: Medium] <requirement text>
+- REQ-2: [risk: High] <requirement text>
+- REQ-3: [risk: Low] <requirement text — mark "(unresolved conflict)"
+  if it still holds two contradictory versions>

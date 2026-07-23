@@ -140,7 +140,10 @@ category / exhibitor ids on the target event (§7). Group cases by
 endpoint so each is called once where possible.
 
 ### Step 4 — Execute each case
-For each `[API]` case, in test-cases order:
+For each `[API]` case — `[risk: High]` cases first, then Medium, then
+Low (test-cases order within the same rating; plain test-cases order
+when there are no risk markers). The report still lists cases in
+test-cases order:
 1. Check the precondition (data state). If it needs a state that does
    not exist, either set it via a safe, revertible write (§9/§12) or, if
    that is not possible, mark BLOCKED with the reason.

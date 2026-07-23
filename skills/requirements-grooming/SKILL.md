@@ -110,6 +110,10 @@ For each requirement from the context file go through four questions:
    - Combinations of conditions: if there are several conditions (role
      + status + data state), is the behavior described for each
      combination
+   - CRUD completeness: if the feature creates, edits, or deletes an
+     entity, is the behavior described for the other lifecycle
+     operations it affects (what does the edited/deleted entity look
+     like elsewhere; can it still be read, listed, exported?)
    - User classes: is behavior separated for different roles, account
      types, access levels
    - Negative scenarios: what if the data is empty, deleted, in an
@@ -154,6 +158,24 @@ messages", "handle", "support".
     network failures) unless the ticket is specifically about this
   - things that are obvious from the task or product context — do not
     re-ask what is already clear
+
+## Risk rating
+
+Rate each requirement's product risk — **High / Medium / Low** —
+as impact × likelihood:
+
+- Impact: what breaks if this fails — money, data loss/exposure, a
+  blocked core flow, many users affected → higher.
+- Likelihood: complex logic, many conditions or integrations, a
+  historically buggy area, reworked legacy behavior → higher.
+
+Default to Medium. High means "this failing hurts the event or the
+client"; Low is cosmetic or rare-path. Write the rating on each
+requirement line in the output file (`[risk: High]`). Do not ask the
+user to confirm ratings — mention them in the findings pause where
+they can adjust. The rating flows down the chain: test cases inherit
+it, and api-/web-testing execute High first, so a truncated run still
+covers what matters most.
 
 ## Order of work
 
@@ -203,9 +225,10 @@ messages", "handle", "support".
    requirement text and mark it "(unresolved conflict)" so it is not
    silently lost.
 9. Produce the final list: covered requirements unchanged + problem
-   requirements rewritten taking the alignment into account. Copy the
-   "Goal" section from the context file unchanged — the next skills
-   need it to understand the context.
+   requirements rewritten taking the alignment into account, each with
+   its risk rating (see "Risk rating"). Copy the "Goal" section from
+   the context file unchanged — the next skills need it to understand
+   the context.
 10. Save one file — a clean numbered list of finished requirements.
 
 ## Output file

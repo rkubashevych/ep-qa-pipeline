@@ -32,7 +32,7 @@ Optimise for both: keep them **scannable top-to-bottom with short lines**.
 ## Structure
 
 ```
-## REQ-N — <requirement label>  [<channel tag(s)>]
+## REQ-N — <requirement label>  [risk: <High|Medium|Low>] [<channel tag(s)>]
 
 Applied techniques: <technique(s) — once per requirement group>
 
