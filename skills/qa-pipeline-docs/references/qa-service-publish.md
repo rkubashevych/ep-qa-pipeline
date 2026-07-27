@@ -28,7 +28,7 @@ QA Service instance.
 | Suite title | the story summary, cleaned (no ticket key, no "[QA-PIPELINE]") |
 | Suite prefix | short UPPERCASE mnemonic of the feature (2–8 chars, e.g. `ZTB`, `PSRCH`). Propose one; the user can override at the pause. |
 | Folder | reuse the `folderId` of an existing sibling suite with the same role/feature-area (find it via `list_suites`); omit if none fits |
-| Web UI base URL | `<not configured>` — set to the QA Service web app's base URL and verify the suite-page URL shape once in a browser (likely `<base>/suites/<suiteId>`). When configured, every "QA Service suite" line in Jira (sub-task description, human summary, story note) becomes a clickable link; until then, write the suite path only. |
+| Web UI base URL | `https://qa-service.expoplatform.com` — the suites list is `<base>/<productId>/test-suites` (e.g. `/expoplatform/test-suites`). Suite detail page: assumed `<base>/<productId>/test-suites/<suiteId>` — VERIFY on the first published suite (open it in the UI, compare); if the shape differs, correct this row. Every "QA Service suite" line in Jira (sub-task description, human summary, story note) links here; if a link cannot be built, fall back to the plain suite path. |
 
 ## Mapping — pipeline files → QA Service
 
