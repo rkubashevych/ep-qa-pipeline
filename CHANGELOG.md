@@ -5,6 +5,56 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.10.0 — 2026-07-27
+
+- **QA Service publishing (qa-pipeline-docs step 6).** The docs phase
+  now dual-writes: alongside the Jira QA sub-task it publishes the
+  groomed requirements and test cases into a QA Service suite via the
+  QA Service MCP connector — the team's permanent, traceable system of
+  record. One suite per ticket (`role/feature-area/slug`), requirements
+  as `fr`/`oq`/`discrepancy` with `<PREFIX>-FR-NN` stableIds, cases
+  created + edited with traceability, priority (risk→P0/P1/P2),
+  levelText (channel tag), techniques, and the Pre/Steps/Exp/Post
+  content mapped to detail fields. Re-runs append to the existing suite
+  (no duplicates; superseded cases → `status: deprecated` — QA Service
+  has no delete). Bug tickets never get their own suite: their
+  regression cases are appended to the existing feature suite (bug key
+  in the case notes), continuing that suite's prefix and numbering.
+  Same single publish pause covers Jira + QA Service;
+  if the connector is not enabled the step is skipped with a note,
+  never blocking the Jira publish. Config + full field mapping:
+  `skills/qa-pipeline-docs/references/qa-service-publish.md`.
+- **QA Service read-side (task-context + requirements-grooming).**
+  Stage 1 pulls the touched feature's existing suite (requirements,
+  risks, open questions, known-bug cases) into a new "Existing QA
+  Service suite" context section; stage 2 grooms the ticket against it
+  — a ticket requirement contradicting an established one is a
+  Contradiction finding citing both sides. Comparison material only;
+  suite items are never imported as requirements.
+- **QA Service as case source (qa-pipeline-code step 0).** With the
+  connector present, extracted test cases are reconciled against the
+  suite: UI-edited cases win, `deprecated` cases are dropped from
+  execution, team-added cases are picked up and executed. Jira archive
+  remains the fallback when the connector is absent.
+- **Result write-back (qa-pipeline-code step 6).** Executed cases get
+  their PASS/FAIL outcome appended to the suite case notes (with date,
+  story key, and filed-bug keys), inside the same posting confirmation.
+  Lifecycle `status` is never overwritten by run results.
+- **Coverage tagging (publish step).** Created cases get existing
+  feature @tags via `tag_case` (new ones via `propose_tag`, pending
+  approval), so pipeline cases show up in `get_coverage`.
+- **Independent publish verification (qa-run-analyzer).** New "QA
+  Service sync" check: when the connector is present, the analyzer
+  compares the suite against the requirements/test-cases files and
+  reports in-sync / not-published-yet / mismatch (with missing IDs) /
+  write-back-missing — a fresh-instructions re-check so a silently
+  skipped or partial publish surfaces in the run report.
+- **QA Service line in results (templates).** The human summary
+  comment and the "QA passed" story note now carry a "Test docs: QA
+  Service suite <path>" line (clickable once the Web UI base URL is
+  configured in qa-service-publish.md), so anyone reading Jira can
+  jump to the created documentation.
+
 ## 0.9.0 — 2026-07-23
 
 - **Main-issue PR fallback (qa-pipeline-code step 0).** Tickets with no

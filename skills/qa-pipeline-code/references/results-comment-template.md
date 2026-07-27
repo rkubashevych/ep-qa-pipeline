@@ -100,7 +100,16 @@ settings, reproduced in both UI and API.">
 
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
 report (archive comment above).
+
+**Test docs:** QA Service suite `<path>` — <N> requirements /
+<M> cases, run results written back. <link when the Web UI base URL
+is configured in qa-service-publish.md; otherwise the path only>
 ```
+
+QA Service line rules: include it whenever the docs phase published a
+suite (even if this run's write-back was skipped — then say
+"write-back skipped: <reason>"). Omit the line entirely only when no
+suite exists for this ticket.
 
 ### Overall verdict
 
@@ -151,6 +160,7 @@ jargon.
 **Coverage:** <N> test cases (<N> UI, <N> API) + code review of <branches/PRs>
 **Result:** all passed<, N non-blocking notes: <one line each>>.
 **Not covered here:** <N [mobile]/[export] cases → manual check> *(omit if none)*
+**Test docs:** QA Service suite `<path>` <(link when the Web UI base URL is configured)> *(omit if no suite)*
 **Details:** full reports on QA sub-task <KEY>
 **Status:** ready for <merge / release / next step>
 ```

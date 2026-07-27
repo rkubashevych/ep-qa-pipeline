@@ -83,6 +83,8 @@ Status — per references/field-maps.md) and use
    only the data of the current task.
 7. Run the impact scan (see "Related functionality & bug history"
    below).
+8. Pull the existing QA Service suite for the touched feature (see
+   "Existing QA Service suite" below).
 
 ## Related functionality & bug history (impact scan)
 
@@ -110,6 +112,33 @@ Rules: this is background, NEVER a source of requirements — the
 anti-invention prohibitions apply unchanged. Keep it ≤10 lines. If
 both paths fail, write "Impact scan unavailable" and continue — do not
 block the run on it. Internal-only content stays internal.
+
+## Existing QA Service suite (established test design)
+
+If the QA Service MCP connector is present in the session, pull the
+feature's established requirements so grooming can check the ticket
+against them instead of re-deriving from scratch:
+
+1. `list_suites` (product `expoplatform`); match the suite whose
+   role/feature path corresponds to what the ticket touches (use the
+   same keywords as the impact scan). No match → write "No existing
+   QA Service suite found" in the section and continue.
+2. On a match, `get_suite` and write the "Existing QA Service suite"
+   section of the output file:
+   - suite path, title, requirement/case counts, one-line summary;
+   - the requirements as one line each: `stableId — title (kind)`.
+     If the suite has more than ~40, list ALL of kind `risk`, `oq`,
+     `discrepancy`, `invariant` plus the `fr`/`rule` items matching
+     the ticket's keywords, and close with "+N more not listed";
+   - any cases whose notes reference open bug keys (known-bug areas),
+     one line each.
+3. Connector absent → omit the section entirely. Never block on this.
+
+Rules: like the impact scan, this is background and comparison
+material, NEVER a source of requirements for the current ticket — the
+anti-invention prohibitions apply unchanged. Grooming (next stage) uses
+it to detect contradictions between the ticket and the established
+requirements.
 
 ## Sub-tasks (when the input is a parent Story)
 

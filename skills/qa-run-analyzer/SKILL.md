@@ -81,7 +81,31 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   checklist or test cases.
 - A stage that clearly errored or was skipped in the chain.
 
-### 4. Findings summary (Product)
+### 4. QA Service sync (Pipeline) — only when the connector is present
+
+Skip this section entirely (and say so in one line) when the QA
+Service MCP tools are not in the session. Otherwise, locate the
+ticket's suite (`list_suites` match on the story / the `QA Service
+suite:` line in the QA sub-task description) and report ONE of:
+
+- 🟢 **in sync** — suite exists; its requirement stableIds and case
+  count match the requirements/test-cases files (compare via
+  `get_suite`; account for deliberately skipped duplicates listed in
+  the publish preview).
+- 🟢 **not published yet** — no suite found AND this analyzer run is
+  inside the docs orchestrator (publish is its step 6, which runs
+  after this check — expected, not a failure).
+- 🔴 **publish incomplete / mismatch** — suite exists but counts or
+  IDs diverge from the files: list the missing/extra stableIds.
+- 🟡 **write-back missing** — code phase only, when run after step 6:
+  executed cases whose suite notes lack the run line.
+
+This is the independent check on the QA Service publish — the publish
+step verifies itself, but this skill re-checks it with fresh
+instructions in a later stage/chat, so a silently skipped or partial
+publish surfaces here.
+
+### 5. Findings summary (Product)
 - Docs phase: # requirements, # checks, # test cases, channel
   breakdown, # needing clarification.
 - Code phase: code-review PASS/FAIL/QA/N/A; api-testing PASS/FAIL/

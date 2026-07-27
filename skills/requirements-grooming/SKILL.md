@@ -131,6 +131,17 @@ For each requirement from the context file go through four questions:
      them, raise it as a question — do not silently assume they are
      unaffected
    - Contradictions between requirements in the context file
+   - Contradictions with the established test design: if the context
+     file has an "Existing QA Service suite" section, check each
+     requirement against the listed established requirements. A ticket
+     requirement that contradicts an established one (a rule flipped, a
+     limit changed, an invariant broken) is a **Contradiction** finding
+     — cite both sides (`REQ-N` vs the suite `stableId`). It may be an
+     intended change; only the user/PM can say, so never silently pick
+     a side. Established `risk`/`oq` items touching the same behavior
+     are grooming input too: raise them if the ticket leaves them open.
+     The suite section is comparison material only — do not import
+     suite requirements as new REQ items.
 
 Broad or vague wording is a signal to check deeper. Examples: "where
 applicable", "all places", "update the wording", "appropriate

@@ -11,6 +11,17 @@ Generated: <YYYY-MM-DD>
 | Run / coverage health | 🟢 / 🟡 / 🔴 |
 | Input quality | 🟢 / 🟡 / 🔴 |
 | Skill / process | 🟢 / 🟡 / 🔴 |
+| QA Service sync | 🟢 in sync / 🟢 not published yet / 🟡 write-back missing / 🔴 mismatch / — connector absent |
+
+## QA Service sync
+
+> Only when the QA Service connector is present; otherwise one line:
+> "Connector absent — not checked."
+
+- Suite: `<path>` (<N> requirements / <M> cases) — or "no suite found"
+- Verdict: <in sync / not published yet (docs run, pre-publish) /
+  mismatch: missing <stableIds>, extra <stableIds> / write-back
+  missing on <stableIds>>
 
 ## Issues worth fixing
 
@@ -39,7 +50,7 @@ After writing the file, the chat message is exactly this shape
 (≤10 lines, worst news first, omit empty lines):
 
 ```
-Run health (<docs/code>): 🟢 coverage · 🟡 input · 🟢 process
+Run health (<docs/code>): 🟢 coverage · 🟡 input · 🟢 process · 🟢 QA-sync (omit when connector absent)
 
 Top issues (max 3):
 1. 🔴 [Input] <one line> — fix: <one line>

@@ -4,11 +4,13 @@ description: >
   Orchestrator for the documentation half of the QA pipeline (stages
   1-4) plus publishing. Given a Jira ticket, runs task-context ->
   requirements-grooming -> qa-checklist -> qa-test-cases, runs the
-  run-analyzer, then creates a QA sub-task on the story holding the
-  checklist + test cases so the code phase can pick them up without
-  manual file attaching. Auto-advances with default decisions, pausing
-  only to confirm the Jira write (say "interactive mode" to get the
-  grooming pause back). Use it
+  run-analyzer, then publishes: a QA sub-task on the story holding the
+  checklist + test cases (so the code phase can pick them up without
+  manual file attaching) and, when the QA Service MCP connector is
+  enabled, a QA Service suite with the requirements and test cases as
+  the team's permanent system of record. Auto-advances with default
+  decisions, pausing only to confirm the publish (say "interactive
+  mode" to get the grooming pause back). Use it
   when the user says "run the QA docs pipeline", "build the test cases
   for a ticket", "groom and write test cases", or gives a ticket and
   wants the full checklist/test-case set without invoking each stage by
@@ -96,13 +98,22 @@ the next stage automatically (they share the working directory).
 5. **qa-run-analyzer** -- run the `qa-run-analyzer` skill automatically.
    It health-checks the docs run and writes `<ISSUEKEY>-run-report.md`.
 
-6. **Publish to a new QA sub-task** -- create a QA sub-task on the story
-   so the code phase can read the checklist/test-cases from Jira instead
-   of via re-attached files.
-   - **REQUIRED PAUSE / CONFIRM.** Before writing anything to Jira, show
-     the user a preview: the parent story, the new sub-task summary, the
-     assignee, and what will be posted. Create only after an explicit
-     yes. (Writing to the tracker is a change and must be confirmed.)
+6. **Publish** -- two destinations, ONE confirmation.
+   (a) a new QA sub-task on the story, so the code phase can read the
+   checklist/test-cases from Jira instead of via re-attached files;
+   (b) a QA Service suite holding the same requirements + test cases as
+   the team's permanent, traceable system of record — per
+   **`references/qa-service-publish.md`** (field mapping, suite naming,
+   re-run rules live there). If the QA Service connector is not enabled
+   in the session, publish (a) only and note the skip in the final
+   response — never block on (b).
+   - **REQUIRED PAUSE / CONFIRM.** Before writing anything to Jira or
+     QA Service, show the user ONE preview: the parent story, the new
+     sub-task summary, the assignee, what will be posted, and the QA
+     Service line (new suite path + requirement/case counts, or
+     "appending to existing suite", or "skipped — connector not
+     enabled"). Proceed only after an explicit yes. (Writing to the
+     tracker or to QA Service is a change and must be confirmed.)
    - Create with the Atlassian connector (`createJiraIssue`), using the
      project key, issue type, assignee, summary format, and label from
      **`references/publish-config.md`** (the per-team values live there —
@@ -117,6 +128,9 @@ the next stage automatically (they share the working directory).
        pointer.
    - **Description content** (keep it a summary, NOT a second tracker):
      - A link to the spec/Confluence AC and the parent story.
+     - The QA Service suite line: `QA Service suite: <path> — N
+       requirements / M cases` (omit if the QA Service publish was
+       skipped).
      - A "How to use this ticket" note: the checkbox tracker in the
        comment is the single source of truth for **manual** testing
        status — tick as you verify by hand. Automated results arrive
@@ -166,6 +180,9 @@ After publishing, report:
 - The paths of the four stage files + the run report.
 - The QA sub-task key + URL and what was posted (tracker comment +
   archive comment).
+- The QA Service suite path + requirement/case counts and the
+  count-verification result (or "QA Service publish skipped —
+  connector not enabled").
 - The run-analyzer health verdict (🟢/🟡/🔴 per category) and any
   ⚠ SPECIAL ATTENTION items the code phase should know about.
 - The next step: run `qa-pipeline-code` on the Story key in a fresh

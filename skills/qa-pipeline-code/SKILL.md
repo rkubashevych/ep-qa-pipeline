@@ -75,6 +75,13 @@ Otherwise, using the Atlassian connector and the Story key:
    cannot run. Write the results to the working directory as
    `<STORY>-checklist.md` and `<STORY>-test-cases.md` so the stage
    skills can consume them.
+   - **QA Service reconciliation:** if the QA Service MCP connector is
+     present, after extracting the files reconcile the test cases
+     against the published suite — the suite wins on divergence
+     (cases may have been fixed in the web UI between phases). Rules:
+     `qa-pipeline-docs/references/qa-service-publish.md` → "Code phase
+     — suite as the case source". Connector absent → Jira archive is
+     authoritative, as before; never block on QA Service.
    - If no pipeline QA sub-task exists, tell the user to run
      `qa-pipeline-docs` first (or to attach the test-cases file).
    - **Resume mode:** if the sub-task also has a results **archive
@@ -190,7 +197,16 @@ multi-PR story does not exhaust the orchestrator's context:
    **`references/results-comment-template.md`** (formats live there,
    not here):
    - **REQUIRED PAUSE / CONFIRM.** Show what will be posted (both
-     comments) and to which sub-task; post only after an explicit yes.
+     comments), to which sub-task, and — when the QA Service connector
+     is present — the result write-back line (how many executed cases
+     get a PASS/FAIL note in the suite). Post only after an explicit
+     yes; the one confirmation covers Jira and QA Service.
+   - **QA Service result write-back:** for every executed case, append
+     the run outcome to its suite case notes — rules and exact note
+     format: `qa-pipeline-docs/references/qa-service-publish.md` →
+     "Result write-back". Never overwrite lifecycle `status` with a
+     run result. Connector absent → skip with a note in the final
+     response.
    - **Comment 1 — machine archive (for agents):** the full
      `<STORY>-code-review.md`, `<STORY>-api-testing.md`,
      `<STORY>-web-testing.md` and `<STORY>-run-report.md`, each inside
@@ -264,7 +280,10 @@ multi-PR story does not exhaust the orchestrator's context:
 
 After posting, report: the files produced, the overall verdict and
 confirmed bugs, confirmation that BOTH comments (archive + human
-summary) were posted to the QA sub-task (with its key + URL), which
+summary) were posted to the QA sub-task (with its key + URL), the QA
+Service write-back counts (N PASS / M FAIL notes written, or "skipped —
+connector not enabled") and any reconciliation changes applied at step
+0, which
 confirmed bugs were filed (via knowledge-base or the default path) or
 listed for manual filing, and which handoff was performed (reassigned
 to whom / transition applied) or that the user skipped it. In chat,

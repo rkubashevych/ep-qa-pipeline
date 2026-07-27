@@ -54,6 +54,16 @@ Generated: <YYYY-MM-DD>
   <; notable: KEY-123 — one-line summary>
 - Source: <knowledge-base /search | connector fallback | unavailable>
 
+## Existing QA Service suite
+> Established test design for the touched feature — background and
+> comparison material for grooming. Not requirements of this task.
+
+- Suite: `<path>` — <title> (<N> requirements / <M> cases)
+- Summary: <one line>
+- <stableId> — <title> (<kind>)
+- <stableId> — <title> (<kind>)
+- Known-bug cases: <stableId> — <bug key(s)>
+
 ## Attachments
 - `attachments/<file>`: <type and what it contains>
 
@@ -66,6 +76,7 @@ Section rules:
 - Additional requirements (from comments) — only when there are relevant comments with new requirements.
 - Related context — only when there are real linked issues in the tracker. Comments from the current task are not related context.
 - Related functionality & bug history — always attempt the impact scan; if it found nothing or was unavailable, keep the section with a single "Impact scan unavailable" or "No related hits" line.
+- Existing QA Service suite — only when the QA Service connector is present in the session; keep it with a single "No existing QA Service suite found" line when the lookup found nothing. Omit the section entirely when the connector is absent.
 - Attachments — only when there is data.
 
 Formatting rules:
