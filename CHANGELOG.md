@@ -5,6 +5,24 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.10.3 — 2026-07-28
+
+Two write-semantics assumptions settled by direct experiment on a live
+suite; instructions corrected accordingly.
+
+- **`edit_test_case` MERGES** (verified): an edit sending only
+  `status` + `levelText` preserved `detail` (all keys), `techniques`,
+  `priority`, `type`, `traceability` and attached tags byte-identical.
+  The result write-back no longer re-sends the whole `detail` object —
+  only `notes`, sent complete.
+- **`levels` is not derivable from `levelText`** (verified): setting the
+  exact canonical `API-E2E` left `levels: []` and `stats.byLevel` at
+  zero. Publish verification and `qa-run-analyzer` no longer treat an
+  empty `byLevel` as a defect — it is a connector gap (no `levels`
+  parameter) and chasing it would have sent the pipeline into a loop
+  trying to fix something unfixable. Zeroed *status* buckets and
+  collapsed requirement kinds remain real 🔴 findings.
+
 ## 0.10.2 — 2026-07-28
 
 Field mapping rewritten after diffing the first pipeline-published

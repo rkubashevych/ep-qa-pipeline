@@ -99,13 +99,18 @@ suite:` line in the QA sub-task description) and report ONE of:
   IDs diverge from the files: list the missing/extra stableIds.
 - 🟡 **write-back missing** — code phase only, when run after step 6:
   executed cases whose suite notes lack the run line.
-- 🔴 **zeroed dashboards** — the suite exists but its own stats
-  contradict its contents: `stats.byLevel` sums to 0 against a non-zero
-  case total (invalid `levelText`), or every status bucket is 0
-  (invalid case `status`, e.g. `draft`), or 0 rules AND 0 invariants
-  AND 0 risks among the requirements (kinds collapsed to `fr`). Name
-  the offending field and the correct vocabulary — the fix is a
-  re-`edit_test_case` pass, not a re-publish.
+- 🔴 **zeroed status buckets** — every case-status bucket reads 0
+  against a non-zero total: the cases were written with a `status`
+  outside `planned/implemented/partial/deferred/na` (e.g. `draft`).
+  Fixable with a re-`edit_test_case` pass, not a re-publish.
+- 🔴 **collapsed requirement kinds** — 0 rules AND 0 invariants AND 0
+  risks among the suite's requirements: everything was filed as `fr`.
+  Not fixable after the fact (no `edit_requirement`) — flag it so the
+  next publish classifies properly.
+- Do NOT flag `stats.byLevel` reading zero: the per-level dashboard is
+  driven by the case `levels` array, which the connector cannot write
+  and does not derive from `levelText` (verified). It is a known
+  service-side gap on every pipeline-published suite, not a run defect.
 
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh

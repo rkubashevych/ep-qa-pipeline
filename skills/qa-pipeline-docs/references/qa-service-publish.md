@@ -104,9 +104,11 @@ report them once in the final response instead:
   `likelihood`, `threatens`) stay empty. Encode what matters in
   `summary` prose (as above) and say so.
 - **Case `levels` array and `implementations`** — not parameters of
-  `edit_test_case`. Setting an exact canonical `levelText` is the best
-  available signal; **verify once** whether the server derives `levels`
-  from it, and report the answer.
+  `edit_test_case`, and the server does NOT derive `levels` from
+  `levelText` (tested). Consequence: `stats.byLevel` reads zero on every
+  pipeline-published suite, and no case is eligible for the implement
+  workflow. Canonical `levelText` remains required as the human-readable
+  level.
 - **Suite `summary` / `status` / `owner` / `lastReviewed`** —
   `create_suite` takes only title/productId/prefix/folderId, so a
   pipeline-created suite has a bare header.
@@ -192,18 +194,37 @@ preview so the user can redirect:
    approval (`approve_tag` is the reviewer's call, not the pipeline's),
    so note pending proposals in the final response. Untagged cases are
    invisible to `get_coverage` — that is the point of this step.
-5. Verify: `get_suite` once at the end and check BOTH:
+5. Verify: `get_suite` once at the end and check:
    - counts match the statistics block of the test-cases file;
-   - **the dashboards are not zeroed** — `stats.byLevel` must sum to the
-     case total (a zero row against a non-zero total means `levelText`
-     was outside the canonical vocabulary) and the status buckets must
-     account for every case (all-zero means `status` was outside
-     `planned/implemented/partial/deferred/na`). Also confirm no
-     requirement kind is suspiciously absent (0 rules AND 0 invariants
-     AND 0 risks = mis-classification).
-   Report any mismatch in the final response and fix it with
-   `edit_test_case` before finishing — do not leave a suite whose own
-   charts read zero.
+   - **status buckets account for every case** — all-zero means `status`
+     was outside `planned/implemented/partial/deferred/na`. This IS
+     fixable: re-`edit_test_case` with `status: "planned"` before
+     finishing.
+   - no requirement kind is suspiciously absent (0 rules AND 0
+     invariants AND 0 risks = mis-classification). Not fixable after the
+     fact (no `edit_requirement`) — report it so the next publish is
+     correct.
+   - `stats.byLevel` will read **all zeros regardless** — see the note
+     below. Do NOT try to fix it and do not loop on it.
+   Report anything off in the final response.
+
+> **Verified — `stats.byLevel` cannot be populated by this pipeline.**
+> The per-level dashboard is keyed off the case's `levels` array
+> (codes `U`/`I`/`AE`/`C`/`E2E`/`CFE`/`Perf`/`M`/`worker`), NOT off
+> `levelText`, and `edit_test_case` exposes no `levels` parameter. Tested
+> directly: setting the exact canonical `levelText: "API-E2E"` left
+> `levels: []` and `byLevel` at zero. Canonical `levelText` is still
+> required (it is the human-readable level and the only signal
+> available), but an empty `byLevel` on a pipeline-published suite is a
+> connector gap, not a run defect. Closing it needs `levels` on the
+> write API or server-side derivation from `levelText` — a request for
+> the QA Service team.
+
+> **Verified — `edit_test_case` MERGES.** Omitted fields are preserved:
+> an edit sending only `status` + `levelText` left `detail` (all keys),
+> `techniques`, `priority`, `type`, `traceability` and the attached tags
+> byte-identical. So partial edits are safe — no read-modify-write
+> needed for small field changes.
 6. Add to the Jira QA sub-task description (step 6 already writes it):
    `QA Service suite: <path> — <requirementCount> requirements /
    <testCaseCount> cases` plus the TC-REQ-N.M → stableId map (one line
@@ -240,11 +261,12 @@ Within the same step-6 confirmation that posts the Jira result
 comments, also write the run outcome to QA Service for every EXECUTED
 case (skip not-executed ones):
 
-- `get_test_case` first, then `edit_test_case` re-sending the full
-  `detail` object with `notes` appended (never send a partial `detail`
-  — treat it as replace-not-merge unless proven otherwise):
-  `Run <YYYY-MM-DD> (<STORY> code phase): PASS | FAIL — <one-line
-  reason if FAIL>; details: QA sub-task <KEY>`.
+- `get_test_case` first (to read the current `notes`), then
+  `edit_test_case` with `detail: { notes: "<existing notes>" + "\nRun
+  <YYYY-MM-DD> (<STORY> code phase): PASS | FAIL — <one-line reason if
+  FAIL>; details: QA sub-task <KEY>" }`. Top-level fields you omit are
+  preserved (verified: `edit_test_case` merges), but inside `detail`
+  send `notes` complete — assume a key you send replaces that key.
 - A FAIL that produced a filed bug also gets `bug <BUGKEY>` appended to
   that line.
 - Do NOT overwrite the lifecycle `status` (e.g. `implemented`) with a
