@@ -5,6 +5,19 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.10.4 — 2026-07-28
+
+- **Hard rule: never call `summarize_requirement`** (or advise clicking
+  the UI's Regenerate / "Generate missing summaries" buttons) on a suite
+  the pipeline published. Tested on one requirement: it rewrote `title`
+  from the requirement's testable text to a 3-word label, produced a
+  summary contradicting the suite's own invariant, and dropped the
+  `[risk: …]` marker — irreversibly, since there is no
+  `edit_requirement`. Replaces the earlier (harmful) advice to use those
+  buttons for enrichment. `apply_auto_tags` stays recommended (additive);
+  `start_collect_requirements` / `start_import_docs` are marked
+  UNVERIFIED on populated suites (may duplicate by stableId, no delete).
+
 ## 0.10.3 — 2026-07-28
 
 Two write-semantics assumptions settled by direct experiment on a live

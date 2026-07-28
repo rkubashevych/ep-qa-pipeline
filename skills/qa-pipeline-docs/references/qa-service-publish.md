@@ -115,11 +115,41 @@ report them once in the final response instead:
 - **`traceLinks` graph** — materialized by the importer, not by
   `create_test_case`; per-case `traceability` is still stored and shown.
 
-**Post-publish enrichment (tell the user once, in the final response):**
-the web UI can fill several of these server-side — "Generate missing
-summaries" (requirements), "Auto-tag untagged" (cases), "Collect
-requirements" / "Import docs" (suite header + relationship detail).
-That is a human click, never a pipeline action.
+### NEVER call `summarize_requirement` on pipeline-written requirements
+
+`summarize_requirement` (and the UI's per-requirement **Regenerate** /
+**Generate missing summaries** buttons) rewrites BOTH `title` and
+`summary` from the requirement's current content — destructively, with
+no `edit_requirement` to undo it.
+
+Tested on one requirement (PRIVFAV-FR-02):
+
+- before — `title`: "An opted-out favourite is added to the user's own
+  favourites list exactly like a regular favourite" · `summary`:
+  "[risk: Medium]"
+- after — `title`: "Opted-out favouriting parity" · `summary`:
+  "Opted-out users retain full access to favouriting, storing and
+  managing saved items identically to regular users…"
+
+Three losses, all in one call: the requirement's testable text was
+replaced by a 3-word label (the scoping word "own" — the whole point —
+is gone from both fields); the generated summary **contradicts the
+suite's own invariant** (an opted-out favourite is explicitly NOT
+identical: no notification, no connection row, no lead); and the
+`[risk: …]` signal was dropped.
+
+Rule: the pipeline never calls it, and never advises the user to click
+those buttons on a suite it published. Pipeline-authored requirement
+text is authoritative — a generated label is not an improvement over it.
+
+**Post-publish enrichment that IS safe:** "Auto-tag untagged" /
+`apply_auto_tags` (additive, touches only tag links). Treat "Collect
+requirements" / "Import docs" (`start_collect_requirements`,
+`start_import_docs`) as UNVERIFIED on an already-populated suite: they
+merge a fresh extraction into the register by stableId, and since the
+extractor mints its own ids they may duplicate rather than enrich —
+and there is no delete. Test on a throwaway suite before ever pointing
+them at a real one.
 
 ## Suite selection — append by default
 
