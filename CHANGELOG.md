@@ -5,6 +5,30 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.10.5 — 2026-07-28
+
+- **QA Service publishing is now opt-in per run.** New switch in
+  `qa-pipeline-docs/references/qa-service-publish.md`: `ask` (default),
+  `always`, or `never`. Under `ask`, the docs orchestrator puts one
+  question at the START of the run (step 0, bundled with the
+  session-rename suggestion) — "publish to a QA Service suite as well
+  as the Jira QA sub-task? yes / no — Jira-only" — so declining costs
+  nothing instead of being decided after all the work. A preference
+  stated when invoking the pipeline ("no QA Service") is honoured
+  without asking; the answer is restated in the step-6 preview and can
+  still be flipped there.
+- Declining is a normal outcome, not a degraded run: `qa-run-analyzer`
+  records "publishing declined by the user" instead of flagging a gap,
+  and `qa-pipeline-code` skips reconciliation + result write-back
+  silently when no suite was published or the switch is `never`.
+- A "no" disables WRITES only — reading an existing feature suite for
+  grooming comparison (stage 1) has no side effects and stays on unless
+  the user asks to skip QA Service entirely.
+
+  Rationale: the write-API gaps in EP-55653 (empty `levels`, no
+  `edit_requirement`) mean some teams will want Jira-only runs until
+  those land. Set the switch to `never` for that.
+
 ## 0.10.4 — 2026-07-28
 
 - **Hard rule: never call `summarize_requirement`** (or advise clicking

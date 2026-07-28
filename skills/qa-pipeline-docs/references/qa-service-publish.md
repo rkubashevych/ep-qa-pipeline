@@ -6,6 +6,41 @@ via its MCP connector, alongside the Jira QA sub-task. Edit this file —
 not the orchestrator's SKILL.md — when adopting for another product or
 QA Service instance.
 
+## The switch — QA Service publishing is OPTIONAL
+
+| Setting | Value |
+|---|---|
+| QA Service publishing | `ask` |
+
+Options: `ask` (default — put the question to the user at the start of
+the run) · `always` (publish whenever the connector is present, no
+question) · `never` (Jira-only; never publish, never ask). Change the
+row to `never` while the QA Service write-API gaps (EP-55653) are open
+and you want Jira-only runs without being asked every time.
+
+**How `ask` behaves.** ONE question, asked at the START of the run
+(step 0, before stage 1) — never at the end, so a "no" costs nothing:
+
+> QA Service: publish this ticket's requirements + test cases to a
+> suite as well as the Jira QA sub-task? (yes / no — Jira-only)
+
+Rules:
+
+- If the user already stated a preference when invoking the pipeline
+  ("run the docs pipeline, no QA Service" / "…and publish to QA
+  Service"), honour it and do NOT ask.
+- If the connector is not present, do not ask at all — Jira-only, note
+  it once in the final response.
+- Carry the answer through the whole run and restate it in the step-6
+  publish preview ("QA Service: skipped — you chose Jira-only at the
+  start"). The user can still flip it at that confirmation.
+- **A "no" disables WRITES only.** Reading an existing suite in stage 1
+  (grooming comparison material) has no side effects and stays on — it
+  is one of the more useful parts. If the user says "skip QA Service
+  entirely" / "don't touch it", skip the read too.
+- A "no" is not a failure and must not be reported as a gap by the run
+  analyzer: it records `— publishing declined by the user`.
+
 ## Preconditions
 
 - The QA Service MCP connector must be enabled in the session. Detect it
