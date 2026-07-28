@@ -128,9 +128,11 @@ the next stage automatically (they share the working directory).
        pointer.
    - **Description content** (keep it a summary, NOT a second tracker):
      - A link to the spec/Confluence AC and the parent story.
-     - The QA Service suite line: `QA Service suite: <path> — N
-       requirements / M cases` (omit if the QA Service publish was
-       skipped).
+     - The QA Service suite line: the full **bare** suite URL (never a
+       markdown link — the connector drops hyperlinks) followed by
+       `(N requirements / M cases, prefix <PREFIX>)`. Format:
+       `references/qa-service-publish.md` → "Writing the suite link
+       into Jira". Omit if the QA Service publish was skipped.
      - A "How to use this ticket" note: the checkbox tracker in the
        comment is the single source of truth for **manual** testing
        status — tick as you verify by hand. Automated results arrive

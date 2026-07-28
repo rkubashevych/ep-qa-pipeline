@@ -28,7 +28,21 @@ QA Service instance.
 | Suite title | the story summary, cleaned (no ticket key, no "[QA-PIPELINE]") |
 | Suite prefix | short UPPERCASE mnemonic of the feature (2–8 chars, e.g. `ZTB`, `PSRCH`). Propose one; the user can override at the pause. |
 | Folder | reuse the `folderId` of an existing sibling suite with the same role/feature-area (find it via `list_suites`); omit if none fits |
-| Web UI base URL | `https://qa-service.expoplatform.com` — suite detail page: `<base>/<productId>/test-suites/<suite path>` (verified, e.g. `/expoplatform/test-suites/exhibitor/exhibitor-favorites`). Every "QA Service suite" line in Jira (sub-task description, human summary, story note) links here; if a link cannot be built, fall back to the plain suite path. |
+| Web UI base URL | `https://qa-service.expoplatform.com` — suite detail page: `<base>/<productId>/test-suites/<suite path>` (verified, e.g. `/expoplatform/test-suites/exhibitor/exhibitor-favorites`). |
+
+**Writing the suite link into Jira — bare URL only.** The Atlassian
+connector's markdown→ADF conversion drops/mangles `[text](url)`
+hyperlinks, so a markdown link arrives in Jira as unclickable text.
+Always write the **full bare URL on its own**, which Jira auto-links:
+
+```
+QA Service suite: https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path>
+(<N> requirements / <M> cases, prefix <PREFIX>)
+```
+
+Never wrap it in `[...](...)`, never shorten it, never put the path in
+the link text. Same rule for every place the suite is referenced —
+sub-task description, human summary comment, story note.
 
 ## Mapping — pipeline files → QA Service
 

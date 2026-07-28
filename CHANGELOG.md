@@ -7,6 +7,12 @@ signals an update to installed copies.
 
 ## 0.10.1 — 2026-07-28
 
+- **Suite links in Jira: bare URL only.** The Atlassian connector's
+  markdown→ADF conversion drops `[text](url)` hyperlinks, so the suite
+  link arrived in Jira as unclickable text. Every reference (sub-task
+  description, human summary, story note) now writes the full bare URL,
+  which Jira auto-links.
+
 - **QA Service suite selection: append by default.** One suite per
   FEATURE, not per ticket. A feature-extension story now appends its
   requirements and cases to the feature's existing suite (previously
