@@ -5,6 +5,22 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.10.1 — 2026-07-28
+
+- **QA Service suite selection: append by default.** One suite per
+  FEATURE, not per ticket. A feature-extension story now appends its
+  requirements and cases to the feature's existing suite (previously
+  only bugs and re-runs did; stories always created a sibling suite,
+  splitting one feature's test design across suites). A new suite is
+  created only when the feature has no suite yet — named after the
+  feature, never the ticket key. Ambiguous matches are surfaced in the
+  publish preview with both candidates and a recommendation instead of
+  being guessed; empty failed-import suites (`0r · 0t`) count as the
+  feature's suite and get appended to. The preview now states
+  append-vs-create, the reason, duplicates skipped, and the runner-up
+  candidate, so the target can be redirected before anything is
+  written.
+
 ## 0.10.0 — 2026-07-27
 
 - **QA Service publishing (qa-pipeline-docs step 6).** The docs phase

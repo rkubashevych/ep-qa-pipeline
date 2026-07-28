@@ -61,27 +61,52 @@ through the edit call):
 | case goal | `detail.goal` = one sentence: what the case verifies (derive from name + Exp) |
 | "needs clarification" markers | `detail.notes` |
 
-## Suite selection — Story vs Bug
+## Suite selection — append by default
 
-- **Story / new feature** → its own new suite (path/prefix per Config).
-- **Bug / bugfix ticket** → do NOT create a suite named after the bug.
-  Find the **existing feature suite** the bug belongs to (`list_suites`,
-  match role + feature area) and append there: the regression cases that
-  prove the fix (reference the bug key in `detail.notes`, e.g.
-  `Regression for EP-NNNNN`), plus at most a `risk` or `discrepancy`
-  requirement if the bug revealed a missing rule. Use that suite's
-  existing prefix and continue its stableId numbering (check
-  `get_suite` for the highest used id). Only if no feature suite exists
-  yet, create one named after the FEATURE (not the bug ticket) and file
-  the cases there.
+**Default: append to the existing feature suite.** One suite per
+FEATURE, not per ticket — suites are the feature's living test design,
+and splitting one feature across sibling suites is the main way this
+integration loses its value. Create a new suite only when the ticket
+introduces a feature that has no suite yet.
+
+Always resolve the target BEFORE writing, and name it in the publish
+preview so the user can redirect:
+
+1. `list_suites`; find the suite whose role + feature area matches what
+   the ticket touches (the context file's "Existing QA Service suite"
+   section usually already names it). Ignore ticket-key naming — match
+   on the FEATURE.
+2. **Match found → append there**, whatever the issue type:
+   - *Feature-extension story* (adds/changes behavior of an existing
+     feature): append its requirements and cases; the feature's suite
+     grows. Do not create a sibling suite for the story.
+   - *Bug / bugfix*: append the regression cases that prove the fix
+     (reference the bug key in `detail.notes`, e.g. `Regression for
+     EP-NNNNN`), plus at most a `risk` or `discrepancy` requirement if
+     the bug revealed a missing rule.
+   - *Re-run of the same ticket*: append only what is new or changed.
+   In every case use the suite's existing prefix and continue its
+   stableId numbering (`get_suite` → highest used id). Apply the
+   requirement-immutability and case-dedup rules below.
+3. **No match → create a new suite**, named after the FEATURE (never
+   after the ticket key), path/prefix per Config. This is the genuinely
+   new-feature case only.
+4. **Ambiguous** (the ticket spans two features, or the nearest suite is
+   a partial match): do not guess silently — state both candidates in
+   the publish preview with a recommendation and let the user pick. An
+   existing suite whose imported requirements are empty (`0r · 0t`,
+   a failed import) still counts as the feature's suite: append to it
+   rather than creating a duplicate.
 
 ## Procedure (inside the step-6 confirmed publish)
 
 1. `list_suites` for the product; pick the target suite per "Suite
-   selection" above (existing suite for bugs/re-runs; new for stories).
+   selection" above — append to the feature's existing suite by
+   default; a new suite only when the feature has none.
 2. **New suite needed** → `create_suite` (title, productId, prefix,
-   folderId if a sibling folder was found). **Existing suite (bug, or
-   re-run of the same ticket)** → do NOT create a duplicate; append
+   folderId if a sibling folder was found). **Existing suite (the
+   default: feature-extension story, bug, or re-run)** → do NOT create
+   a duplicate; append
    only requirements/cases that are new or changed (compare stableIds
    via `get_suite`), and say so in the publish preview. There are no
    delete tools — never try to remove superseded items; mark them via
@@ -165,6 +190,11 @@ case (skip not-executed ones):
 ## Publish preview additions (same single pause)
 
 The step-6 preview shown to the user must also state:
-- QA Service: creating suite `<path>` (prefix `<PREFIX>`) with N
-  requirements / M cases — or "appending K new cases to existing suite
-  `<path>`" — or "skipped (connector not enabled)".
+- QA Service: **appending** N requirements / M cases to existing suite
+  `<path>` (K duplicates skipped) — or **creating** suite `<path>`
+  (prefix `<PREFIX>`) because the feature has no suite yet — or
+  "skipped (connector not enabled)".
+- The reason for the choice in one clause ("matches the feature this
+  ticket extends" / "no existing suite for this feature"), plus the
+  runner-up candidate when the match was ambiguous — this line is what
+  lets the user redirect before anything is written.
