@@ -46,34 +46,78 @@ sub-task description, human summary comment, story note.
 
 ## Mapping — pipeline files → QA Service
 
-**Requirements** (`<ISSUEKEY>-requirements.md`) → `create_requirement`:
+> Calibrated against an importer-built reference suite
+> (`common/account-interactions`, prefix ACINT) — match its shape, not
+> just the schema's required fields. **Controlled vocabularies below are
+> mandatory:** free-text values outside them make the suite's own
+> dashboards read zero (verified: invented `levelText` and
+> `status: draft` collapsed every level/status bucket to 0 across 89
+> cases while the total read 89).
+
+### Requirements → `create_requirement`
 
 | Pipeline | QA Service |
 |---|---|
-| `REQ-N: <text>` | `title` = requirement text (first sentence if long; rest → `summary`) |
-| numbering `REQ-N` | `stableId` = `<PREFIX>-FR-NN` (zero-padded; REQ-3 → `<PREFIX>-FR-03`) |
-| `[risk: High/Medium/Low]` | prepend to `summary` as `[risk: …]` |
-| kind | `fr` for normal requirements; `oq` for grooming items still open at publish time (questions / contradictions / gaps — same list the Jira comment gets); `discrepancy` for "(unresolved conflict)" requirements |
+| `REQ-N: <text>` | `title` = a SHORT label naming the rule (≤ ~9 words, e.g. "Interaction query scoped to one event") — NOT the full sentence |
+| `REQ-N: <text>` | `summary` = the requirement's full text, verbatim and self-contained (a reader must understand it without the ticket). **Never a bare `[risk: …]` tag** — the risk suffix goes at the END, after the text. Never omit `summary`. |
+| kind (classify — do not default everything to `fr`) | `rule` = a MUST/MUST-NOT constraint · `invariant` = a property that must always hold · `risk` = a grooming risk · `nfr` = performance/security/limit/compat requirement · `fr` = functional behaviour · `oq` = still-open grooming question · `discrepancy` = "(unresolved conflict)" item. A suite with 0 rules / 0 invariants / 0 risks is a mis-classification, not a fact about the feature. |
+| kind → stableId segment | `<PREFIX>-RULE-NN` · `-INV-NN` · `-R-NN` (risk) · `-NFR-NN` · `-FR-NN` · `-OQ-NN` · `-DISC-NN`, each numbered per kind from 01. The ID must match the kind — never file an invariant as `-FR-`. |
+| `[risk: High/Medium/Low]` on a normal requirement | append to `summary` as ` [risk: High]` |
+| a `risk`-kind requirement | `summary` ends with `Impact: high · Likelihood: medium` (lowercase vocab: `low`/`medium`/`high`) and names what it threatens by stableId, since `detail` cannot be written via MCP (see Known gaps) |
+| REQ-N → stableId map | record it; the checklist/test-case files still use REQ-N |
 
-**Test cases** (`<ISSUEKEY>-test-cases.md`) → `create_test_case` then
-`edit_test_case` (creation only takes title/stableId; all content goes
-through the edit call):
+### Test cases → `create_test_case` + `edit_test_case`
+
+Creation takes only `suiteId`/`title`/`stableId`/`folderName`; all
+content goes through the follow-up `edit_test_case`.
 
 | Pipeline | QA Service |
 |---|---|
-| `TC-REQ-N.M — <name>` | `title` = scenario name; `stableId` = `<PREFIX>-NN` sequential over the whole file, in file order (record the TC-REQ-N.M → stableId map for the Jira comment) |
-| parent `REQ-N` | `traceability` = `["<PREFIX>-FR-NN"]` |
-| channel tag `[UI]` / `[API]` / `[mobile]` / `[export/email]` | `levelText` = `E2E (UI)` / `API` / `E2E (mobile)` / `E2E (export/email)` |
-| `Applied techniques` (per REQ group) | `techniques` (uppercase, e.g. `["BVA", "STATE"]`) |
+| `TC-REQ-N.M — <name>` | `title` = scenario name |
+| — | `stableId` = `<PREFIX>-<SEG>-NN`, where `<SEG>` is a 2–5 char aspect code shared by the cases of one behaviour area (`AUTH`, `VAL`, `DATA`, `READ`, `REG`, `CTR`, `BVA`, `PRIV`…), numbered per segment from 01. Fall back to the channel code (`UI`/`API`/`MOB`/`EXP`) only when no aspect is meaningful. **Never a flat `<PREFIX>-01…89`** — IDs must carry meaning. |
+| requirement group `REQ-N` | `folderName` = the REQ group's behaviour-area label (e.g. "Opted-out favourite is invisible to the other party"). Group the file's cases into 4–8 such folders. **Never dump everything into "General".** |
+| parent `REQ-N` (+ any seam requirements the case also covers) | `traceability` = the requirement stableIds, kind-correct (`["<PREFIX>-RULE-02","<PREFIX>-INV-01"]`) — list every requirement the case verifies, not just the parent |
+| channel tag → level | `levelText` = EXACT canonical label only: `[API]` → `API-E2E` · `[UI]` → `E2E (UI)` · `[mobile]` → `Manual` · `[export/email]` → `Manual`. Other canonical labels when they genuinely apply: `Unit`, `Integration`, `Contract`, `Component-FE`, `Performance`, `Worker-home`. **Never invent labels** (`API`, `E2E (mobile)`, `E2E (export/email)` are invalid and produce an empty level on the case). |
+| — | `status` = `planned` (vocabulary: `planned` / `implemented` / `partial` / `deferred` / `na`). **`draft` is NOT in the vocabulary** — it renders as 0 in every readiness bucket. Use `deferred` for a case knowingly not executable yet, `na` for one routed out. |
+| `Applied techniques` (per REQ group) | `techniques`, uppercase tokens (`BVA`, `EP`, `STATE`, `DT`, `UC`, `CONTRACT`, `INVARIANT`, `UI-CONF`) |
 | requirement risk | `priority`: High → `P0`, Medium → `P1`, Low → `P2` |
 | scenario polarity | `type`: `positive` or `negative` (negative = error/denial/limit paths) |
-| — | `status`: `draft` |
+| case goal | `detail.goal` = one sentence: what the case verifies |
 | `Pre:` | `detail.preconditions` |
-| `Steps:` (numbered, with `[data: …]` inline) | `detail.steps` (keep numbering, one string) — move long `[data: …]` values to `detail.testData` |
+| `Steps:` (numbered) | `detail.steps` (keep numbering, one string) |
+| `[data: …]` values | `detail.testData` — ALWAYS populate it (extract the data out of the steps/preconditions); leaving it empty loses the case's data setup. Write "None — uses default event fixtures" when there really is none. |
 | `Exp:` | `detail.assertions` |
 | `Post:` | append to `detail.notes` as `Post: …` |
-| case goal | `detail.goal` = one sentence: what the case verifies (derive from name + Exp) |
 | "needs clarification" markers | `detail.notes` |
+| tags applied in step 4 | `detail.tagPlan` = one line naming the tags attached and why (mirrors the reference suites) |
+
+### Known MCP gaps — state them, don't fake them
+
+These cannot be set through the connector today (verified against the
+tool schemas). Do not invent workarounds that corrupt other fields;
+report them once in the final response instead:
+
+- **Requirement `detail` and `priority`** — `create_requirement` accepts
+  only kind/title/summary/stableId, and there is no `edit_requirement`.
+  So the relationship model (`type`, `related`, `implements`,
+  `constrainedBy`, `enforces`) and the risk model (`impact`,
+  `likelihood`, `threatens`) stay empty. Encode what matters in
+  `summary` prose (as above) and say so.
+- **Case `levels` array and `implementations`** — not parameters of
+  `edit_test_case`. Setting an exact canonical `levelText` is the best
+  available signal; **verify once** whether the server derives `levels`
+  from it, and report the answer.
+- **Suite `summary` / `status` / `owner` / `lastReviewed`** —
+  `create_suite` takes only title/productId/prefix/folderId, so a
+  pipeline-created suite has a bare header.
+- **`traceLinks` graph** — materialized by the importer, not by
+  `create_test_case`; per-case `traceability` is still stored and shown.
+
+**Post-publish enrichment (tell the user once, in the final response):**
+the web UI can fill several of these server-side — "Generate missing
+summaries" (requirements), "Auto-tag untagged" (cases), "Collect
+requirements" / "Import docs" (suite header + relationship detail).
+That is a human click, never a pipeline action.
 
 ## Suite selection — append by default
 
@@ -148,9 +192,18 @@ preview so the user can redirect:
    approval (`approve_tag` is the reviewer's call, not the pipeline's),
    so note pending proposals in the final response. Untagged cases are
    invisible to `get_coverage` — that is the point of this step.
-5. Verify: `get_suite` once at the end; check the requirement/case
-   counts match the statistics block of the test-cases file. Report any
-   mismatch in the final response.
+5. Verify: `get_suite` once at the end and check BOTH:
+   - counts match the statistics block of the test-cases file;
+   - **the dashboards are not zeroed** — `stats.byLevel` must sum to the
+     case total (a zero row against a non-zero total means `levelText`
+     was outside the canonical vocabulary) and the status buckets must
+     account for every case (all-zero means `status` was outside
+     `planned/implemented/partial/deferred/na`). Also confirm no
+     requirement kind is suspiciously absent (0 rules AND 0 invariants
+     AND 0 risks = mis-classification).
+   Report any mismatch in the final response and fix it with
+   `edit_test_case` before finishing — do not leave a suite whose own
+   charts read zero.
 6. Add to the Jira QA sub-task description (step 6 already writes it):
    `QA Service suite: <path> — <requirementCount> requirements /
    <testCaseCount> cases` plus the TC-REQ-N.M → stableId map (one line

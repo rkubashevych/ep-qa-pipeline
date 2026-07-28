@@ -5,6 +5,45 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.10.2 — 2026-07-28
+
+Field mapping rewritten after diffing the first pipeline-published
+suite against an importer-built reference suite (ACINT). The first run
+produced a structurally poor suite: every level/status dashboard read
+zero, requirement kinds collapsed, 89 cases in one folder.
+
+- **Controlled vocabularies are now mandatory.** Case `levelText` must
+  be an exact canonical label (`API-E2E`, `E2E (UI)`, `Manual`, `Unit`,
+  `Integration`, `Contract`, …) — invented labels (`API`,
+  `E2E (mobile)`) leave the case with no level, so `stats.byLevel` read
+  0/89. Case `status` is `planned` (vocab
+  `planned/implemented/partial/deferred/na`); `draft` is not a bucket
+  and zeroed the readiness dashboard.
+- **Requirement kinds must be classified**, not defaulted to `fr`:
+  rule / invariant / risk / nfr / fr / oq / discrepancy, with
+  kind-matching stableId segments (`-RULE-`, `-INV-`, `-R-`, `-NFR-`,
+  `-FR-`, `-OQ-`, `-DISC-`). Previously 33/41 were `fr` and an
+  invariant was filed as `-FR-37`. 0 rules + 0 invariants + 0 risks is
+  now treated as a mis-classification signal.
+- **Requirement `summary` carries the requirement text**, verbatim and
+  self-contained, with the risk tag appended at the end — previously
+  11 requirements had a summary of literally `[risk: Medium]`.
+- **Case IDs and folders carry meaning:** `<PREFIX>-<SEG>-NN` aspect
+  segments instead of flat `<PREFIX>-01…89`, and 4–8 behaviour-area
+  folders instead of a single "General".
+- **`detail.testData` and `detail.tagPlan` always populated**;
+  `traceability` lists every requirement a case verifies, not just its
+  parent.
+- **Publish verification now checks the dashboards**, not just counts:
+  a suite whose own level/status charts read zero must be fixed with an
+  `edit_test_case` pass before the run finishes. `qa-run-analyzer`
+  gained a matching 🔴 "zeroed dashboards" verdict.
+- **Known MCP gaps documented instead of faked:** requirement `detail`
+  and `priority` (no `edit_requirement`), case `levels` and
+  `implementations`, suite `summary`/`status`/`owner`, and the
+  `traceLinks` graph cannot be set through the connector — the pipeline
+  reports them and points at the UI's server-side enrichment buttons.
+
 ## 0.10.1 — 2026-07-28
 
 - **Suite links in Jira: bare URL only.** The Atlassian connector's

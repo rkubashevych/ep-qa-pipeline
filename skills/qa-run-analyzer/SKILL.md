@@ -99,6 +99,13 @@ suite:` line in the QA sub-task description) and report ONE of:
   IDs diverge from the files: list the missing/extra stableIds.
 - 🟡 **write-back missing** — code phase only, when run after step 6:
   executed cases whose suite notes lack the run line.
+- 🔴 **zeroed dashboards** — the suite exists but its own stats
+  contradict its contents: `stats.byLevel` sums to 0 against a non-zero
+  case total (invalid `levelText`), or every status bucket is 0
+  (invalid case `status`, e.g. `draft`), or 0 rules AND 0 invariants
+  AND 0 risks among the requirements (kinds collapsed to `fr`). Name
+  the offending field and the correct vocabulary — the fix is a
+  re-`edit_test_case` pass, not a re-publish.
 
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh
