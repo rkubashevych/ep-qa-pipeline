@@ -85,10 +85,8 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 
 Skip this section entirely (and say so in one line) when the QA
 Service MCP tools are not in the session, or when the user declined
-QA Service publishing for this run / the switch in
-`qa-pipeline-docs/references/qa-service-publish.md` is `never` — in
-that case record `— publishing declined by the user` and treat it as a
-normal outcome, never a gap or a 🔴. Otherwise, locate the
+publishing for this run — record the reason and treat it as a normal
+outcome, never a gap or a 🔴. Otherwise, locate the
 ticket's suite (`list_suites` match on the story / the `QA Service
 suite:` line in the QA sub-task description) and report ONE of:
 

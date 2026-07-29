@@ -5,6 +5,36 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.11.1 — 2026-07-29
+
+- **QA Service publishing is back to on-by-default.** The 0.10.5
+  ask/always/never switch and its step-0 question are removed — the
+  write-API gaps that motivated opting out are fixed, so publishing is
+  part of a normal run again. The user can still decline at the step-6
+  confirmation or when invoking the pipeline.
+- **Audit of the mapping against the real tool schemas — three bugs in
+  our own instructions fixed:**
+  - `create_test_case` takes the case's FULL content in one call
+    (levels, levelText, status, priority, type, techniques,
+    traceability, folderName, detail). The old "create bare, then
+    `edit_test_case`" instruction doubled the calls and left cases
+    briefly empty. Same for `create_requirement`, which accepts
+    `detail` and `priority` directly.
+  - **`status: "deprecated"` was invalid** and would have been rejected
+    — the case vocabulary is `planned`/`partial`/`implemented`/
+    `deferred`/`na`. Superseded cases are now retired as `na` with a
+    note; superseded requirements use `edit_requirement`
+    `status: "retired"`.
+  - `create_suite` has always accepted `summary`/`status`/`owner`/
+    `lastReviewed`; the pipeline simply never passed them. The header is
+    now set at creation, not patched afterwards with `edit_suite`
+    (which is kept for refreshing an existing suite).
+- **Tagging is one bulk `apply_auto_tags` call** (`perCase` array, up to
+  400) instead of a `tag_case` per case; unknown tag names are created
+  as PENDING automatically, so `propose_tag` is not needed in the flow.
+- Obsolete "requirements are immutable, publish a `-FR-NNb` revision"
+  guidance removed — changed requirements are edited in place.
+
 ## 0.11.0 — 2026-07-29
 
 The QA Service write-API gaps from EP-55653 were fixed by the QA

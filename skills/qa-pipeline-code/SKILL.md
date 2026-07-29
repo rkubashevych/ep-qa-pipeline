@@ -75,10 +75,9 @@ Otherwise, using the Atlassian connector and the Story key:
    cannot run. Write the results to the working directory as
    `<STORY>-checklist.md` and `<STORY>-test-cases.md` so the stage
    skills can consume them.
-   - **QA Service reconciliation:** only when the QA sub-task names a
-     QA Service suite (the docs phase published one) AND the switch in
-     `qa-pipeline-docs/references/qa-service-publish.md` is not `never`.
-     No suite line / switch `never` / connector absent → Jira archive is
+   - **QA Service reconciliation:** whenever the QA sub-task names a
+     QA Service suite (the docs phase published one) and the connector
+     is present. No suite line or no connector → Jira archive is
      authoritative, skip reconciliation and the later write-back
      silently; say so once in the final response. Otherwise, after
      extracting the files reconcile the test cases

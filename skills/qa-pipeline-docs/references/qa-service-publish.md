@@ -6,46 +6,17 @@ via its MCP connector, alongside the Jira QA sub-task. Edit this file —
 not the orchestrator's SKILL.md — when adopting for another product or
 QA Service instance.
 
-## The switch — QA Service publishing is OPTIONAL
-
-| Setting | Value |
-|---|---|
-| QA Service publishing | `ask` |
-
-Options: `ask` (default — put the question to the user at the start of
-the run) · `always` (publish whenever the connector is present, no
-question) · `never` (Jira-only; never publish, never ask). Change the
-row to `never` while the QA Service write-API gaps (EP-55653) are open
-and you want Jira-only runs without being asked every time.
-
-**How `ask` behaves.** ONE question, asked at the START of the run
-(step 0, before stage 1) — never at the end, so a "no" costs nothing:
-
-> QA Service: publish this ticket's requirements + test cases to a
-> suite as well as the Jira QA sub-task? (yes / no — Jira-only)
-
-Rules:
-
-- If the user already stated a preference when invoking the pipeline
-  ("run the docs pipeline, no QA Service" / "…and publish to QA
-  Service"), honour it and do NOT ask.
-- If the connector is not present, do not ask at all — Jira-only, note
-  it once in the final response.
-- Carry the answer through the whole run and restate it in the step-6
-  publish preview ("QA Service: skipped — you chose Jira-only at the
-  start"). The user can still flip it at that confirmation.
-- **A "no" disables WRITES only.** Reading an existing suite in stage 1
-  (grooming comparison material) has no side effects and stays on — it
-  is one of the more useful parts. If the user says "skip QA Service
-  entirely" / "don't touch it", skip the read too.
-- A "no" is not a failure and must not be reported as a gap by the run
-  analyzer: it records `— publishing declined by the user`.
-
 ## Preconditions
+
+QA Service publishing is **on by default** whenever the connector is
+present — it is part of a normal publish, not an extra. The user can
+still decline at the step-6 confirmation, or say "no QA Service" when
+invoking the pipeline; honour that for the run without arguing.
 
 - The QA Service MCP connector must be enabled in the session. Detect it
   by the presence of its tools (`list_products`, `create_suite`,
-  `create_requirement`, `create_test_case`, `edit_test_case`, …).
+  `create_requirement`, `create_test_case`, `edit_requirement`,
+  `edit_test_case`, `edit_suite`, `apply_auto_tags`, …).
 - **If the connector is absent, skip this publish silently-but-visibly:**
   do everything else as normal and add one line to the final response —
   "QA Service publish skipped (connector not enabled)". Never block the
@@ -89,7 +60,11 @@ sub-task description, human summary comment, story note.
 > `status: draft` collapsed every level/status bucket to 0 across 89
 > cases while the total read 89).
 
-### Requirements → `create_requirement`
+### Requirements → `create_requirement` (one call each — it takes everything)
+
+`create_requirement` accepts `kind`, `title`, `summary`, `stableId`,
+`priority` AND `detail`. Send them all in the creating call; no
+follow-up `edit_requirement` is needed on a fresh publish.
 
 | Pipeline | QA Service |
 |---|---|
@@ -102,10 +77,14 @@ sub-task description, human summary comment, story note.
 | cross-references between requirements | `detail.related` / `enforces` / `threatens` / `implements` / `constrainedBy` — arrays of stableIds. All but `related` become trace-graph edges on write, so a rule that enforces an invariant, or a risk that threatens one, must say so here. |
 | REQ-N → stableId map | record it; the checklist/test-case files still use REQ-N |
 
-### Test cases → `create_test_case` + `edit_test_case`
+### Test cases → `create_test_case` (one call each — it takes everything)
 
-Creation takes only `suiteId`/`title`/`stableId`/`folderName`; all
-content goes through the follow-up `edit_test_case`.
+`create_test_case` writes the case **with its full content in one
+call**: `title`, `stableId`, `folderName`, `levels`, `levelText`,
+`status`, `priority`, `type`, `techniques`, `traceability` and the whole
+`detail` object. Do NOT create a bare case and fill it with a follow-up
+`edit_test_case` — that is twice the calls and leaves a window where the
+case is empty. `edit_test_case` is for CORRECTING cases later.
 
 | Pipeline | QA Service |
 |---|---|
@@ -127,15 +106,18 @@ content goes through the follow-up `edit_test_case`.
 | "needs clarification" markers | `detail.notes` |
 | tags applied in step 4 | `detail.tagPlan` = one line naming the tags attached and why (mirrors the reference suites) |
 
-### Suite header — always set it (`edit_suite`)
+### Suite header — set it IN `create_suite`
 
-`create_suite` still takes only title/productId/prefix/folderId, so
-immediately after creating a suite call `edit_suite` to fill the header
-a browser needs: `summary` (a paragraph saying what the feature is and
-what the suite covers — model it on an importer-built suite),
-`status` (`Draft`), `owner` (the pipeline operator + team),
-`lastReviewed` (today, YYYY-MM-DD). A suite that lands with a bare
-title is an incomplete publish.
+`create_suite` accepts the header fields directly: `summary` (a
+paragraph saying what the feature is and what this suite covers — model
+it on an importer-built suite), `status` (`Draft`), `owner` (the
+pipeline operator + team), `lastReviewed` (today, YYYY-MM-DD), on top
+of `title` / `productId` / `prefix` / `folderId`. Pass them at
+creation — a suite that lands with a bare title is an incomplete
+publish, and it is a missed parameter, not a limitation.
+
+Use `edit_suite` only to fix or refresh the header of a suite that
+already exists (e.g. bump `lastReviewed` when appending to it).
 
 ### Correcting an existing suite (all of it is editable now)
 
@@ -247,14 +229,16 @@ preview so the user can redirect:
    a duplicate; append
    only requirements/cases that are new or changed (compare stableIds
    via `get_suite`), and say so in the publish preview. There are no
-   delete tools — never try to remove superseded items; mark them via
-   `edit_test_case` `status: deprecated` instead.
-   - **Requirements are immutable via MCP** (create only — no edit, no
-     status): a requirement whose text materially changed since the
-     last publish gets a NEW entry with a revision stableId
-     (`<PREFIX>-FR-NNb`) and a summary starting `Supersedes
-     <old stableId>:`. The old entry stays; never re-create an
-     unchanged requirement.
+   delete tools — never try to remove superseded items; retire them
+   instead (requirement → `edit_requirement` `status: "retired"`; case →
+   `edit_test_case` `status: "na"` plus a `detail.notes` line saying
+   what superseded it). **`deprecated` is not a valid case status** —
+   the vocabulary is `planned` / `partial` / `implemented` / `deferred`
+   / `na`.
+   - **Changed requirements are edited in place** — `edit_requirement`
+     takes kind / title / summary / priority / status / detail /
+     stableId and merges. Update the existing entry rather than adding a
+     revision; never re-create an unchanged requirement.
    - **Case dedup on append:** before appending cases to an existing
      suite, compare each candidate against the suite's active cases
      (title + goal + assertions). A candidate that verifies the same
@@ -262,16 +246,20 @@ preview so the user can redirect:
      requirement to the EXISTING case instead; list every skip in the
      publish preview. Append it only if it genuinely differs (new data
      path, new boundary, regression for a specific bug).
-3. Create requirements in file order, then cases in file order
-   (create + edit per case).
-4. **Tag the cases for Coverage.** `list_tags` once; for each created
-   case pick the applicable existing feature @tags (match the feature
-   area, surface, and entity — do not force a tag that doesn't fit) and
-   apply via `tag_case`. If an obviously-needed tag does not exist,
-   `propose_tag` it and apply once accepted — proposed tags await
-   approval (`approve_tag` is the reviewer's call, not the pipeline's),
-   so note pending proposals in the final response. Untagged cases are
-   invisible to `get_coverage` — that is the point of this step.
+3. Create requirements in file order (one `create_requirement` each,
+   full content), then cases in file order (one `create_test_case`
+   each, full content). Requirements first — cases reference their
+   stableIds in `traceability`.
+4. **Tag the cases for Coverage.** `list_tags` once to see the
+   catalogue, then ONE `apply_auto_tags` call carrying the whole
+   `perCase` array (`{stableId, tags}`, up to 400 cases) — not a
+   `tag_case` call per case. Pick tags that genuinely match the feature
+   area, surface and entity; do not force a tag that doesn't fit. A tag
+   name that is not yet in the catalogue is created as PENDING for a
+   human to approve (`approve_tag` is the reviewer's call, never the
+   pipeline's) — list any pending names in the final response. Untagged
+   cases are invisible to `get_coverage`, which is the point of this
+   step.
 5. Verify: `get_suite` once at the end and check:
    - counts match the statistics block of the test-cases file;
    - **status buckets account for every case** — all-zero means `status`
@@ -317,7 +305,7 @@ CONTENT (the team may have fixed cases in the web UI between phases):
    extracted `<STORY>-test-cases.md` against the suite cases:
    - a suite case's content differs (steps/assertions/priority edited
      in the UI) → the suite version wins; update the local file.
-   - a suite case is `deprecated` → drop it from execution; note it.
+   - a suite case is `na` or `deferred` → drop it from execution; note it.
    - a suite case exists with no counterpart in the Jira file (added
      by the team) → append it to the local file under its requirement,
      channel-tagged from its `levelText`, and execute it too.
@@ -343,8 +331,9 @@ case (skip not-executed ones):
 - A FAIL that produced a filed bug also gets `bug <BUGKEY>` appended to
   that line.
 - Do NOT overwrite the lifecycle `status` (e.g. `implemented`) with a
-  run result — run outcomes live in notes; the only status the
-  pipeline ever sets is `deprecated` for superseded cases (docs phase).
+  run result — run outcomes live in notes; the only status the pipeline
+  ever changes after creation is `na` for a superseded case (docs
+  phase).
 - Include the write-back in the step-6 preview (how many cases get a
   result note) and report the PASS/FAIL counts written in the final
   response. Connector absent → skip silently-but-visibly, as always.

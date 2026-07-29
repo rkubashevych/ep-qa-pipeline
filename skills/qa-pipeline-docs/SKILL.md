@@ -58,19 +58,6 @@ Execute each stage by reading that stage's `SKILL.md` and following it
 **in full** -- do not summarise or shortcut it. Pass each output file to
 the next stage automatically (they share the working directory).
 
-0. **QA Service — ask once, up front.** Before stage 1, settle whether
-   this run publishes to QA Service in addition to the Jira QA
-   sub-task:
-
-   > QA Service: publish this ticket's requirements + test cases to a
-   > suite as well as the Jira QA sub-task? (yes / no — Jira-only)
-
-   Ask it in the SAME message as the session-rename suggestion so the
-   run still starts with one exchange. Skip the question entirely when
-   the user already said which they want, when the connector is absent,
-   or when `references/qa-service-publish.md` → "The switch" is set to
-   `always` / `never`. Carry the answer to step 6; a "no" means
-   Jira-only and is a normal outcome, not a degraded run.
 
 1. **task-context** -- run the `task-context` skill on the ticket.
    - Pause only if it needs you: attachments to upload, or a Confluence
@@ -117,11 +104,11 @@ the next stage automatically (they share the working directory).
    checklist/test-cases from Jira instead of via re-attached files;
    (b) a QA Service suite holding the same requirements + test cases as
    the team's permanent, traceable system of record — per
-   **`references/qa-service-publish.md`** (the publish switch, field
-   mapping, suite naming and re-run rules all live there). Publish (a)
-   only — and say so once in the final response — when the user declined
-   at step 0, when the switch is `never`, or when the connector is not
-   enabled. Never block (a) on (b).
+   **`references/qa-service-publish.md`** (field mapping, suite naming
+   and re-run rules live there). This is on by default whenever the
+   connector is present. Publish (a) only — and say so once in the final
+   response — when the connector is absent or the user declines. Never
+   block (a) on (b).
    - **REQUIRED PAUSE / CONFIRM.** Before writing anything to Jira or
      QA Service, show the user ONE preview: the parent story, the new
      sub-task summary, the assignee, what will be posted, and the QA
