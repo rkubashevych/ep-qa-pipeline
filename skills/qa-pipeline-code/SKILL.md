@@ -74,7 +74,15 @@ Otherwise, using the Atlassian connector and the Story key:
      `<STORY>-test-cases.md` from the suite's cases (id, title, levels →
      channel tag, traceability, and `detail`
      goal/preconditions/steps/testData/assertions/notes). This is the
-     authoritative copy of the cases. Rebuild `<STORY>-checklist.md`
+     authoritative copy of the cases.
+     - **Scope it to THIS run.** A suite is per FEATURE, so it also
+       holds cases from earlier stories. Execute only the cases whose
+       ids appear on the sub-task's checkbox tracker (each line carries
+       its QA Service case id), plus any suite case that traces to a
+       requirement in this run and has no tracker line (team-added —
+       flag it in the reconciliation list). Never execute the whole
+       suite because it happens to be in the response. Report the
+       numbers: "suite holds N cases; M in scope for <STORY>". Rebuild `<STORY>-checklist.md`
      from the suite's requirements PLUS the
      `(structural checks only)` fenced block on the sub-task — those
      `[UI]` presence/label/field-type checks have no test case and exist

@@ -34,6 +34,12 @@ real ticket (EP-55646: **188,063 characters across 10 posts**).
 - `qa-pipeline-code` step 0 documents the source order explicitly:
   suite first (+ the structural-checks block), fenced archive as
   fallback, otherwise ask.
+- **Run scoping.** Because suites are per FEATURE, `get_suite` also
+  returns cases from earlier stories. The code phase executes only the
+  case ids listed on this run's checkbox tracker (plus team-added cases
+  tracing to this run's requirements, flagged in reconciliation) and
+  reports "suite holds N cases; M in scope" — it never executes a whole
+  feature suite because the response contained it.
 
 Net effect: ~32% less text per ticket, one authoritative copy of each
 test case, and the code phase reads structured data instead of
