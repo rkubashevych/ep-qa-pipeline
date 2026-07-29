@@ -286,12 +286,14 @@ preview so the user can redirect:
 > attached tags byte-identical across 88 cases. Partial edits are safe —
 > no read-modify-write needed. Inside `detail`, send a key complete:
 > assume the key you send replaces that key's value.
-6. Add to the Jira QA sub-task description (step 6 already writes it):
-   `QA Service suite: <path> — <requirementCount> requirements /
-   <testCaseCount> cases` plus the TC-REQ-N.M → stableId map (one line
-   per case, in the machine-archive comment, not the description, if
-   longer than ~15 lines). The map is REQUIRED in one of the two places
-   — the code phase uses it for reconciliation and result write-back.
+6. Add to the Jira QA sub-task description (step 6 already writes it)
+   the bare suite URL + `(N requirements / M cases, prefix <PREFIX>)`.
+   **Do not publish a separate TC-REQ-N.M → stableId map**: carry the
+   QA Service case id on each tracker line instead
+   (`- [ ] TC-REQ-1.2 — <name>  [UI] · PRIVFAV-PRIV-03`), so the mapping
+   lives next to the case it belongs to and cannot go stale on its own.
+   A standalone map block was measured at ~2,000 characters and went
+   stale the first time stableIds were corrected.
 
 ## Code phase — suite as the case source (qa-pipeline-code step 0)
 
@@ -301,8 +303,9 @@ CONTENT (the team may have fixed cases in the web UI between phases):
 
 1. Locate the suite: the `QA Service suite:` line in the QA sub-task
    description; fall back to a `list_suites` match on the story.
-2. `get_suite`; using the TC-REQ-N.M → stableId map, reconcile the
-   extracted `<STORY>-test-cases.md` against the suite cases:
+2. `get_suite`; using the QA Service case id carried on each tracker
+   line (older runs: a standalone id map, or match by title), reconcile
+   the extracted `<STORY>-test-cases.md` against the suite cases:
    - a suite case's content differs (steps/assertions/priority edited
      in the UI) → the suite version wins; update the local file.
    - a suite case is `na` or `deferred` → drop it from execution; note it.
@@ -310,9 +313,8 @@ CONTENT (the team may have fixed cases in the web UI between phases):
      by the team) → append it to the local file under its requirement,
      channel-tagged from its `levelText`, and execute it too.
    List every reconciliation change to the user before the stages run.
-   If the stableId map is missing (a run published before it existed),
-   match cases by title; cases that match nothing run from the Jira
-   version unchanged — and skip the result write-back for them.
+   If neither an id nor a title match is possible, run that case from
+   the Jira version unchanged and skip the result write-back for it.
 3. Connector absent or suite not found → the Jira archive comment alone
    is authoritative, exactly as before. Never block on QA Service.
 

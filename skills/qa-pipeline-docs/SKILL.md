@@ -137,12 +137,12 @@ the next stage automatically (they share the working directory).
        into Jira". Omit if the QA Service publish was skipped.
      - A "How to use this ticket" note: the checkbox tracker in the
        comment is the single source of truth for **manual** testing
-       status — tick as you verify by hand. Automated results arrive
-       later as two code-phase comments (machine archive + human
-       summary); the connector cannot tick checkboxes, so transfer
-       automated PASS/FAIL to the tracker by hand if you want one
-       combined view. The code phase reads the test cases from the
-       comment.
+       status — tick as you verify by hand; the full steps/expected
+       results for each case live in the QA Service suite (linked
+       above). Automated results arrive later as two code-phase comments
+       (machine archive + human summary); the connector cannot tick
+       checkboxes, so transfer automated PASS/FAIL to the tracker by
+       hand if you want one combined view.
      - The `⚠ SPECIAL ATTENTION` list and a short run-report summary.
      - An "Open questions from grooming" list — the same open items
        drafted for the story comment (questions / contradictions /
@@ -151,27 +151,34 @@ the next stage automatically (they share the working directory).
      - Do NOT paste the checklist here — it duplicates the test cases and
        is not the tracker. One tracker only.
    - **Test cases → a follow-up comment (`addCommentToJiraIssue`), as an
-     interactive checkbox tracker** so the human can tick pass/fail and
-     the code phase can still read it:
-     - One Jira task checkbox per test case: a single line
-       `- [ ] TC-REQ-N.M — <name>` (id + short name only).
-     - Put `Pre:` / `Steps:` / `Exp:` / `Post:` as **sibling lines right
-       after** the checkbox (blank line between), NOT nested under it —
-       nesting content inside a `- [ ]` item makes Jira drop the checkbox
-       (it becomes a plain bullet). Steps go in a numbered list so each is
-       on its own line. Verified: siblings keep the box interactive AND
-       the steps readable.
+     interactive checkbox tracker** for the human to tick pass/fail.
+     **One line per case — no Pre/Steps/Exp** (measured: inlining them
+     duplicated the machine archive by 99.3% and cost ~15,000 characters
+     per ticket; the steps live in the QA Service suite and the local
+     file):
+     - One Jira task checkbox per test case:
+       `- [ ] TC-REQ-N.M — <name>  [<channel>] · <PREFIX>-<SEG>-NN`
+       (id, short name, channel tag, and the QA Service case id so a
+       reader can find the full case in one hop).
      - Group by `### REQ-N — <label>  [channels]` headings so the
        tracker mirrors the test-cases file, and end the comment with
        the statistics block from the test-cases file.
-   - **Machine-readable archive → one more comment**: post the full
-     `<ISSUEKEY>-checklist.md` and `<ISSUEKEY>-test-cases.md` contents,
-     each inside its own fenced code block, each preceded by a plain
-     line naming the file (e.g. `File: EP-1234-test-cases.md`). This is
-     what `qa-pipeline-code` reads back in a fresh chat (its Step 0
-     extracts these fenced blocks) — the checkbox tracker is for humans,
-     the fenced blocks are for the code phase. Do not shorten or
-     reformat the file contents inside the blocks.
+     - Nothing else goes in this comment. If a case genuinely needs its
+       steps visible in Jira (a blocker a human must reproduce without
+       QA Service access), add them to that ONE case, not to all.
+   - **Machine-readable archive → only when QA Service did NOT publish.**
+     The code phase reads the cases from the suite when there is one, so
+     the fenced archive is a fallback, not a default:
+     - **QA Service suite published** → skip the archive comment. State
+       in the final response that the code phase will read the suite.
+       (Saves ~45,000 characters per ticket and keeps one authoritative
+       copy of the cases.)
+     - **No suite (connector absent / user declined)** → post the full
+       `<ISSUEKEY>-checklist.md` and `<ISSUEKEY>-test-cases.md` contents
+       exactly as before, each inside its own fenced code block preceded
+       by a plain `File: <name>` line, so `qa-pipeline-code` Step 0 can
+       still rebuild them. Do not shorten or reformat file contents
+       inside the blocks.
      - **Size limit:** a Jira comment body maxes out around ~32,000
        characters. Measure the assembled comment before posting; if it
        exceeds ~30,000, split it into several comments with the same

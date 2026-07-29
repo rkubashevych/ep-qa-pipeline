@@ -64,9 +64,26 @@ Otherwise, using the Atlassian connector and the Story key:
 1. **Test cases / checklist.** Find the story's QA sub-task created by
    the docs phase: `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype = "QA sub-task"` (prefer the newest
-   with label `qa-pipeline` or a `[QA-PIPELINE]` summary). Read its
-   description (and comments) and extract the fenced code blocks holding
-   the checklist and test cases. Large files may be split across
+   with label `qa-pipeline` or a `[QA-PIPELINE]` summary).
+
+   **Source order — suite first.** Since 0.11.2 the docs phase does not
+   post the fenced archive when it published a QA Service suite (the
+   cases were duplicated in Jira otherwise). So:
+   - the sub-task description names a **QA Service suite** and the
+     connector is present → `get_suite` and rebuild
+     `<STORY>-test-cases.md` from the suite's cases (id, title, levels →
+     channel tag, traceability, and `detail`
+     goal/preconditions/steps/testData/assertions/notes) and
+     `<STORY>-checklist.md` from its requirements. This is the
+     authoritative copy.
+   - no suite line, or no connector → fall back to the **fenced archive
+     comments**, which the docs phase posts in exactly that case.
+   - neither available → tell the user to re-run `qa-pipeline-docs` (or
+     attach the files).
+
+   When falling back to the archive, read the description (and comments)
+   and extract the fenced code blocks holding the checklist and test
+   cases. Large files may be split across
    comments as `File: <name> (part i/N)` blocks — collect all parts and
    concatenate them in order. Prefer running
    `scripts/extract_archive.py` (in this skill's folder) on the saved

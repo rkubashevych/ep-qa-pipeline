@@ -5,6 +5,33 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.11.2 — 2026-07-29
+
+De-duplication of what the docs phase writes to Jira, after measuring a
+real ticket (EP-55646: **188,063 characters across 10 posts**).
+
+- **The fenced machine archive is no longer posted when a QA Service
+  suite was published.** The 89 test cases were being written to Jira
+  twice — the human checkbox tracker and the machine archive were
+  measured 99.3% identical (76 of 89 case blocks byte-identical after
+  normalising rendering). The code phase now rebuilds its working files
+  from the suite; the archive is posted only when there is no suite
+  (connector absent or user declined), which is exactly when the code
+  phase still needs it. **−45,767 chars/ticket.**
+- **The checkbox tracker is one line per case** — id, name, channel tag
+  and the QA Service case id — instead of carrying Pre/Steps/Exp inline.
+  The steps live in the suite and the local file. **−14,931
+  chars/ticket** (−63% of the tracker).
+- **The standalone TC-REQ → stableId map is gone.** It cost ~2,000 chars
+  and went stale the first time stableIds were corrected; the case id
+  now travels on the tracker line it belongs to.
+- `qa-pipeline-code` step 0 documents the source order explicitly:
+  suite first, fenced archive as fallback, otherwise ask.
+
+Net effect: ~32% less text per ticket, one authoritative copy of each
+test case, and the code phase reads structured data instead of
+re-parsing markdown out of comments.
+
 ## 0.11.1 — 2026-07-29
 
 - **QA Service publishing is back to on-by-default.** The 0.10.5
