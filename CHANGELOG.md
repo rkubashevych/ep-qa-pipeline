@@ -5,6 +5,43 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.11.0 — 2026-07-29
+
+The QA Service write-API gaps from EP-55653 were fixed by the QA
+Service team overnight. Verified against the live PRIVFAV suite, and
+the mapping updated to use everything that is now writable.
+
+- **Requirement `detail` and `priority` are now published.** New
+  `edit_requirement` (kind, title, summary, priority, status, detail,
+  stableId — merge semantics) means requirements carry their structured
+  model: `type` / `statement` / `rationale` / `scope` / `source`,
+  per-kind fields (`actor`/`trigger`/`outcome`, `metric`/`target`,
+  `impact`/`likelihood`/`mitigation`), and the cross-link lists
+  `related` / `enforces` / `threatens` / `implements` / `constrainedBy`
+  that become trace-graph edges. Risk ratings now map to `priority`
+  (High→P0, Medium→P1, Low→P2) instead of living only in prose.
+- **Case `levels` codes are now sent** alongside `levelText`
+  (`[API]`→`AE`, `[UI]`→`E2E`, `[mobile]`/`[export/email]`→`M`), so the
+  Coverage-by-level table is populated and cases are eligible for the
+  implement workflow. Verified: backfilling 88 existing cases moved
+  `byLevel` from all-zero to 60 AE / 24 E2E / 5 M = 89.
+- **Suite header is set at publish** via `edit_suite` (summary, status,
+  owner, lastReviewed) — no more bare-title suites.
+- **Nothing published is frozen any more.** New "Correcting an existing
+  suite" section: fix `kind`/`stableId` in place (renaming a stableId
+  rewrites every reference to it), fill thin requirements, retire
+  obsolete ones (`status: retired`). The "supersede with `-FR-NNb`"
+  workaround is removed as obsolete.
+- **`traceLinks` now materialize** from case `traceability` and
+  requirement cross-links — 0 → 89 `satisfies` links on the verified
+  suite. Publish verification and `qa-run-analyzer` check for an empty
+  graph, a zeroed level table and a bare header, and fix what is
+  fixable instead of reporting it.
+- Unchanged: never call `summarize_requirement` (still destructive).
+  New caveat: setting `levels` auto-creates a placeholder
+  `implementations` entry (`ref: ""`), so a non-empty `implementations`
+  array does not mean a real test is linked.
+
 ## 0.10.5 — 2026-07-28
 
 - **QA Service publishing is now opt-in per run.** New switch in

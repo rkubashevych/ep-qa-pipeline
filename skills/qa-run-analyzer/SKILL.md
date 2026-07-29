@@ -109,12 +109,17 @@ suite:` line in the QA sub-task description) and report ONE of:
   Fixable with a re-`edit_test_case` pass, not a re-publish.
 - 🔴 **collapsed requirement kinds** — 0 rules AND 0 invariants AND 0
   risks among the suite's requirements: everything was filed as `fr`.
-  Not fixable after the fact (no `edit_requirement`) — flag it so the
-  next publish classifies properly.
-- Do NOT flag `stats.byLevel` reading zero: the per-level dashboard is
-  driven by the case `levels` array, which the connector cannot write
-  and does not derive from `levelText` (verified). It is a known
-  service-side gap on every pipeline-published suite, not a run defect.
+  Fixable in place with `edit_requirement` (`kind` + corrected
+  `stableId`, which rewrites references).
+- 🔴 **zeroed level table** — `stats.byLevel` sums to 0 against a
+  non-zero case total: the cases were written without the `levels` code
+  array (`AE`/`E2E`/`M`/`U`/`I`/`C`…). Those cases are also invisible to
+  the implement workflow. Fixable with a re-`edit_test_case` pass.
+- 🟡 **empty trace graph** — `traceLinks` is `[]` while cases carry
+  `traceability`: the links never materialized; re-sending
+  `traceability` on a case rebuilds the suite's edges.
+- 🟡 **bare suite header** — no `summary` / `owner` / `status` /
+  `lastReviewed` on the suite. Fixable with `edit_suite`.
 
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh

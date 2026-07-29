@@ -97,8 +97,9 @@ sub-task description, human summary comment, story note.
 | `REQ-N: <text>` | `summary` = the requirement's full text, verbatim and self-contained (a reader must understand it without the ticket). **Never a bare `[risk: …]` tag** — the risk suffix goes at the END, after the text. Never omit `summary`. |
 | kind (classify — do not default everything to `fr`) | `rule` = a MUST/MUST-NOT constraint · `invariant` = a property that must always hold · `risk` = a grooming risk · `nfr` = performance/security/limit/compat requirement · `fr` = functional behaviour · `oq` = still-open grooming question · `discrepancy` = "(unresolved conflict)" item. A suite with 0 rules / 0 invariants / 0 risks is a mis-classification, not a fact about the feature. |
 | kind → stableId segment | `<PREFIX>-RULE-NN` · `-INV-NN` · `-R-NN` (risk) · `-NFR-NN` · `-FR-NN` · `-OQ-NN` · `-DISC-NN`, each numbered per kind from 01. The ID must match the kind — never file an invariant as `-FR-`. |
-| `[risk: High/Medium/Low]` on a normal requirement | append to `summary` as ` [risk: High]` |
-| a `risk`-kind requirement | `summary` ends with `Impact: high · Likelihood: medium` (lowercase vocab: `low`/`medium`/`high`) and names what it threatens by stableId, since `detail` cannot be written via MCP (see Known gaps) |
+| `[risk: High/Medium/Low]` | `priority`: High → `P0`, Medium → `P1`, Low → `P2`. Keep the ` [risk: High]` suffix on `summary` too — it is what the checklist/test-case files carry. |
+| requirement `detail` (ALWAYS populate — this is what makes it more than a line of text) | `type` (short classifier: Constraint / Data integrity / Security / State machine / Referential…), `statement`, `rationale`, `scope`, `source` (the AC page or ticket it came from). Per kind: `actor` / `trigger` / `outcome` for `fr`; `metric` / `target` for `nfr`; `impact` / `likelihood` / `mitigation` for `risk` (vocab `low`/`medium`/`high`). |
+| cross-references between requirements | `detail.related` / `enforces` / `threatens` / `implements` / `constrainedBy` — arrays of stableIds. All but `related` become trace-graph edges on write, so a rule that enforces an invariant, or a risk that threatens one, must say so here. |
 | REQ-N → stableId map | record it; the checklist/test-case files still use REQ-N |
 
 ### Test cases → `create_test_case` + `edit_test_case`
@@ -112,7 +113,7 @@ content goes through the follow-up `edit_test_case`.
 | — | `stableId` = `<PREFIX>-<SEG>-NN`, where `<SEG>` is a 2–5 char aspect code shared by the cases of one behaviour area (`AUTH`, `VAL`, `DATA`, `READ`, `REG`, `CTR`, `BVA`, `PRIV`…), numbered per segment from 01. Fall back to the channel code (`UI`/`API`/`MOB`/`EXP`) only when no aspect is meaningful. **Never a flat `<PREFIX>-01…89`** — IDs must carry meaning. |
 | requirement group `REQ-N` | `folderName` = the REQ group's behaviour-area label (e.g. "Opted-out favourite is invisible to the other party"). Group the file's cases into 4–8 such folders. **Never dump everything into "General".** |
 | parent `REQ-N` (+ any seam requirements the case also covers) | `traceability` = the requirement stableIds, kind-correct (`["<PREFIX>-RULE-02","<PREFIX>-INV-01"]`) — list every requirement the case verifies, not just the parent |
-| channel tag → level | `levelText` = EXACT canonical label only: `[API]` → `API-E2E` · `[UI]` → `E2E (UI)` · `[mobile]` → `Manual` · `[export/email]` → `Manual`. Other canonical labels when they genuinely apply: `Unit`, `Integration`, `Contract`, `Component-FE`, `Performance`, `Worker-home`. **Never invent labels** (`API`, `E2E (mobile)`, `E2E (export/email)` are invalid and produce an empty level on the case). |
+| channel tag → level | Pass **`levels`** (the code array — this is what the Coverage-by-level table counts and the implement workflow selects on) AND `levelText`: `[API]` → `levels: ["AE"]`, `API-E2E` · `[UI]` → `["E2E"]`, `E2E (UI)` · `[mobile]` → `["M"]`, `Manual` · `[export/email]` → `["M"]`, `Manual`. Other codes when they genuinely apply: `U` Unit, `I` Integration, `C` Contract, `CFE` Component-FE, `Perf` Performance, `worker` Worker-home. A case with no `levels` is counted nowhere and can never be picked up for automation. **Never invent labels** — `API`, `E2E (mobile)`, `E2E (export/email)` are not canonical. |
 | — | `status` = `planned` (vocabulary: `planned` / `implemented` / `partial` / `deferred` / `na`). **`draft` is NOT in the vocabulary** — it renders as 0 in every readiness bucket. Use `deferred` for a case knowingly not executable yet, `na` for one routed out. |
 | `Applied techniques` (per REQ group) | `techniques`, uppercase tokens (`BVA`, `EP`, `STATE`, `DT`, `UC`, `CONTRACT`, `INVARIANT`, `UI-CONF`) |
 | requirement risk | `priority`: High → `P0`, Medium → `P1`, Low → `P2` |
@@ -126,36 +127,48 @@ content goes through the follow-up `edit_test_case`.
 | "needs clarification" markers | `detail.notes` |
 | tags applied in step 4 | `detail.tagPlan` = one line naming the tags attached and why (mirrors the reference suites) |
 
-### Known MCP gaps — state them, don't fake them
+### Suite header — always set it (`edit_suite`)
 
-These cannot be set through the connector today (verified against the
-tool schemas). Do not invent workarounds that corrupt other fields;
-report them once in the final response instead:
+`create_suite` still takes only title/productId/prefix/folderId, so
+immediately after creating a suite call `edit_suite` to fill the header
+a browser needs: `summary` (a paragraph saying what the feature is and
+what the suite covers — model it on an importer-built suite),
+`status` (`Draft`), `owner` (the pipeline operator + team),
+`lastReviewed` (today, YYYY-MM-DD). A suite that lands with a bare
+title is an incomplete publish.
 
-- **Requirement `detail` and `priority`** — `create_requirement` accepts
-  only kind/title/summary/stableId, and there is no `edit_requirement`.
-  So the relationship model (`type`, `related`, `implements`,
-  `constrainedBy`, `enforces`) and the risk model (`impact`,
-  `likelihood`, `threatens`) stay empty. Encode what matters in
-  `summary` prose (as above) and say so.
-- **Case `levels` array and `implementations`** — not parameters of
-  `edit_test_case`, and the server does NOT derive `levels` from
-  `levelText` (tested). Consequence: `stats.byLevel` reads zero on every
-  pipeline-published suite, and no case is eligible for the implement
-  workflow. Canonical `levelText` remains required as the human-readable
-  level.
-- **Suite `summary` / `status` / `owner` / `lastReviewed`** —
-  `create_suite` takes only title/productId/prefix/folderId, so a
-  pipeline-created suite has a bare header.
-- **`traceLinks` graph** — materialized by the importer, not by
-  `create_test_case`; per-case `traceability` is still stored and shown.
+### Correcting an existing suite (all of it is editable now)
+
+Nothing published is frozen — `edit_requirement`, `edit_test_case` and
+`edit_suite` all merge (omitted fields are preserved) and every write
+rebuilds the suite's trace-graph edges. So on a re-run, or when a
+mistake surfaces:
+
+- wrong requirement `kind` or a stableId that misrepresents it →
+  `edit_requirement` with the corrected `kind` + `stableId`. Renaming a
+  stableId rewrites every reference to it in the suite (test-case
+  traceability and other requirements' cross-link lists) — no orphans.
+- thin requirement (no `detail`, no `priority`) → fill it in place
+  rather than creating a superseding entry.
+- a requirement that no longer applies → `status: "retired"` (there is
+  still no delete).
+- case missing `levels`, or with a stale status/traceability → edit it.
+
+Prefer correcting in place over creating revision entries; the
+"supersede with `-FR-NNb`" workaround is obsolete.
+
+**Still not settable via MCP:** the `implementations[].ref` (setting
+`levels` auto-creates a placeholder entry `{ref: "", level: <code>}` —
+harmless, but it means a non-empty `implementations` array does NOT
+mean a real test is linked).
 
 ### NEVER call `summarize_requirement` on pipeline-written requirements
 
 `summarize_requirement` (and the UI's per-requirement **Regenerate** /
 **Generate missing summaries** buttons) rewrites BOTH `title` and
-`summary` from the requirement's current content — destructively, with
-no `edit_requirement` to undo it.
+`summary` from the requirement's current content. It is now repairable
+with `edit_requirement` — but only if you still have the original text,
+which the tool does not return before overwriting it.
 
 Tested on one requirement (PRIVFAV-FR-02):
 
@@ -265,31 +278,26 @@ preview so the user can redirect:
      was outside `planned/implemented/partial/deferred/na`. This IS
      fixable: re-`edit_test_case` with `status: "planned"` before
      finishing.
+   - **`stats.byLevel` sums to the case total** — a zero row against a
+     non-zero total means `levels` was not sent. Fixable: re-
+     `edit_test_case` with the right code array.
+   - **`traceLinks` is non-empty** — it should hold one `satisfies` link
+     per case (plus requirement↔requirement edges from `detail`
+     cross-links). Empty means `traceability` never landed.
    - no requirement kind is suspiciously absent (0 rules AND 0
-     invariants AND 0 risks = mis-classification). Not fixable after the
-     fact (no `edit_requirement`) — report it so the next publish is
-     correct.
-   - `stats.byLevel` will read **all zeros regardless** — see the note
-     below. Do NOT try to fix it and do not loop on it.
-   Report anything off in the final response.
+     invariants AND 0 risks = mis-classification). Fixable in place with
+     `edit_requirement` (`kind` + corrected `stableId`) — do it rather
+     than reporting it.
+   - the suite header is filled (`summary`, `status`, `owner`,
+     `lastReviewed`) — otherwise call `edit_suite`.
+   Fix what is fixable before finishing; report the rest.
 
-> **Verified — `stats.byLevel` cannot be populated by this pipeline.**
-> The per-level dashboard is keyed off the case's `levels` array
-> (codes `U`/`I`/`AE`/`C`/`E2E`/`CFE`/`Perf`/`M`/`worker`), NOT off
-> `levelText`, and `edit_test_case` exposes no `levels` parameter. Tested
-> directly: setting the exact canonical `levelText: "API-E2E"` left
-> `levels: []` and `byLevel` at zero. Canonical `levelText` is still
-> required (it is the human-readable level and the only signal
-> available), but an empty `byLevel` on a pipeline-published suite is a
-> connector gap, not a run defect. Closing it needs `levels` on the
-> write API or server-side derivation from `levelText` — a request for
-> the QA Service team.
-
-> **Verified — `edit_test_case` MERGES.** Omitted fields are preserved:
-> an edit sending only `status` + `levelText` left `detail` (all keys),
-> `techniques`, `priority`, `type`, `traceability` and the attached tags
-> byte-identical. So partial edits are safe — no read-modify-write
-> needed for small field changes.
+> **Verified — all three edit tools MERGE.** Omitted fields are
+> preserved: an edit sending only `status` + `levelText` left `detail`
+> (all keys), `techniques`, `priority`, `type`, `traceability` and the
+> attached tags byte-identical across 88 cases. Partial edits are safe —
+> no read-modify-write needed. Inside `detail`, send a key complete:
+> assume the key you send replaces that key's value.
 6. Add to the Jira QA sub-task description (step 6 already writes it):
    `QA Service suite: <path> — <requirementCount> requirements /
    <testCaseCount> cases` plus the TC-REQ-N.M → stableId map (one line
