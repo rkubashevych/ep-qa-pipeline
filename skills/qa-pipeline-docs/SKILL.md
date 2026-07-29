@@ -169,10 +169,18 @@ the next stage automatically (they share the working directory).
    - **Machine-readable archive → only when QA Service did NOT publish.**
      The code phase reads the cases from the suite when there is one, so
      the fenced archive is a fallback, not a default:
-     - **QA Service suite published** → skip the archive comment. State
-       in the final response that the code phase will read the suite.
-       (Saves ~45,000 characters per ticket and keeps one authoritative
-       copy of the cases.)
+     - **QA Service suite published** → skip the archive comment, with
+       ONE exception: the checklist's **structural checks that have no
+       test case** (the `[UI]` presence / label / field-type checks)
+       exist nowhere else — not in the suite, not in the tracker — and
+       `web-testing` executes them. Post those, and only those, as a
+       short fenced block headed
+       `File: <ISSUEKEY>-checklist.md (structural checks only)`,
+       preserving their REQ grouping and channel tags. Everything the
+       cases already cover stays out. State in the final response that
+       the code phase will read the cases from the suite. (Saves ~45,000
+       characters per ticket while keeping one authoritative copy of
+       each artifact.)
      - **No suite (connector absent / user declined)** → post the full
        `<ISSUEKEY>-checklist.md` and `<ISSUEKEY>-test-cases.md` contents
        exactly as before, each inside its own fenced code block preceded

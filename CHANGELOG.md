@@ -25,8 +25,15 @@ real ticket (EP-55646: **188,063 characters across 10 posts**).
 - **The standalone TC-REQ → stableId map is gone.** It cost ~2,000 chars
   and went stale the first time stableIds were corrected; the case id
   now travels on the tracker line it belongs to.
+- **Structural checks are still posted.** The checklist's `[UI]`
+  presence / label / field-type checks deliberately have no test case,
+  so they exist neither in the suite nor in the tracker — and stage 8
+  (web-testing) executes them. They are posted as a short
+  `(structural checks only)` fenced block; the rest of the checklist,
+  which the cases already cover, is not.
 - `qa-pipeline-code` step 0 documents the source order explicitly:
-  suite first, fenced archive as fallback, otherwise ask.
+  suite first (+ the structural-checks block), fenced archive as
+  fallback, otherwise ask.
 
 Net effect: ~32% less text per ticket, one authoritative copy of each
 test case, and the code phase reads structured data instead of

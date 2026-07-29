@@ -73,9 +73,13 @@ Otherwise, using the Atlassian connector and the Story key:
      connector is present → `get_suite` and rebuild
      `<STORY>-test-cases.md` from the suite's cases (id, title, levels →
      channel tag, traceability, and `detail`
-     goal/preconditions/steps/testData/assertions/notes) and
-     `<STORY>-checklist.md` from its requirements. This is the
-     authoritative copy.
+     goal/preconditions/steps/testData/assertions/notes). This is the
+     authoritative copy of the cases. Rebuild `<STORY>-checklist.md`
+     from the suite's requirements PLUS the
+     `(structural checks only)` fenced block on the sub-task — those
+     `[UI]` presence/label/field-type checks have no test case and exist
+     only there; stage 8 needs them. If that block is missing on an
+     older ticket, say so — structural checks will be skipped.
    - no suite line, or no connector → fall back to the **fenced archive
      comments**, which the docs phase posts in exactly that case.
    - neither available → tell the user to re-run `qa-pipeline-docs` (or
