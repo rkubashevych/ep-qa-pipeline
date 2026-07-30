@@ -4,12 +4,55 @@ The deliverable is a workbook whose first sheet is the only thing the
 tester needs open. Everything else is reference material they consult
 when something looks wrong.
 
-## Sheet 1 — Run sheet
+## Sheet 1 — Case index
 
-Six columns, in this order. Nothing else belongs here.
+**Twelve columns. Resist adding more.** Every extra column is noise the
+tester has to scroll past to reach the three that matter.
 
-| TC | Log in as | Do | Expect | Result | Notes |
-|---|---|---|---|---|---|
+| A | B | C | D | E | F | G | H | I | J | K | L |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| TC | Title | Ch. | Risk | Code review | API verdict | Ready? | **Log in as** | **Do** | **Expect** | Result | Notes |
+
+H, I and J replace five old columns — `Account(s) to use - id · login /
+password`, `Entity/entities to use`, `What to do (one line)`,
+`Precondition already in place`, `Caveat / watch out`. Entity ids move
+into the steps where they are needed; precondition and caveat merge into
+the pass condition instead of sitting two columns away from it.
+
+**Deliberately not columns:**
+
+- **UI verdict** — one automated-verdict column is enough context. A
+  stage-8 result goes in Notes when there is one.
+- **How the case is run** — that belongs at the top of **Do**, not in its
+  own column (see below).
+
+### Can a human even run it? Put it in Do, not a column
+
+The channel tag says **who runs the case in the automated pipeline**. It
+does not say whether a person can run it by hand. Where they differ, open
+the **Do** cell with a one-line marker:
+
+- a click produces exactly that request → say so: *"This click IS the
+  case — the card sends POST /profile/connect {type:visitor, id:…}"*
+- the UI cannot produce the payload → *"⚠ Clicking twice will NOT work,
+  the star toggles. Trigger it, then DevTools → Network → Copy as fetch →
+  re-run."*
+- no UI path exists → give the request, and point at the token recipe on
+  the Environment sheet
+- not manually observable → say why, and who could obtain it
+
+Two mistakes this prevents:
+
+- **Assuming a toggle can duplicate.** A favourite star toggles, so
+  clicking twice *unfavourites* — it can never produce the duplicate a
+  400-on-duplicate case needs.
+- **Overstating what a click proves.** Clicking a star shows the star lit;
+  it does not show the stored row is typed `exhibitor`. Where only part of
+  an assertion is observable by hand, say so in **Expect** and name which
+  half the automated stage owns. Half-verified is not verified.
+
+Keep A–H dim (9pt grey is enough) — they are reference, not instruction.
+I–K carry the work. L–M are the tester's.
 
 **TC** — the case id, e.g. `TC-REQ-12.2`. Frozen column.
 
@@ -38,9 +81,71 @@ control in the same cell:
 > Interactions list empty **and** PAGE LIKES reads 1
 
 **Result** — left empty, with a dropdown: PASS / FAIL / BLOCKED /
-SKIPPED.
+SKIPPED, **and conditional formatting so the cell recolours itself when a
+value is picked**. A dropdown that only changes the word is a missed
+opportunity: the tester should be able to see the shape of the run by
+scrolling, without reading.
 
 **Notes** — left empty. The tester's own words.
+
+### Colour — reuse the existing palette, do not invent one
+
+**Use the hex values already in `build_data_pack.py`.** They were chosen
+for this workbook, testers are used to them, and — crucially — they are
+saturated enough to tell apart at a glance.
+
+| Meaning | Values | Fill | Font |
+|---|---|---|---|
+| good | PASS · READY | `E2EFDA` green | `375623` |
+| bad | FAIL · High | `FCE4D6` peach | `833C00` / `C00000` |
+| attention | QA · PARTIAL · MUST TEST · Medium | `FFF2CC` amber | `7F6000` |
+| not run | BLOCKED · NOT EXECUTED · N/A · Low · — | `F2F2F2` grey | `808080` |
+| skipped | SKIPPED | `D9E1F2` blue | `1F4E78` |
+
+Header: `1F4E78` navy, white bold.
+
+**One body font throughout: Arial 10.** Do not set a monospace font on
+the credential column. It was tried — the reasoning being that `l` vs `1`
+and `O` vs `0` are easier to tell apart in a fixed-width face — and it
+reads as a mistake in the grid, because one column in a different typeface
+looks broken rather than deliberate. Consistency wins; if a password is
+genuinely ambiguous, the tester copies and pastes it anyway.
+
+Applied per value to `Risk`, `Code review`, `API verdict`, `Ready?`
+(D–G) and `Result` (K). Use `EXACT()` rather than `SEARCH()` so a
+compound value cannot match two rules, and set `stopIfTrue` on each.
+
+**A muted pastel palette was tried and rejected.** Softer tints looked
+calmer in isolation but were indistinguishable in a grid — the tester
+could not tell amber from cream from grey, and stopped trusting the
+colour at all. Distinguishable beats gentle. If a colour needs squinting
+at, it is doing nothing.
+
+Colour is still only ever a second signal: a blocked row also says
+`BLOCKED` in `Ready?` and opens **Expect** with `BLOCKED —`, so the
+meaning survives printing and colour-blindness.
+
+**openpyxl trap:** differential-format fills are read by Excel from
+`bgColor`, not `fgColor`. `PatternFill(fgColor=...)` inside a
+`CellIsRule` writes `00000000` and produces no colour at all, silently.
+Use `PatternFill(bgColor="E9F3EC")`. Verify by re-loading the saved
+workbook and asserting each rule's `dxf.fill.bgColor.rgb` is not
+`00000000` — the file opens perfectly fine while being wrong.
+
+### Palette — muted, not alarming
+
+A tester looks at this sheet for hours. Saturated reds and yellows are
+tiring and make everything feel urgent, which defeats the point of
+colour-coding.
+
+- Header `3E5C76` (muted slate) rather than a hard navy.
+- Gridlines `D9D9D9`, not black.
+- Row-state tints stay pale: must-test `FDF6E3`, known-fail `FBEDEC`,
+  blocked/settled `F5F5F3`.
+- Tint columns A–K for row state and leave **Result** untinted, so the
+  conditional-format colour reads cleanly instead of fighting the row.
+- Colour is always a second signal. A blocked row still says `BLOCKED —`
+  in text, because colour is invisible to some readers and lost on print.
 
 ### Row states
 

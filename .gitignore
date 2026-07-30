@@ -35,3 +35,7 @@ EP-*.png
 EP-*.xlsx
 .playwright-mcp/
 .claude/
+*-preserved-entries.tsv
+*-sample-runsheet.xlsx
+build_sample_runsheet.py
+build_runsheet_*.py
