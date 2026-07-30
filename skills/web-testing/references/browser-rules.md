@@ -1,5 +1,11 @@
 # Browser interaction rules
 
+**Contents:** General principle · Tools · Interaction pattern ·
+Waiting (incl. the absence-check exception) · Finding elements ·
+Entering data · ExpoPlatform UI notes (React + MUI) · Interpreting
+test-case steps · Error handling · Verifying expected results ·
+Screenshots · Login · Registration · New tabs · Navigation memory
+
 The skill uses the Claude in Chrome extension for all
 browser actions. These rules are mandatory for every
 interaction with the page.

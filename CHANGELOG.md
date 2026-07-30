@@ -5,6 +5,42 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.18.1 — 2026-07-30
+
+Skill-authoring compliance (items 1–4 of
+`SKILL-BEST-PRACTICES-AUDIT-2026-07-30.md`, a cold audit against
+Anthropic's official skill best-practices doc).
+
+- **Broken cross-skill paths fixed** in `qa-pipeline-code/SKILL.md`:
+  three `qa-pipeline-docs/references/…` references lacked the `../`
+  prefix — in the publish/write-back/transition steps of all places.
+- **Discovery misroutes fixed:** web-testing's description no longer
+  claims the "manual testing" trigger (that request belongs to stages
+  9/10 and now says so); qa-manual-runsheet's description no longer
+  calls itself "Stage 4.5" — it is stage 9, run at the END of the code
+  phase, and the description now matches the orchestrator (and
+  mentions the VERIFY spot-check rows and stage 10).
+- **MCP tool names disambiguated:** the five skills that call
+  connector tools (task-context, qa-pipeline-docs, qa-pipeline-code,
+  qa-run-analyzer, qa-manual-results) now open with a one-line mapping
+  note — bare Jira/Confluence names = Atlassian MCP connector,
+  suite/case tools = QA Service MCP connector; prefixes vary per
+  install, match by tool name.
+- **Contents lines added to all 13 reference files over 100 lines**
+  (qa-service-publish, api-testing-reference, browser-rules,
+  results-comment-template, runsheet-format, checklist-design-rules,
+  provisioning-rules, bitbucket-access, absence-check-protocol, both
+  output templates, both design-rules/example files) — so a partial
+  reader knows what exists before deciding what to skip. On the two
+  report templates the line is marked "do NOT reproduce in the
+  report".
+
+Not done (recorded): audit item 5 — no per-skill evaluation sets yet.
+The `fixtures/EP-0000` smoke test covers the docs stages; building
+eval scenarios for the code-phase stages is real work and is deferred
+to the mileage phase (run real tickets first, turn the failures they
+expose into the eval set).
+
 ## 0.18.0 — 2026-07-30
 
 The trust-model release. Implements the accepted findings of

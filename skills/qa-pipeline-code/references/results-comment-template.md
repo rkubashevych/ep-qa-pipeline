@@ -1,5 +1,10 @@
 # Results comments — qa-pipeline-code step 6
 
+**Contents:** Comment 1 — machine archive · Comment 2 — human summary
+(incl. PROVISIONAL status line, Requirements to correct, Overall
+verdict, Partial runs, Writing rules) · Story note — QA passed (posted
+by qa-manual-results) · Story note — QA failed (step 8)
+
 Step 6 posts **two comments** to the QA sub-task, in this order:
 
 1. **Machine archive** — the raw report files, for agents. Long is fine.

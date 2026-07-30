@@ -1,5 +1,9 @@
 # Bitbucket access — shared reference
 
+**Contents:** Repos · Branch mode vs PR mode · Authentication setup
+(incl. Credential handling — hard rules) · Command workflows · If
+authenticated access is unavailable
+
 The single source of truth for how the code-phase skills (`pr-summary`
 and `code-review`) authenticate against Bitbucket Cloud. Both SKILL.md
 files point here — edit HERE, not in the skills, so the two never

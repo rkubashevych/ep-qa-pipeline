@@ -1,5 +1,9 @@
 # Example of test cases
 
+**Contents** *(reader aid — not part of the format)*: REQ-1 filter by
+state · REQ-2 dependent select · REQ-3 label presence · REQ-4 reset
+button · Statistics block
+
 This example shows the expected level of detail, the format, the
 application of techniques, and the distinction from the checklist.
 It uses the Jira-friendly vertical block layout from

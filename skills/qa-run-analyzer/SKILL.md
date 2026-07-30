@@ -14,6 +14,10 @@ description: >
 
 # QA Run Analyzer
 
+> **Tool names:** `list_suites` / `get_suite` are tools of the
+> **QA Service MCP connector** (install-specific server prefix varies —
+> match by tool name).
+
 A meta-review of the pipeline RUN, not the product. Read-only: it never
 edits the pipeline files, only inspects them and writes its own report.
 

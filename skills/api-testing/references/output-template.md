@@ -1,5 +1,10 @@
 # <ISSUEKEY> - API Testing
 
+> Sections of the generated report (this line is a reader aid — do NOT
+> reproduce it in the report): Scope · Not executed here · Route to
+> web-testing · Results · Findings · Writes performed (audit) ·
+> Statistics.
+
 Code review: <path to the code-review file>
 Test cases: <path to the test-cases file>
 Environment: <ADMIN_BASE_URL> · event <EVENT_ID> · frontend host <FE host, if used>

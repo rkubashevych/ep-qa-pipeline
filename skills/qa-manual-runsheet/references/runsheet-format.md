@@ -1,5 +1,10 @@
 # Run sheet format
 
+**Contents:** Sheet 1 — Case index (columns, row states incl. VERIFY
+spot-check, colour spec + REJECTED muted palette, formatting) ·
+Sheet 2 — Accounts · Sheet 3 — Entities · Sheet 4 — Reference ·
+Sheet 5 — Environment · Credentials · What must not happen
+
 The deliverable is a workbook whose first sheet is the only thing the
 tester needs open. Everything else is reference material they consult
 when something looks wrong.

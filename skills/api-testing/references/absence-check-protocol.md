@@ -1,5 +1,9 @@
 # Absence-check & evidence-provenance protocol — shared reference
 
+**Contents:** Definitions · The four rules (provenance · positive
+control · ingestion lag · "anywhere" claims) · Interaction with
+waiting rules · What the analyzer flags
+
 The single source of truth for when a PASS is allowed on checks that
 assert something does NOT appear, or that read counters / analytics /
 leads / statistics / notifications / dashboards. Binding on

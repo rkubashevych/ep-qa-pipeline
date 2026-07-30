@@ -12,6 +12,11 @@ description: >
 
 # Task Context
 
+> **Tool names:** bare names like `getJiraIssue`, `getConfluencePage`,
+> `searchJiraIssuesUsingJql` (here and in this skill's references) are
+> tools of the **Atlassian MCP connector**. The install-specific server
+> prefix varies — match by tool name on the server that provides it.
+
 Collects task data from the tracker, cross-references information
 from all fields, and produces a single enriched Markdown context — the
 source of truth for the next skills in the chain.

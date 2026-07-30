@@ -1,5 +1,10 @@
 # Checklist-building rules — reference
 
+**Contents:** What a checklist item is · Quality attributes · Wording
+rules · Decomposing a requirement · Sufficiency criterion · Base set
+for typical elements · Provenance-sensitive checks (dual tag) ·
+Filtering out unnecessary checks · Anti-patterns
+
 Sources: ISTQB CTFL v4.0, ISTQB CTAL-TA v4.0, and commonly
 accepted requirements-based testing practices.
 

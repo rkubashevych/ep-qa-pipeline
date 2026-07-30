@@ -1,5 +1,12 @@
 # API Testing Reference (ExpoPlatform) — for the QA agent
 
+**Contents:** §0 Config & credentials · §1 Three auth contexts ·
+§2 Admin token · §3 Admin-panel session · §4 Exhibitor/visitor token ·
+§5 Response envelope · §6 Finding the real route · §7 Finding test
+data · §8 Worked example (logo restriction) · §9 Read-only vs write
+safety · §10 Gotchas checklist · §11 Frontend / exhibitor-token cases ·
+§12 Throwaway test entities
+
 A reusable playbook for exercising ExpoPlatform REST endpoints directly (curl / HTTP),
 so API `[API]` test cases from the QA pipeline can be executed without the browser.
 

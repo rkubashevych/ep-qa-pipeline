@@ -1,5 +1,9 @@
 # <ISSUEKEY> - Web Testing
 
+> Sections of the generated report (this line is a reader aid — do NOT
+> reproduce it in the report): Scope · Not executed here · Structural
+> checks · Results · Findings · Observations · Statistics.
+
 Code review: <path to the code-review file>
 Test cases: <path to the test-cases file>
 Host: <the base URL / test host actually used>

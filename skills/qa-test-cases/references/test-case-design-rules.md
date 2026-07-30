@@ -1,5 +1,10 @@
 # Test-case building rules — reference
 
+**Contents:** Choosing a technique by requirement type · Coverage
+levels · Mandatory attributes · Quality rules · EP rules · BVA rules ·
+State Transition rules · Decision Table rules · Pairwise rules ·
+Anti-patterns
+
 ## Choosing a technique by requirement type
 
 | Nature of the requirement | Technique | Coverage criterion |

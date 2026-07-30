@@ -1,5 +1,9 @@
 # Provisioning rules and known traps
 
+**Contents:** The tracking trap · Analytics lag · Fields that lie
+about what they are · Fixtures · Verify every blocked reason ·
+ExpoPlatform environment specifics · Disclosure
+
 Hard-won on ExpoPlatform alpha2. The general principles apply anywhere;
 the endpoint specifics are ExpoPlatform-only and should be re-verified
 rather than trusted, since they have already changed once.

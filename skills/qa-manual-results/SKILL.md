@@ -16,6 +16,11 @@ description: >
 
 # QA Manual Results
 
+> **Tool names:** `addCommentToJiraIssue` etc. are tools of the
+> **Atlassian MCP connector**; `get_test_case` / `edit_test_case` /
+> `suggest_test_case` belong to the **QA Service MCP connector**
+> (install-specific server prefix varies — match by tool name).
+
 The pipeline publishes automated verdicts at code-phase step 6 — before
 the human walks the run sheet. This stage exists so what the human
 found actually reaches the record. Without it, the truest verdicts of

@@ -19,6 +19,13 @@ description: >
 
 # QA Pipeline -- Docs (stages 1-4 + publish)
 
+> **Tool names:** bare names like `createJiraIssue` /
+> `addCommentToJiraIssue` (here and in this skill's references) are
+> tools of the **Atlassian MCP connector**; `create_suite` /
+> `create_test_case` / `edit_requirement` etc. belong to the
+> **QA Service MCP connector**. The install-specific server prefix
+> varies — match by tool name on the server that provides it.
+
 > Recommended settings for the whole run: **Opus . Effort: High .
 > Extended thinking: On**. Grooming (stage 2) benefits most; the lighter
 > stages run fine on this too. This avoids switching models mid-run.

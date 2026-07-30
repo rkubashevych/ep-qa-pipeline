@@ -5,8 +5,10 @@ description: >
   from code review and the test cases, executes them in the browser
   via a Chrome extension, checks the expected results, and builds a
   detailed report. Use when the user says "web testing",
-  "test in the browser", "run the QA checks", "manual testing",
-  or after code review is finished.
+  "test in the browser", "run the QA checks", "browser testing",
+  or after code review is finished. NOT for hand-testing by the user:
+  the manual run sheet is qa-manual-runsheet (stage 9) and ingesting
+  the human's results is qa-manual-results (stage 10).
 ---
 
 # Web Testing

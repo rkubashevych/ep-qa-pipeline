@@ -20,6 +20,14 @@ description: >
 
 # QA Pipeline -- Code & UI (stages 5-10)
 
+> **Tool names:** bare names like `searchJiraIssuesUsingJql` /
+> `addCommentToJiraIssue` / `getTransitionsForJiraIssue` (here and in
+> this skill's references) are tools of the **Atlassian MCP
+> connector**; `get_suite` / `get_test_case` / `edit_test_case` etc.
+> belong to the **QA Service MCP connector**. The install-specific
+> server prefix varies — match by tool name on the server that
+> provides it.
+
 > Recommended settings for the whole run: **Opus . Effort: High .
 > Extended thinking: On**. Code review (stage 6) benefits most.
 > Stage 7 (api-testing) runs the `[API]` cases; stage 8 (web-testing)
@@ -133,7 +141,7 @@ Otherwise, using the Atlassian connector and the Story key:
      extracting the files reconcile the test cases
      against the published suite — the suite wins on divergence
      (cases may have been fixed in the web UI between phases). Rules:
-     `qa-pipeline-docs/references/qa-service-publish.md` → "Code phase
+     `../qa-pipeline-docs/references/qa-service-publish.md` → "Code phase
      — suite as the case source". Connector absent → Jira archive is
      authoritative, as before; never block on QA Service.
    - If no pipeline QA sub-task exists, tell the user to run
@@ -292,7 +300,7 @@ multi-PR story does not exhaust the orchestrator's context:
      yes; the one confirmation covers Jira and QA Service.
    - **QA Service result write-back:** for every executed case, append
      the run outcome to its suite case notes — rules and exact note
-     format: `qa-pipeline-docs/references/qa-service-publish.md` →
+     format: `../qa-pipeline-docs/references/qa-service-publish.md` →
      "Result write-back". Never overwrite lifecycle `status` with a
      run result. Connector absent → skip with a note in the final
      response.
@@ -346,7 +354,7 @@ multi-PR story does not exhaust the orchestrator's context:
      to reassign the failing dev sub-tasks (or the story) back to
      their dev assignees, with a comment linking the human summary and
      the filed bug keys; apply the "back to dev" transition from
-     `qa-pipeline-docs/references/publish-config.md` if one is
+     `../qa-pipeline-docs/references/publish-config.md` if one is
      configured there.
    - **Verdict ✅ PASS: the handback WAITS for the human.** Automated
      verdicts are provisional (the creator's own base rates: ~half of

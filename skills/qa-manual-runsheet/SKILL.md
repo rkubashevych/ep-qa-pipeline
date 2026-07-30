@@ -1,15 +1,18 @@
 ---
 name: qa-manual-runsheet
 description: >
-  Stage 4.5 of task processing. Takes the test cases created by the
-  qa-test-cases skill, provisions and verifies the fixture data on a
+  Stage 9 of task processing — the last automated step of
+  qa-pipeline-code. Takes the test cases and the automated verdicts
+  from stages 6-8, provisions and verifies the fixture data on a
   throwaway test event, then produces a lean run sheet a human can work
   straight through — one explicit "Log in as" account, one action, one
-  expected result per row.
+  expected result per row, with machine-settled rows pre-filled and
+  High-risk machine PASSes as spot-checks.
   Use it when the user says "prepare the manual tests", "make a run
   sheet", "prepare test data", "set up the data so I can just check the
-  cases", or after the docs phase (qa-pipeline-docs) finishes and before
-  anyone starts testing by hand.
+  cases", or after the automated code-phase stages finish and before
+  anyone starts testing by hand. The completed sheet is later ingested
+  by qa-manual-results (stage 10).
 ---
 
 # QA Manual Run Sheet

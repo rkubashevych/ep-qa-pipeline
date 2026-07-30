@@ -1,5 +1,11 @@
 # QA Service publish — suite creation from pipeline output
 
+**Contents:** Preconditions · Config · Mapping — pipeline files → QA
+Service · Suite selection — append by default · Procedure (inside the
+step-6 confirmed publish) · Code phase — suite as the case source ·
+Result write-back (incl. Improvised coverage becomes permanent + the
+Retraction convention) · Publish preview additions
+
 How `qa-pipeline-docs` step 6 publishes the groomed requirements and
 test cases into **QA Service** (the team's test-suite system of record)
 via its MCP connector, alongside the Jira QA sub-task. Edit this file —
