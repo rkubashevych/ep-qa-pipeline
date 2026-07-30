@@ -6,7 +6,10 @@ description: >
   requirement into atomic checks, and builds a reference QA
   checklist — the input for test cases and for manual testing.
   Use it when the user says "build a checklist", "make a checklist",
-  "checklist of checks", or after requirements grooming is complete.
+  "checklist of checks", or after requirements grooming is complete. Do NOT use for
+  generic checklists (to-do lists, process checklists, packing lists)
+  — this stage decomposes the pipeline's groomed requirements file
+  and cannot run without it.
 ---
 
 # QA Checklist

@@ -4,8 +4,8 @@ description: >
   Orchestrator for the code + UI half of the QA pipeline (stages
   5-10). Given a Story key, reads the test cases from the story's QA
   sub-task (published by qa-pipeline-docs) and derives the dev branches
-  from the backend/frontend sub-tasks, then runs pr-summary ->
-  code-review -> api-testing -> web-testing -> run-analyzer, posts the
+  from the backend/frontend sub-tasks, then runs pr-summary, then
+  code-review, then api-testing, then web-testing, then run-analyzer, posts the
   results back to the QA sub-task (marked PROVISIONAL), builds the
   manual run sheet (qa-manual-runsheet) so a human can walk what the
   machine could not settle, verifies the published state, and defers

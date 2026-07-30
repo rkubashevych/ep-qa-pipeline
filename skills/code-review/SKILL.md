@@ -7,7 +7,10 @@ description: >
   builds a compact results file with statuses and findings for the
   problem items. Use when the user says "code review",
   "check the implementation", "go through the code", or after the
-  PR summary is finished.
+  PR summary is finished. Do NOT use for general code-quality, style,
+  or architecture review of arbitrary code or diffs — this stage
+  verifies TEST CASES against a PR and requires the pipeline's
+  test-cases file as input.
 ---
 
 # Code Review

@@ -142,6 +142,10 @@ No files need to be carried between environments.
    test-cases (skip the Jira publish) and check the expectations listed
    at the bottom of the fixture still hold. If you touched
    `reconcile_counts.py`, run `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`.
+   If you touched ANY skill's frontmatter `description`, walk
+   `evals/triggering.md` — every ✅ query must still route to that
+   skill and every ❌ must not; update the list when triggers
+   legitimately change.
 5. **Bump the version in BOTH manifests** — `.claude-plugin/plugin.json`
    AND `.claude-plugin/marketplace.json` (the plugin entry's `version`).
    The app decides update availability from the **marketplace** manifest;

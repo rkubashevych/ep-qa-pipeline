@@ -5,7 +5,10 @@ description: >
   and builds a structured summary of the changes — a PR map
   for the code-review skill. Use when the user says "read the PR",
   "look at the PR", "PR summary", "what's in the PR", or after
-  the test cases are finished and before code review.
+  the test cases are finished and before code review. Do NOT use to
+  review, judge, or approve code quality (that is code-review's job,
+  and only against test cases), and not for repos outside the
+  ExpoPlatform Bitbucket workspace.
 ---
 
 # PR Summary

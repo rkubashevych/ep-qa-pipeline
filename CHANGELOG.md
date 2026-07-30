@@ -5,6 +5,32 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.18.2 — 2026-07-30
+
+Net-new items from `GUIDE-ALIGNMENT-AUDIT-2026-07-30.md` (cold audit
+against the author-supplied "Complete Guide to Building Skills for
+Claude" PDF; ~70% of the guide overlapped ground already settled by
+the 0.18.1 audit).
+
+- **`->` removed from frontmatter descriptions** (both orchestrators)
+  — the guide bans angle-bracket characters in frontmatter as an
+  upload-validator/security rule; stage chains now read "…, then …".
+- **Negative triggers** added to the four skills whose trigger phrases
+  are generic (task-context, qa-checklist, pr-summary, code-review):
+  each description now carries a "Do NOT use for…" clause so
+  co-installed skills can't capture (or lose) these requests.
+- **`evals/triggering.md`** — should-fire / must-not-fire query list
+  for all 13 skills; MAINTAINERS recipe step 4 now requires walking it
+  after any description edit. This is the free tier of the deferred
+  eval-set work; the functional tier still lands with the mileage
+  phase.
+- Recorded from the audit's contradiction analysis: official doc wins
+  on frontmatter fields (name+description only — already compliant)
+  and on the <500-line SKILL.md bar (web-testing is at 519 — one more
+  input to the planned consolidation release); the PDF's
+  "rigor scales with audience" stance is the recorded justification
+  for deferring functional eval sets while the plugin has one user.
+
 ## 0.18.1 — 2026-07-30
 
 Skill-authoring compliance (items 1–4 of

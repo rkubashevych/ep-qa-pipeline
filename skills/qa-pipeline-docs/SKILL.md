@@ -2,8 +2,8 @@
 name: qa-pipeline-docs
 description: >
   Orchestrator for the documentation half of the QA pipeline (stages
-  1-4) plus publishing. Given a Jira ticket, runs task-context ->
-  requirements-grooming -> qa-checklist -> qa-test-cases, runs the
+  1-4) plus publishing. Given a Jira ticket, runs task-context, then
+  requirements-grooming, then qa-checklist, then qa-test-cases, runs the
   run-analyzer, then publishes: a QA sub-task on the story holding the
   checklist + test cases (so the code phase can pick them up without
   manual file attaching) and, when the QA Service MCP connector is

@@ -7,7 +7,9 @@ description: >
   the source of truth for the next skills in the chain. Use it when the
   user provides a task URL or key and wants processed context, or when
   they say "pull task context", "prepare task context", "process the
-  ticket".
+  ticket". Do NOT use to merely read or summarise a ticket in chat —
+  use it only when the enriched context FILE is needed as pipeline
+  input (stage 1 of the QA pipeline).
 ---
 
 # Task Context
