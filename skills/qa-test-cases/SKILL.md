@@ -278,5 +278,7 @@ human and by the code phase. Format for easy human scanning:
 - Channel tags go on BOTH the requirement group heading — the union
   of its cases' tags (`## REQ-N — <label>  [UI] [API]`) — and on each
   test-case heading with exactly ONE tag
-  (`### TC-REQ-N.M — <name>  [UI]`). The per-case tag is what the
-  executing stages (api-testing, web-testing) route on.
+  (`### TC-REQ-N.M — <name>  [UI]`), with the single exception of
+  provenance-sensitive cases, which carry the dual `[API][UI]` tag
+  (see "Provenance-sensitive exception" above). The per-case tag is
+  what the executing stages (api-testing, web-testing) route on.

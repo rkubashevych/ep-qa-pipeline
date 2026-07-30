@@ -216,6 +216,10 @@ FAIL only when there is concrete evidence:
 
 ## Classification
 
+Canonical definitions for ALL stages:
+`../qa-run-analyzer/references/status-vocabulary.md` — new or changed
+statuses land there first. This stage emits:
+
 Each test case gets one status:
 
 - `PASS` — the code confirms that the behavior described
@@ -267,6 +271,19 @@ Rules:
   channel is exactly how a shipped defect stays invisible (a real run
   PASSed a case via the client API while the hazard lived on the
   legacy web edit path, which no stage then exercised).
+
+## Closing step — Unmapped changes (reverse gap check)
+
+After classifying every test case, take the pr-summary's "Behaviours
+touched" list and mark each behaviour that at least one test case
+exercises. Whatever remains — behaviours the PR changes that NO case
+covers — goes in the report's "Unmapped changes" section, one line
+each with the file reference. This is the only place scope creep and
+unsanctioned side effects become visible: the docs phase can only
+cover what the ticket promised; this step catches what the code did
+beyond it. If the pr-summary lacks the section (older file), say so in
+the Notes line instead of skipping silently. An empty list is written
+as "None".
 
 ## Output file
 

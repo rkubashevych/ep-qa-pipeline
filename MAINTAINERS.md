@@ -71,10 +71,12 @@ The stages need different things, so they run in different places:
 
 | Stage(s) | Needs | Run in |
 |---|---|---|
-| 1–4 docs (`task-context` … `qa-test-cases`) + `qa-pipeline-docs` | Jira/Confluence only | **Cowork** (or Claude Code) |
+| 1–4 docs (`task-context` … `qa-test-cases`) + `qa-pipeline-docs` | Jira/Confluence only (+ QA Service connector for the suite publish) | **Cowork** (or Claude Code) |
+| code-phase step 0 (case rebuild) | the **QA Service connector** whenever the docs phase published a suite — since 0.11.2 a suite-published ticket has NO Jira archive, so without the connector there is nothing to rebuild the cases from | wherever `qa-pipeline-code` starts |
 | 5–6 `pr-summary`, `code-review` | the code: a **backend/portal-ui repo clone** OR a Bitbucket **API token** (`BB_EMAIL`+`BB_API_TOKEN`) | **Claude Code** |
 | 7 `api-testing` | the e2e **`.env`** (API creds) + a per-event frontend host | **Claude Code** |
 | 8 `web-testing` | a connected Chrome + logged-in test env | **Cowork** (Chrome extension) |
+| 9–10 `qa-manual-runsheet`, `qa-manual-results` | QA Service connector (suite read/write-back) + `.env` for provisioning | either, connector present |
 
 **Why:** Cowork has no repo clone, no `BB_API_TOKEN`, and no `.env`, so
 5–7 can't authenticate there — `api-testing` will pause ("no .env"),

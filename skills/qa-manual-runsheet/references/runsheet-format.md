@@ -132,20 +132,23 @@ Use `PatternFill(bgColor="E9F3EC")`. Verify by re-loading the saved
 workbook and asserting each rule's `dxf.fill.bgColor.rgb` is not
 `00000000` — the file opens perfectly fine while being wrong.
 
-### Palette — muted, not alarming
+### Tinting rule (live)
 
-A tester looks at this sheet for hours. Saturated reds and yellows are
-tiring and make everything feel urgent, which defeats the point of
-colour-coding.
-
-- Header `3E5C76` (muted slate) rather than a hard navy.
-- Gridlines `D9D9D9`, not black.
-- Row-state tints stay pale: must-test `FDF6E3`, known-fail `FBEDEC`,
-  blocked/settled `F5F5F3`.
 - Tint columns A–K for row state and leave **Result** untinted, so the
   conditional-format colour reads cleanly instead of fighting the row.
-- Colour is always a second signal. A blocked row still says `BLOCKED —`
-  in text, because colour is invisible to some readers and lost on print.
+
+### REJECTED — muted palette. Do not implement.
+
+Recorded only so it is not reinvented (it was, once — the
+`*-runsheet-calm-example.xlsx` iteration). Muted slate header `3E5C76`,
+grey gridlines `D9D9D9`, pale tints (must-test `FDF6E3`, known-fail
+`FBEDEC`, blocked/settled `F5F5F3`): calmer in isolation,
+**indistinguishable in a grid** — the tester could not tell amber from
+cream from grey and stopped trusting the colour at all. Distinguishable
+beats gentle. The saturated palette in "Colour — reuse the existing
+palette" above is the one and only spec; if two sections of this file
+ever disagree again, the one the generator script implements wins and
+the other must be moved under a REJECTED heading like this one.
 
 ### Row states
 
@@ -156,7 +159,15 @@ accounted for rather than silently missing:
   naming what would unblock it and who can provide it. Grey the row.
 - **ALREADY SETTLED** — pre-fill **Result** with the existing verdict and
   put its source in **Notes** (`from code review`, `from API testing`).
-  The tester skips it unless they want to confirm.
+  The tester skips it unless they want to confirm. Reserved for
+  runtime-verified Low/Medium-risk verdicts only.
+- **VERIFY (spot-check)** — Result left EMPTY (dropdown live), Notes
+  carries `spot-check: machine PASS (<source>) — <why distrusted:
+  High-risk / code-reading only>`. The Do/Expect are trimmed to the
+  single fastest action that would expose a wrong PASS. Tint like
+  READY, not like settled — these rows are work, not history. On a
+  typical run this adds roughly the High-risk-PASS count in rows, not
+  the full settled set.
 
 ### Formatting
 

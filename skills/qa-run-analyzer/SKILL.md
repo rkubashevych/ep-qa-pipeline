@@ -51,6 +51,13 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 - Every REQ-N in the requirements file has >=1 checklist item; every
   behavioural requirement has >=1 test case. List orphans (REQ with no
   checks / no test cases).
+- **The AC→REQ seam** (the only unguarded end of the chain): when
+  `<KEY>-context.md` is present, every numbered/bulleted item in its
+  Requirements and "Additional requirements (from comments)" sections
+  maps to a REQ-N in the requirements file (grooming numbers them in
+  order of appearance, so this is a count + ordering comparison). An
+  AC item with no REQ is 🔴 — the whole downstream coverage guarantee
+  is anchored on this seam.
 - REQ-ID traceability is intact across requirements -> checklist ->
   test-cases -> code-review -> web-testing. Flag IDs that appear in one
   file but vanish in the next.
@@ -85,6 +92,11 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   cases being named in the human summary; 🔴 when any single report's
   Scope and Statistics totals disagree with each other (a real report
   shipped Scope 60 vs Statistics 62 and was resumed as "done").
+- Unmapped changes: if code-review's "Unmapped changes" section is
+  non-empty, surface each entry as 🟡 "PR behaviour with no covering
+  case — scope creep or missing requirement; decide which". If the
+  section is absent entirely (not even "None"), flag 🟡 that the
+  reverse gap check did not run.
 - Blast radius: if the pr-summary's "Shared / high blast-radius files"
   section is non-empty, surface it as 🟡 with a one-line note per file
   ("shared file X changed — flows outside this ticket may be affected;
@@ -175,6 +187,12 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
   (`qa-service-publish.md` → "Retraction convention"). The record is
   asserting something the run's own artifacts disprove — flag it until
   `qa-manual-results` has been run.
+- 🟡 manual results never ingested: runsheet outputs exist for this
+  ticket (`<KEY>-runsheet.xlsx` / testdata files, or the run report
+  says stage 9 ran) but no `<KEY>-manual-results.md` exists and no
+  manual-results comment is on the QA sub-task. The ticket's verdicts
+  are still PROVISIONAL however old they are — say so, never let
+  silence read as "verified".
 
 ### 6. Findings summary (Product)
 - Docs phase: # requirements, # checks, # test cases, channel

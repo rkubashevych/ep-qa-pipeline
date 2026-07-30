@@ -380,6 +380,10 @@ The report must be detailed:
 
 ## Classification
 
+Canonical definitions for ALL stages:
+`../qa-run-analyzer/references/status-vocabulary.md` — new or changed
+statuses land there first. This stage emits:
+
 Each test case gets one status:
 
 - `PASS` — the UI behavior matches the expected result
@@ -398,7 +402,13 @@ Each test case gets one status:
   mechanism, or code review was wrong.
 - `BLOCKED` — the test case cannot be executed. The element
   was not found, the page did not load, there is no access,
-  the precondition is unreachable.
+  the precondition is unreachable. **A BLOCKED needs a recorded
+  `Probe:`** — what was actually tried/checked to prove the blocker is
+  real (the navigation attempted, the setting page opened, the search
+  performed) and what it showed. No probe possible → write
+  `BLOCKED (unverified)` with what would verify it. Wrong blockers
+  keep being accepted: "no such setting" existed under another name,
+  "no brand on this event" had ten.
 - `OBSERVATION` — the test case passed (PASS), but a defect
   or anomaly outside the requirements scope was noticed.
 - `SPEC-DEFECT` — executing the case showed its premise or expected
@@ -470,7 +480,8 @@ Before saving, check:
   the expected result, the actual result.
 - Every FAIL REJECTED has: the code-review finding and what the
   agent saw in the UI.
-- Every BLOCKED has a reason.
+- Every BLOCKED has a reason AND a recorded probe (or is explicitly
+  `BLOCKED (unverified)` with what would verify it).
 - There are no test cases without a status.
 - For items with FAIL from code review —
   FAIL CONFIRMED or FAIL REJECTED was used, not PASS/FAIL.

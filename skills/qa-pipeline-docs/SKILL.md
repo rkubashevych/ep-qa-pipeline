@@ -75,14 +75,21 @@ the next stage automatically (they share the working directory).
      answer them (then regenerate from stage 2) or post the open items
      to the ticket. If the user asks for **interactive mode**, pause
      here and wait for decisions as grooming's own SKILL.md describes.
-   - **Open items → ticket (shift-left), bundled with publish.** If
-     genuinely open items remain — questions, contradictions needing
-     the PM/analyst, spec gaps — do not ask about them separately:
-     include a drafted ticket comment (one line per item, grouped
-     Questions / Contradictions / Gaps, no pipeline jargon) in the
-     stage-6 publish preview, as an opt-out part of that single
-     confirmation. Items the user answered in chat are settled — do
-     not post those.
+   - **Open items → ticket NOW, not at publish (shift-left is a clock,
+     not a label).** If genuinely open items remain — questions,
+     contradictions needing the PM/analyst, spec gaps — draft the
+     ticket comment immediately (one line per item, grouped Questions /
+     Contradictions / Gaps, no pipeline jargon), show it, and ask ONE
+     quick yes/no: "post these open questions to <KEY> now?". On yes,
+     post it before stage 3 starts; the run continues either way
+     without waiting for answers. Rationale: an answer that arrives
+     while stages 3–4 run can still fix the cases this run; a question
+     first seen at the publish preview has already cost the whole
+     phase (on a real ticket, five unanswered questions each became a
+     blocked or contested case downstream). Items the user answered in
+     chat are settled — do not post those. If the user declines the
+     stage-2 post, fall back to including the draft in the stage-6
+     publish preview as before.
    - Produces `<ISSUEKEY>-requirements.md`.
 
 3. **qa-checklist** -- run the `qa-checklist` skill.
@@ -216,7 +223,6 @@ After publishing, report:
 - The run-analyzer health verdict (🟢/🟡/🔴 per category) and any
   ⚠ SPECIAL ATTENTION items the code phase should know about.
 - The next step: run `qa-pipeline-code` on the Story key in a fresh
-  chat.
   chat. `qa-pipeline-code` ends by building the manual run sheet
   (`qa-manual-runsheet`), so do NOT run that stage here — the run sheet
   needs the automated verdicts to know what is left for the human.

@@ -64,6 +64,10 @@ Date: <YYYY-MM-DD>
 ### BLOCKED: TC-REQ-30.1 — <scenario name>
 - **Source:** QA
 - **Reason:** <missing auth/host/data, unreachable precondition, etc.>
+- **Probe:** <the verbatim call/check that proved the blocker + its
+  response — e.g. `GET /api/v1/... → 404 route not found on both
+  hosts`. If no probe was possible, the status must be
+  BLOCKED (unverified) with what would confirm it.>
 
 ---
 

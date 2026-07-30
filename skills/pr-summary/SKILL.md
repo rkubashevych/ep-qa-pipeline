@@ -76,7 +76,9 @@ this skill works only with code.
 - Describe what was changed, not how it was changed. Do not comment
   on code quality, style, architecture or naming.
 - Do not compare the changes against the task requirements. The skill
-  does not know the requirements — it only sees the code.
+  does not know the requirements — it only sees the code. (The
+  "Behaviours touched" list below is NOT a comparison — it is a
+  diff-derived inventory that code-review compares later.)
 - After saving the file — stop. Do not continue
   into code review or analysis.
 
@@ -156,6 +158,20 @@ output, each with one line naming what else consumes it — based only on
 what the code shows (imports, usages, table names). Do not speculate,
 do not analyze unchanged code beyond identifying consumers. If nothing
 shared was touched, write "None".
+
+## Behaviours touched (required section)
+
+From the diff ONLY — no requirements comparison — list every
+user-observable behaviour the PR changes, one line each: endpoints
+added/changed, settings/flags introduced or read differently, state
+fields written, counters/notifications affected, UI elements
+added/removed/re-wired, validation rules changed. This is an
+INVENTORY, not an assessment: code-review compares it against the test
+cases and reports anything no case exercises as "Unmapped changes" —
+the only way scope creep and unsanctioned side effects become visible.
+Derive it from the per-file descriptions you already wrote (it is
+mostly a regrouping); if the PR touches nothing user-observable, write
+"None".
 
 ## Verification before saving
 

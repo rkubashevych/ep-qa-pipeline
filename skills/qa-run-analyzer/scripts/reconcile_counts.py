@@ -27,6 +27,10 @@ PIPELINE-REVIEW-2026-07-30.md):
 - Range rows (`TC-REQ-29.1–29.3`) expand to every id in the range.
 
 Run `--selftest` before trusting the output on a new pipeline version.
+
+The status set mirrors ../references/status-vocabulary.md — the single
+home for status semantics. A status added there must be added to
+STATUSES below (longest-first) and to the self-test.
 """
 import os
 import re

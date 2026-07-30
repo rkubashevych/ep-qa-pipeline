@@ -185,6 +185,10 @@ Create `<ISSUEKEY>-api-testing.md` per `references/output-template.md`.
 
 ## Classification
 
+Canonical definitions for ALL stages:
+`../qa-run-analyzer/references/status-vocabulary.md` — new or changed
+statuses land there first. This stage emits:
+
 - `PASS` — the API response matches the expected result.
 - `FAIL` — a concrete discrepancy between expected and actual (for a
   case that arrived as QA from code review).
@@ -192,7 +196,12 @@ Create `<ISSUEKEY>-api-testing.md` per `references/output-template.md`.
   from code review: the API confirms (or refutes) the code-review bug.
 - `PARTIAL` — some steps/surfaces pass, others do not (record which).
 - `BLOCKED` — could not be executed: missing auth/host/data, endpoint
-  unreachable, or an unrevertible precondition.
+  unreachable, or an unrevertible precondition. **A BLOCKED needs a
+  recorded `Probe:`** — the verbatim call/check that proves the
+  blocker is real, plus its response. No probe possible → write
+  `BLOCKED (unverified)` instead, with what would verify it: wrong
+  blockers silently remove cases from testing, and nine of them across
+  two real runs dissolved on a single probe each.
 - `NOT-TESTABLE` — the case cannot be validated as written because the
   ticket's endpoint mapping is wrong or ambiguous; record the correct
   endpoint and what it actually does (reference §11.3). (Older reports

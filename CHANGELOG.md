@@ -5,6 +5,91 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.18.0 — 2026-07-30
+
+The trust-model release. Implements the accepted findings of
+`ORCHESTRATOR-DESIGN-REVIEW-2026-07-30.md` (a cold design review of
+both orchestrators against the creator's intent: human is the final
+arbiter, AI verdicts are provisional by architecture) plus the last
+quick items from the first review.
+
+**W1 — the handback waits for the human.** Step 8 no longer posts
+"QA passed" / applies the "QA done" transition on automated verdicts;
+both move to `qa-manual-results` step 4b (new), after the manual round.
+An explicit early note is titled "Automated QA passed — manual
+verification pending", with no transition.
+
+**W2 — VERIFY (spot-check) runsheet rows.** ALREADY SETTLED is now
+reserved for runtime-verified Low/Medium PASSes; machine PASSes on
+`[risk: High]` requirements and ALL code-reading-only PASSes become
+short spot-check rows (runsheet SKILL step 2 + format reference). The
+sheet stays lean; the tester's effort lands where the error model says
+the lies are.
+
+**W3 — PROVISIONAL is a record property.** The step-6 human summary
+carries `Status: PROVISIONAL — manual verification pending (N rows)`;
+the manual-results comment supersedes it; the analyzer flags 🟡 when
+runsheet outputs exist but manual results were never ingested.
+
+**W4 — grooming questions post at stage 2.** The open-items ticket
+comment moves from the publish bundle to immediately after grooming
+(one quick yes/no), so the PM clock starts four stages earlier.
+
+**W5 — reverse gap detection.** pr-summary gains a required
+"Behaviours touched" inventory (diff-only); code-review gains a
+closing "Unmapped changes" step (touched behaviour no case exercises);
+the analyzer flags each entry 🟡. Scope creep is now visible.
+
+**W8 — the AC→REQ seam is checked.** Analyzer: every numbered item in
+the context file's Requirements sections must map to a REQ-N; an AC
+item with no REQ is 🔴. The coverage chain is now anchored at the top.
+
+**W9 — retest mode.** `qa-pipeline-code` step 0: when the newest human
+summary is ❌ and the fix landed, scope the run to the failed cases +
+their REQ siblings + confirmed risk rows, post as `RETEST:` with
+supersede lines, offer bug-closing comments.
+
+**W6(b) — the suite/connector dead end is now a pre-flight check.**
+Chosen over always-posting the archive (keeps the 0.11.2 dedup):
+MAINTAINERS' environment matrix now lists the QA Service connector per
+phase, and step 0's environment check verifies suite-vs-connector-vs-
+archive availability up front instead of failing at extraction time.
+
+**W7 — cosmetics on load-bearing files.** Fixed the duplicated line in
+qa-pipeline-docs' final response (old truncation damage); "How it
+runs" items now carry their stage numbers; the code orchestrator's
+title/description say stages 5–10 and mention retest mode. (W10 — the
+dual-tag contradiction — was fixed the same day it was found.)
+
+**Status vocabulary home.** New
+`qa-run-analyzer/references/status-vocabulary.md` — every status, its
+emitting stages, meaning, and evidence requirements in one table; the
+three verdict stages, the templates, and `reconcile_counts.py` defer
+to it. Zero behaviour change.
+
+**First-review leftovers #11 and #15.** BLOCKED now requires a
+recorded `Probe:` in api-testing and web-testing (else
+`BLOCKED (unverified)`, analyzer-flagged) — nine wrong blockers across
+two runs dissolved on one probe each. The runsheet format's
+contradictory muted-palette section is now an explicit "REJECTED — do
+not implement" record; the saturated palette (what the generator
+implements) is the only spec.
+
+**Recorded rejections and deferrals** (per the MAINTAINERS loop rule):
+- First review finding 14's `<KEY>-verdicts.tsv` ledger: REJECTED — it
+  would add a fifth verdict surface when the failure mode is too many
+  half-authoritative surfaces; ⚠ CURRENT VERDICT + the PROVISIONAL
+  marker + the never-ingested check cover the need. Revisit only if
+  contradictions still slip through.
+- Design review's big consolidations (single routing invariant;
+  folding qa-checklist into test-cases) and small-noise deletions:
+  DEFERRED deliberately — too much rule-mass changed today already;
+  next consolidation pass.
+- Finding 13 (freeze-forever experiment outcome) remains a user
+  action, not a repo change.
+- #17 (settings.local.json wildcards) narrowed manually by the user —
+  the file is outside the plugin's editable tree.
+
 ## 0.17.0 — 2026-07-30
 
 Completeness, legalised improvisation, and requirements restore

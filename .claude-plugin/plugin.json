@@ -1,6 +1,6 @@
 {
   "name": "ep-qa-pipeline",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "ExpoPlatform QA pipeline - turns a Jira ticket into groomed requirements, a channel-tagged checklist, and test cases, then reviews the sub-task PRs, runs REST API testing ([API] cases), and runs browser UI testing ([UI] cases). Includes two one-command orchestrators (qa-pipeline-docs, qa-pipeline-code), a run-health analyzer, Jira QA-sub-task publishing, and QA Service suite publishing (via the QA Service MCP connector), plus a manual run-sheet stage (qa-manual-runsheet) that provisions and verifies fixture data on a test event and emits a lean Log in as / Do / Expect sheet for hand testing, and a manual-results stage (qa-manual-results) that ingests the completed sheet and corrects the published record with explicit retractions.",
   "author": {
     "name": "Roman Kubashevych"

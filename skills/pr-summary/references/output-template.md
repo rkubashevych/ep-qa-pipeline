@@ -23,6 +23,14 @@ Completeness: <complete | partial — N of M changed files not summarised: <reas
 |------|----------|--------------|
 | <path> | <category> | <short description> |
 
+## Behaviours touched
+> Diff-derived inventory of user-observable behaviour changes — one
+> line each. Code-review compares this list against the test cases;
+> anything no case exercises lands in its "Unmapped changes".
+
+- <endpoint / setting / state field / counter / UI element>: <what changed, one line>
+- None *(if the PR touches nothing user-observable)*
+
 ## Shared / high blast-radius files
 
 <"None", or one line per shared changed file:>

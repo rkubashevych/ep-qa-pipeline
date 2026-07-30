@@ -1,14 +1,16 @@
 ---
 name: qa-pipeline-code
 description: >
-  Orchestrator for the code + UI half of the QA pipeline (stages 5, 6,
-  7, 8, 9). Given a Story key, reads the test cases from the story's QA
+  Orchestrator for the code + UI half of the QA pipeline (stages
+  5-10). Given a Story key, reads the test cases from the story's QA
   sub-task (published by qa-pipeline-docs) and derives the dev branches
   from the backend/frontend sub-tasks, then runs pr-summary ->
   code-review -> api-testing -> web-testing -> run-analyzer, posts the
-  results back to the QA sub-task, and finally builds the manual run
-  sheet (qa-manual-runsheet) so a human can walk what the machine could
-  not settle. Auto-advances, pausing for the browser login, the Jira
+  results back to the QA sub-task (marked PROVISIONAL), builds the
+  manual run sheet (qa-manual-runsheet) so a human can walk what the
+  machine could not settle, verifies the published state, and defers
+  the final handback to qa-manual-results (stage 10). Also supports
+  retest mode for verifying dev fixes. Auto-advances, pausing for the browser login, the Jira
   write confirmation, and the test-event authorisation before any
   fixture is provisioned. Use it when the user says "run the QA code
   pipeline", "review the PRs and test in the browser", "do code review
@@ -16,7 +18,7 @@ description: >
   qa-pipeline-docs.
 ---
 
-# QA Pipeline -- Code & UI (stages 5, 6, 7, 8, 9)
+# QA Pipeline -- Code & UI (stages 5-10)
 
 > Recommended settings for the whole run: **Opus . Effort: High .
 > Extended thinking: On**. Code review (stage 6) benefits most.
@@ -55,6 +57,14 @@ reachable (a mounted folder holding them, or the env vars set). If
 they are not, say so NOW and ask the user to either mount the folder
 that has them or run this phase from Claude Code (see MAINTAINERS
 "Where to run each stage") — do not discover this mid-run at stage 5.
+
+**QA Service connector is part of this check.** If the QA sub-task's
+description names a QA Service suite and the connector is NOT in this
+session, there is nothing to rebuild the cases from — a
+suite-published ticket carries no Jira archive (0.11.2 dedup). Verify
+this NOW: suite named + no connector + no archive comment → PAUSE and
+tell the user to enable the connector or start from a session that has
+it. Never discover this at extraction time.
 
 **Same-session shortcut:** if the `<STORY>-test-cases.md` (and
 checklist) files are already in the working directory — e.g. you ran
@@ -150,6 +160,19 @@ Otherwise, using the Atlassian connector and the Story key:
      (typically web-testing in Cowork after 5–7 ran in Claude Code),
      unless the user asks to re-run. Tell the user which stages were
      restored complete vs partial vs pending before continuing.
+   - **Retest mode (the fix came back):** when the QA sub-task's
+     newest human summary (or manual-results comment) is ❌ FAIL and
+     the user says the fix has landed, do not re-run everything. Scope
+     this run to: every FAIL / FAIL CONFIRMED case (including
+     retracted-to-FAIL ones), the other cases of the same REQ groups
+     (the fix's blast radius), and any `RISK-CR-*` rows that were
+     confirmed. Run stages 5–8 on that scope only — pr-summary on the
+     fix branch/PR — and post the results as a normal comment pair
+     with the verdict line prefixed `RETEST:`. Write-backs follow the
+     retraction convention (a FAIL that now passes gets its supersede
+     line), and verified bugs get a closing comment offered on their
+     tickets. Everything else from the prior run keeps its verdicts —
+     say so in the summary.
 2. **Dev branches.** `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype in ("Backend sub-task","Frontend
    sub-task")`. Each dev sub-task's **key is its branch name** (e.g.
@@ -215,17 +238,17 @@ multi-PR story does not exhaust the orchestrator's context:
 - If subagents are not available, run everything inline as before,
   and make sure stage 8 starts with enough context left.
 
-1. **pr-summary** -- run on the derived branches (branch mode; the
+1. **pr-summary (stage 5)** -- run on the derived branches (branch mode; the
    repository-scoped token is enough) or, when step 0's fallback found
    PR URLs on the main issue, on those PRs directly. Groups changes
    per sub-task (or per PR/branch when there are no sub-tasks).
    Produces `<STORY>-pr-summary.md`.
 
-2. **code-review** -- run on the test-cases + pr-summary across all the
+2. **code-review (stage 6)** -- run on the test-cases + pr-summary across all the
    branches. Keys results by REQ-ID with a PR/branch column.
    Produces `<STORY>-code-review.md`.
 
-3. **api-testing** -- run on the code-review + test-cases. Executes the
+3. **api-testing (stage 7)** -- run on the code-review + test-cases. Executes the
    `[API]` cases (status QA/FAIL) against the REST API via curl using
    `.env` credentials; covers admin REST, legacy admin-panel and
    exhibitor-token (frontend) cases. Read-only by default; any write
@@ -234,7 +257,7 @@ multi-PR story does not exhaust the orchestrator's context:
      admin creds) or a per-event frontend host is missing.
    - Produces `<STORY>-api-testing.md`.
 
-4. **web-testing** -- run on the code-review + test-cases + checklist
+4. **web-testing (stage 8)** -- run on the code-review + test-cases + checklist
    (the checklist supplies the `[UI]` structural checks).
    - Executes only `[UI]` test cases. `[API]` cases are handled by
      stage 3 (api-testing); only `[mobile]`/`[export/email]` remain
@@ -325,19 +348,24 @@ multi-PR story does not exhaust the orchestrator's context:
      the filed bug keys; apply the "back to dev" transition from
      `qa-pipeline-docs/references/publish-config.md` if one is
      configured there.
-   - **Verdict ✅ PASS:** offer to post the short "QA passed" note to
-     the PARENT story (template: "Story note — QA passed" in
-     `references/results-comment-template.md`) so managers and devs
-     see the outcome without opening the QA sub-task, and to apply
-     the "QA done" transition from publish-config (if configured);
-     the posted comments remain the record.
+   - **Verdict ✅ PASS: the handback WAITS for the human.** Automated
+     verdicts are provisional (the creator's own base rates: ~half of
+     machine results wrong) — so do NOT post the "QA passed" story
+     note or apply the "QA done" transition at this step by default.
+     Both move to `qa-manual-results` step 4, after the manual round
+     confirms the verdict. If the user explicitly wants a story note
+     now, post the provisional variant — title it
+     "✅ Automated QA passed — manual verification pending" (template
+     note in `references/results-comment-template.md`) and apply no
+     transition. A machine-only PASS must never be dressed as a final
+     one.
    - Transitions are optional: when publish-config has none
      configured, skip transitions and only do the reassignment +
      comment. Before attempting any transition, verify it exists via
      `getTransitionsForJiraIssue`; if the configured name is not
      available, list the available ones and ask the user.
 
-9. **Build the manual run sheet — run `qa-manual-runsheet`.** Every
+9. **Build the manual run sheet — run `qa-manual-runsheet` (stage 9).** Every
    ticket here is hand-tested after the machine finishes, so this is a
    real step, not an optional extra. Read
    `qa-manual-runsheet/SKILL.md` and follow it in full.
@@ -345,11 +373,13 @@ multi-PR story does not exhaust the orchestrator's context:
    **Why it belongs at the END of this phase, not in the docs phase.**
    The run sheet's value is that it tells the human what is *left*. It
    can only do that once the automated verdicts exist: it carries
-   `Code review` / `API verdict` / `Ready?` per case, marks the rows the
-   machine already settled, and leaves the tester the remainder. Run it
+   `Code review` / `API verdict` / `Ready?` per case, marks the
+   runtime-verified Low/Medium rows as settled, turns High-risk and
+   code-reading-only machine PASSes into short VERIFY (spot-check)
+   rows, and leaves the tester the remainder. Run it
    after the docs phase and every verdict column is empty, so the tester
    walks all 89 cases blind — on a real ticket that was the difference
-   between **89 rows and 11**.
+   between **89 rows and 11** (plus a handful of spot-checks).
 
    - **REQUIRED PAUSE.** This stage creates accounts and entities on a
      live event. Ask for the throwaway test event id and explicit
@@ -389,7 +419,7 @@ multi-PR story does not exhaust the orchestrator's context:
    final response. A ❌ here is a real finding — fix it or tell the
    user, never bury it.
 
-10. **Ingest the manual results — `qa-manual-results` (deferred).**
+10. **Ingest the manual results — `qa-manual-results` (stage 10, deferred).**
     The human run happens after this orchestrator finishes — often days
     later, in a different chat. When the tester hands back the filled
     run sheet (or a TC/Result/Notes table), run `qa-manual-results`: it

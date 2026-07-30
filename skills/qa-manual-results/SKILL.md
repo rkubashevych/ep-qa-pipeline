@@ -116,6 +116,23 @@ Show the user exactly what will be written, then on explicit yes:
 - Connector absent → suite write-back is skipped with a visible note;
   the Jira comments still carry everything.
 
+### Step 4b — The deferred handback (this stage owns it)
+
+The code phase deliberately does NOT post the final "QA passed" story
+note or apply the "QA done" transition — automated verdicts are
+provisional until this stage runs. Now that the manual results are in:
+
+- Overall verdict still ✅ PASS after ingestion (no unresolved RETRACTS
+  to FAIL, no new FAILs): offer the "Story note — QA passed" to the
+  PARENT story (template:
+  `../qa-pipeline-code/references/results-comment-template.md`) and
+  the "QA done" transition from publish-config, exactly as step 8
+  would have — same confirm rules.
+- Verdict flipped to ❌ (retractions/new FAILs): offer the reassign +
+  "Story note — QA failed" path from `qa-pipeline-code` step 8
+  instead, and make sure any earlier provisional story note is
+  superseded by a comment stating the corrected outcome.
+
 ### Step 5 — Offer to file unfiled bugs
 
 Any FAIL whose Notes carry no bug key: one offer listing them all —

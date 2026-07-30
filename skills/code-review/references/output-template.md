@@ -40,6 +40,15 @@ PR column = which sub-task PR the test case was checked against
 
 ---
 
+## Unmapped changes
+> Behaviours from pr-summary's "Behaviours touched" list that NO test
+> case exercises — the reverse gap (code did something the
+> requirements never sanctioned). One line each, with the file. Write
+> "None" rather than omitting; if the pr-summary has no Behaviours
+> section (older file), note that here.
+
+- <behaviour>: <file> — no covering case
+
 ## Risks
 > Hazards seen in the code that NO test case covers — numbered, so
 > stages 7/8 can chase them as `RISK-CR-<n>` rows and step 6 can

@@ -159,8 +159,18 @@ cases (rule 6).
 - **NEEDS FIXTURE** — requires something you cannot create (a differently
   configured event, an ownerless entity, a log-group grant). Say exactly
   what would unblock it and who can provide it.
-- **ALREADY SETTLED** — an existing verdict file already answers it.
-  Carry the verdict and its source so the human skips it.
+- **ALREADY SETTLED** — an existing verdict file answers it with
+  runtime-grade evidence (executed in stage 7/8 under the
+  absence-check protocol) AND the case's risk is Low/Medium. Carry the
+  verdict and its source so the human skips it.
+- **VERIFY (spot-check)** — the machine has a PASS, but it is exactly
+  the kind the creator's error model distrusts: a PASS on a
+  `[risk: High]` requirement, or ANY PASS whose only evidence is code
+  reading (code-review PASS, never executed). One short-form row: same
+  Log in as / Do / Expect, trimmed to the fastest action that would
+  expose a wrong PASS. Never mark these skipped — the whole point of
+  the manual round is that ~half of unverified machine PASSes are
+  historically wrong, and the High-risk ones are where that hurts.
 
 Probe every NEEDS FIXTURE reason against the live system before
 accepting it (rule 5).

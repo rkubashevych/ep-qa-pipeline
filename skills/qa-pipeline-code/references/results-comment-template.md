@@ -105,6 +105,10 @@ settings, reproduced in both UI and API.">
 - TC-REQ-N.M (SPEC-DEFECT): the case/requirement says <X>; the spec /
   observed deliberate behaviour is <Y> — fix the case, not the code
 
+Status: PROVISIONAL — automated verdicts; manual verification pending
+(<N> rows on the run sheet, incl. <N> spot-checks). Final status
+arrives with the manual-results comment, which supersedes this line.
+
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
 report (archive comment above).
 
@@ -154,12 +158,15 @@ Never edit or delete earlier comments — newest pair wins.
 - Numbers in the stage table must match the report files' Statistics
   blocks exactly.
 
-## Story note — QA passed (step 8)
+## Story note — QA passed (posted by qa-manual-results step 4, NOT step 8)
 
 Posted to the **PARENT story** (not the QA sub-task) when the overall
-verdict is ✅ PASS, after the user confirms — managers and devs read
-the story, not the sub-task. ≤10 lines, plain words, no pipeline
-jargon.
+verdict is ✅ PASS **after the manual results are ingested** — managers
+and devs read the story, not the sub-task. ≤10 lines, plain words, no
+pipeline jargon. Step 8 must not post this on automated verdicts
+alone; if the user insists on a story note at step 8, use the title
+"✅ Automated QA passed — manual verification pending", include the
+`Status: PROVISIONAL` line, and apply no workflow transition.
 
 ```markdown
 ✅ QA passed — <STORY>: <feature in plain words>

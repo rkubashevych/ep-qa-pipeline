@@ -24,7 +24,11 @@ Optimise for both: keep them **scannable top-to-bottom with short lines**.
 - **Channel tags:** the requirement heading carries the union of its
   cases' tags (`## REQ-1 — State select filters leads  [UI]`); each
   test-case heading carries exactly ONE tag
-  (`### TC-REQ-1.2 — Returning to the full list  [UI]`). The per-case
+  (`### TC-REQ-1.2 — Returning to the full list  [UI]`) — except
+  provenance-sensitive cases (counter/analytics/lead/notification
+  assertions), which carry the dual tag
+  (`### TC-REQ-5.1 — Counter increments  [API][UI]`; SKILL.md
+  "Provenance-sensitive exception"). The per-case
   tag is what api-testing and web-testing route on.
 
 ---
