@@ -47,6 +47,18 @@ From the checklist, the skill takes:
   individually on its `### TC-REQ-N.M` heading — a requirement can mix
   channels (one `[UI]` check and one `[API]` check), and the executing
   stages route per test case, not per requirement.
+  **Provenance-sensitive exception — dual tag allowed:** when the
+  expected result reads a counter / lead / analytics / statistics /
+  notification / dashboard surface, the endpoint alone cannot prove the
+  behaviour (API-created actions often skip client-side tracking), so
+  such a case may carry `[API][UI]` — meaning "the call is API-shaped,
+  but the verdict needs the browser". Web-testing takes dual-tagged
+  cases into scope; api-testing may run the API half but may not record
+  the final PASS (see
+  `../api-testing/references/absence-check-protocol.md`). This tag is
+  advisory routing made at the docs phase, blind — code review may
+  still `RE-ROUTE` any case once it has seen the code, and that
+  re-route wins over the tag.
 
 Additional source:
 - The user's answers to questions asked before generation.
@@ -210,6 +222,15 @@ After generating the test cases and before saving the file:
   Instead, use a concrete value, state, or behaviour.
 - Test data is realistic and marked where it is not from the
   requirement.
+- **The statistics block is derived mechanically, never tallied by
+  hand.** Count the `### TC-REQ` headings and their channel tags
+  (grep-style over the generated text; where a shell is available:
+  `grep -c '^### TC-REQ'` and per-tag counts). Hand tallies of this
+  file have produced three different answers for the same 89 headings
+  — and the number gets copied into Jira and used to build suite
+  levels. Dual-tagged `[API][UI]` cases are counted once, under a
+  separate `[API][UI]` row, not once per tag. The totals row must
+  equal the number of headings exactly.
 
 If a problem is found, fix it before saving.
 

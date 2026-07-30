@@ -336,6 +336,40 @@ case (skip not-executed ones):
   run result — run outcomes live in notes; the only status the pipeline
   ever changes after creation is `na` for a superseded case (docs
   phase).
+
+### Improvised coverage becomes permanent (same step-6 write-back)
+
+- **Confirmed risk rows** (`RISK-CR-<n>` executed by stage 7/8 with
+  FAIL CONFIRMED, or worth keeping regardless): propose each as a real
+  suite test case (`suggest_test_case` when available, else
+  `create_test_case` after the same confirmation) so next run has a
+  case where this run had only an improvisation. Say how many in the
+  preview.
+- **SPEC-DEFECT verdicts:** append a `discrepancy:` line to the suite
+  case's notes stating what the case says vs what the spec/behaviour
+  is, and list the case under "Requirements to correct" in the human
+  summary. Do not silently fix the case text — the correction goes
+  through the docs-phase owner.
+
+### Retraction convention — how a wrong verdict gets corrected
+
+Binding on EVERY writer of run lines (code-phase step 6,
+`qa-manual-results`, any future stage). Notes are append-only history,
+so a correction is a new line, never an edit of an old one — but it
+must be impossible to read the old verdict as current:
+
+- When a new verdict **contradicts** a previously recorded run line for
+  the same case, append the supersede form instead of a plain run line:
+  `Run <YYYY-MM-DD> (<source>) — SUPERSEDES <prior date/source>
+  (<old> → <new>): <one-line reason>; bug <KEY if any>`.
+- Additionally maintain a single **first line** of `notes`:
+  `⚠ CURRENT VERDICT: <verdict> (<YYYY-MM-DD>, <source>)`.
+  Add it on the first retraction; rewrite it (that line only) on every
+  later one. Readers that read nothing else read this.
+- The stage that writes a retraction also says so in its Jira human
+  summary — retractions listed first, `old → new` with the reason. A
+  correction that only lives in suite notes has not been communicated.
+- Never delete or edit prior run lines; the history is the audit trail.
 - Include the write-back in the step-6 preview (how many cases get a
   result note) and report the PASS/FAIL counts written in the final
   response. Connector absent → skip silently-but-visibly, as always.

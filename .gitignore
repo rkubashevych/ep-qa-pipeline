@@ -1,4 +1,16 @@
-# pipeline run outputs
+# ────────────────────────────────────────────────────────────────
+# RUN WORKSPACE — this repo doubles as the run working directory.
+# Every per-ticket artifact is ignored by BROAD rule, not by filename:
+# a new artifact name must never be one `git add -A` from a commit.
+# (That recipe is banned in MAINTAINERS.md; commit explicit paths only.)
+# ────────────────────────────────────────────────────────────────
+
+# Any per-ticket run artifact, any stage, any extension (EP-12345-*.*)
+EP-*
+# future layout: per-run folders
+runs/
+
+# stage outputs for non-EP ticket keys (belt and braces)
 *-context.md
 *-requirements.md
 *-checklist.md
@@ -8,34 +20,39 @@
 *-api-testing.md
 *-web-testing.md
 *-run-report.md
-# fixtures are committed even though they match the patterns above
-!fixtures/*.md
-# secrets / local
+*-run-analyzer.md
+
+# local investigation / review working files
+*-alpha-repro.md
+*-flow-gap-analysis.md
+*-remaining-cases-triage.md
+*-results-archive.md
+_vidframes/
+.playwright-mcp/
+.claude/
+
+# generated data-pack / runsheet builders (embed fixture + account detail)
+build_*.py
+
+# ────────────────────────────────────────────────────────────────
+# SECRETS — never committed, anywhere in the tree
+# ────────────────────────────────────────────────────────────────
 .env
 .env.*
+*-testdata.json
+*-testdata-notes.md
+*-testdata.md
+*-runsheet.xlsx
+*-runsheet-*.xlsx
+*-sample-runsheet.xlsx
+*-manual-test-data-pack.xlsx
+*-preserved-entries.tsv
 *.diff
 navigation_paths.json
 
+# packaging
 *.plugin
-# local investigation artifacts
-*-alpha-repro.md
-_vidframes/
 
-# manual run-sheet stage: these carry LIVE test-account credentials
-*-testdata.json
-*-testdata-notes.md
-*-runsheet.xlsx
-*-manual-test-data-pack.xlsx
-build_data_pack_*.py
-*-freezeforever-testdata.md
-# run evidence + local tooling state
-*-flow-gap-analysis.md
-*-remaining-cases-triage.md
-EP-*.png
-EP-*.xlsx
-.playwright-mcp/
-.claude/
-*-preserved-entries.tsv
-*-sample-runsheet.xlsx
-build_sample_runsheet.py
-build_runsheet_*.py
+# fixtures are committed even though they match the patterns above
+!fixtures/EP-*
+!fixtures/*.md

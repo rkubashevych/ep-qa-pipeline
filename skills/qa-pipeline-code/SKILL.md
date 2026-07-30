@@ -91,6 +91,14 @@ Otherwise, using the Atlassian connector and the Story key:
      `[UI]` presence/label/field-type checks have no test case and exist
      only there; stage 8 needs them. If that block is missing on an
      older ticket, say so — structural checks will be skipped.
+     **Also rebuild `<STORY>-requirements.md` from the suite's
+     requirements** (title, kind, risk, and the stableId → REQ-N
+     mapping carried on the tracker lines): without it, the analyzer's
+     traceability check silently cannot run in any fresh-chat code
+     phase — the documented normal flow. When there is no suite, use
+     the requirements block from the docs archive comment (posted
+     since 0.17.0); on older tickets where neither exists, say once
+     that upstream traceability cannot be re-verified this run.
    - no suite line, or no connector → fall back to the **fenced archive
      comments**, which the docs phase posts in exactly that case.
    - neither available → tell the user to re-run `qa-pipeline-docs` (or
@@ -124,11 +132,24 @@ Otherwise, using the Atlassian connector and the Story key:
      comment** from an earlier partial run (fenced blocks labeled
      `File: <STORY>-code-review.md` etc. — see
      `references/results-comment-template.md`), extract those files to
-     the working directory too. A stage whose report file exists is
-     done — skip it and continue from the first missing stage
+     the working directory too. Also extract, when present:
+     `File: <STORY>-manual-results.md` (posted by `qa-manual-results`)
+     and any `File: <STORY>-remaining-cases-triage.md` — they carry
+     verdict corrections that SUPERSEDE the stage reports; a resumed
+     run that reconciles cases must honour them over older PASS/FAIL
+     lines. **A stage is done only if its report is COMPLETE — file
+     existence is not completion.** For each restored report, read its
+     `Completeness:` header (older reports lack one — then derive it:
+     do the Scope and Statistics totals agree, and is every in-scope
+     case present in Results or Not-executed-here?). A report that is
+     `partial`, internally inconsistent, or header-less-and-uncheckable
+     gets its stage RE-DISPATCHED for the missing cases — a resumed
+     run must not inherit "NOT EXECUTED 15" as "done" (a real run did
+     exactly that). Skip only stages whose reports are complete, and
+     continue from the first missing or partial stage
      (typically web-testing in Cowork after 5–7 ran in Claude Code),
      unless the user asks to re-run. Tell the user which stages were
-     restored vs pending before continuing.
+     restored complete vs partial vs pending before continuing.
 2. **Dev branches.** `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype in ("Backend sub-task","Frontend
    sub-task")`. Each dev sub-task's **key is its branch name** (e.g.
@@ -232,6 +253,15 @@ multi-PR story does not exhaust the orchestrator's context:
 6. **Post results back to the QA sub-task** -- TWO comments, per
    **`references/results-comment-template.md`** (formats live there,
    not here):
+   - **Count gate first — refuse to post while a mismatch stands.**
+     Where a shell is available, run
+     `python3 <plugin>/skills/qa-run-analyzer/scripts/reconcile_counts.py <STORY>`
+     (self-test first) and compare its mechanical counts against each
+     report's own Scope/Statistics numbers. Any disagreement (a
+     report's Scope vs its Statistics, or a report vs the mechanical
+     count, or an ID set with unexplained missing cases) is fixed in
+     the report BEFORE the preview is shown — wrong numbers must not
+     reach Jira, the suite, or the human summary.
    - **REQUIRED PAUSE / CONFIRM.** Show what will be posted (both
      comments), to which sub-task, and — when the QA Service connector
      is present — the result write-back line (how many executed cases
@@ -338,6 +368,36 @@ multi-PR story does not exhaust the orchestrator's context:
      blocked split, and anything that could not be provisioned.
 
    Skip only if the user says they are not hand-testing this ticket.
+
+   **Post-publish verification — always the last action of the run.**
+   The analyzer ran at step 5, BEFORE publishing, bug filing, and the
+   run sheet existed — so nothing it certified covers what steps 6–9
+   actually did. Verify the final state now:
+   - **Write-back landed:** connector present → `get_test_case` on a
+     sample (all, if few) of the cases step 6 planned to annotate;
+     confirm the run line is in `notes` and the count matches the
+     plan. Connector absent → state that no durable per-case record
+     exists beyond the Jira comments.
+   - **Bugs traceable:** every FAIL / FAIL CONFIRMED across the three
+     reports has either a filed bug key or an explicit "not filed —
+     <reason>" line in the human summary. No silent FAILs.
+   - **Comments exist:** both step-6 comments (archive + human
+     summary) are on the sub-task — re-read, don't assume.
+   - **Runsheet outputs exist** (unless the user skipped stage 9).
+   Append the outcome as a `## Post-publish verification` section to
+   `<STORY>-run-report.md` (✅/❌ per item) and include one line in the
+   final response. A ❌ here is a real finding — fix it or tell the
+   user, never bury it.
+
+10. **Ingest the manual results — `qa-manual-results` (deferred).**
+    The human run happens after this orchestrator finishes — often days
+    later, in a different chat. When the tester hands back the filled
+    run sheet (or a TC/Result/Notes table), run `qa-manual-results`: it
+    joins the results by TC id, reconciles them against what step 6
+    published, and writes back to Jira + the suite **with explicit
+    retractions** where the human overturned an automated verdict.
+    End THIS run by telling the user that step exists: the published
+    verdicts are provisional until the manual results are ingested.
 
 ## Between stages
 

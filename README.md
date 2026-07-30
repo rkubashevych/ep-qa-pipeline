@@ -23,6 +23,7 @@ These skills were adapted for ExpoPlatform's stack:
 | 7 | `api-testing` | code-review + test-cases (+ `.env`) | `<KEY>-api-testing.md` | Sonnet · High |
 | 8 | `web-testing` | code-review + test-cases | `<KEY>-web-testing.md` | Sonnet · High |
 | 9 | `qa-manual-runsheet` | verdicts from 6/7/8 + test cases | `<KEY>-runsheet.xlsx` + `-testdata.json` | Sonnet · High |
+| 10 | `qa-manual-results` | completed runsheet (Result/Notes) | `<KEY>-manual-results.md` + Jira/suite write-back | Sonnet · Medium |
 
 > Per-stage settings apply when running a stage on its own. The orchestrators (`qa-pipeline-docs`, `qa-pipeline-code`) instead recommend one setting for the whole run (Opus · High · thinking on) to avoid switching models mid-run — with subagent dispatch, heavy stages get fresh context anyway.
 
@@ -30,7 +31,9 @@ These skills were adapted for ExpoPlatform's stack:
 
 > **Stage 9 = `qa-manual-runsheet`.** The last step of `qa-pipeline-code`, because it needs the automated verdicts to know what is left for a human. Provisions and verifies fixture data on a throwaway test event and emits a lean *Log in as / Do / Expect* run sheet for hand testing. It reads the cases from the **QA Service suite** (the machine's source of truth) and writes any correction back there — the run sheet is a view and is **never** an input to an automated stage. Its `references/provisioning-rules.md` carries the pipeline-wide false-pass traps (UI-only preconditions, analytics ingestion lag, instruments that report capability as state).
 
-> Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post + stage 9 run sheet).
+> **Stage 10 = `qa-manual-results`.** The return leg: when the tester hands back the filled run sheet (or a TC/Result/Notes table), this stage joins the results **by TC id, never row position**, reconciles them against the published automated verdicts, and writes back to Jira + the suite — with explicit **retractions** (`SUPERSEDES: old → new` + a `⚠ CURRENT VERDICT` line) wherever the human overturned a published PASS/FAIL. Until it runs, the published verdicts are provisional.
+
+> Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post + stage 9 run sheet, with stage 10 run on demand when the manual results come back).
 
 ## How the flow works
 
@@ -42,6 +45,8 @@ These skills were adapted for ExpoPlatform's stack:
 6. **code-review** — verifies each test case against the PR code and produces a compact pass/fail table with findings for failures.
 7. **api-testing** — executes the `[API]` cases (code-review QA/FAIL items) against the running REST API via curl using `.env` credentials; covers admin REST, legacy admin-panel, and exhibitor-token (frontend) cases. Read-only by default; any write snapshots-and-reverts or uses a throwaway entity. Pauses if `.env` / a per-event frontend host is missing.
 8. **web-testing** — executes the `[UI]` QA items and any failed code-review items in a real browser (Chrome extension), confirming bugs in the UI, and writes a detailed report.
+9. **qa-manual-runsheet** — provisions fixture data on a throwaway event and emits the *Log in as / Do / Expect* sheet with the machine-settled rows pre-filled, so the human tests only what is left.
+10. **qa-manual-results** — ingests the completed sheet, joins by TC id, and corrects the published record with explicit retractions where the human proved a verdict wrong.
 
 ## Before you run
 

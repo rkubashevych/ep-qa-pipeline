@@ -24,7 +24,13 @@ if the chat is new):
 `<ISSUEKEY>-context.md`, `<ISSUEKEY>-requirements.md`,
 `<ISSUEKEY>-checklist.md`, `<ISSUEKEY>-test-cases.md`,
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
-`<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`.
+`<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
+`<ISSUEKEY>-manual-results.md`,
+`<ISSUEKEY>-remaining-cases-triage.md`, and any tester results table
+(`<ISSUEKEY>-preserved-entries.tsv` or similar TC/Result/Notes file).
+The last three carry post-publication corrections: when present, they
+are MORE current than the stage reports — a stage-report PASS
+contradicted there is a retracted verdict, not a pass.
 
 Detect the phase from what is present:
 - Docs phase = context/requirements/checklist/test-cases.
@@ -49,19 +55,36 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   test-cases -> code-review -> web-testing. Flag IDs that appear in one
   file but vanish in the next.
 - Counts reconcile (where a shell is available, run
+  `scripts/reconcile_counts.py --selftest` first — if the self-test
+  fails, do NOT trust the script: recount by hand and raise a 🔴
+  [Pipeline] finding. When it passes, run
   `scripts/reconcile_counts.py <ISSUEKEY>` from this skill's folder and
   verify its ID sets / status counts instead of recounting by hand —
-  you still judge WHY a gap exists):
+  you still judge WHY a gap exists. Note: `source PASS(code)=N` is a
+  source-marker tally, not a verdict count; range rows are expanded;
+  `RISK-*` ids appear as "ids NOT in test-cases" — that is expected for
+  risk-chasing rows, judge them, don't suppress them):
   code-review TC count == test-cases TC count;
-  web-testing executed == QA+FAIL `[UI]` items;
-  api-testing executed == QA+FAIL `[API]` items. Flag `[API]` items that
-  are neither in api-testing nor routed out.
+  web-testing executed == QA+FAIL `[UI]` items + routed-in cases
+  (api-testing's "Route to web-testing" + code-review `RE-ROUTE [UI]`);
+  api-testing executed == QA+FAIL `[API]` items minus those it routed
+  to web-testing. Flag `[API]` items that
+  are neither in api-testing nor routed out. Do not "certify" the
+  routing by arithmetic alone — if a case's hazard (from code-review
+  findings) lives on a surface its channel never touched, flag it 🔴
+  even when the counts balance.
 - Structural checklist items (`[UI]` presence/type/label checks with
   no test case) appear in web-testing's "Structural checks" section —
   as executed or explicitly "not visited". Flag structural checks
   that are neither there nor explained by a Notes line.
 - BLOCKED test cases (web-testing / api-testing) and any
   empty/placeholder sections.
+- Completeness integrity: 🔴 when a report whose `Completeness:`
+  header says `partial` (or that lacks the header AND has internal
+  disagreement) feeds the run's final verdict without its missing
+  cases being named in the human summary; 🔴 when any single report's
+  Scope and Statistics totals disagree with each other (a real report
+  shipped Scope 60 vs Statistics 62 and was resumed as "done").
 - Blast radius: if the pr-summary's "Shared / high blast-radius files"
   section is non-empty, surface it as 🟡 with a one-line note per file
   ("shared file X changed — flows outside this ticket may be affected;
@@ -100,7 +123,11 @@ suite:` line in the QA sub-task description) and report ONE of:
 - 🔴 **publish incomplete / mismatch** — suite exists but counts or
   IDs diverge from the files: list the missing/extra stableIds.
 - 🟡 **write-back missing** — code phase only, when run after step 6:
-  executed cases whose suite notes lack the run line.
+  executed cases whose suite notes lack the run line. (In the
+  orchestrated flow this analyzer runs BEFORE step 6, so this check
+  cannot fire there — the orchestrator's mandatory **post-publish
+  verification** after step 9 covers it instead. On an on-demand
+  analyzer run after publish, check it here.)
 - 🔴 **zeroed status buckets** — every case-status bucket reads 0
   against a non-zero total: the cases were written with a `status`
   outside `planned/implemented/partial/deferred/na` (e.g. `draft`).
@@ -124,12 +151,38 @@ step verifies itself, but this skill re-checks it with fresh
 instructions in a later stage/chat, so a silently skipped or partial
 publish surfaces here.
 
-### 5. Findings summary (Product)
+### 5. Evidence quality (Pipeline) — can the verdicts be believed?
+
+Audit against `../api-testing/references/absence-check-protocol.md`:
+
+- 🔴 any absence-check PASS (in api-testing or web-testing) with no
+  positive control recorded on the same surface in this run.
+- 🔴 any PASS/PARTIAL on an instrumented-surface assertion (counter /
+  lead / analytics / statistics / notification / dashboard) whose
+  precondition provenance is API-created or unstated.
+- 🔴 the same surface cited as conclusive evidence in one case and
+  dismissed as unmeasurable/lagging in another case of the same run
+  (one run carried nine PASSes and one BLOCKED on the same
+  "No data to show" read — those cannot both be right).
+- 🟡 any absence verdict from a single immediate read with no second
+  read after the measured ingestion lag.
+- 🟡 routing integrity: every case in api-testing's "Route to
+  web-testing" section and every code-review `RE-ROUTE [UI]` case
+  appears in web-testing's Results (or its Not-executed-here with a
+  reason). A routed case that vanished is a coverage hole, not a pass.
+- 🔴 retraction integrity: any case whose manual result / triage entry
+  contradicts a published verdict with no supersede line recorded
+  (`qa-service-publish.md` → "Retraction convention"). The record is
+  asserting something the run's own artifacts disprove — flag it until
+  `qa-manual-results` has been run.
+
+### 6. Findings summary (Product)
 - Docs phase: # requirements, # checks, # test cases, channel
   breakdown, # needing clarification.
-- Code phase: code-review PASS/FAIL/QA/N/A; api-testing PASS/FAIL/
+- Code phase: code-review PASS/FAIL/QA/RE-ROUTE/N/A; api-testing PASS/FAIL/
   FAIL CONFIRMED/FAIL REJECTED/PARTIAL/BLOCKED/NOT-TESTABLE (older
-  reports may use QA for this) plus any
+  reports may use QA for this) plus NOT-TESTABLE (instrumentation)
+  routed cases and any
   endpoint-mapping corrections (ticket endpoint != real endpoint);
   web-testing PASS/FAIL/FAIL CONFIRMED/FAIL REJECTED/BLOCKED/OBSERVATION;
   the list of confirmed bugs; what was routed to "Not executed here"

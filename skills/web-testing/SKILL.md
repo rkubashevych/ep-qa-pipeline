@@ -55,6 +55,16 @@ re-listing those cases as unverified; only when it does not exist do
 `[export/email]` cases always go into "Not executed here" with their
 tag, so they are visibly routed rather than silently dropped.
 
+**Two overrides beat the channel tag** (the tag was assigned by a
+stage that never saw the code or the system, so stages that did see
+them may re-route):
+1. Cases in api-testing's **"Route to web-testing"** section
+   (instrumented-surface assertions the API cannot measure) — take
+   them into scope even though they are tagged `[API]`.
+2. Cases marked **`RE-ROUTE [UI]`** by code review (the assertion
+   originates in client-side code) — take them into scope regardless
+   of tag.
+
 The issue key follows the Jira format `PROJECT-123` (for example `EP-1234`).
 
 If the code-review file is not provided — ask before starting.
@@ -152,7 +162,13 @@ This information helps to understand exactly what to check in the UI.
 Split the QA/FAIL scope by channel tag. Each test case carries its
 own tag on the `### TC-REQ-N.M` heading; older files may tag only the
 requirement heading — then that tag applies to all its cases. Only
-`[UI]` test cases are executed in the browser. For `[API]` cases:
+`[UI]` test cases are executed in the browser — **plus the routed-in
+cases:** everything in api-testing's "Route to web-testing" section
+(if that file exists) and every case code review marked `RE-ROUTE
+[UI]`. Routed-in cases join the working list with their origin noted
+("routed from api-testing: instrumentation" / "re-routed by code
+review"). For their preconditions, follow the provenance rule below.
+For `[API]` cases:
 if `<ISSUEKEY>-api-testing.md` is present, add one line to the report
 — "[API] cases executed by api-testing (stage 7), see
 <ISSUEKEY>-api-testing.md" — instead of listing them as unverified;
@@ -291,6 +307,16 @@ For each test case in the scope:
      the data: where to create it, which values to set, whether there is
      a ready record that can be used. Do not create
      data yourself without instructions from the user.
+   - **Provenance rule (routed-in and instrumented-surface cases):**
+     if the case asserts on a counter / lead / analytics / statistics /
+     notification / dashboard surface, its precondition must be created
+     **through the UI in this run** — an API-created fixture is invalid
+     evidence for these cases
+     (`../api-testing/references/absence-check-protocol.md`). If the
+     no-unrequested-writes rule forbids creating it, PAUSE and ask the
+     user to perform the setup action by hand, then continue. Never
+     silently skip, and never read the surface against an API-created
+     fixture and call it a verdict.
    - If the next test case requires a different
      page — go to it (check the memory
      or ask the user).
@@ -375,10 +401,26 @@ Each test case gets one status:
   the precondition is unreachable.
 - `OBSERVATION` — the test case passed (PASS), but a defect
   or anomaly outside the requirements scope was noticed.
+- `SPEC-DEFECT` — executing the case showed its premise or expected
+  result is wrong (the UI element it assumes does not exist as
+  described, the expected behaviour contradicts the ticket's own
+  spec). Not a FAIL, not a PASS: the case or requirement needs
+  correcting. Feeds the human summary's "Requirements to correct"
+  section.
+
+Risk-chasing rows: a code-review risk with no covering test case MAY
+be exercised as a `RISK-CR-<n>` row when its surface is on a page this
+run already visits — same evidence rules as a FAIL case. Step 6
+proposes confirmed risk rows as permanent suite cases.
 
 Rules:
 - Do not mark PASS if there is any doubt — prefer FAIL with a description.
 - Do not mark FAIL without a concrete description of the discrepancy.
+- **Absence checks** ("nothing appears", "no row", "zero count") follow
+  `../api-testing/references/absence-check-protocol.md`: no PASS
+  without a positive control observed on the same surface this run,
+  and — on analytics-backed surfaces — a second read after the
+  measured ingestion lag. A single immediate clean read is not a PASS.
 - BLOCKED is not a FAIL. The test did not fail, it could not
   be executed.
 - OBSERVATION does not replace FAIL. If the expected result
@@ -416,9 +458,13 @@ caught your eye while going through the test cases.
 
 Before saving, check:
 
-- The number of test cases in the report equals the number
-  of QA + FAIL items from the code-review file. If it does
-  not match — find the missing ones and add them.
+- The number of test cases in the report equals the number of
+  QA + FAIL **`[UI]`** items from the code-review file, plus every
+  routed-in case (api-testing's "Route to web-testing" and code
+  review's `RE-ROUTE [UI]`). Additionally, every QA/FAIL case of ANY
+  channel appears exactly once somewhere: in this report's Results, in
+  its "Not executed here" section, or in the referenced api-testing
+  report. If a case appears nowhere — find it and add it before saving.
 - The order of the test cases matches the order in the test-cases file.
 - Every FAIL and FAIL CONFIRMED has: which step,
   the expected result, the actual result.

@@ -63,6 +63,12 @@ Never skip steps 1 and 4.
   a validation error, or check that `navigate` reached a new URL.
 - Do not use `computer wait` with a fixed number of
   seconds. Always wait for a specific element or text.
+- **Exception — absence checks.** You cannot wait for an element that
+  must never appear, and analytics-backed surfaces ingest with a lag.
+  For a check whose expected result is "nothing appears": wait until
+  the run's positive control is visible on the same surface (proof
+  ingestion caught up), then read the absence. See
+  `../../api-testing/references/absence-check-protocol.md`.
 
 ## Finding elements
 

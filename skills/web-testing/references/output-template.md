@@ -3,6 +3,7 @@
 Code review: <path to the code-review file>
 Test cases: <path to the test-cases file>
 Host: <the base URL / test host actually used>
+Completeness: <complete | partial — N of M in-scope cases not executed: <reason>>
 Notes: <carry forward any warning/unresolved-conflict note from the code-review or test-cases file; omit the line if none>
 Date: <YYYY-MM-DD>
 

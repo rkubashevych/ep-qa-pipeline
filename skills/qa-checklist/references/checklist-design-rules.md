@@ -159,6 +159,26 @@ transition conditions
 **Table / list:** presence → columns/fields → data is displayed →
 sorting (if any) → pagination (if any) → empty state
 
+## Provenance-sensitive checks — when one channel tag is not enough
+
+A check whose expected result reads a **counter, lead, analytics,
+statistics, notification, or dashboard** surface cannot be proven by an
+API call alone: actions performed over the API frequently never enter
+client-side tracking, so the surface stays clean whether the feature
+works or not (this produced a false pass on a privacy requirement in a
+real run). For these checks:
+
+- Tag them `[API][UI]` (dual tag) rather than forcing a single channel.
+  The API half can exercise the call; only the browser half can read
+  the instrumented surface against UI-created data.
+- For absence checks ("nothing appears", "count stays 0"), word the
+  check so it names its positive control — the thing that proves the
+  surface CAN show data ("counter reads 1 for the public favourite AND
+  0 for the private one"), not a bare "nothing appears".
+- Remember the tag is assigned blind (this stage must not inspect code
+  or system). It is a routing hint, not a verdict about where the
+  behaviour lives — code review may re-route it after seeing the code.
+
 ## Filtering out unnecessary checks
 
 Do not generate checks for:

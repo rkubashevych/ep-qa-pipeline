@@ -5,6 +5,228 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.17.0 — 2026-07-30
+
+Completeness, legalised improvisation, and requirements restore
+(Findings 8, 9 and 10 of `PIPELINE-REVIEW-2026-07-30.md`).
+
+Finding 8 — a code-review PASS removed a case from all runtime
+execution (65% of EP-53978's cases never touched a running system),
+and resume treated file-existence as completion:
+- **code-review**: PASS only when the expected result is fully
+  determined by the code text; runtime observables (counter values,
+  absence on a surface, notifications, exports, cache behaviour over
+  time) are QA however convincing the code.
+- **`Completeness: complete | partial — N of M …` header** required in
+  pr-summary, code-review, api-testing and web-testing templates.
+- **Resume re-dispatches partial stages**: step 0 reads the header (or
+  derives it on older reports) and never inherits "NOT EXECUTED 15" as
+  done. The human summary carries "N of M verified by code reading
+  only".
+- **Analyzer**: 🔴 partial report feeding a final verdict; 🔴 Scope vs
+  Statistics disagreement inside one report.
+
+Finding 9 — the run's two best product findings came from stage 7
+breaking its contract; the templates and script could not represent
+them:
+- **Legalised:** executing code-review-PASS cases (Source
+  `PASS(code)`), `NOT EXECUTED` (with reason, distinct from BLOCKED),
+  and risk-chasing `RISK-CR-<n>` rows for code-review risks with no
+  covering case — code-review now emits a numbered "Risks" section for
+  them, and step 6 proposes confirmed risk rows as permanent suite
+  cases (`qa-service-publish.md`).
+- **New `SPEC-DEFECT` status** (code-review, api-testing, web-testing):
+  the case/requirement is wrong, not the code — feeds a "Requirements
+  to correct" section in the human summary and a `discrepancy` note on
+  the suite case. `reconcile_counts.py` understands it (self-test
+  extended). (`VACUOUS` from the gap analysis is deliberately NOT
+  added — `NOT-TESTABLE (instrumentation)` from 0.14.0 covers it.)
+
+Finding 10 — fresh-chat code phases never restored the requirements,
+so the analyzer's traceability check silently could not run in the
+documented normal flow:
+- **step 0 rebuilds `<STORY>-requirements.md`** from the suite's
+  requirements (stableId → REQ-N via the tracker lines); the docs
+  phase's no-suite archive now includes the requirements file; when
+  neither exists (older tickets) the run says so once instead of
+  degrading silently.
+
+## 0.16.0 — 2026-07-30
+
+Post-publish verification + count gates (Findings 6 and 7 of
+`PIPELINE-REVIEW-2026-07-30.md`). The analyzer runs at step 5, before
+publishing (6), bug filing (7) and the run sheet (9) — so its
+"write-back missing" check was unreachable by construction, and no one
+ever verified the run's final published state. Separately, report
+numbers were hand-tallied (three counts of the same 89 headings gave
+three answers) and posted to Jira unchecked.
+
+- **`qa-pipeline-code`: mandatory post-publish verification** as the
+  last action of the run: write-back notes actually landed (re-read a
+  sample via `get_test_case`), every FAIL has a bug key or an explicit
+  "not filed" line, both step-6 comments exist (re-read, don't
+  assume), runsheet outputs exist. Result appended to the run report
+  as `## Post-publish verification` and stated in the final response.
+- **Count gates:** `qa-pipeline-code` step 6 refuses to post while a
+  report's numbers disagree with `reconcile_counts.py` (or with the
+  report's own Scope vs Statistics); `qa-pipeline-docs` step 6
+  mechanically recounts the `### TC-REQ` headings before posting the
+  tracker statistics; `qa-test-cases` derives its statistics block by
+  counting headings, never by hand (dual-tag `[API][UI]` counted once,
+  own row).
+- **Analyzer** bucket 4 now states plainly where its write-back check
+  can and cannot fire, pointing to the orchestrator's post-publish
+  verification for the orchestrated flow.
+
+## 0.15.0 — 2026-07-30
+
+Verdict corrections (Finding 2 of `PIPELINE-REVIEW-2026-07-30.md`).
+Step 6 publishes verdicts before the human run exists; on EP-53978 the
+triage and the tester then overturned at least eight of them — and
+nothing could say so: no retraction convention, and the tester's actual
+results (a TC/Result/Notes TSV) were read by no skill. The system of
+record kept asserting PASS on a violated privacy requirement.
+
+- **Retraction convention** in `qa-service-publish.md` → "Result
+  write-back", binding on every writer of run lines: a contradicting
+  verdict appends `Run <date> — SUPERSEDES <prior> (<old> → <new>):
+  <reason>` and maintains a single `⚠ CURRENT VERDICT:` first line in
+  the case notes. History is append-only; the current truth is
+  unmissable. Retractions are also listed first in the Jira human
+  summary.
+- **New stage 10: `qa-manual-results`.** Ingests the completed run
+  sheet (xlsx Result/Notes) or a pasted TC/Result/Notes table or the
+  triage file; **joins by TC id, never row position**; classifies each
+  entry CONFIRMS / FILLS / RETRACTS (+ non-standard verdicts and
+  unmatched rows, never coerced or dropped); writes
+  `<KEY>-manual-results.md`; posts the archive + human-summary comment
+  pair; writes suite notes under the retraction convention; offers to
+  file unfiled FAIL bugs. One confirm pause before any write.
+- **Wiring:** `qa-pipeline-code` gains deferred step 10 and now ends by
+  saying the published verdicts are provisional until manual results
+  are ingested; its resume mode restores `manual-results` and triage
+  files and honours them over older stage reports. The analyzer's
+  inputs now include `<KEY>-manual-results.md`,
+  `<KEY>-remaining-cases-triage.md` and tester TSVs, with a 🔴
+  retraction-integrity check (contradiction with no supersede line).
+  README stage table/flow, MAINTAINERS repo tree (which had omitted
+  stage 9 — both 9 and 10 now listed), and the plugin description
+  updated.
+
+## 0.14.0 — 2026-07-30
+
+False-pass defenses + channel re-routing (Findings 1 and 3 of
+`PIPELINE-REVIEW-2026-07-30.md`). The verdict-producing stages could
+not tell a false pass from a pass — the anti-false-pass knowledge
+lived only in `qa-manual-runsheet`, which runs after verdicts are
+published — and the channel tag was an irreversible routing decision
+made blind at the docs phase. Both mechanisms produced the EP-53978
+false PASSes (TC-REQ-37.1, TC-REQ-16.3).
+
+- **New shared reference
+  `api-testing/references/absence-check-protocol.md`** — binding on
+  stages 7 and 8, audited by the analyzer: (1) API-created data cannot
+  prove anything on an instrumented surface (counters / leads /
+  analytics / statistics / notifications / dashboards); (2) an absence
+  check with no positive control is VACUOUS, not PASS; (3) measure the
+  ingestion lag once per run and read absence twice — never from a
+  single immediate read; (4) "anywhere" claims enumerate surfaces per
+  role or cap at PARTIAL.
+- **api-testing**: new status `NOT-TESTABLE (instrumentation)` + a
+  "Route to web-testing" report section (provenance gate in Step 4;
+  template updated). It no longer records PASS/PARTIAL on instrumented
+  surfaces fed by API-created preconditions.
+- **web-testing**: takes routed-in cases into scope regardless of
+  channel tag (api-testing's routed section + code-review `RE-ROUTE
+  [UI]`); pauses for the user to create UI preconditions where its
+  no-write rule forbids it; absence checks require the positive
+  control + post-lag second read. Its completeness check is now
+  satisfiable: `[UI]` QA/FAIL + routed-in, and every QA/FAIL case of
+  any channel must appear exactly once somewhere (also closes the
+  four-cases-vanished hole from Finding 7).
+- **browser-rules "Waiting"**: absence-check exception — wait for the
+  positive control to appear, then read the absence (the old rule was
+  backwards for absence checks).
+- **code-review**: new status `RE-ROUTE [UI]` with file+line evidence
+  — the first stage that sees the code can now override a blind docs-
+  phase channel tag. Template + statistics updated.
+- **qa-test-cases / qa-checklist**: provenance-sensitive checks may
+  carry a dual `[API][UI]` tag; absence checks are worded with their
+  positive control; the tag is documented as a routing hint that
+  code review may override, not a verdict.
+- **qa-run-analyzer**: new "Evidence quality" bucket (🔴 absence-PASS
+  without positive control; 🔴 instrumented-surface PASS with API
+  provenance; 🔴 same surface conclusive+unmeasurable in one run;
+  🟡 single-read absence verdicts; routing integrity for routed
+  cases). Health table + chat summary updated. The reconcile check no
+  longer "certifies" blind routing when counts balance.
+- **reconcile_counts.py**: understands `RE-ROUTE [UI]` (self-test
+  extended).
+
+Verdict semantics change: runs will report fewer automated PASSes on
+analytics-backed claims and more routed/instrumentation statuses —
+that is the point; those PASSes were unearned.
+
+## 0.13.2 — 2026-07-30
+
+The improvement loop (Finding 4 of `PIPELINE-REVIEW-2026-07-30.md`).
+Run reports kept issuing 🔴 pipeline fixes that nothing consumed — the
+2026-07-28 report's two named repairs were still absent two releases
+later. This release closes the loop mechanism and implements both.
+
+- **MAINTAINERS recipe, new step 1:** any 🔴 [Pipeline/skill] item in
+  the latest run report / triage must be implemented (CHANGELOG entry)
+  or explicitly rejected in the CHANGELOG. A recommendation with
+  neither is an open defect of the plugin.
+- **`reconcile_counts.py` rewritten** — the three defects the run
+  report named, plus two found while fixing: statuses now count only on
+  result rows (statistics tables no longer inflate counts); ids no
+  longer swallow trailing periods; one status per row (adjacent-pipe
+  undercount gone); bold (`**FAIL CONFIRMED**`) and qualified
+  (`NOT-TESTABLE (instrumentation)`, `BLOCKED (unverified)`) statuses
+  count; `PASS(code)` is tallied as a source marker, never as PASS;
+  range rows (`TC-REQ-29.1–29.3`) expand; `RISK-*` ids are visible.
+  Ships `--selftest`; the analyzer must run it before trusting output,
+  and recount by hand + raise 🔴 if it fails. Verified against
+  EP-53978: mechanical counts now match the review's hand counts
+  (89 ids; code-review PASS=58/QA=28/N-A=2/FAIL=1).
+- **`bitbucket-access.md` — "Credential handling — hard rules":** never
+  a credential in a URL / inline in a command; one-shot credential
+  helper recipe for clone/fetch; a failed command that touched a secret
+  is a rotation event. (The 2026-07-28 token-echo fix, finally landed.)
+
+Not done here (later findings): re-status of TC-REQ-1.1 and the token
+rotation itself are run-side actions, not repo changes — flagged to the
+maintainer; runs/<KEY>/ layout still pending.
+
+## 0.13.1 — 2026-07-30
+
+Secrets safety (Finding 5 of `PIPELINE-REVIEW-2026-07-30.md`). The
+plugin root doubles as run workspace and credential store, and the
+ignore list was per-filename whack-a-mole — five run artifacts were
+sitting untracked-and-unignored while the documented commit recipe was
+`git add -A`.
+
+- **`.gitignore` rewritten to broad rules.** `EP-*` (all per-ticket
+  artifacts, any extension), `build_*.py`, `*-testdata*`, all runsheet
+  xlsx variants, `*-preserved-entries.tsv`, `runs/` — replacing the
+  nine-per-run filename patterns. Fixtures keep their negation. A new
+  artifact name can no longer leak by being new.
+- **`git add -A` banned in MAINTAINERS.** Both recipes (update +
+  publish) now require: `git status --short` review → secret scan
+  (`secret-leak-scan` skill or gitleaks) → `git add <explicit paths>`.
+- **`qa-manual-runsheet` Step 7** now ends with a mandatory secret scan
+  and an ignore-coverage check over its own emitted artifacts (they
+  carry live credentials by design).
+- **`.env.qa-agents` co-location documented** as a deliberate risk in
+  MAINTAINERS ("Gotchas"): `git archive` is safe, raw folder copies are
+  not. Also fixed the stale `D:\Coding\…` repo path (now
+  `C:\media-files\Coding\qa-pipeline-skill`).
+
+Not done here (tracked as review findings): moving run outputs to
+`runs/<KEY>/`, the run-report 🔴-items enforcement rule (Finding 4),
+and narrowing `.claude/settings.local.json` allowlists (Finding 17).
+
 ## 0.13.0 — 2026-07-29
 
 `qa-manual-runsheet` is now **stage 9 of `qa-pipeline-code`**, not an

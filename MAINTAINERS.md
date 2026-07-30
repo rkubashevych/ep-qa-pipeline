@@ -6,8 +6,8 @@ then the README, then the specific `skills/<stage>/SKILL.md`.
 
 ## Golden rule — where the real skill lives
 
-- **Edit here:** `D:\Coding\qa-pipeline-skill` (this repo). This is what
-  gets published and installed.
+- **Edit here:** `C:\media-files\Coding\qa-pipeline-skill` (this repo).
+  This is what gets published and installed.
 - **Never edit the installed copy.** When a plugin is installed, Claude
   loads it from a read-only cache (e.g. `…/.remote-plugins/plugin_XXX/`
   or `…/.claude/skills/`). Editing that cache does nothing — changes
@@ -33,9 +33,11 @@ skills/
   code-review/                 # stage 6
   api-testing/                 # stage 7  — [API] cases, REST/curl
   web-testing/                 # stage 8  — [UI] cases, browser
+  qa-manual-runsheet/          # stage 9  — fixture provisioning + human run sheet
+  qa-manual-results/           # stage 10 — ingest completed sheet, retract wrong verdicts
   qa-run-analyzer/             # run-health check (both phases)
   qa-pipeline-docs/            # orchestrator: stages 1-4 + Jira publish
-  qa-pipeline-code/            # orchestrator: stages 5-6-7-8 + analyzer + Jira post
+  qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
 ```
 
 Each stage folder is the same shape:
@@ -112,9 +114,19 @@ No files need to be carried between environments.
 
 ## How to update — recipe
 
-1. **Change the relevant `SKILL.md` / `references/`.** Keep `SKILL.md`
+1. **Consume the last run's findings first — this rule is load-bearing.**
+   If the most recent `<KEY>-run-report.md` (or a triage /
+   flow-gap-analysis file from that run) contains a 🔴 item tagged
+   [Pipeline] or [Pipeline/skill], you must do one of two things before
+   or with your change: implement it (with a CHANGELOG entry), or record
+   the rejection and its reason in the CHANGELOG. **A run-report
+   recommendation with neither is an open defect of the plugin.** Run
+   outputs are git-ignored working files — they do not survive the
+   workspace. The CHANGELOG is where their lessons become permanent;
+   a lesson that never reaches a tracked file was never learned.
+2. **Change the relevant `SKILL.md` / `references/`.** Keep `SKILL.md`
    lean; put heavy detail in `references/`.
-2. **If you added or renamed a stage, wire it into the orchestrator and
+3. **If you added or renamed a stage, wire it into the orchestrator and
    analyzer** (this is the step people forget):
    - `skills/qa-pipeline-code/SKILL.md` — the title `(stages …)`, the
      numbered "How it runs" list, the Jira-comment contents, and the
@@ -123,18 +135,31 @@ No files need to be carried between environments.
      — the input file list, the counts-reconcile check, and the
      findings-summary line.
    - `README.md` — the stage table + the "How the flow works" list.
-3. **Smoke-test the docs stages** if you touched them: run
+4. **Smoke-test the docs stages** if you touched them: run
    `fixtures/EP-0000-context.md` through grooming → checklist →
    test-cases (skip the Jira publish) and check the expectations listed
-   at the bottom of the fixture still hold.
-4. **Bump the version in BOTH manifests** — `.claude-plugin/plugin.json`
+   at the bottom of the fixture still hold. If you touched
+   `reconcile_counts.py`, run `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`.
+5. **Bump the version in BOTH manifests** — `.claude-plugin/plugin.json`
    AND `.claude-plugin/marketplace.json` (the plugin entry's `version`).
    The app decides update availability from the **marketplace** manifest;
    if only plugin.json is bumped, the Update button stays inactive and
    reinstalls keep serving the old version. Add a `CHANGELOG.md` entry.
-5. **Commit** (run git locally — see gotcha below):
-   `git add -A && git commit -m "…"` then push.
-6. **Publish / update the installed plugin** (see below), and remove any
+6. **Secret-scan, then commit — explicit paths only** (run git locally —
+   see gotcha below). **Never `git add -A` or `git add .` in this repo**:
+   the working tree doubles as a run workspace holding live-credential
+   artifacts (`.env.qa-agents`, testdata packs, runsheets), and the
+   ignore list is a backstop, not a guarantee. The steps are:
+   1. `git status --short` — every untracked file must be either in your
+      change set or a run artifact you can explain. An untracked run
+      artifact that is not ignored means the `.gitignore` broad rules
+      have a hole — fix the pattern before committing.
+   2. Run a secret scan over the working tree (the `secret-leak-scan`
+      skill, or `gitleaks protect --staged` after staging).
+   3. `git add <the specific files you changed>` — e.g.
+      `git add skills/ README.md MAINTAINERS.md CHANGELOG.md .claude-plugin/ .gitignore`
+   4. `git commit -m "…"` then push.
+7. **Publish / update the installed plugin** (see below), and remove any
    duplicate standalone install of the changed skill.
 
 ## Where to look when something's off
@@ -170,8 +195,19 @@ No files need to be carried between environments.
   gets corrupted on write. Commit from a normal local terminal.
 - **Windows PowerShell** doesn't accept `&&`; run git lines separately
   or use `;`.
-- **Don't commit secrets or run outputs** — `.gitignore` covers `.env`,
-  the `<KEY>-*.md` pipeline outputs, `*.diff`, and `navigation_paths.json`.
+- **Don't commit secrets or run outputs** — `.gitignore` ignores run
+  artifacts by BROAD rule (`EP-*`, `build_*.py`, `*-testdata*`,
+  `*runsheet*.xlsx`, the `<KEY>-<stage>.md` patterns, `.env*`). If you
+  create a run artifact whose name escapes those patterns, widen the
+  pattern — do not add one filename. And commit explicit paths only;
+  `git add -A` is banned in this repo (recipe step 6). On one run, 84
+  live account passwords were one `git add -A` away from being committed.
+- **`.env.qa-agents` lives in this repo root by design** (the skills
+  read it from the mounted plugin folder). That co-locates live
+  credentials with the distributable: if you ever publish this folder by
+  copy (loose `.plugin` bundle, zip, local-path marketplace that copies
+  rather than clones), verify the env file is not inside the artifact —
+  `git archive` respects the index (safe), raw folder copies do not.
 - **api-testing pauses** if `.env` or a per-event frontend host is
   missing (the frontend host is per-event and not discoverable).
 
@@ -185,7 +221,7 @@ automatic (no packaging, no drag-and-drop).
 **One-time setup (do once):**
 1. Make sure the repo is a git repo with a commit (it is).
 2. Add this folder as a marketplace:
-   - Claude Code CLI: `/plugin marketplace add D:\Coding\qa-pipeline-skill`
+   - Claude Code CLI: `/plugin marketplace add C:\media-files\Coding\qa-pipeline-skill`
    - Cowork: Settings › Capabilities → add/manage marketplaces → point at
      this folder (local path) or its git URL.
 3. Install `ep-qa-pipeline` from the `expoplatform-qa` marketplace.
@@ -198,7 +234,9 @@ automatic (no packaging, no drag-and-drop).
 1. Edit the skill/reference files here.
 2. Bump `version` in `.claude-plugin/plugin.json` (semver) — the version
    bump is what signals an update.
-3. `git add -A && git commit` (push too if the marketplace is a remote).
+3. Secret-scan, then `git add <changed files>` and commit — never
+   `git add -A` (see the update recipe, step 6). Push too if the
+   marketplace is a remote.
 4. That's it — with `autoUpdate` on, the app pulls it on next startup;
    or force it now: `/plugin marketplace update expoplatform-qa` (CLI) /
    the "update" action in Cowork's marketplace UI.

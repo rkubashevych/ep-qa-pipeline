@@ -11,6 +11,7 @@ Generated: <YYYY-MM-DD>
 | Run / coverage health | 🟢 / 🟡 / 🔴 |
 | Input quality | 🟢 / 🟡 / 🔴 |
 | Skill / process | 🟢 / 🟡 / 🔴 |
+| Evidence quality | 🟢 / 🟡 / 🔴 (code phase; "—" on docs-only runs) |
 | QA Service sync | 🟢 in sync / 🟢 not published yet / 🟡 write-back missing / 🔴 mismatch / — connector absent |
 
 ## QA Service sync
@@ -29,6 +30,7 @@ Generated: <YYYY-MM-DD>
 
 - 🔴 [Input] No Confluence AC linked — requirements derived from Description only. Fix: add/link AC on the ticket.
 - 🟡 [Pipeline] REQ-7 has no test cases (behavioural). Fix: re-run qa-test-cases or check why it was treated as structural.
+- 🔴 [Pipeline] Evidence: TC-REQ-37.1 absence-PASS with API-created precondition / no positive control. Fix: re-run via web-testing per absence-check-protocol.md.
 - 🟡 [Product] FAIL CONFIRMED: TC-REQ-1.2 — <bug>. Fix: file a bug.
 
 If none: "No issues found — run is clean."
@@ -50,7 +52,7 @@ After writing the file, the chat message is exactly this shape
 (≤10 lines, worst news first, omit empty lines):
 
 ```
-Run health (<docs/code>): 🟢 coverage · 🟡 input · 🟢 process · 🟢 QA-sync (omit when connector absent)
+Run health (<docs/code>): 🟢 coverage · 🟡 input · 🟢 process · 🟢 evidence · 🟢 QA-sync (omit when connector absent; evidence on code runs only)
 
 Top issues (max 3):
 1. 🔴 [Input] <one line> — fix: <one line>

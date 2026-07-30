@@ -97,6 +97,13 @@ settings, reproduced in both UI and API.">
 
 - N [mobile] cases → manual/device testing; N [export/email] cases
   → export/MailDev
+- N of M cases verified by code reading only (code-review PASS — never
+  executed against a running system)
+
+**Requirements to correct** *(omit if none)*
+
+- TC-REQ-N.M (SPEC-DEFECT): the case/requirement says <X>; the spec /
+  observed deliberate behaviour is <Y> — fix the case, not the code
 
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
 report (archive comment above).

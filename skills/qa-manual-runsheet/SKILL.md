@@ -215,6 +215,14 @@ so the next person knows the two agree.
   sheets.
 - No blocked reason is unverified.
 - No absence-check row is missing its positive control.
+- **Secret scan before handover.** The emitted artifacts carry live
+  credentials by design (`-testdata.json`, the runsheet, the generator
+  script). Confirm every emitted file matches a `.gitignore` broad rule
+  (`git status --short` shows none of them as untracked-unignored), and
+  run a secret scan over the working tree (the `secret-leak-scan` skill
+  or `gitleaks`). If any emitted artifact escapes the ignore rules,
+  widen the pattern in `.gitignore` before handing over — never leave it
+  for the commit step to catch.
 
 State the counts (ready / needs fixture / already settled) and the
 verification results in the final response.

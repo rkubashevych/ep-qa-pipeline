@@ -24,7 +24,10 @@ The full method — auth contexts, token flows, route discovery, the
 response envelope, test-data discovery, write-safety, and the frontend /
 exhibitor-token cases — lives in **`references/api-testing-reference.md`**.
 Read it before running. This SKILL.md is the stage contract; the
-reference is the how-to.
+reference is the how-to. Also read
+**`references/absence-check-protocol.md`** — it is binding on every
+verdict this stage records on counters / leads / analytics /
+statistics / notifications / dashboards, and on every absence check.
 
 ## Input
 
@@ -119,6 +122,20 @@ Split anything non-`[API]` (`[mobile]`, `[export/email]`) into the
 report's "Not executed here" section. If there are no `[API]` items —
 tell the user there is nothing to run and stop.
 
+Two deliberate scope extensions (both proved their worth on a real
+run — its two most important product findings came from them):
+- **Code-review-PASS cases** MAY be executed when they are cheap and
+  adjacent to an identified hazard (same endpoint, same entity as a QA
+  case you are already running). Record them with Source `PASS(code)`.
+  Not running them is never a gap; running them never replaces the
+  QA/FAIL scope.
+- **Risk-chasing rows:** for each code-review risk that has NO covering
+  test case, you MAY add a `RISK-CR-<n>` row (name = the risk, source =
+  `code-review risk <n>`) and execute it like a case. A FAIL CONFIRMED
+  on a risk row is a confirmed bug like any other, and step 6 proposes
+  the row as a permanent suite case so next time it exists as a real
+  test case.
+
 Notify briefly:
 ```
 API scope: [N] cases.  QA: [N] · FAIL (confirm): [N].
@@ -147,6 +164,14 @@ test-cases order:
 1. Check the precondition (data state). If it needs a state that does
    not exist, either set it via a safe, revertible write (§9/§12) or, if
    that is not possible, mark BLOCKED with the reason.
+   **Provenance gate first:** if the case's assertion reads an
+   instrumented surface (counter / lead / analytics / statistics /
+   notification / dashboard) and the precondition would be created over
+   the API, do NOT execute-and-pass — classify
+   `NOT-TESTABLE (instrumentation)` per
+   `references/absence-check-protocol.md` and put it in the "Route to
+   web-testing" section. API-created data frequently never enters
+   client-side tracking, so a clean read proves nothing.
 2. Perform the call(s) with the correct auth context and headers
    (reference §1, §2, §11.2). For writes: snapshot first, write, then
    revert in teardown.
@@ -173,15 +198,45 @@ Create `<ISSUEKEY>-api-testing.md` per `references/output-template.md`.
   endpoint and what it actually does (reference §11.3). (Older reports
   used `QA` for this — do not: `QA` is an INPUT status from code
   review, never an output of this stage.)
+- `NOT-TESTABLE (instrumentation)` — this stage's instrument cannot
+  measure the claim: the assertion reads an instrumented surface
+  (counter / lead / analytics / statistics / notification / dashboard)
+  and the precondition is API-created, or an absence check has no
+  positive control (see `references/absence-check-protocol.md`). List
+  every such case in the report's **"Route to web-testing"** section —
+  web-testing picks them up regardless of their channel tag.
+- `NOT EXECUTED` — in scope but not attempted, for a stated
+  environmental reason (no non-GDPR event available, route not on the
+  supplied hosts, no BM endpoint). Distinct from BLOCKED: BLOCKED means
+  tried and could not; NOT EXECUTED means not attempted. Always with
+  the reason; these count toward the Completeness header's
+  "partial — N of M".
+- `SPEC-DEFECT` — executing the case showed its PREMISE or expected
+  result is wrong (the setting it assumes does not exist, the expected
+  value contradicts the ticket's own spec, the mapped behaviour is a
+  different feature). Not a product FAIL and not a PASS: the test case
+  or requirement needs correcting. Every SPEC-DEFECT feeds the human
+  summary's "Requirements to correct" section and a `discrepancy` note
+  on the suite case (step 6).
 
 Rules: prefer BLOCKED/NOT-TESTABLE over a false PASS; never PASS with
 doubt; every
 FAIL/PARTIAL needs the endpoint + observed vs expected; for code-review
 FAIL items use FAIL CONFIRMED / FAIL REJECTED, not plain PASS/FAIL.
+Absence checks and instrumented-surface assertions follow
+`references/absence-check-protocol.md` — no PASS without provenance,
+positive control, and the post-lag second read; "anywhere" claims
+enumerate surfaces per role or cap at PARTIAL.
 
 ## Verification before saving
 - Every `[API]` QA/FAIL case from code review appears in the results
   table (order matches the test-cases file).
+- Every `NOT-TESTABLE (instrumentation)` case also appears in the
+  "Route to web-testing" section with the precondition the browser run
+  must create through the UI.
+- No PASS/PARTIAL sits on an instrumented-surface assertion with an
+  API-created precondition, and no absence-check PASS lacks its
+  positive control + post-lag second read (protocol reference).
 - Every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED /
   NOT-TESTABLE has evidence (endpoint + observed vs expected, or the
   reason).
@@ -197,5 +252,6 @@ append). The template is in `references/output-template.md`.
 After saving, report: the path, the PASS / FAIL / FAIL CONFIRMED / FAIL
 REJECTED / PARTIAL / BLOCKED / NOT-TESTABLE counters, the overall
 verdict, any
-confirmed bugs, any endpoint-mapping corrections found, and what was
+confirmed bugs, any endpoint-mapping corrections found, what was routed
+to web-testing (instrumentation cases), and what was
 left for `[mobile]` / `[export/email]`.

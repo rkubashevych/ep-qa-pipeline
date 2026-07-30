@@ -219,7 +219,16 @@ FAIL only when there is concrete evidence:
 Each test case gets one status:
 
 - `PASS` — the code confirms that the behavior described
-  in the test case is implemented.
+  in the test case is implemented. **PASS is allowed only when the
+  expected result is fully determined by the code text.** If the
+  expected result is a runtime observable — a counter value, an
+  absence on a surface, a delivered notification, export contents,
+  cache behaviour over time, anything that depends on data, timing, or
+  an external system — the verdict is QA no matter how convincing the
+  code looks. A code-review PASS removes the case from all runtime
+  execution (stages 7 and 8 skip PASS cases), so an over-generous PASS
+  here is how 65% of a real run's cases never touched a running
+  system.
 - `FAIL` — the code shows that the behavior is not implemented,
   is implemented incorrectly, or contradicts the expectations.
 - `QA` — cannot be checked against the code. Requires
@@ -227,13 +236,37 @@ Each test case gets one status:
   layout, real data, integrations, permissions.
 - `N/A` — the item does not apply to this PR.
   The code related to this requirement is absent from the PR.
+- `RE-ROUTE [UI]` — the case carries the wrong channel tag: it is
+  tagged `[API]` (or `[mobile]`/`[export/email]`) but the code shows
+  its assertion originates in **client-side / UI code**, so testing it
+  over the API would exercise a different code path and could pass
+  while the real hazard ships. This stage is the FIRST one that sees
+  the code, so it is the first that can catch a mis-tag — the tag was
+  assigned at the docs phase, blind. A RE-ROUTE entry names the file
+  and line where the client-side behaviour lives, and web-testing
+  (stage 8) takes the case into its scope regardless of the tag.
+  RE-ROUTE implies "needs runtime verification in the browser" — it
+  replaces QA for that case, never PASS/FAIL.
+- `SPEC-DEFECT` — the code is consistent and deliberate, but the test
+  case's expected result contradicts what the ticket/spec itself
+  requires (or the case's premise names something that does not exist
+  in this codebase). The defect is in the CASE, not the code — record
+  file+line showing the deliberate behaviour and what the case should
+  say. Feeds the human summary's "Requirements to correct" section.
 
 Rules:
 - Do not mark PASS if there is any doubt — prefer QA.
 - Do not mark FAIL without concrete evidence from the code.
 - Do not mark N/A without concrete evidence from the code.
+- Do not mark RE-ROUTE without the file+line evidence that the
+  behaviour is client-side.
 - QA is a normal status. Many UI/UX and runtime
   checks cannot be confirmed from code alone.
+- While reviewing, compare each case's channel tag against where the
+  code actually implements the behaviour — a green PASS on the wrong
+  channel is exactly how a shipped defect stays invisible (a real run
+  PASSed a case via the client API while the hazard lived on the
+  legacy web edit path, which no stage then exercised).
 
 ## Output file
 
@@ -259,6 +292,8 @@ Before saving, check:
 - Every FAIL has a corresponding entry in Findings
   with a concrete file and line.
 - Every N/A has a corresponding entry in Findings with a reason.
+- Every RE-ROUTE has a corresponding entry in Findings with the
+  file+line of the client-side behaviour and the tag it overrides.
 - There is no FAIL without evidence from the code.
 - There is no N/A without evidence from the code.
 
@@ -266,4 +301,5 @@ Before saving, check:
 
 After saving the file, report:
 - The path to the saved file
-- PASS / FAIL / QA / N/A counters
+- PASS / FAIL / QA / RE-ROUTE / N/A counters
+- If any RE-ROUTE: one line each — which case, from which tag, why

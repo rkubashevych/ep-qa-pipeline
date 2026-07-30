@@ -3,6 +3,7 @@
 PRs: <one line per PR — issue key (role): URL / branch>
   - <EP-47975 (backend)>: <URL or branch>
   - <EP-54610 (frontend)>: <URL or branch>
+Completeness: <complete | partial — N of M changed files not summarised: <reason>>
 
 ## Changed files
 > When the summary covers several PRs, repeat the structure below once

@@ -163,6 +163,14 @@ the next stage automatically (they share the working directory).
      - Group by `### REQ-N — <label>  [channels]` headings so the
        tracker mirrors the test-cases file, and end the comment with
        the statistics block from the test-cases file.
+     - **Count gate — do not post a number you did not derive.** Before
+       posting, mechanically recount the `### TC-REQ` headings and
+       their channel tags (where a shell is available, run
+       `python3 <plugin>/skills/qa-run-analyzer/scripts/reconcile_counts.py <KEY>`;
+       otherwise count the headings directly). If the statistics block
+       disagrees with the mechanical count, FIX the test-cases file
+       first — never post the mismatched number to Jira or use it for
+       suite levels.
      - Nothing else goes in this comment. If a case genuinely needs its
        steps visible in Jira (a blocker a human must reproduce without
        QA Service access), add them to that ONE case, not to all.
@@ -182,11 +190,14 @@ the next stage automatically (they share the working directory).
        characters per ticket while keeping one authoritative copy of
        each artifact.)
      - **No suite (connector absent / user declined)** → post the full
-       `<ISSUEKEY>-checklist.md` and `<ISSUEKEY>-test-cases.md` contents
+       `<ISSUEKEY>-requirements.md`, `<ISSUEKEY>-checklist.md` and
+       `<ISSUEKEY>-test-cases.md` contents
        exactly as before, each inside its own fenced code block preceded
        by a plain `File: <name>` line, so `qa-pipeline-code` Step 0 can
-       still rebuild them. Do not shorten or reformat file contents
-       inside the blocks.
+       still rebuild them (the requirements file is what lets the
+       code-phase analyzer re-verify upstream traceability — without it
+       that check dies silently in every fresh chat). Do not shorten or
+       reformat file contents inside the blocks.
      - **Size limit:** a Jira comment body maxes out around ~32,000
        characters. Measure the assembled comment before posting; if it
        exceeds ~30,000, split it into several comments with the same

@@ -37,6 +37,33 @@ use PR-URL / REST mode if the token has been given the
   `BB_API_TOKEN` is a Bitbucket Cloud API token with scopes.
 - Use Basic auth: `-u "$BB_EMAIL:$BB_API_TOKEN"`.
 
+### Credential handling — hard rules
+
+These exist because a clone URL with an embedded token was echoed into
+a session log on a real run (2026-07-28 run report, 🔴).
+
+- **Never put a credential in a URL.** No
+  `https://user:token@bitbucket.org/...` — not for `git clone`, not for
+  `git remote add`, not for `curl`. A URL is echoed by git on every
+  error, stored in `.git/config`, and shown by `git remote -v`.
+- **Never paste a credential inline** in a command (literal token as an
+  argument) or in an `export TOKEN=...` line typed into the transcript.
+  Reference the environment variable (`$BB_API_TOKEN`) so the value
+  never appears in chat, logs, or shell history.
+- **Cloning/fetching without stored git credentials:** use a one-shot
+  credential helper that reads the env vars —
+  ```bash
+  git -c credential.helper='!f() { echo "username=$BB_EMAIL"; echo "password=$BB_API_TOKEN"; }; f' \
+    clone https://bitbucket.org/expoplatform/{repo}.git
+  ```
+  (works for `fetch`/`pull` the same way). This keeps the token out of
+  the URL, out of `.git/config`, and out of the process list.
+- **A failed command that touched a secret is a rotation event.** If a
+  command containing a credential errors in a way that echoes it into a
+  log, transcript, or artifact: treat the token as burned — tell the
+  user to rotate it, and record the rotation in the run report. Do not
+  reason about whether anyone probably saw it.
+
 > **App passwords are dead.** Bitbucket Cloud app passwords are
 > deprecated — new ones could not be created after September 2025, and
 > all remaining app passwords are permanently disabled as of June 9,
