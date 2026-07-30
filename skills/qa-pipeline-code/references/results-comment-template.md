@@ -174,6 +174,57 @@ Rules:
   remarks — never confirmed bugs (a confirmed bug means the verdict
   is not PASS).
 - Omit any line that would be empty (notes, Not covered).
-- Only for ✅ PASS. FAIL / PASS WITH GAPS use the reassignment path;
-  in the no-sub-task fallback (results already on the main issue),
-  still post this note — it is the manager-readable line on top.
+- Only for ✅ PASS. For FAIL / PASS WITH GAPS use the variant below.
+
+## Story note — QA failed (step 8)
+
+Also posted to the **PARENT story**, for the same reason: managers and
+devs read the story, not the sub-task — and that matters *more* when a
+run produced defects, not less. Post it **in addition to** the
+reassignment path, not instead of it.
+
+Group the defects by what a reader has to decide about them, not by the
+order they were filed. A flat list of thirteen keys tells a manager
+nothing; "three of these are privacy exposures and two are not this
+story's fault" tells them everything.
+
+```markdown
+❌ QA failed — <STORY>: <feature in plain words>
+
+**What was tested:** <1 sentence — the user-facing behaviour>
+**Environment:** <host / alpha env> · event <EVENT_ID if relevant>
+**Coverage:** <N> cases (<N> UI, <N> API, <N> mobile, <N> export) + code review of <PR>
+**Result:** <N> failed · <N> passed · <N> blocked · <N> not run. <N> defects raised.
+
+**What holds:** <1–2 sentences on what genuinely works — a reader needs to
+know how much of the feature is sound, not only that it failed>
+
+**Blocks release / needs a decision**
+- <KEY> — <one line, consequence first>
+
+**Feature incomplete**
+- <KEY> — <one line>
+
+**Data integrity**
+- <KEY> — <one line>
+
+**Not caused by this story** *(omit if none)*
+- <KEY> — <one line, and why it is out of scope>
+
+**Not covered:** <N> blocked by environment/access, <N> awaiting a manual run
+**Test docs:** https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path> *(bare URL)*
+**Details:** full reports and per-case verdicts on QA sub-task <KEY>
+```
+
+Rules:
+
+- Same numbers as the human summary's stage table.
+- **Lead each defect line with the consequence, not the mechanism.**
+  "Opted-out users are named to exhibitors" beats "consent evaluated at
+  the wrong point in the read filter".
+- Separate defects this story *caused* from ones it merely *surfaced*.
+  Environment faults and pre-existing bugs must not inflate the story's
+  apparent damage.
+- Always include **What holds**. A failure note that lists only breakage
+  misleads on scope; if the core of the feature is sound, say so.
+- Never imply a status transition the user has not approved.

@@ -22,10 +22,13 @@ These skills were adapted for ExpoPlatform's stack:
 | 6 | `code-review` | test-cases + pr-summary | `<KEY>-code-review.md` | Opus · High · thinking on |
 | 7 | `api-testing` | code-review + test-cases (+ `.env`) | `<KEY>-api-testing.md` | Sonnet · High |
 | 8 | `web-testing` | code-review + test-cases | `<KEY>-web-testing.md` | Sonnet · High |
+| 4.5 | `qa-manual-runsheet` | QA Service suite (or test-cases) | `<KEY>-runsheet.xlsx` + `-testdata.json` | Sonnet · High |
 
 > Per-stage settings apply when running a stage on its own. The orchestrators (`qa-pipeline-docs`, `qa-pipeline-code`) instead recommend one setting for the whole run (Opus · High · thinking on) to avoid switching models mid-run — with subagent dispatch, heavy stages get fresh context anyway.
 
 > **Stage 7 = `api-testing`.** Executes the `[API]` test cases directly against the ExpoPlatform REST API (curl / HTTP, no browser), so API cases are verified instead of routed out. Credentials are read at runtime from the e2e `.env` — never hardcoded. Stage 8 (`web-testing`) then runs only `[UI]` cases; `[mobile]` / `[export/email]` remain routed out. See `skills/api-testing/references/api-testing-reference.md` for the full method (auth contexts, route discovery, write-safety, frontend/exhibitor-token cases).
+
+> **Stage 4.5 = `qa-manual-runsheet`** (optional, manual branch). After the docs phase, provisions and verifies fixture data on a throwaway test event and emits a lean *Log in as / Do / Expect* run sheet for hand testing. It reads the cases from the **QA Service suite** (the machine's source of truth) and writes any correction back there — the run sheet is a view and is **never** an input to an automated stage. Its `references/provisioning-rules.md` carries the pipeline-wide false-pass traps (UI-only preconditions, analytics ingestion lag, instruments that report capability as state).
 
 > Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post).
 

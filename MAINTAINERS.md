@@ -144,6 +144,8 @@ No files need to be carried between environments.
 | A skill doesn't trigger / triggers wrongly | its `SKILL.md` frontmatter `description` |
 | Report format wrong | that stage's `references/output-template.md` |
 | API auth / route discovery / write-safety | `skills/api-testing/references/api-testing-reference.md` |
+| Manual run-sheet format (columns, row states) | `skills/qa-manual-runsheet/references/runsheet-format.md` |
+| Fixture provisioning rules + false-pass traps (UI-only, ingestion lag, unreliable instruments) | `skills/qa-manual-runsheet/references/provisioning-rules.md` |
 | Browser interaction rules | `skills/web-testing/references/browser-rules.md` |
 | Test login / host | `skills/web-testing/references/login-config.md` |
 | Jira custom-field / AC source | `skills/task-context/references/field-maps.md` |

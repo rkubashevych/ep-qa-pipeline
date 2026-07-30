@@ -5,6 +5,40 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.12.0 — 2026-07-29
+
+New stage **`qa-manual-runsheet`** (stage 4.5): provisions and verifies
+fixture data on a throwaway test event, then emits a lean run sheet a
+human can work straight through — one explicit "Log in as", one action,
+one expected result per row.
+
+Added after a run where the pack was technically complete and still cost
+the tester hours: it named accounts by internal fixture key, buried which
+one to log in as, and shipped **no Expected-result column at all**.
+
+The stage also carries the run's hard-won anti-false-pass rules, which
+apply to the whole pipeline and not just to it:
+
+- **UI-only conditions.** Favourite tracking fires client-side, so a
+  precondition created over the API never enters the analytics pipeline.
+  This produced a PARTIAL that hid a real privacy leak (EP-55701) and two
+  defects filed against the wrong root cause.
+- **Ingestion lag.** Analytics-backed surfaces lag 30–60 minutes; an
+  immediate read returns a clean result. This produced a false PASS on a
+  privacy requirement later filed as EP-55715.
+- **Instruments that lie.** `getInteractions.data.acc.favourite` is a
+  capability flag, not state; several precondition "verifications" built
+  on it were worthless.
+- **Probe every blocker.** Four cases were blocked on premises that each
+  dissolved on one check.
+- **Never share a fixture across counter cases**, and set every dependent
+  attribute explicitly — a fixture that defaults silently invalidates
+  cases quietly.
+
+References: `skills/qa-manual-runsheet/references/runsheet-format.md`
+(sheet spec) and `.../provisioning-rules.md` (traps + environment
+specifics, each recorded with the cost it actually caused).
+
 ## 0.11.2 — 2026-07-29
 
 De-duplication of what the docs phase writes to Jira, after measuring a

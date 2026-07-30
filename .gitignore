@@ -20,3 +20,18 @@ navigation_paths.json
 # local investigation artifacts
 *-alpha-repro.md
 _vidframes/
+
+# manual run-sheet stage: these carry LIVE test-account credentials
+*-testdata.json
+*-testdata-notes.md
+*-runsheet.xlsx
+*-manual-test-data-pack.xlsx
+build_data_pack_*.py
+*-freezeforever-testdata.md
+# run evidence + local tooling state
+*-flow-gap-analysis.md
+*-remaining-cases-triage.md
+EP-*.png
+EP-*.xlsx
+.playwright-mcp/
+.claude/
