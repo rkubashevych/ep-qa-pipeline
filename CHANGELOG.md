@@ -5,6 +5,29 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.13.0 — 2026-07-29
+
+`qa-manual-runsheet` is now **stage 9 of `qa-pipeline-code`**, not an
+optional side branch nobody invokes.
+
+It was wired nowhere: neither orchestrator referenced it, so the stage
+existed and never ran. It also belongs at the END of the code phase
+rather than after the docs phase — the run sheet's whole value is telling
+the human what is *left*, which it can only do once the automated
+verdicts exist. On a real ticket that was the difference between handing
+a tester **89 rows and 11**.
+
+Pauses for the throwaway-event authorisation before provisioning, since
+the stage creates accounts on a live environment. `qa-pipeline-docs` now
+explicitly says not to run it there.
+
+Run-sheet format settled at 12 columns after review: the old pack's
+informative columns plus Log in as / Do / Expect, the palette already in
+`build_data_pack.py`, per-value colour on the four verdict columns and
+Result, one font throughout. A muted pastel palette and a monospace
+credential column were both tried and rejected; both are recorded in
+`references/runsheet-format.md` so they are not reinvented.
+
 ## 0.12.0 — 2026-07-29
 
 New stage **`qa-manual-runsheet`** (stage 4.5): provisions and verifies

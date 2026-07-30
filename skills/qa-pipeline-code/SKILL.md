@@ -2,18 +2,21 @@
 name: qa-pipeline-code
 description: >
   Orchestrator for the code + UI half of the QA pipeline (stages 5, 6,
-  7, 8). Given a Story key, reads the test cases from the story's QA
+  7, 8, 9). Given a Story key, reads the test cases from the story's QA
   sub-task (published by qa-pipeline-docs) and derives the dev branches
   from the backend/frontend sub-tasks, then runs pr-summary ->
-  code-review -> api-testing -> web-testing -> run-analyzer, and posts the results back
-  to the QA sub-task. Auto-advances, pausing only for the browser login
-  and the Jira write confirmation. Use it when the user says "run the QA
-  code pipeline", "review the PRs and test in the browser", "do code
-  review and UI testing for a ticket". Run in a FRESH chat after
+  code-review -> api-testing -> web-testing -> run-analyzer, posts the
+  results back to the QA sub-task, and finally builds the manual run
+  sheet (qa-manual-runsheet) so a human can walk what the machine could
+  not settle. Auto-advances, pausing for the browser login, the Jira
+  write confirmation, and the test-event authorisation before any
+  fixture is provisioned. Use it when the user says "run the QA code
+  pipeline", "review the PRs and test in the browser", "do code review
+  and UI testing for a ticket". Run in a FRESH chat after
   qa-pipeline-docs.
 ---
 
-# QA Pipeline -- Code & UI (stages 5, 6, 7, 8)
+# QA Pipeline -- Code & UI (stages 5, 6, 7, 8, 9)
 
 > Recommended settings for the whole run: **Opus . Effort: High .
 > Extended thinking: On**. Code review (stage 6) benefits most.
@@ -304,6 +307,38 @@ multi-PR story does not exhaust the orchestrator's context:
      `getTransitionsForJiraIssue`; if the configured name is not
      available, list the available ones and ask the user.
 
+9. **Build the manual run sheet — run `qa-manual-runsheet`.** Every
+   ticket here is hand-tested after the machine finishes, so this is a
+   real step, not an optional extra. Read
+   `qa-manual-runsheet/SKILL.md` and follow it in full.
+
+   **Why it belongs at the END of this phase, not in the docs phase.**
+   The run sheet's value is that it tells the human what is *left*. It
+   can only do that once the automated verdicts exist: it carries
+   `Code review` / `API verdict` / `Ready?` per case, marks the rows the
+   machine already settled, and leaves the tester the remainder. Run it
+   after the docs phase and every verdict column is empty, so the tester
+   walks all 89 cases blind — on a real ticket that was the difference
+   between **89 rows and 11**.
+
+   - **REQUIRED PAUSE.** This stage creates accounts and entities on a
+     live event. Ask for the throwaway test event id and explicit
+     authorisation to mutate it before provisioning anything. Never
+     target an event carrying real client data, and never guess an event.
+   - Runs AFTER the automated stages on purpose: 7 and 8 create their own
+     ad-hoc data, so provisioning clean fixtures first would collide with
+     them.
+   - Feed it the verdict files from this run (`-code-review.md`,
+     `-api-testing.md`, `-web-testing.md`) so settled rows are marked and
+     the tester skips them.
+   - Outputs `<STORY>-runsheet.xlsx`, `<STORY>-testdata.json` and
+     `<STORY>-testdata-notes.md`. **These carry live credentials — they
+     are git-ignored and must never be committed or attached to Jira.**
+   - Report the account and entity counts, the ready / must-test /
+     blocked split, and anything that could not be provisioned.
+
+   Skip only if the user says they are not hand-testing this ticket.
+
 ## Between stages
 
 - Keep chat output short: one line per hand-off.
@@ -321,3 +356,8 @@ confirmed bugs were filed (via knowledge-base or the default path) or
 listed for manual filing, and which handoff was performed (reassigned
 to whom / transition applied) or that the user skipped it. In chat,
 reuse the human-summary content rather than writing a third format.
+
+Then, from step 9: the run-sheet path, how many cases the tester still
+has to walk versus how many the machine settled, and the reminder that
+the run sheet and provisioning record hold live credentials and stay out
+of version control and Jira.

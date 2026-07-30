@@ -206,3 +206,6 @@ After publishing, report:
   ⚠ SPECIAL ATTENTION items the code phase should know about.
 - The next step: run `qa-pipeline-code` on the Story key in a fresh
   chat.
+  chat. `qa-pipeline-code` ends by building the manual run sheet
+  (`qa-manual-runsheet`), so do NOT run that stage here — the run sheet
+  needs the automated verdicts to know what is left for the human.
