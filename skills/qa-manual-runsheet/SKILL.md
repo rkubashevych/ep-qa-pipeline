@@ -11,8 +11,11 @@ description: >
   Use it when the user says "prepare the manual tests", "make a run
   sheet", "prepare test data", "set up the data so I can just check the
   cases", or after the automated code-phase stages finish and before
-  anyone starts testing by hand. The completed sheet is later ingested
-  by qa-manual-results (stage 10).
+  anyone starts testing by hand. Handles retests too ("retest", "the fix
+  landed") — it detects a prior run rather than waiting to be told,
+  scopes the sheet to the fix's blast radius, and always provisions
+  fresh fixtures. The completed sheet is later ingested by
+  qa-manual-results (stage 10).
 ---
 
 # QA Manual Run Sheet
@@ -56,6 +59,42 @@ If a verdict already recorded in the suite is later found wrong, mark the
 correction explicitly as superseding the earlier line — the notes are
 append-only and two bare verdicts side by side tell a reader nothing.
 
+## Retest runs — detect, do not wait to be told
+
+A retest is the common case, not the exception: every ticket that fails
+comes back. **Never assume a bare invocation means a first run.** Before
+Step 1, check for evidence of a prior run:
+
+- `<ISSUEKEY>-testdata.json` or `<ISSUEKEY>-runsheet.xlsx` already exists
+- the suite's cases carry `RETEST:` lines, or run-outcome notes at all
+- the QA sub-task's newest human summary is ❌ FAIL
+- defects exist under the story
+
+If any of those hold, **PAUSE and ask** whether this is a retest or a
+fresh run. Do not silently rebuild. On a real story the difference is 89
+rows and 84 accounts versus about 30 rows and a dozen.
+
+When it is a retest:
+
+- **Scope the sheet.** Rows for the failed cases, the other cases in the
+  same REQ groups (the fix's blast radius), any case whose defect is
+  marked fixed, and every case that was never executed — blocked,
+  amber, or skipped. Cases that passed on an unrelated path keep their
+  verdict and get no row; say so in the final response.
+- **Fixtures are always fresh. This is not negotiable.** Reusing the
+  previous run's accounts is the fastest way to an unreadable retest:
+  they carry favourites, connections and counter state from the cases
+  already executed against them. On a real run two counter fixtures were
+  permanently poisoned — a phantom like on one, a count stuck at 15 on
+  the other — and no counter case could be judged against either. Give
+  every retest its own accounts and entities with verified zero
+  baselines, and retire the old ones in the notes file.
+- **Carry the history into the row.** A row being retested says so in
+  Notes: the prior verdict, the defect key, and the date. A tester who
+  cannot see that a row failed last time cannot tell a fix from a fluke.
+- **Ask which fix landed.** If the user has not said, ask. A retest
+  scoped to defects that were not actually fixed wastes the whole run.
+
 ## Non-goals
 
 - Not a test-case authoring tool. Cases come from `qa-test-cases`; this
@@ -73,7 +112,11 @@ append-only and two bare verdicts side by side tell a reader nothing.
    `-api-testing.md`, `-web-testing.md`. Optional; used to mark rows
    that are already settled so the human does not re-walk them.
 4. `.env.qa-agents` (or the e2e project `.env`) for host and credentials.
-5. **A throwaway test event id, and explicit authorisation from the user
+5. **Whether this is a first run or a retest** — see "Retest runs"
+   above. Detect it; ask when the evidence is ambiguous. On a retest,
+   the prior `<ISSUEKEY>-testdata.json` is read only to know which
+   accounts to RETIRE, never to reuse.
+6. **A throwaway test event id, and explicit authorisation from the user
    to create and modify data on it.** This stage mutates a live
    environment. Never proceed without that authorisation, and never
    target an event that carries real client data.
