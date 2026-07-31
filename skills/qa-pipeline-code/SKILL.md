@@ -10,7 +10,8 @@ description: >
   manual run sheet (qa-manual-runsheet) so a human can walk what the
   machine could not settle, verifies the published state, and defers
   the final handback to qa-manual-results (stage 10). Also supports
-  retest mode for verifying dev fixes. Auto-advances, pausing for the browser login, the Jira
+  retest mode ("retest <KEY>", "the fix landed") for verifying dev
+  fixes. Auto-advances, pausing for the browser login, the Jira
   write confirmation, and the test-event authorisation before any
   fixture is provisioned. Use it when the user says "run the QA code
   pipeline", "review the PRs and test in the browser", "do code review
@@ -168,19 +169,40 @@ Otherwise, using the Atlassian connector and the Story key:
      (typically web-testing in Cowork after 5–7 ran in Claude Code),
      unless the user asks to re-run. Tell the user which stages were
      restored complete vs partial vs pending before continuing.
-   - **Retest mode (the fix came back):** when the QA sub-task's
-     newest human summary (or manual-results comment) is ❌ FAIL and
-     the user says the fix has landed, do not re-run everything. Scope
-     this run to: every FAIL / FAIL CONFIRMED case (including
-     retracted-to-FAIL ones), the other cases of the same REQ groups
-     (the fix's blast radius), and any `RISK-CR-*` rows that were
-     confirmed. Run stages 5–8 on that scope only — pr-summary on the
-     fix branch/PR — and post the results as a normal comment pair
-     with the verdict line prefixed `RETEST:`. Write-backs follow the
-     retraction convention (a FAIL that now passes gets its supersede
-     line), and verified bugs get a closing comment offered on their
-     tickets. Everything else from the prior run keeps its verdicts —
-     say so in the summary.
+   - **Retest mode (the fix came back).** Two ways in, both valid:
+     the user says so ("retest <KEY>", "the fix landed, verify it"),
+     OR step 0 notices the signals itself — the QA sub-task's newest
+     human summary / manual-results comment is ❌ FAIL, or the suite
+     carries RETEST/supersede lines — and ASKS "full run or retest?"
+     instead of assuming. Never require a magic phrase for the right
+     behaviour.
+     **Scope (three tiers, shown to the user for confirmation before
+     stage 5):**
+     1. every FAIL / FAIL CONFIRMED case (including
+        retracted-to-FAIL ones) — the defects' own cases;
+     2. the other cases of the same REQ groups plus any case sharing
+        the fixed code path (from the fix PR's Behaviours touched) —
+        the blast radius — and confirmed `RISK-CR-*` rows;
+     3. every case that never got a real verdict: NOT EXECUTED,
+        unresolved BLOCKED, rows the human never walked. A retest is
+        the natural moment to close them.
+     **The scope binds ALL stages including stage 9:** pr-summary runs
+     on the fix branch/PR; stages 6–8 execute only the scoped cases;
+     and `qa-manual-runsheet` builds rows for the scoped cases ONLY —
+     never a full-sheet rebuild on a retest. Fixtures for the retest
+     are FRESH by default: prior fixtures are presumed contaminated
+     for any counter/analytics assertion (accumulated state — one run
+     left a phantom like and a counter stuck at 15; those fixtures can
+     never judge a counter again). Reuse a prior account only for
+     stateless checks, and only after re-verifying its login and
+     baseline.
+     Post the results as a normal comment pair with the verdict line
+     prefixed `RETEST:`. Write-backs follow the retraction convention
+     (a FAIL that now passes gets its supersede line), and verified
+     bugs get a closing comment offered on their tickets. Everything
+     else from the prior run keeps its verdicts — say so in the
+     summary. Stage 10 ingests the retest sheet exactly like a first
+     run.
 2. **Dev branches.** `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype in ("Backend sub-task","Frontend
    sub-task")`. Each dev sub-task's **key is its branch name** (e.g.

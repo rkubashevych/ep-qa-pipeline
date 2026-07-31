@@ -5,6 +5,35 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.18.3 — 2026-07-31
+
+Retest mode made clean. The 0.18.0 retest paragraph half-existed: it
+was triggered by inference only ("the user says the fix has landed"),
+its scope stopped at stage 8 — so stage 9 would rebuild all rows and
+re-provision the full fixture set on every retest — and
+`qa-manual-runsheet` had no retest concept at all. Found while
+planning the first real retest of EP-53978; the magic-phrase
+dependency is exactly the failure pattern the earlier reviews flagged.
+
+- **`qa-pipeline-code` retest mode rewritten:** explicit triggers
+  ("retest <KEY>", "the fix landed" — now also in the description) AND
+  self-detection (❌ newest summary / RETEST lines in the suite →
+  ask "full run or retest?"). Scope is three tiers, confirmed by the
+  user before stage 5: (1) the defects' own cases, (2) blast radius —
+  REQ siblings + cases sharing the fixed code path + confirmed
+  RISK rows, (3) everything that never got a real verdict. The scope
+  now binds ALL stages including stage 9.
+- **`qa-manual-runsheet` — "Retest runs: detect, don't assume":**
+  prior-run artifacts (testdata.json, runsheet, RETEST suite lines,
+  manual-results comment) → pause and ask, never a silent full
+  rebuild. On retest: rows for the scoped cases only; fixtures fresh
+  by default — prior fixtures are presumed contaminated for any
+  counter/analytics assertion (a real run left a phantom like and a
+  counter stuck at 15); reuse only stateless accounts after re-proving
+  login; abandoned-as-contaminated fixtures listed for cleanup.
+- `evals/triggering.md`: retest queries route to the orchestrator, not
+  the bare runsheet stage.
+
 ## 0.18.2 — 2026-07-30
 
 Net-new items from `GUIDE-ALIGNMENT-AUDIT-2026-07-30.md` (cold audit

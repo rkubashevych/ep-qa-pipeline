@@ -81,6 +81,32 @@ append-only and two bare verdicts side by side tell a reader nothing.
 If the test-cases file is missing, ask for it. If the event id or the
 authorisation is missing, PAUSE and ask — do not guess an event.
 
+## Retest runs — detect, don't assume
+
+Before provisioning anything, check whether a PRIOR run of this story
+exists: a `<ISSUEKEY>-testdata.json` or `<ISSUEKEY>-runsheet.xlsx`
+already present, `RETEST:`/supersede lines in the suite's case notes,
+or a manual-results comment on the QA sub-task. Any of these found →
+**PAUSE and ask: "prior run detected — full fresh run, or retest?"**
+Never silently rebuild the full sheet on top of a finished run.
+
+On a retest:
+- Build rows ONLY for the retest scope (provided by `qa-pipeline-code`
+  retest mode, or ask for it: the failed cases + their REQ groups +
+  never-verdicted cases). A retest sheet is short by design — that is
+  its value.
+- **Fixtures are fresh by default.** Prior fixtures are presumed
+  contaminated for every counter / analytics / lead assertion:
+  accumulated interactions make their baselines unreadable (a real run
+  left a phantom like on one target and a counter stuck at 15 on
+  another — no counter case can ever be judged against those again).
+  Read the prior `testdata.json` to know what exists, but provision
+  new dedicated targets with verified zero baselines for anything
+  numeric. Reuse a prior account only for stateless checks, after
+  re-proving its login.
+- Note in the testdata-notes file which prior fixtures were abandoned
+  as contaminated, so cleanup can target them.
+
 ## Output
 
 - `<ISSUEKEY>-testdata.json` — machine-readable record of every account

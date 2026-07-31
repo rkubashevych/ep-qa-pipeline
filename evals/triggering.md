@@ -67,6 +67,9 @@ names who should handle it instead).
 - ✅ "set up the data so I can just check the cases"
 - ❌ "run the manual tests yourself" → web-testing does browser runs
 - ❌ "the sheet is filled, update the results" → qa-manual-results
+- ❌ "retest EP-1234, the fix landed" → qa-pipeline-code retest mode
+  (which then invokes this stage scoped; invoked bare on a story with
+  prior artifacts, this stage must PAUSE and ask full-run vs retest)
 
 ## qa-manual-results (stage 10)
 - ✅ "ingest the manual results"
