@@ -5,6 +5,22 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.19.4 — 2026-08-13
+
+Two items from the `claude doctor` run.
+
+- **notify hook works on Windows**: `hooks/hooks.json` now falls back
+  `python3` → `python` → `py -3` → silent exit. The hook had failed
+  (non-blocking) on every session because Windows ships the `py`
+  launcher, not `python3`. Still opt-in via `QA_PIPELINE_NOTIFY=1`.
+- **`CLAUDE.md` added** (the G1 gap from the verification-loops check,
+  written per the context-engineering guidance: gotchas only, no
+  duplication): hard rules (no `git add -A`, no shell-mount writes,
+  broad ignore patterns, credential handling), the four verify
+  commands, and the change discipline — auto-loaded into every Claude
+  Code session in this repo instead of waiting for someone to open
+  MAINTAINERS.md.
+
 ## 0.19.3 — 2026-08-13
 
 Voice block completed with action-shape rules (from the i-have-adhd

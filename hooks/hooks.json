@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" done 2>/dev/null || python \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" done"
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" done 2>/dev/null || python \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" done 2>/dev/null || py -3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" done 2>/dev/null || exit 0"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" attention 2>/dev/null || python \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" attention"
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" attention 2>/dev/null || python \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" attention 2>/dev/null || py -3 \"${CLAUDE_PLUGIN_ROOT}/scripts/notify.py\" attention 2>/dev/null || exit 0"
           }
         ]
       }
