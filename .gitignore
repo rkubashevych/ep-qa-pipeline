@@ -35,8 +35,9 @@ _vidframes/
 .playwright-mcp/
 .claude/
 
-# generated data-pack / runsheet builders (embed fixture + account detail)
+# generated data-pack / runsheet builders + repro scripts (embed fixture detail)
 build_*.py
+repro_*.py
 
 # ────────────────────────────────────────────────────────────────
 # SECRETS — never committed, anywhere in the tree
