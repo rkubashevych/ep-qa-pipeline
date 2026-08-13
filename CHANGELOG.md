@@ -5,6 +5,14 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.19.3 — 2026-08-13
+
+Voice block completed with action-shape rules (from the i-have-adhd
+skill's approach): reader-actionable content is a numbered list, lists
+cap at 5 items, and a comment that asks for something ends on the one
+concrete next step. Applies to all human-facing Jira text via
+`results-comment-template.md` → "Writing rules".
+
 ## 0.19.2 — 2026-08-13
 
 Minimal manual set (un-defers the stage-9 minimisation from 0.19.0 —

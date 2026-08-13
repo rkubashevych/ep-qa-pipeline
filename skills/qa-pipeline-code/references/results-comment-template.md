@@ -190,6 +190,10 @@ Never edit or delete earlier comments — newest pair wins.
   - Vary sentence length; use contractions; at most one em dash per
     comment.
   - If a sentence would fit in a press release, rewrite it.
+  - Anything a reader must DO (repro steps, fix verification) is a
+    numbered list; cap any list at 5 items — past that, group or cut.
+  - When the comment asks for something, end with the one concrete
+    next step and nothing after it.
 - One line per confirmed bug — the evidence lives in the archive
   comment; never restate full findings.
 - FAIL REJECTED items are not bugs — count them as passes in the
