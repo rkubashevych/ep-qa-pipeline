@@ -196,12 +196,23 @@ Every non-account fixture: id, name, type, owner, and — for anything used
 in a counter case — its **verified zero baseline**, with a note that the
 baseline was read twice.
 
+**Covers column (K+1, after Result/Notes when present):** when one row
+carries several cases, list them — `Covers: TC-REQ-3.1, TC-REQ-3.2`.
+The tester's Result applies to all of them; a Note naming one case
+overrides for that case only. Rows with no Covers entry carry just
+their own TC.
+
 ## Sheet 4 — Reference
 
 Per-case detail the run sheet deliberately omits: the full precondition
 that was established, prior automated verdicts with their source stage,
 and any caveat the tester needs only if a row misbehaves (known
 environment faults, timing requirements, surfaces that disagree).
+
+The Reference tab also carries the **coverage map**: one line per REQ —
+which walked row(s) cover it, or `machine-verified (<status>)`, or
+`delegated to machine verdict (<status>)` for unselected cases. No REQ
+line may be blank; that's the selection's floor.
 
 ## Sheet 5 — Environment
 

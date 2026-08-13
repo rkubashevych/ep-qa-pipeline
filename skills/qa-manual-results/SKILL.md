@@ -54,6 +54,11 @@ table; do not proceed on guesses.
   sorted, filtered, and re-generated; position is meaningless. A row
   whose TC id does not match any known case goes to the report's
   "Unmatched rows" section — never silently dropped, never guessed.
+- **Expand `Covers` lists.** A row carrying `Covers: TC-x, TC-y` applies
+  its Result to every listed case, unless the tester's Notes single a
+  case out — then the note's verdict wins for that case. Cases the
+  sheet delegated to machine verdicts (Reference tab) are recorded as
+  machine-only, never as human-confirmed.
 - Empty Result = not run. Report it as such; it is not SKIPPED and not
   PASS.
 - Normalize statuses case-insensitively to PASS / FAIL / BLOCKED /

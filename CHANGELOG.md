@@ -5,6 +5,23 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.19.2 — 2026-08-13
+
+Minimal manual set (un-defers the stage-9 minimisation from 0.19.0 —
+two runs showed it as the biggest human-time saving: 32→14 rows on
+EP-53768, 33→8 on EP-53767). The machine still runs every case and the
+QA Service suite still stores every case; only the human's sheet
+shrinks. Stage 9 now selects rows by test-design technique — one
+representative per equivalence class, boundaries only where the
+boundary matters, pairwise over full sweeps, shared-fixture walks
+merged into one row with a `Covers:` list — under a hard floor: every
+behavioural REQ is covered by a walked row or a runtime-verified
+machine verdict (code reading doesn't count), with the REQ→row
+coverage map printed on the Reference tab. High-risk blast-radius
+cases and ⚠ SPECIAL ATTENTION items are added back on top. Unselected
+cases are named as delegated, and stage 10 expands `Covers` lists on
+ingestion (a note naming one case overrides for that case).
+
 ## 0.19.1 — 2026-08-13
 
 Voice rules for human-facing Jira text. Machine artifacts stay as they

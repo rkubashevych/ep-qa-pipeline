@@ -225,6 +225,40 @@ target entities and their types, the precondition, and the pass
 condition. Group cases that can share a fixture — but never counter
 cases (rule 6).
 
+### Step 2a — Select the manual set: minimum rows, full AC coverage
+
+The machine runs ALL cases (stages 6–8) and the QA Service suite keeps
+ALL cases — that never changes. The human walks a SELECTED set, because
+a full hand-run of 90 cases costs a day and most of it re-proves what a
+representative would prove. Build the selection with the same
+test-design techniques that built the cases:
+
+1. **Must-walk (never reducible):** every case with no runtime-verified
+   machine verdict — QA, FAIL claims, routed-in, unresolved BLOCKED,
+   NOT EXECUTED — plus the VERIFY spot-checks (High-risk or
+   code-reading-only machine PASSes).
+2. **Reduce by technique, not by mood:** within the must-walk set, one
+   representative per equivalence class; boundary rows only where the
+   boundary is the point; a pairwise pick instead of a full combination
+   sweep; and when several cases walk the same fixture through the same
+   surface, ONE row carries them with a `Covers: TC-x, TC-y, …` note.
+3. **Coverage gate — the floor under the reduction:** after selecting,
+   map rows → REQ ids. Every behavioural REQ of THIS ticket must be
+   covered by a walked row or by a runtime-verified machine verdict.
+   A REQ covered only by code reading is NOT covered — it needs a row.
+   Print the map in the sheet's Reference tab and the final response:
+   "N cases → M rows, covering R/R requirements".
+4. **Risk extras:** add rows for High-risk cases in the fix's blast
+   radius even when machine-settled, and anything the QA sub-task's
+   ⚠ SPECIAL ATTENTION block names.
+5. **What's left out is named, not dropped:** unselected cases appear
+   on the Reference tab as "delegated to machine verdict (<status>)".
+   Stage 10 records those verdicts as machine-only — the summary's
+   PARTIALLY VERIFIED wording already covers that honestly.
+
+A row's Result applies to every case in its `Covers` list unless the
+tester's Notes single one out — stage 10 expands the list on ingestion.
+
 ### Step 2 — Classify every case
 
 - **READY** — data can be provisioned; the human can run it.
