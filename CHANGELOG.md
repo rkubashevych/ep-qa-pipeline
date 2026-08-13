@@ -5,6 +5,16 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.19.1 — 2026-08-13
+
+Voice rules for human-facing Jira text. Machine artifacts stay as they
+are (agents read those); everything a person reads now follows a short
+anti-slop voice block in `results-comment-template.md` → "Writing
+rules": point first, no filler phrases, no fake-insight structures, no
+bold-term-colon lists, no wrap-up endings, varied sentence length, one
+em dash max. Bug drafts and the grooming open-questions comment point
+at the same block, so the voice lives in one place.
+
 ## 0.19.0 — 2026-08-13
 
 The mileage release. Five real runs (EP-47675, EP-47678, EP-53767,

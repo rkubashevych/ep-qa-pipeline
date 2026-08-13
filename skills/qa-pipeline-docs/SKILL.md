@@ -86,7 +86,9 @@ the next stage automatically (they share the working directory).
      not a label).** If genuinely open items remain — questions,
      contradictions needing the PM/analyst, spec gaps — draft the
      ticket comment immediately (one line per item, grouped Questions /
-     Contradictions / Gaps, no pipeline jargon), show it, and ask ONE
+     Contradictions / Gaps, no pipeline jargon; voice rules:
+     `../qa-pipeline-code/references/results-comment-template.md` →
+     "Writing rules"), show it, and ask ONE
      quick yes/no: "post these open questions to <KEY> now?". On yes,
      post it before stage 3 starts; the run continues either way
      without waiting for answers. Rationale: an answer that arrives

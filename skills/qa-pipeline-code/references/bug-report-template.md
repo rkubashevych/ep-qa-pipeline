@@ -4,6 +4,10 @@ Used by qa-pipeline-code step 7 when the `/knowledge-base` skill is
 not installed. One Jira bug per confirmed finding. Draft first, show
 the user, create via `createJiraIssue` only after an explicit yes.
 
+Voice: follow the Voice rules in `results-comment-template.md` →
+"Writing rules" — a dev reads this bug, so the defect statement comes
+first, in plain words, with no filler and no wrap-up.
+
 ## Duplicate check (before drafting)
 
 Search first: `searchJiraIssuesUsingJql` with the summary's key

@@ -175,6 +175,21 @@ Never edit or delete earlier comments — newest pair wins.
 
 - Write for a PM/dev skimming Jira: plain words, no pipeline jargon
   ("checked against the code", not "stage 6").
+- **Voice — applies to every human-facing comment this pipeline posts**
+  (this summary, the status line, story notes, bug drafts, the
+  grooming open-questions comment):
+  - Verdict or point first, support after. Never restate the context
+    before getting to it.
+  - No filler: "it's worth noting", "importantly", "at its core",
+    "when it comes to", "plays a crucial role".
+  - No fake-insight structures: "it's not just X — it's Y",
+    "this isn't about X, it's about Y".
+  - Never the "**Bold term:** explanation" list pattern — say the thing
+    in a sentence.
+  - No summary wrap-up at the end; end on the last piece of substance.
+  - Vary sentence length; use contractions; at most one em dash per
+    comment.
+  - If a sentence would fit in a press release, rewrite it.
 - One line per confirmed bug — the evidence lives in the archive
   comment; never restate full findings.
 - FAIL REJECTED items are not bugs — count them as passes in the
