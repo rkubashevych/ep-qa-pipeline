@@ -73,9 +73,30 @@ directory; pass each output file to the next automatically.
      can still answer them (then regenerate from stage 2). If the user
      asks for **interactive mode**, pause here as grooming's own
      SKILL.md describes.
+   - **Recon first — self-answer the answerable (default when env
+     access exists).** Grooming marks each open item SPEC (an intent
+     decision only the PM/owner can make) or BEHAVIOUR ("how does the
+     app work today?" — an observable fact). BEHAVIOUR items do not go
+     to a human until observation has been tried: dispatch a
+     READ-ONLY look at the running system (admin panel, live pages, a
+     generated export, existing Confluence "how it works" pages) and
+     write `<ISSUEKEY>-recon.md`, opening with this header verbatim:
+     "These are observations of CURRENT behaviour, not requirements.
+     They settle what a tester needs to know; they do not change the
+     acceptance criteria. Where observed behaviour and the AC could
+     diverge, the item is raised as a question, not resolved."
+     Rules: strictly no writes; every observation carries its evidence
+     (URL/element/response, per the Probe convention); recon facts may
+     ground an expected result ONLY where the requirement itself
+     references current behaviour — they never become requirements.
+     Fold the answers back into the requirements file as "resolved by
+     observation (recon)". No env access / user declines → skip, and
+     BEHAVIOUR items go to the ticket like everything else. Real-run
+     evidence: a run with recon ended with 1 open question; comparable
+     runs without it posted 4–5, most answerable by looking.
    - **Open items → ticket NOW, not at publish (shift-left is a
-     clock, not a label).** If genuinely open items remain (questions,
-     contradictions, spec gaps), draft the ticket comment immediately
+     clock, not a label).** Only SPEC items and BEHAVIOUR items recon
+     could not settle go to the ticket. Draft the comment immediately
      — one line per item, grouped Questions / Contradictions / Gaps,
      no pipeline jargon; voice rules:
      `../qa-pipeline-code/references/results-comment-template.md` →

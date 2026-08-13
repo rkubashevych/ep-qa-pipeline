@@ -196,6 +196,17 @@ messages", "handle", "support".
   scope-difference rule above. This is a hard check, not a judgement
   call: read your own `source` string back and confirm each named
   document really contains every clause you wrote.
+- **Classify every open item: SPEC or BEHAVIOUR.** SPEC = an intent
+  decision only the PM/owner can make ("should the counter cap at
+  20?"). BEHAVIOUR = an observable fact about the app today ("does
+  the export have field selection?", "which report is this?", "what
+  does the empty state currently show?"). Mark each question with its
+  class — the orchestrator answers BEHAVIOUR items by read-only
+  observation (recon) before anything reaches a human. Most
+  "questions" on past runs were BEHAVIOUR wearing a SPEC costume. If
+  a `<ISSUEKEY>-recon.md` already exists in the working directory,
+  read it before raising any BEHAVIOUR question — it may already hold
+  the answer, with evidence.
 - Do not generate questions about:
   - implementation details the developer decides (architecture,
     libraries, cache, performance) unless it is stated in the

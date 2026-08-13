@@ -5,6 +5,28 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.21.0 — 2026-08-13
+
+Recon: the docs phase now answers its own "how does the app work
+today?" questions instead of posting them to a human. Formalises what
+the owner improvised on EP-55889 (that run's hand-made recon file
+dropped open questions to 1, vs 4–5 on comparable runs, and caught a
+one-row-per-participant surprise no document mentioned).
+
+- **Grooming classifies every open item** SPEC (intent — a human
+  decision) or BEHAVIOUR (observable fact), and consumes an existing
+  `<KEY>-recon.md` before raising BEHAVIOUR questions.
+- **`qa-pipeline-docs` recon step** (default when env access exists,
+  before the questions post): read-only observation of the running
+  system into `<KEY>-recon.md`, opening with the fixed epistemic
+  header — current behaviour, not requirements; divergence from AC
+  stays a question; every observation evidenced; recon facts ground
+  expected results only where the requirement references current
+  behaviour. Only SPEC + unresolved BEHAVIOUR items reach the ticket.
+- **Analyzer**: reads `<KEY>-recon.md`; 🟡 when an observable question
+  was posted to a human despite available env access; 🔴 when a recon
+  answer changed a case's premise without the requirement updating.
+
 ## 0.20.1 — 2026-08-13
 
 Bug-fix mode. `qa-pipeline-code` step 0's dead end ("re-run

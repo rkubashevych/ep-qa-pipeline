@@ -29,6 +29,7 @@ if the chat is new):
 `<ISSUEKEY>-checklist.md`, `<ISSUEKEY>-test-cases.md`,
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
+`<ISSUEKEY>-recon.md`,
 `<ISSUEKEY>-manual-results.md`,
 `<ISSUEKEY>-remaining-cases-triage.md`, and any tester results table
 (`<ISSUEKEY>-preserved-entries.tsv` or similar TC/Result/Notes file).
@@ -55,6 +56,11 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 - Every REQ-N in the requirements file has >=1 checklist item; every
   behavioural requirement has >=1 test case. List orphans (REQ with no
   checks / no test cases).
+- Recon usage: when open questions reached the ticket, flag 🟡 any
+  BEHAVIOUR-class question posted while env access existed and no
+  `<KEY>-recon.md` was produced — an observable fact was asked of a
+  human. A recon answer that changed a case's premise without the
+  requirement being updated is 🔴 (same discipline as any source).
 - **The AC→REQ seam** (the only unguarded end of the chain): when
   `<KEY>-context.md` is present, every numbered/bulleted item in its
   Requirements and "Additional requirements (from comments)" sections
