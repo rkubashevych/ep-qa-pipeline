@@ -34,64 +34,72 @@ instruction — it names no account, no endpoint and no pass condition.
 **The QA Service suite is the system of record for the cases.** The
 automated stages regenerate their test-case file from it, and the suite
 wins on divergence. Everything this stage produces is a *view* of that
-suite.
+suite. Consequences:
 
-Consequences that must be respected:
-
-- **Read the cases from the suite** when a suite exists and the connector
+- **Read the cases from the suite** when one exists and the connector
   is available, exactly as `qa-pipeline-code` step 0 does. Fall back to
   `<ISSUEKEY>-test-cases.md` / the Jira archive only when it does not.
 - **The run sheet is never an input.** No automated stage reads it, and
   none ever should. It carries less detail than the machine needs by
-  design — one login, one action, one pass condition — so treating it as
-  a source would silently degrade every later run.
-- **Corrections must go back to the suite.** When a tester discovers that
-  an expected result is wrong, that a case needs a UI-only condition, or
-  that a blocked reason was false, writing it in the sheet is *losing*
-  it: the next run regenerates from the suite and repeats the mistake.
-  Write it to the suite and note in the sheet that you did.
+  design, so treating it as a source would silently degrade every later
+  run.
+- **Corrections must go back to the suite.** When a tester discovers
+  that an expected result is wrong, that a case needs a UI-only
+  condition, or that a blocked reason was false, writing it only in the
+  sheet is *losing* it: the next run regenerates from the suite and
+  repeats the mistake. Write it to the suite and note in the sheet that
+  you did.
 - **Run outcomes belong in the case's `detail` notes, never in
-  `status`.** `status` is a lifecycle field. Record the verdict, the
-  date, whether it was human-executed or analysis-derived, and the
-  defect key.
-
-If a verdict already recorded in the suite is later found wrong, mark the
-correction explicitly as superseding the earlier line — the notes are
-append-only and two bare verdicts side by side tell a reader nothing.
+  `status`** (a lifecycle field). Record the verdict, the date, whether
+  it was human-executed or analysis-derived, and the defect key. A
+  verdict later found wrong gets an explicit superseding line — the
+  notes are append-only, and two bare verdicts side by side tell a
+  reader nothing.
 
 ## Retest runs — detect, do not wait to be told
 
 A retest is the common case, not the exception: every ticket that fails
 comes back. **Never assume a bare invocation means a first run.** Before
-Step 1, check for evidence of a prior run:
+provisioning anything, check for evidence of a prior run:
 
-- `<ISSUEKEY>-testdata.json` or `<ISSUEKEY>-runsheet.xlsx` already exists
-- the suite's cases carry `RETEST:` lines, or run-outcome notes at all
-- the QA sub-task's newest human summary is ❌ FAIL
+- `<ISSUEKEY>-testdata.json` or `<ISSUEKEY>-runsheet.xlsx` already
+  exists
+- the suite's cases carry `RETEST:`/supersede lines, or run-outcome
+  notes at all
+- the QA sub-task's newest human summary or manual-results comment is
+  ❌ FAIL
 - defects exist under the story
 
-If any of those hold, **PAUSE and ask** whether this is a retest or a
-fresh run. Do not silently rebuild. On a real story the difference is 89
-rows and 84 accounts versus about 30 rows and a dozen.
+Any of these found → **PAUSE and ask: "prior run detected — full fresh
+run, or retest?"** Never silently rebuild the full sheet on top of a
+finished run. On a real story the difference is 89 rows and 84 accounts
+versus about 30 rows and a dozen.
 
 When it is a retest:
 
-- **Scope the sheet.** Rows for the failed cases, the other cases in the
-  same REQ groups (the fix's blast radius), any case whose defect is
-  marked fixed, and every case that was never executed — blocked,
-  amber, or skipped. Cases that passed on an unrelated path keep their
-  verdict and get no row; say so in the final response.
-- **Fixtures are always fresh. This is not negotiable.** Reusing the
-  previous run's accounts is the fastest way to an unreadable retest:
-  they carry favourites, connections and counter state from the cases
-  already executed against them. On a real run two counter fixtures were
-  permanently poisoned — a phantom like on one, a count stuck at 15 on
-  the other — and no counter case could be judged against either. Give
-  every retest its own accounts and entities with verified zero
-  baselines, and retire the old ones in the notes file.
+- **Scope the sheet.** Rows ONLY for the retest scope (provided by
+  `qa-pipeline-code` retest mode, or ask for it): the failed cases,
+  the other cases in the same REQ groups (the fix's blast radius), any
+  case whose defect is marked fixed, and every case that never got a
+  real verdict — blocked, amber, or skipped. Cases that passed on an
+  unrelated path keep their verdict and get no row; say so in the
+  final response. A retest sheet is short by design — that is its
+  value.
+- **Fixtures are always fresh. This is not negotiable.** Prior
+  fixtures are presumed contaminated for every counter / analytics /
+  lead assertion: accumulated interactions make their baselines
+  unreadable (a real run left a phantom like on one target and a
+  counter stuck at 15 on another — no counter case can ever be judged
+  against those again). Read the prior `testdata.json` only to know
+  what exists and which accounts to RETIRE; provision new dedicated
+  targets with verified zero baselines for anything numeric. Reuse a
+  prior account only for stateless checks, after re-proving its login.
+  Note in the testdata-notes file which prior fixtures were abandoned
+  as contaminated, so cleanup can target them.
 - **Carry the history into the row.** A row being retested says so in
   Notes: the prior verdict, the defect key, and the date. A tester who
-  cannot see that a row failed last time cannot tell a fix from a fluke.
+  cannot see that a row failed last time cannot tell a fix from a
+  fluke.
 - **Ask which fix landed.** If the user has not said, ask. A retest
   scoped to defects that were not actually fixed wastes the whole run.
 
@@ -113,9 +121,7 @@ When it is a retest:
    that are already settled so the human does not re-walk them.
 4. `.env.qa-agents` (or the e2e project `.env`) for host and credentials.
 5. **Whether this is a first run or a retest** — see "Retest runs"
-   above. Detect it; ask when the evidence is ambiguous. On a retest,
-   the prior `<ISSUEKEY>-testdata.json` is read only to know which
-   accounts to RETIRE, never to reuse.
+   above. Detect it; ask when the evidence is ambiguous.
 6. **A throwaway test event id, and explicit authorisation from the user
    to create and modify data on it.** This stage mutates a live
    environment. Never proceed without that authorisation, and never
@@ -123,32 +129,6 @@ When it is a retest:
 
 If the test-cases file is missing, ask for it. If the event id or the
 authorisation is missing, PAUSE and ask — do not guess an event.
-
-## Retest runs — detect, don't assume
-
-Before provisioning anything, check whether a PRIOR run of this story
-exists: a `<ISSUEKEY>-testdata.json` or `<ISSUEKEY>-runsheet.xlsx`
-already present, `RETEST:`/supersede lines in the suite's case notes,
-or a manual-results comment on the QA sub-task. Any of these found →
-**PAUSE and ask: "prior run detected — full fresh run, or retest?"**
-Never silently rebuild the full sheet on top of a finished run.
-
-On a retest:
-- Build rows ONLY for the retest scope (provided by `qa-pipeline-code`
-  retest mode, or ask for it: the failed cases + their REQ groups +
-  never-verdicted cases). A retest sheet is short by design — that is
-  its value.
-- **Fixtures are fresh by default.** Prior fixtures are presumed
-  contaminated for every counter / analytics / lead assertion:
-  accumulated interactions make their baselines unreadable (a real run
-  left a phantom like on one target and a counter stuck at 15 on
-  another — no counter case can ever be judged against those again).
-  Read the prior `testdata.json` to know what exists, but provision
-  new dedicated targets with verified zero baselines for anything
-  numeric. Reuse a prior account only for stateless checks, after
-  re-proving its login.
-- Note in the testdata-notes file which prior fixtures were abandoned
-  as contaminated, so cleanup can target them.
 
 ## Output
 
@@ -206,8 +186,7 @@ It carries the environment-specific detail. The three that matter most:
   Actions performed over the API frequently skip client-side tracking,
   so any case touching counters, leads, analytics or statistics must be
   exercised **through the UI** or it passes for the wrong reason. This
-  is the single most expensive trap in this pipeline: it has produced
-  false passes in the automated stages and in manual review.
+  is the single most expensive trap in this pipeline.
 - **Analytics-backed surfaces lag.** Reading immediately after an action
   shows a clean result. Establish the lag for the surface before
   trusting any "nothing appeared" verdict, and put the required wait in
@@ -274,9 +253,9 @@ tester's Notes single one out — stage 10 expands the list on ingestion.
   `[risk: High]` requirement, or ANY PASS whose only evidence is code
   reading (code-review PASS, never executed). One short-form row: same
   Log in as / Do / Expect, trimmed to the fastest action that would
-  expose a wrong PASS. Never mark these skipped — the whole point of
-  the manual round is that ~half of unverified machine PASSes are
-  historically wrong, and the High-risk ones are where that hurts.
+  expose a wrong PASS. Never mark these skipped — ~half of unverified
+  machine PASSes are historically wrong, and the High-risk ones are
+  where that hurts.
 
 Probe every NEEDS FIXTURE reason against the live system before
 accepting it (rule 5).

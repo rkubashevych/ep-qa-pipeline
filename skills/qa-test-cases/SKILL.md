@@ -39,26 +39,20 @@ From the checklist, the skill takes:
   copy it unchanged onto the `## REQ-N` group heading; the executing
   stages run High-risk cases first.
 - The channel tag on each check (`[UI]`, `[API]`, `[mobile]`,
-  `[export/email]`) — carry it onto the test case. It tells later
-  stages how the test case is executed: only `[UI]` test cases are
-  runnable by the browser-based web-testing skill; `[API]` cases are
-  executed by the api-testing skill; `[mobile]` and `[export/email]`
-  need other tools or manual checking. Tag EVERY test case
-  individually on its `### TC-REQ-N.M` heading — a requirement can mix
-  channels (one `[UI]` check and one `[API]` check), and the executing
-  stages route per test case, not per requirement.
-  **Provenance-sensitive exception — dual tag allowed:** when the
-  expected result reads a counter / lead / analytics / statistics /
-  notification / dashboard surface, the endpoint alone cannot prove the
-  behaviour (API-created actions often skip client-side tracking), so
-  such a case may carry `[API][UI]` — meaning "the call is API-shaped,
-  but the verdict needs the browser". Web-testing takes dual-tagged
-  cases into scope; api-testing may run the API half but may not record
-  the final PASS (see
-  `../api-testing/references/absence-check-protocol.md`). This tag is
-  advisory routing made at the docs phase, blind — code review may
-  still `RE-ROUTE` any case once it has seen the code, and that
-  re-route wins over the tag.
+  `[export/email]`) — carry it onto the test case. Tag EVERY test
+  case individually on its `### TC-REQ-N.M` heading — a requirement
+  can mix channels, and the executing stages route per test case, not
+  per requirement.
+  **Provenance-sensitive exception — dual tag:** when the expected
+  result reads a counter / lead / analytics / statistics /
+  notification / dashboard surface, the endpoint alone cannot prove
+  the behaviour (API-created actions often skip client-side
+  tracking), so such a case carries `[API][UI]` — "the call is
+  API-shaped, but the verdict needs the browser".
+  The tag is an ADVISORY routing hint made at the docs phase, blind —
+  the binding routing rule, and what the later stages do with the
+  tags, is the routing invariant in
+  `../qa-run-analyzer/references/status-vocabulary.md`.
 
 Additional source:
 - The user's answers to questions asked before generation.
@@ -280,5 +274,5 @@ human and by the code phase. Format for easy human scanning:
   test-case heading with exactly ONE tag
   (`### TC-REQ-N.M — <name>  [UI]`), with the single exception of
   provenance-sensitive cases, which carry the dual `[API][UI]` tag
-  (see "Provenance-sensitive exception" above). The per-case tag is
-  what the executing stages (api-testing, web-testing) route on.
+  (see the Input section). The per-case tag is what the executing
+  stages route on.

@@ -276,17 +276,16 @@ Each test case gets one status:
   layout, real data, integrations, permissions.
 - `N/A` — the item does not apply to this PR.
   The code related to this requirement is absent from the PR.
-- `RE-ROUTE [UI]` — the case carries the wrong channel tag: it is
-  tagged `[API]` (or `[mobile]`/`[export/email]`) but the code shows
-  its assertion originates in **client-side / UI code**, so testing it
-  over the API would exercise a different code path and could pass
-  while the real hazard ships. This stage is the FIRST one that sees
-  the code, so it is the first that can catch a mis-tag — the tag was
-  assigned at the docs phase, blind. A RE-ROUTE entry names the file
-  and line where the client-side behaviour lives, and web-testing
-  (stage 8) takes the case into its scope regardless of the tag.
-  RE-ROUTE implies "needs runtime verification in the browser" — it
-  replaces QA for that case, never PASS/FAIL.
+- `RE-ROUTE [UI]` — the case carries the wrong channel tag: the code
+  shows its assertion originates in **client-side / UI code**, so
+  testing it over the API would exercise a different code path and
+  could pass while the real hazard ships. This stage is the first
+  that sees the code, so it is the first that can override the
+  docs-phase tag (routing invariant:
+  `../qa-run-analyzer/references/status-vocabulary.md`). A RE-ROUTE
+  entry names the file and line where the client-side behaviour
+  lives; web-testing takes the case into scope regardless of tag.
+  RE-ROUTE replaces QA for that case, never PASS/FAIL.
 - `SPEC-DEFECT` — the code is consistent and deliberate, but the test
   case's expected result contradicts what the ticket/spec itself
   requires (or the case's premise names something that does not exist

@@ -40,11 +40,48 @@ Source markers (not statuses — never counted as verdicts):
 Row identifiers: `TC-REQ-N.M` (regular cases) and `RISK-<TAG>-<n>`
 (risk rows — legal, reported by the script as "ids NOT in test-cases").
 
+## Routing invariant — one rule, four recorded forms
+
+The docs-phase channel tag (`[UI]` / `[API]` / `[mobile]` /
+`[export/email]`, including the dual `[API][UI]`) is **advisory**: it
+was assigned before any stage saw the code or the running system. The
+binding rule is:
+
+> **Web-testing's scope = every QA/FAIL case that no earlier stage
+> conclusively executed at runtime, plus every routed-in and
+> spot-check row.** And every QA/FAIL case of ANY channel appears
+> exactly once across the run: in api-testing's Results, in
+> web-testing's Results, in a "Not executed here" section with its tag
+> and reason, or via an explicit reference to the report that executed
+> it. `[mobile]` / `[export/email]` cases land in "Not executed here"
+> unless api-testing's HTTP-fetchable-export exception applies.
+
+The four recorded forms of this one rule — keep the names; they are
+what the templates and `reconcile_counts.py` parse:
+- the **per-case channel tag** (qa-checklist / qa-test-cases) — the
+  initial routing hint;
+- the **dual `[API][UI]` tag** — provenance-sensitive cases: the call
+  is API-shaped but the verdict needs the browser (absence-check
+  protocol); api-testing may run the API half, never the final PASS;
+- **code-review `RE-ROUTE [UI]`** — the first stage that sees the code
+  overrides a wrong tag, with file+line evidence;
+- **api-testing's "Route to web-testing" section** — instrumentation
+  the API cannot measure (`NOT-TESTABLE (instrumentation)`).
+
+A routed case that appears in none of web-testing's sections is a
+coverage hole, not a pass (analyzer: routing integrity).
+
 Cross-stage rules that live with the vocabulary:
 - Prefer BLOCKED / NOT-TESTABLE / QA over a doubtful PASS — a false
   pass is worse than a failure because nobody investigates it.
 - A case that arrived as FAIL from code review exits stages 7/8 only
   as FAIL CONFIRMED or FAIL REJECTED.
+- **If you write the doubt, you must classify it.** When a stage's own
+  finding says the case's WORDING is what makes it fail ("depends on
+  the reading", "the spec doesn't state a limit", "would pass under
+  the other interpretation"), that IS the SPEC-DEFECT definition:
+  record SPEC-DEFECT, not FAIL. A verdict that needs a caveat to
+  survive is the caveat's verdict.
 - Manual results (stage 10) use PASS / FAIL / BLOCKED / SKIPPED; any
   other human entry is recorded verbatim as a non-standard verdict,
   never coerced.

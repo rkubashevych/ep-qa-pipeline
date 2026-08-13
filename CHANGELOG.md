@@ -5,6 +5,37 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.20.0 — 2026-08-13
+
+The consolidation release — subtractive, as three reviews demanded.
+Full cut ledger: `CONSOLIDATION-2026-08-13.md` (every deleted rule
+with its class and new home). 2657 → 2319 lines across eight files
+(−12.7%); web-testing 539→354 and qa-pipeline-code 540→451, both back
+under the 500-line bar. Zero behaviour change; zero incident-backed
+rules weakened; all frontmatter descriptions byte-identical.
+
+- **Routing invariant homed** in `status-vocabulary.md`: the channel
+  tag is advisory; web-testing's scope = every QA/FAIL case no earlier
+  stage conclusively executed at runtime, plus routed-in and
+  spot-check rows. The four recorded forms (tag, dual tag,
+  RE-ROUTE [UI], Route-to-web-testing) keep their names for templates
+  and the counting script; their scattered rules collapse into
+  pointers.
+- **Single homes extended:** env-credential search order lives only in
+  api-testing-reference §0; "if you write the doubt, you must classify
+  it" lives in status-vocabulary; duplicates elsewhere became
+  pointers. Cut ledger: 10 duplicates, 6 judgment-restating, 5 merged
+  into the invariant, 1 superseded.
+- **One substantive fix:** qa-pipeline-code's Final response still
+  claimed both comments (archive + human summary) were posted —
+  contradicting 0.19.0's two-wave rule. Now wave-1-only.
+- **Deleted:** orphaned `references/progress-protocol.md` (artifact of
+  retro proposal B, rejected in 0.19.0, referenced by nothing).
+- Deferred to a possible second pass: references/ dedup (~2,500 lines
+  of potential), and the structural cuts that change behaviour
+  (checklist folding, transport fallback, vocabulary collapse) stay
+  deferred with their recorded reasons.
+
 ## 0.19.4 — 2026-08-13
 
 Two items from the `claude doctor` run.
