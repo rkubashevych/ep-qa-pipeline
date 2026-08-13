@@ -110,22 +110,28 @@ Show the user exactly what will be written, then on explicit yes:
   (`Run <date> — SUPERSEDES <prior> (<old> → <new>): <reason>`) plus
   the single `⚠ CURRENT VERDICT:` first line. Never change lifecycle
   `status`.
-- **Jira QA sub-task**: post TWO comments, same convention as
-  code-phase step 6 — a machine archive (the full
+- **Jira QA sub-task**: post TWO comments — a machine archive (the full
   `<ISSUEKEY>-manual-results.md` in a fenced block preceded by
-  `File: <ISSUEKEY>-manual-results.md`) and a human summary (≤25
-  lines: verdict counts, **Retractions listed first with old → new
-  and reason**, bugs filed/linked, what remains untested). If a prior
-  human summary is now wrong, the new summary's first line says so
-  plainly ("supersedes the 2026-07-28 summary for N cases").
+  `File: <ISSUEKEY>-manual-results.md`) and **the run's FIRST
+  human-facing summary** (two-wave rule: the code phase posted only an
+  agents-only archive + status line). Write it as the complete
+  picture, not a delta — overall verdict, stage table, confirmed bugs,
+  **Retractions listed first with old → new and reason**, what needs a
+  human, what was not tested — because no earlier human summary
+  exists. Where the machine's verdict and the human's disagree, state
+  the human's and note the machine's in one clause. (On older tickets
+  where a pre-two-wave summary WAS posted, open with "supersedes the
+  <date> summary for N cases".)
 - Connector absent → suite write-back is skipped with a visible note;
   the Jira comments still carry everything.
 
 ### Step 4b — The deferred handback (this stage owns it)
 
-The code phase deliberately does NOT post the final "QA passed" story
-note or apply the "QA done" transition — automated verdicts are
-provisional until this stage runs. Now that the manual results are in:
+The code phase deliberately posts NOTHING human-facing — no summary, no
+story note, no transitions, no bug filings, no questions to named
+people (two-wave rule, `qa-pipeline-code` step 6). This stage is where
+all of it happens, on verdicts a human has confirmed. Now that the
+manual results are in:
 
 - Overall verdict still ✅ PASS after ingestion (no unresolved RETRACTS
   to FAIL, no new FAILs): offer the "Story note — QA passed" to the

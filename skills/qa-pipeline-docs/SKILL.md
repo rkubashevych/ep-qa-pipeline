@@ -211,7 +211,11 @@ the next stage automatically (they share the working directory).
        still rebuild them (the requirements file is what lets the
        code-phase analyzer re-verify upstream traceability — without it
        that check dies silently in every fresh chat). Do not shorten or
-       reformat file contents inside the blocks.
+       reformat file contents inside the blocks. Choose fence lengths
+       longer than any fence inside the file, and after posting, READ
+       THE COMMENT BACK and verify each file's length against disk —
+       Jira's markdown→ADF conversion has silently truncated an archive
+       containing nested code fences.
      - **Size limit:** a Jira comment body maxes out around ~32,000
        characters. Measure the assembled comment before posting; if it
        exceeds ~30,000, split it into several comments with the same

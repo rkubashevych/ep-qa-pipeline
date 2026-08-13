@@ -160,6 +160,39 @@ For each test case (TC-REQ-X.Y):
    of each step with what the code does.
 4. **Classify** — assign a status.
 
+### Source fidelity — before judging the case, check the case is real
+
+The code phase reads DERIVED test cases, never the acceptance criteria.
+A requirement mis-derived upstream is therefore invisible to every
+later stage, and this stage is the last one that still holds the
+tracker. (Yes, this is a deliberate, bounded exception to "do not go to
+the tracker" — read-only, and only for the cases below.)
+
+Before assigning FAIL — and for every `[risk: High]` case regardless of
+verdict — confirm the case's asserted expectation actually appears in a
+source of record:
+
+1. Read the case's `source` / traceability (the suite requirement's
+   `source` field, or the requirements file's source line).
+2. Open the named acceptance-criteria page or ticket and find the
+   sentence the case asserts. One fetch per distinct source, not per
+   case — in practice a handful per run.
+3. Also read the IMPLEMENTING sub-task's own acceptance criteria (you
+   already have them from the PR/branch derivation). A clause present
+   in an early brief but absent from the sub-task that was built is the
+   exact shape of a mis-derived requirement.
+
+If the asserted expectation is NOT in the source of record, or is
+present in only one of several cited sources:
+- classify the case **SPEC-DEFECT**, never FAIL;
+- name which document does and does not carry the clause;
+- say which version the code implements.
+
+Scope deliberately: FAIL-bound cases and High-risk cases only. This is
+not a re-grooming and you are not re-deriving requirements — you are
+confirming that the sentence you are about to fail a build against
+exists.
+
 ### What to look for in the code
 
 ExpoPlatform splits a story into separate frontend and backend
@@ -264,6 +297,14 @@ Each test case gets one status:
 Rules:
 - Do not mark PASS if there is any doubt — prefer QA.
 - Do not mark FAIL without concrete evidence from the code.
+- **A FAIL from code reading alone is a CLAIM, not a settled verdict.**
+  It must reach runtime confirmation (stages 7/8: FAIL CONFIRMED /
+  FAIL REJECTED) or the manual round before anyone acts on it. If
+  runtime cannot confirm it (BLOCKED), it is reported under
+  "Unverified defect claims" in the human summary — never as a settled
+  FAIL, and it never files a bug (step 7 gate). Measured base rate:
+  half of code-read-only negative verdicts were wrong across real runs
+  (6 of 12 on one ticket).
 - Do not mark N/A without concrete evidence from the code.
 - Do not mark RE-ROUTE without the file+line evidence that the
   behaviour is client-side.

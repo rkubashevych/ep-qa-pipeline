@@ -5,8 +5,9 @@ description: >
   5-10). Given a Story key, reads the test cases from the story's QA
   sub-task (published by qa-pipeline-docs) and derives the dev branches
   from the backend/frontend sub-tasks, then runs pr-summary, then
-  code-review, then api-testing, then web-testing, then run-analyzer, posts the
-  results back to the QA sub-task (marked PROVISIONAL), builds the
+  code-review, then api-testing, then web-testing, then run-analyzer,
+  archives machine results on the QA sub-task (human summary follows
+  at stage 10), builds the
   manual run sheet (qa-manual-runsheet) so a human can walk what the
   machine could not settle, verifies the published state, and defers
   the final handback to qa-manual-results (stage 10). Also supports
@@ -303,9 +304,32 @@ multi-PR story does not exhaust the orchestrator's context:
 5. **qa-run-analyzer** -- run automatically; also reads
    `<STORY>-api-testing.md`. Writes `<STORY>-run-report.md`.
 
-6. **Post results back to the QA sub-task** -- TWO comments, per
-   **`references/results-comment-template.md`** (formats live there,
-   not here):
+6. **Publish in two waves — only the first happens now.** Formats:
+   **`references/results-comment-template.md`**.
+
+   **Wave 1 — now, agents only.** The machine archive comment(s) (a
+   resumed run needs them; they are unreadable prose to a human and tag
+   no one), the QA Service suite write-back (machine record), and ONE
+   short status comment on the QA sub-task with no verdicts:
+   `QA automated pass complete — N cases, M settled by machine, K for
+   manual. Results published after the manual round.`
+
+   **Wave 2 — after `qa-manual-results` (stage 10), never now.** The
+   human summary, the story comment, the stage-verdict table, and any
+   request for a product decision. By then every verdict has been
+   confirmed by a human or retracted, and the summary states what IS
+   rather than what the machine currently believes. Rationale from a
+   real run: the PROVISIONAL label did not stop readers acting on
+   unverified verdicts — a mis-typed bug, three "product decisions"
+   the AC already answered, two retractions within 24 hours. Marking
+   output tentative does not make readers treat it tentatively;
+   withholding it does.
+
+   **The exception, and it is narrow.** A finding may be published in
+   wave 1 only if ALL of: confirmed at RUNTIME (not from a code read);
+   evidence attached; and it blocks the manual round from proceeding
+   (e.g. an environment fault that stops the tester working). A
+   code-read FAIL never qualifies.
    - **Count gate first — refuse to post while a mismatch stands.**
      Where a shell is available, run
      `python3 <plugin>/skills/qa-run-analyzer/scripts/reconcile_counts.py <STORY>`
@@ -315,11 +339,12 @@ multi-PR story does not exhaust the orchestrator's context:
      count, or an ID set with unexplained missing cases) is fixed in
      the report BEFORE the preview is shown — wrong numbers must not
      reach Jira, the suite, or the human summary.
-   - **REQUIRED PAUSE / CONFIRM.** Show what will be posted (both
-     comments), to which sub-task, and — when the QA Service connector
-     is present — the result write-back line (how many executed cases
-     get a PASS/FAIL note in the suite). Post only after an explicit
-     yes; the one confirmation covers Jira and QA Service.
+   - **REQUIRED PAUSE / CONFIRM.** Show what wave 1 will post (the
+     archive comment(s) + the short status comment), to which sub-task,
+     and — when the QA Service connector is present — the result
+     write-back line (how many executed cases get a run note in the
+     suite). Post only after an explicit yes; the one confirmation
+     covers Jira and QA Service.
    - **QA Service result write-back:** for every executed case, append
      the run outcome to its suite case notes — rules and exact note
      format: `../qa-pipeline-docs/references/qa-service-publish.md` →
@@ -333,16 +358,16 @@ multi-PR story does not exhaust the orchestrator's context:
      the same convention as the docs-phase archive comment, so agents
      can re-read the results from Jira. Do not shorten or reformat the
      file contents.
-   - **Comment 2 — human summary (posted second, so it sits newest):**
-     a short formatted summary per the template: overall verdict up
-     top, stage-verdict table with counters, confirmed bugs (one line
-     each), what needs a human, what was not tested here, and the
-     run-health line. ≤30 lines, no walls of text — the detail lives
-     in comment 1. Always post it, pass or fail.
+   - **Comment 2 — human summary — is WAVE 2: posted by
+     `qa-manual-results` (stage 10), not here.** Write the file
+     `<STORY>-human-summary.md` now (per the template: overall verdict,
+     stage-verdict table, confirmed bugs, what needs a human, what was
+     not tested, run-health line, ≤30 lines) so stage 10 has the
+     machine's picture to reconcile against — but do NOT post it.
    - Use comments (`addCommentToJiraIssue`, not a description
      overwrite) so nothing is lost.
    - If there is no QA sub-task (the no-sub-tasks fallback case) and
-     the test cases came from files or the main issue, post both
+     the test cases came from files or the main issue, post the wave-1
      comments to the MAIN issue instead — same format, same confirm
      pause.
    - **Tracker note:** the connector cannot edit the docs-phase
@@ -351,10 +376,23 @@ multi-PR story does not exhaust the orchestrator's context:
      human's manual verification. Remind the user of this in the final
      response so nobody expects ticked boxes.
 
-7. **Offer to file the confirmed bugs** -- if the run produced confirmed
-   bugs (web-testing `FAIL CONFIRMED` / api-testing `FAIL` or
-   `FAIL CONFIRMED`), make ONE offer listing all the bugs; file only
-   the ones the user confirms.
+7. **Bug filing — after the manual round, not before.** Same rule as
+   step 6: a bug drafted from an automated verdict waits for the human
+   to walk that case; everything goes into the run sheet as a row for
+   the tester, and becomes a bug in stage 10 if it survives contact.
+   The exception is identical and equally narrow: runtime-confirmed,
+   evidenced, and blocking the manual round. When filing does happen
+   (stage 10, or the narrow exception), make ONE offer listing all the
+   bugs; file only the ones the user confirms.
+   - **Source gate — before drafting any bug.** Quote the sentence from
+     the acceptance criteria (or the implementing sub-task) that the
+     build violates, and put it in the draft's "Expected result". If
+     you cannot find that sentence in a source of record, the finding
+     is a SPEC-DEFECT or a product question — retract the FAIL per the
+     supersede convention and raise it to the docs-phase owner instead
+     of filing a Bug against a dev. If you find yourself drafting a
+     "you may get pushed back on this" caveat into the bug, stop — that
+     caveat is this gate firing.
    - **Preferred path (knowledge-base installed):** hand the confirmed
      bugs to the `/knowledge-base` skill — it searches existing
      tickets/known issues first and creates properly routed Jira bugs;
@@ -369,15 +407,22 @@ multi-PR story does not exhaust the orchestrator's context:
      `createJiraIssue` only after an explicit yes per bug. Never
      file silently.
 
-8. **Close the loop — hand the story back.** After posting (and any
-   bug filing), offer the matching Jira handoff. Never transition or
-   reassign silently — show what will change and confirm first.
-   - **Verdict ❌ FAIL or ⚠ PASS WITH GAPS with confirmed bugs:** offer
-     to reassign the failing dev sub-tasks (or the story) back to
-     their dev assignees, with a comment linking the human summary and
-     the filed bug keys; apply the "back to dev" transition from
-     `../qa-pipeline-docs/references/publish-config.md` if one is
-     configured there.
+8. **Close the loop — hand the story back (wave 2, stage 10).** Never
+   transition or reassign silently — show what will change and confirm
+   first. **And never ask a named person for a decision before the
+   manual round** — nor before the source-fidelity check has confirmed
+   the question is real: on one run, three of four "product decisions"
+   put to two people were already answered by the acceptance-criteria
+   page. Asking a colleague to decide something the spec already
+   decides is worse than not asking — it implies the spec is ambiguous
+   when it is not.
+   - **Verdict ❌ FAIL or ⚠ PASS WITH GAPS with confirmed bugs:** the
+     reassignment + "back to dev" offer happens at stage 10 with the
+     human-confirmed verdicts (narrow wave-1 exception: a
+     runtime-confirmed, evidenced, blocking fault may be escalated
+     now). Comment links the human summary and the filed bug keys;
+     transition per `../qa-pipeline-docs/references/publish-config.md`
+     if configured.
    - **Verdict ✅ PASS: the handback WAITS for the human.** Automated
      verdicts are provisional (the creator's own base rates: ~half of
      machine results wrong) — so do NOT post the "QA passed" story
@@ -438,11 +483,14 @@ multi-PR story does not exhaust the orchestrator's context:
      confirm the run line is in `notes` and the count matches the
      plan. Connector absent → state that no durable per-case record
      exists beyond the Jira comments.
-   - **Bugs traceable:** every FAIL / FAIL CONFIRMED across the three
-     reports has either a filed bug key or an explicit "not filed —
-     <reason>" line in the human summary. No silent FAILs.
-   - **Comments exist:** both step-6 comments (archive + human
-     summary) are on the sub-task — re-read, don't assume.
+   - **Findings traceable:** every FAIL / FAIL CONFIRMED across the
+     three reports has either a run-sheet row awaiting the tester, a
+     narrow-exception bug key, or an explicit "not carried —
+     <reason>" line in the drafted human summary. No silent FAILs.
+   - **Wave-1 comments exist:** the archive comment(s) and the short
+     status comment are on the sub-task — re-read, don't assume. The
+     human summary must NOT be posted yet (that is stage 10's job) —
+     finding it posted early is a ❌.
    - **Runsheet outputs exist** (unless the user skipped stage 9).
    Append the outcome as a `## Post-publish verification` section to
    `<STORY>-run-report.md` (✅/❌ per item) and include one line in the
@@ -453,16 +501,25 @@ multi-PR story does not exhaust the orchestrator's context:
     The human run happens after this orchestrator finishes — often days
     later, in a different chat. When the tester hands back the filled
     run sheet (or a TC/Result/Notes table), run `qa-manual-results`: it
-    joins the results by TC id, reconciles them against what step 6
-    published, and writes back to Jira + the suite **with explicit
-    retractions** where the human overturned an automated verdict.
-    End THIS run by telling the user that step exists: the published
-    verdicts are provisional until the manual results are ingested.
+    joins the results by TC id, reconciles them against the machine
+    record, writes back to Jira + the suite **with explicit
+    retractions**, and — because of the two-wave rule — posts the FIRST
+    human-facing summary, files the surviving bugs, and makes the
+    handback offers. End THIS run by telling the user plainly: nothing
+    human-facing has been published yet; stage 10 is where the team
+    hears the result.
 
 ## Between stages
 
 - Keep chat output short: one line per hand-off.
 - Each stage's own rules and templates apply unchanged.
+- **The orchestrator never asserts a product claim from its own
+  observation.** A defect, a reclassification, a reachability claim, a
+  "this is actually fine" — every such statement is produced by a
+  stage skill under that stage's evidence rules, or dispatched to one.
+  On real runs, the dominant error source was the orchestrator
+  narrating conclusions between stages from a single glance; the
+  stages' own rule-bound work was measurably more accurate.
 
 ## Final response
 

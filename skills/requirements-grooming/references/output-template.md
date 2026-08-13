@@ -14,5 +14,11 @@ Generated: <YYYY-MM-DD>
 
 - REQ-1: [risk: Medium] <requirement text>
 - REQ-2: [risk: High] <requirement text>
+  - source: <document containing the whole statement>
 - REQ-3: [risk: Low] <requirement text — mark "(unresolved conflict)"
   if it still holds two contradictory versions>
+- REQ-4: [risk: Medium] <core clause every source states>
+  - source: <spec of record>
+  - ⚠ extra clause "<the clause>" — stated ONLY in <source>. Not in
+    <spec of record>. Testable as a pass/fail only if <owner> confirms
+    it.

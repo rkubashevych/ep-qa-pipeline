@@ -7,6 +7,10 @@
 
 # Any per-ticket run artifact, any stage, any extension (EP-12345-*.*)
 EP-*
+# …but pipeline intelligence stays tracked (Windows git matches EP-*
+# case-insensitively, which would silently swallow these):
+!ep-qa-pipeline-retrospective-*.md
+!ep-qa-pipeline-proposed-edits*.md
 # future layout: per-run folders
 runs/
 

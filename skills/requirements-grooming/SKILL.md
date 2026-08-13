@@ -131,6 +131,26 @@ For each requirement from the context file go through four questions:
      them, raise it as a question — do not silently assume they are
      unaffected
    - Contradictions between requirements in the context file
+   - **Sources that differ in scope (not just in content).** When two
+     sources describe the same requirement and one says *strictly more*
+     than the other — an extra clause, a wider comparison, an added
+     condition — this is NOT a contradiction and must not be resolved by
+     merging them into one statement. Two sources agreeing on a core and
+     differing on a clause is the single easiest way to publish a
+     requirement the acceptance criteria do not contain. Split it
+     instead:
+       - the clause every source carries → the requirement;
+       - each extra clause → its own numbered requirement, or an
+         explicit `(unresolved conflict)` marker, attributed to the one
+         source that states it;
+       - and record which source is the **spec of record**. Where a
+         Confluence acceptance-criteria page exists, it outranks a
+         design sub-task, and an implementing sub-task outranks an
+         earlier brief, unless the ticket says otherwise. State the
+         ranking you used — never leave it implied.
+     A brief that was later superseded by an AC page is the classic
+     case: its extra sentences are intent, not acceptance. Both are
+     worth recording; only one is testable as a pass/fail.
    - Contradictions with the established test design: if the context
      file has an "Existing QA Service suite" section, check each
      requirement against the listed established requirements. A ticket
@@ -140,6 +160,14 @@ For each requirement from the context file go through four questions:
      intended change; only the user/PM can say, so never silently pick
      a side. Established `risk`/`oq` items touching the same behavior
      are grooming input too: raise them if the ticket leaves them open.
+     Also check whether the new requirement and an established one can
+     BOTH hold at once. Two rules that never contradict in wording can
+     still be jointly unsatisfiable — one run's REQ-20 ("no News card
+     larger than the other sections' cards") against the established
+     "each block's card matches that entity's listing-page card": if
+     every block inherits its listing card, the sizes are inherited and
+     cannot be equalised. Neither rule is wrong; together they are
+     impossible. Raise it as a Contradiction citing both sides.
      The suite section is comparison material only — do not import
      suite requirements as new REQ items.
 
@@ -162,6 +190,12 @@ messages", "handle", "support".
 - Record only what really affects the implementation, testing, or
   acceptance of the task. A question that will not change the code, the
   test, or the acceptance result — do not record.
+- **A requirement statement may cite only sources that support all of
+  it.** If you cannot point at one document containing the whole
+  statement, the statement spans sources and must be split per the
+  scope-difference rule above. This is a hard check, not a judgement
+  call: read your own `source` string back and confirm each named
+  document really contains every clause you wrote.
 - Do not generate questions about:
   - implementation details the developer decides (architecture,
     libraries, cache, performance) unless it is stated in the

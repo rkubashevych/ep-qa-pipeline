@@ -419,6 +419,14 @@ Each test case gets one status:
   spec). Not a FAIL, not a PASS: the case or requirement needs
   correcting. Feeds the human summary's "Requirements to correct"
   section.
+  **If you write the doubt, you must classify it.** If your own finding
+  says the case's wording is what makes it fail — "the case should name
+  the comparison section", "depends which element the tester picks",
+  "the requirement doesn't state a maximum", "would pass under the
+  other reading" — that IS the SPEC-DEFECT definition, and the row is
+  SPEC-DEFECT, not FAIL. Do not record a FAIL and explain in the notes
+  why it might not be one. A verdict that needs a caveat to survive is
+  the caveat's verdict.
 
 Risk-chasing rows: a code-review risk with no covering test case MAY
 be exercised as a `RISK-CR-<n>` row when its surface is on a page this
@@ -428,6 +436,18 @@ proposes confirmed risk rows as permanent suite cases.
 Rules:
 - Do not mark PASS if there is any doubt — prefer FAIL with a description.
 - Do not mark FAIL without a concrete description of the discrepancy.
+- **Second observation before FAILing a shared element.** A FAIL on a
+  page-level or shared element (header, nav, global styles, layout of
+  a component reused across pages) requires a second observation in a
+  fresh context — new navigation or fresh tab — before it is recorded.
+  On one run, 16 of 17 browser-stage errors were single-observation
+  false alarms on exactly such elements. Record both observations in
+  the evidence.
+- **Negative/absence verdicts carry their `Control:`** — the evidence
+  line naming the positive control observed on the same surface this
+  run (per the absence-check protocol). A FAIL or "does not appear"
+  with no control line is not publishable; the count gate treats it as
+  missing evidence.
 - **Absence checks** ("nothing appears", "no row", "zero count") follow
   `../api-testing/references/absence-check-protocol.md`: no PASS
   without a positive control observed on the same surface this run,

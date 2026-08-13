@@ -227,6 +227,12 @@ statuses land there first. This stage emits:
   or requirement needs correcting. Every SPEC-DEFECT feeds the human
   summary's "Requirements to correct" section and a `discrepancy` note
   on the suite case (step 6).
+  **If you write the doubt, you must classify it.** If your own finding
+  says the case's wording is what makes it fail — "depends on the
+  reading", "the spec doesn't state a limit", "would pass under the
+  other interpretation" — that IS the SPEC-DEFECT definition: record
+  SPEC-DEFECT, not FAIL. A verdict that needs a caveat to survive is
+  the caveat's verdict.
 
 Rules: prefer BLOCKED/NOT-TESTABLE over a false PASS; never PASS with
 doubt; every

@@ -87,6 +87,33 @@ sheet which signal the tester should trust.
   underlying profile columns does **not** clear it. Verify by actually
   logging in, not by reading fields back.
 
+## Destructive-write safety — snapshot first, always
+
+- **No write to a collection-shaped admin endpoint without a persisted
+  snapshot and a VERIFIED restore path.** A save-style endpoint that
+  takes a list frequently REPLACES the collection rather than appending
+  — one run destroyed 930 permission pairs with a single call that
+  looked like "add one". Before any such write: fetch the full current
+  state to a file, confirm you can restore it (restore a copy or verify
+  the endpoint semantics), then write.
+- **After the run, verify the revert against the snapshot** — a
+  machine check (fetch again, diff against the snapshot file), not a
+  memory of having reverted. Mid-run disconnects have left shared
+  events corrupt precisely because the revert lived only in intent.
+- **Write the restore recipe to the notes file BEFORE the first
+  mutation**, so a crashed session leaves instructions, not a mystery.
+- **Prove reachability on the exact path a case uses with ONE throwaway
+  object before bulk-provisioning** — one run provisioned 19 entities
+  and recovered 0 cases because the surface never showed them. And
+  never create an entity type whose delete path you have not confirmed:
+  one unrevertible row came from an HTTP 500 that still wrote.
+- **Verify positive fixture claims as rigorously as blocked reasons.**
+  Rule 5 probes blockers; the same rigour applies to "the fixture is
+  ready": prove the account logs in, the entity appears on the exact
+  surface, the count reads the expected baseline — including the
+  host's own health. One sheet claimed 15 exhibitors where the event
+  had 359, and 10 toggles where there were 15.
+
 ## Verify every blocked reason
 
 A wrong "blocked" silently removes a case from testing. In one run four
@@ -112,7 +139,26 @@ Re-verify these; they have changed before.
 - **Portal login:** `POST {FRONTEND_HOST}/api/v1/login` with
   `{"username": <email>, "password": ...}`, headers `x-application: 3`
   and `Authorization: Basic base64(ORGANIZER_API_KEY + ":")`. Throttles
-  at roughly **6 attempts per 5 minutes per IP**.
+  at roughly **6 attempts per 5 minutes per IP**. Returns
+  `data.token` — a 32-char hex string, **not** a JWT.
+- **Calling a user-scoped endpoint needs BOTH headers.** The login
+  token goes in its own header alongside the API key, never instead of
+  it:
+
+  ```
+  Authorization: Basic base64(ORGANIZER_API_KEY + ":")
+  x-auth-token: <data.token from login>
+  x-application: 3
+  ```
+
+  Verified on `POST /api/v1/profile/interactions` and
+  `GET /api/v1/profile/interactionsCount`. The token does **not**
+  authenticate as `Authorization: Bearer <token>`, as
+  `Basic base64(token + ":")`, as a `token` field in the JSON body, or
+  as a `?token=` query param — all four return
+  `401 Unauthorized: Not authorized`, which reads like an expired
+  session and is actually the wrong header. Four attempts were spent
+  rediscovering this on a retest; do not rediscover it a third time.
 - **There is no `/login` page** — it renders a soft 404. The login modal
   opens from the header Sign In button or `?openLoginPopup=true`. Log out
   via the avatar menu; the logout endpoints do not end the session.
@@ -126,11 +172,13 @@ Re-verify these; they have changed before.
 - **Account creation:** `POST /admin/index/doRegistration` (admin session
   + CSRF) is the working path. `/admin/visitors/saveVisitor?id=` fatals
   on create.
-- **Known broken on alpha2 at time of writing:** favourites-list reads
-  (`profile/interactions`, `interactionsCount`) 500 on
-  `hosted_buyer_buyers.id`, for every user. Anything whose verification
-  route is a favourites-list read is blocked by the environment, not by
-  the feature.
+- **~~Known broken on alpha2~~ — FIXED 2026-08-03 (EP-55694).**
+  Favourites-list reads (`profile/interactions`, `interactionsCount`)
+  used to 500 on `hosted_buyer_buyers.id` for every user. Re-probed on
+  2026-08-04: all list types and the count endpoint return 200. Kept
+  here as the worked example of why an environment blocker must be
+  re-probed rather than inherited — four cases sat BLOCKED on it, and a
+  stale note would have kept them there.
 
 ## Disclosure
 

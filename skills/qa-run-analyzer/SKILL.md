@@ -210,6 +210,27 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
   the list of confirmed bugs; what was routed to "Not executed here"
   (mobile/export-email); overall verdict.
 
+### 7. Source fidelity (Input) — is the premise true, not just consistent?
+
+Every other check in this skill is a CONSISTENCY check: do the counts
+agree, is traceability intact, does each case map to a requirement.
+Consistency cannot detect a wrong premise propagated uniformly — it is
+the one property such an error preserves. This dimension is the only
+one that looks outward.
+
+For every FAIL / FAIL CONFIRMED, and every requirement marked High
+risk:
+- does the requirement's `source` name a SINGLE document containing the
+  whole statement? A source string joining two documents with "and" is
+  a finding — flag it and name the clause that may not be covered.
+- did any stage report a verdict against a clause absent from the
+  implementing sub-task's acceptance criteria?
+- do any two requirements in the suite fail to be jointly satisfiable?
+
+Flag 🔴 when a published FAIL rests on a clause found in only one of
+several cited sources. That is a retraction waiting to happen, and it
+is cheaper to find here than after the bug is filed.
+
 ## Output
 
 Write `<ISSUEKEY>-run-report.md` per references/output-template.md, then

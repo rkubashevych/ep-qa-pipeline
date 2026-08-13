@@ -36,10 +36,15 @@ import os
 import re
 import sys
 
-CASE_ID = re.compile(r"(?:TC-REQ-\d+(?:\.\d+)*|RISK-[A-Z]+-\d+)")
+# Letter suffix allowed (TC-REQ-12a.1) — without it, 12a.1/12b.1/12c.1
+# silently collapse into one id "TC-REQ-12" (real under-count incident).
+CASE_ID = re.compile(r"(?:TC-REQ-\d+[a-z]?(?:\.\d+)*|RISK-[A-Z]+-\d+)")
 # TC-REQ-29.1–29.3 / TC-REQ-29.1-29.3 / TC-REQ-29.1–TC-REQ-29.3
+# The right side MUST be a dotted maj.min — a bare number after a dash
+# is prose ("TC-REQ-20.1 — 30 characters accepted") and once invented
+# 26 phantom ids when treated as a range end.
 ID_RANGE = re.compile(
-    r"TC-REQ-(\d+)\.(\d+)\s*[–—-]\s*(?:TC-REQ-)?(?:(\d+)\.)?(\d+)")
+    r"TC-REQ-(\d+)\.(\d+)\s*[–—-]\s*(?:TC-REQ-)?(\d+)\.(\d+)")
 # Longest alternatives first so FAIL CONFIRMED never half-matches as FAIL.
 STATUSES = (
     "FAIL CONFIRMED", "FAIL REJECTED", "NOT-TESTABLE", "NOT EXECUTED",
@@ -84,7 +89,7 @@ def collect_ids(text):
     """All case ids in the text, with TC ranges expanded."""
     ids = set(CASE_ID.findall(text))
     for maj, lo, maj2, hi in ID_RANGE.findall(text):
-        if maj2 and maj2 != maj:
+        if maj2 != maj:
             continue  # cross-major range: don't guess
         lo_i, hi_i = int(lo), int(hi)
         if lo_i < hi_i <= lo_i + 50:
@@ -153,6 +158,11 @@ SELFTEST_DOC = """
 | TC-REQ-2.1 | code-review style row | QA | needs runtime |
 | TC-REQ-16.3 | legacy edit path | RE-ROUTE [UI] | client-side clearGDPRCache |
 | TC-REQ-32.1 | admin duplicate toggle | PASS(code) | SPEC-DEFECT | POST /v | premise wrong |
+| TC-REQ-12a.1 | sort variant A | QA | PASS | GET /s?o=a | letter-suffix id |
+| TC-REQ-12b.1 | sort variant B | QA | PASS | GET /s?o=b | letter-suffix id |
+
+## TC-REQ-40.1 — 30 characters accepted and saved
+Prose heading above must NOT parse as a range 40.1–40.30.
 
 ## Statistics
 
@@ -164,14 +174,16 @@ SELFTEST_DOC = """
 
 SELFTEST_EXPECT = {
     "counts": {
-        "NOT EXECUTED": 2, "PASS": 1, "FAIL CONFIRMED": 2,
+        "NOT EXECUTED": 2, "PASS": 3, "FAIL CONFIRMED": 2,
         "NOT-TESTABLE (instrumentation)": 1, "BLOCKED (unverified)": 1,
         "QA": 1, "RE-ROUTE [UI]": 1, "SPEC-DEFECT": 1,
     },
     "sources": {"PASS(code)": 7},
     "ids_has": {"TC-REQ-7.2", "TC-REQ-29.1", "TC-REQ-29.2", "TC-REQ-29.3",
-                "RISK-CR-2", "TC-REQ-32.1"},
-    "ids_lacks": {"TC-REQ-7.2.", "TC-REQ-29"},
+                "RISK-CR-2", "TC-REQ-32.1",
+                "TC-REQ-12a.1", "TC-REQ-12b.1", "TC-REQ-40.1"},
+    "ids_lacks": {"TC-REQ-7.2.", "TC-REQ-29",
+                  "TC-REQ-40.2", "TC-REQ-40.30", "TC-REQ-12"},
 }
 
 

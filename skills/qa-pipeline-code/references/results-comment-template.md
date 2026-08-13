@@ -1,18 +1,27 @@
-# Results comments — qa-pipeline-code step 6
+# Results comments — two waves (step 6 = wave 1 · stage 10 = wave 2)
 
-**Contents:** Comment 1 — machine archive · Comment 2 — human summary
-(incl. PROVISIONAL status line, Requirements to correct, Overall
-verdict, Partial runs, Writing rules) · Story note — QA passed (posted
-by qa-manual-results) · Story note — QA failed (step 8)
+**Contents:** Comment 1 — machine archive (wave 1) · Comment 2 — human
+summary (wave 2, incl. Unverified defect claims, Requirements to
+correct, Overall verdict, Partial runs, Writing rules) · Story note —
+QA passed / QA failed (wave 2)
 
-Step 6 posts **two comments** to the QA sub-task, in this order:
+**Wave 1 (step 6, now):** the machine archive comment(s) + one short
+status comment (`QA automated pass complete — N cases, M settled by
+machine, K for manual. Results published after the manual round.`).
+Agents-only; no verdicts visible to a human skimmer, nobody tagged.
 
-1. **Machine archive** — the raw report files, for agents. Long is fine.
-2. **Human summary** — short and formatted, for people. Posted second so
-   it is the newest comment on the ticket.
+**Wave 2 (stage 10, after the manual round):** the human summary below,
+plus story notes / bug filings / decision requests — all on
+human-confirmed verdicts. Narrow wave-1 exception: runtime-confirmed +
+evidenced + blocking the manual round.
 
-Both are always posted, regardless of verdict. Never merge them into one
-comment.
+Never merge archive and summary into one comment. After posting the
+archive, **read it back and verify fidelity**: fetch the comment,
+run it through `scripts/extract_archive.py`, and compare each file's
+length with disk — Jira's markdown→ADF conversion has silently
+truncated an archive with nested code fences before. Choose each fence
+longer than any fence inside the file (dynamic fence length), never a
+bare triple-backtick around content that itself contains fences.
 
 ## Comment 1 — machine archive (for agents)
 
@@ -91,6 +100,7 @@ settings, reproduced in both UI and API.">
 
 1. **TC-REQ-N.M — <short name>** — expected <X>, got <Y>
    (<where: page / endpoint>). <Filed as EP-XXXXX | not filed yet>
+   (evidence: reproduced-with-control | observed-once | code-read)
 
 **Needs a human**
 
@@ -105,14 +115,24 @@ settings, reproduced in both UI and API.">
 - N of M cases verified by code reading only (code-review PASS — never
   executed against a running system)
 
+**Unverified defect claims** *(omit only when there are none)*
+
+- List every case that arrived FAIL from code review and ended BLOCKED
+  or otherwise never reached runtime confirmation, one line each. These
+  are NOT blocked cases in the ordinary sense: a defect has been
+  asserted from a code read and never confirmed against the product.
+  Say so plainly, and say what would confirm it. (Base rate from real
+  runs: half of code-read-only negative verdicts were wrong.)
+
 **Requirements to correct** *(omit if none)*
 
 - TC-REQ-N.M (SPEC-DEFECT): the case/requirement says <X>; the spec /
   observed deliberate behaviour is <Y> — fix the case, not the code
 
-Status: PROVISIONAL — automated verdicts; manual verification pending
-(<N> rows on the run sheet, incl. <N> spot-checks). Final status
-arrives with the manual-results comment, which supersedes this line.
+Status: VERIFIED — manual round ingested <date>; <N> machine verdicts
+confirmed, <N> retracted. (If rows were not walked:
+`PARTIALLY VERIFIED — <N> rows not walked; those verdicts remain
+machine-only.`)
 
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
 report (archive comment above).

@@ -5,6 +5,86 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.19.0 — 2026-08-13
+
+The mileage release. Five real runs (EP-47675, EP-47678, EP-53767,
+EP-53768, EP-55706) produced five retrospectives and two proposal files
+(`ep-qa-pipeline-proposed-edits*.md`, sections A–G) — now tracked in
+git alongside this entry. Triage per the MAINTAINERS loop rule:
+
+**ACCEPTED — E (source fidelity, docs phase):** grooming may not merge
+sources that differ in scope (split + spec-of-record ranking, E1);
+"a requirement may cite only sources that support all of it" hard check
+(E2); per-clause `source` attribution in qa-service-publish (E3) and
+the grooming output template (E4); joint-satisfiability check against
+the established suite (E5). Root cause: EP-55706 published a
+requirement whose second clause existed in no acceptance criteria.
+
+**ACCEPTED — F (source fidelity, code phase):** code-review verifies
+FAIL-bound and High-risk cases against the actual source of record —
+a deliberate, bounded read-only exception to "never touch the tracker"
+(F1); "if you write the doubt, you must classify it" → SPEC-DEFECT in
+web- and api-testing (F2 — zero cost; alone would have prevented
+EP-56188); source gate quoting the violated AC sentence before any bug
+draft (F3); "Unverified defect claims" heading (F4); analyzer dimension
+7 "Source fidelity — is the premise true, not just consistent?" (F5).
+
+**ACCEPTED — G (two-wave publish; raised by the owner):** step 6 posts
+only the machine archive + a no-verdict status comment; the human
+summary, story notes, bug filings, reassignment and decision requests
+all move to stage 10, on human-confirmed verdicts. Narrow wave-1
+exception: runtime-confirmed + evidenced + blocking the manual round.
+Evidence: EP-55706's PROVISIONAL label prevented nothing — a mis-typed
+bug, three already-answered "product decisions", two retractions in
+24h. Note: the archive still publishes pre-verification — accepted, it
+is agent-facing and resume depends on it. The PROVISIONAL status line
+becomes wave-2 VERIFIED / PARTIALLY VERIFIED.
+
+**ACCEPTED — cross-run items (2–3 runs each):** a code-read-only
+negative verdict is a CLAIM, not a verdict — never publishable settled,
+never files a bug (6 of 12 wrong on EP-53768; mirror of the 0.17.0
+PASS rule). `reconcile_counts.py`: ID_RANGE no longer treats
+"TC-REQ-20.1 — 30 characters" as a range (26 phantom ids on
+EP-53767) and CASE_ID accepts letter suffixes (12a.1/12b.1 no longer
+collapse) — both now covered by the self-test. Jira archive fidelity:
+dynamic fence lengths + mandatory read-back comparison (two corrupted
+archives). Provisioning: snapshot-before-collection-write with
+verified restore + restore recipe written before the first mutation
+(930 wiped permission pairs), reachability probe before
+bulk-provisioning, positive fixture claims verified like blockers.
+Web-testing: second observation before FAILing shared page elements
+(16 of 17 stage-8 errors on EP-47675 were single-observation false
+alarms) and negative verdicts must carry their `Control:` line.
+Orchestrator never asserts product claims from its own observation
+(dominant error source on EP-53767). Confirmed-bug lines carry an
+evidence class (reproduced-with-control / observed-once / code-read).
+`.gitignore`: retro/proposal docs explicitly un-ignored (Windows git
+matches `EP-*` case-insensitively).
+
+**REJECTED — A–D (EP-47675 proposals), reasons on record:** D3/F3/G2
+rewrite the same step-7 anchor in incompatible directions — G wins
+(file after the human round). D1's CANDIDATE-DEFECT vocabulary rewrite
+collides with F2/F5 and expands a vocabulary two other retros say is
+already too wide; its intent (human confirms every bug, one at a time)
+is delivered by G2+F3. A's walk-sheet-at-stage-5.5 is internally
+contradictory (forbids and requires priority sort), needs machine
+facts that do not exist at 5.5 (CORE = "only evidence is code
+reading"), fights three later findings (fixtures must provision AFTER
+stage 8), and adds parallel record surfaces against the one-record
+stance. B (progress heartbeats) is process noise for a solo operator.
+C is cosmetics or already implemented (C7 = post-publish verification).
+
+**DEFERRED (single-run suggestions, wait for recurrence):** Depends-on
+column with auto re-derivation; 3-field verdict split; version-sibling
+both-failed detector; stage-10 write-back batching doc; machine-verdict
+column immutability; reachability-caveat lint; verbatim-quote rule
+before SPEC-DEFECT proposals; blocked-vs-fixture diff re-dispatch;
+design-comment exclusion; browser-exclusivity void-and-rerun;
+text-evidence-only tagging; published-summary contradiction re-read;
+per-status id lists over regex; stage-9 test-design minimisation;
+machine re-execution of unblocked rows; closed-ticket dedup search;
+guest-vs-signed-in authority; copy-only deviations as discrepancy.
+
 ## 0.18.3 — 2026-07-31
 
 Retest mode made clean. The 0.18.0 retest paragraph half-existed: it
