@@ -94,5 +94,7 @@ names who should handle it instead).
 - ✅ "run the QA code pipeline"
 - ✅ "review the PRs and test in the browser for EP-55123"
 - ✅ "the fix landed, retest EP-55123" (retest mode)
+- ✅ "test the bugfix EP-56133" (bug-fix mode — Bug ticket, no docs
+  phase; derives mini cases from the ticket's repro steps)
 - ❌ "review this PR" (alone) → pr-summary/code-review or review-pr
 - ❌ "run all the tests" (in a repo context) → that repo's test runner

@@ -3,16 +3,15 @@ name: qa-pipeline-code
 description: >
   Orchestrator for the code + UI half of the QA pipeline (stages
   5-10). Given a Story key, reads the test cases from the story's QA
-  sub-task (published by qa-pipeline-docs) and derives the dev branches
-  from the backend/frontend sub-tasks, then runs pr-summary, then
+  sub-task and derives the dev branches, then runs pr-summary, then
   code-review, then api-testing, then web-testing, then run-analyzer,
   archives machine results on the QA sub-task (human summary follows
-  at stage 10), builds the
-  manual run sheet (qa-manual-runsheet) so a human can walk what the
-  machine could not settle, verifies the published state, and defers
-  the final handback to qa-manual-results (stage 10). Also supports
-  retest mode ("retest <KEY>", "the fix landed") for verifying dev
-  fixes. Auto-advances, pausing for the browser login, the Jira
+  at stage 10), builds the manual run sheet so a human can walk what
+  the machine could not settle, verifies the published state, and
+  defers the final handback to qa-manual-results (stage 10). Also:
+  retest mode ("retest <KEY>", "the fix landed") and bug-fix mode
+  ("test the bugfix EP-1234" — Bug ticket, no docs phase needed).
+  Auto-advances, pausing for the browser login, the Jira
   write confirmation, and the test-event authorisation before any
   fixture is provisioned. Use it when the user says "run the QA code
   pipeline", "review the PRs and test in the browser", "do code review
@@ -117,8 +116,39 @@ Otherwise, using the Atlassian connector and the Story key:
      parts, and nested fences deterministically; extract manually only
      if it cannot run. Write `<STORY>-checklist.md` and
      `<STORY>-test-cases.md` to the working directory.
-   - Neither available → tell the user to re-run `qa-pipeline-docs`
-     (or attach the files).
+   - Neither available → offer the choice: re-run `qa-pipeline-docs`
+     (or attach the files), or — for a Bug ticket — **Bug-fix mode**
+     below.
+
+   **Bug-fix mode (no docs phase).** For testing a fix to a standalone
+   Bug ticket. Two ways in: the user says so ("test the bugfix
+   EP-XXXX", "quick check of the fix"), or step 0 finds issuetype Bug
+   with no QA sub-task and no suite — then ASK "full pipeline or
+   bug-fix mode?". How it differs from a normal run — and nothing
+   else differs:
+   - **Cases come from the bug ticket itself.** Derive 2–4 mini cases
+     into a normal `<KEY>-test-cases.md`: TC-1 = the reproduction
+     steps with the FIXED behaviour as the expected result (quote the
+     ticket's own words — the source-of-record rule applies: no
+     expected result that the ticket does not state); TC-2 = the
+     negative sibling (the old broken input/path must not regress the
+     surrounding behaviour); plus one regression case per behaviour
+     the fix PR touches beyond the bug (from pr-summary's "Behaviours
+     touched" — add these AFTER stage 5 runs). Channel-tag each case;
+     the routing invariant applies as usual.
+   - **No checklist, no suite, no QA sub-task.** Structural checks are
+     skipped (say so); the write-back targets are the BUG ticket's
+     comments — same two-wave rule: archive + status comment now, the
+     human-facing verdict after your manual check.
+   - **Stages 5–8 run unchanged** on the derived branch (the bug key
+     is the branch, or use the main-issue PR fallback). All evidence
+     rules, gates and pauses apply — a small scope is not a licence to
+     skip the absence-check protocol or the probe rule.
+   - **The manual round shrinks to fit:** stage 9 emits a handful of
+     rows (or, if you say you'll verify directly, skip the sheet and
+     just report your result — "the fix works, ingest it" runs stage
+     10 against your one-line verdict, joined to the mini cases).
+     Verdict flip / bug reopen offers happen at stage 10, as always.
 
    **QA Service reconciliation:** whenever the sub-task names a suite
    AND the connector is present, reconcile the extracted cases against

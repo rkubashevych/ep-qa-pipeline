@@ -5,6 +5,22 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.20.1 — 2026-08-13
+
+Bug-fix mode. `qa-pipeline-code` step 0's dead end ("re-run
+qa-pipeline-docs") gets a third option for standalone Bug tickets:
+derive 2–4 mini cases from the bug ticket itself — the repro steps
+with the fixed behaviour as the expected result (quoting the ticket:
+the source-of-record rule applies), a negative sibling, and one
+regression case per behaviour the fix PR touches. Written as a normal
+test-cases file, so stages 5–8, all gates, the routing invariant and
+the two-wave publish run unchanged; results post to the Bug ticket
+(no sub-task, no suite); stage 9 shrinks to a handful of rows or the
+user verifies directly and stage 10 ingests the one-line verdict.
+Triggers: "test the bugfix EP-1234", or step-0 detection (issuetype
+Bug, no QA sub-task, no suite → ask). Description + triggering evals
+updated.
+
 ## 0.20.0 — 2026-08-13
 
 The consolidation release — subtractive, as three reviews demanded.
