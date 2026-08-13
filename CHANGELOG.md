@@ -5,6 +5,21 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.22.0 — 2026-08-13
+
+`qa-pipeline` — the front door. A 14th, deliberately thin skill: give
+it any ticket ("qa this ticket EP-1234") and it reads the state
+(issuetype; pipeline QA sub-task; suite line; code-phase comments;
+manual-results comment; local run artifacts), proposes the route with
+one line of evidence per signal, and invokes it on confirmation:
+fresh Story/Task → docs phase (code phase handed off as a fresh-chat
+command); standalone Bug → bug-fix mode; docs published → code phase;
+❌ + fix landed → retest; run sheet back → qa-manual-results.
+Contains no testing logic; read-only until the user confirms;
+conflicting signals are presented, never guessed. Direct invocation
+of every orchestrator and mode is unchanged. README, MAINTAINERS
+tree, and triggering evals updated.
+
 ## 0.21.0 — 2026-08-13
 
 Recon: the docs phase now answers its own "how does the app work

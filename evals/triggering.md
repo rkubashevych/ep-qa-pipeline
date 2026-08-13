@@ -84,6 +84,13 @@ names who should handle it instead).
 - ❌ "analyze this log file" → generic task, chat
 - ❌ "why did this test fail?" → diagnosing-bugs or chat
 
+## qa-pipeline (dispatcher)
+- ✅ "qa this ticket EP-55123"
+- ✅ "process EP-55123 for testing" / pasted ticket + "test this"
+- ❌ "run the QA docs pipeline for EP-55123" → qa-pipeline-docs
+- ❌ "retest EP-55123" / "test the bugfix EP-55123" → qa-pipeline-code
+- ❌ "ingest the manual results" → qa-manual-results
+
 ## qa-pipeline-docs (orchestrator)
 - ✅ "run the QA docs pipeline for EP-55123"
 - ✅ "build the test cases for a ticket" (full flow implied)

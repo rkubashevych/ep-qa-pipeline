@@ -36,6 +36,7 @@ skills/
   qa-manual-runsheet/          # stage 9  — fixture provisioning + human run sheet
   qa-manual-results/           # stage 10 — ingest completed sheet, retract wrong verdicts
   qa-run-analyzer/             # run-health check (both phases)
+  qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
   qa-pipeline-docs/            # orchestrator: stages 1-4 + Jira publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
 ```

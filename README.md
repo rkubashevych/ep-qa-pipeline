@@ -33,7 +33,7 @@ These skills were adapted for ExpoPlatform's stack:
 
 > **Stage 10 = `qa-manual-results`.** The return leg: when the tester hands back the filled run sheet (or a TC/Result/Notes table), this stage joins the results **by TC id, never row position**, reconciles them against the published automated verdicts, and writes back to Jira + the suite — with explicit **retractions** (`SUPERSEDES: old → new` + a `⚠ CURRENT VERDICT` line) wherever the human overturned a published PASS/FAIL. Until it runs, the published verdicts are provisional.
 
-> Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post + stage 9 run sheet, with stage 10 run on demand when the manual results come back).
+> Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post + stage 9 run sheet, with stage 10 run on demand when the manual results come back). And one front door wraps the orchestrators: **`qa-pipeline`** — give it any ticket ("qa this ticket EP-1234") and it reads the ticket's state, proposes the route (docs / code / bug-fix / retest / ingest results), and invokes it on your confirmation. Direct invocation of any orchestrator or mode still works exactly as before.
 
 ## How the flow works
 
