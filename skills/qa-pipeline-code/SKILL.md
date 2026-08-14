@@ -471,6 +471,19 @@ story does not exhaust the orchestrator's context:
 
 - Keep chat output short: one line per hand-off. Each stage's own
   rules and templates apply unchanged.
+- **Run clock (progress + time left):** stamp the wall clock (`date
+  +%H:%M`) at step 0 and after every stage/step completes; post
+  exactly ONE line per boundary:
+  `⏱ Stage <n>/<total> done — <name> · elapsed <E> min · ~<R> min left`.
+  Initial budgets (minutes): step 0 8 · pr-summary 15 · code-review 30
+  · api-testing 25 · web-testing 45 · analyzer 8 · archive + publish
+  10 · runsheet 30. Compute `<R>` as the unfinished budgets scaled by
+  the run's own pace (elapsed ÷ sum of finished budgets, clamped to
+  0.5–3); round to 5 minutes, keep the `~`. Stamp both ends of every
+  user-waiting pause (browser login, Jira write confirmation, test-
+  event authorisation) and subtract waited time from elapsed — waiting
+  is not pace. Retest / bug-fix runs: halve the budgets of the
+  scoped-down stages. No shell available → skip the clock silently.
 - **The orchestrator never asserts a product claim from its own
   observation.** A defect, a reclassification, a reachability claim, a
   "this is actually fine" — every such statement is produced by a

@@ -5,6 +5,24 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.25.0 — 2026-08-14
+
+Run clock. Both orchestrators now show progress and time remaining
+while a run is in flight: a wall-clock stamp at start and at every
+stage boundary, one fixed-format line per boundary —
+`⏱ Stage n/N done — <name> · elapsed E min · ~R min left`.
+
+- Per-stage minute budgets seeded from observed run durations (docs
+  ≈ 56 min total, code ≈ 2–3 h); the remaining estimate self-corrects
+  by the run's own pace (elapsed ÷ finished budgets, clamped 0.5–3),
+  rounded to 5 minutes.
+- User-waiting pauses (publish confirmation, browser login, Jira
+  write confirmation, test-event authorisation) are stamped on both
+  ends and excluded — waiting is not pace. Retest / bug-fix runs
+  halve the scoped-down stages' budgets. No shell → the clock is
+  skipped silently.
+- No frontmatter descriptions changed — triggering evals untouched.
+
 ## 0.24.0 — 2026-08-14
 
 Jira writing style — one home. Real bug drafts (EP-47678) kept the

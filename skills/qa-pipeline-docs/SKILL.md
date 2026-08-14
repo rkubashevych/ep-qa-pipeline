@@ -56,6 +56,21 @@ renaming the session to `QA-pipeline <KEY> — docs` (Claude Code:
 `/rename …`; Cowork: click the chat title). One short reminder, then
 move on.
 
+**Run clock (progress + time left):** stamp the wall clock (`date
++%H:%M`) at run start and after every stage below completes, then post
+exactly ONE progress line per boundary — nothing more:
+
+`⏱ Stage <n>/6 done — <stage name> · elapsed <E> min · ~<R> min left`
+
+Initial per-stage budgets (minutes): task-context 8 · grooming 12
+(+10 when recon runs) · checklist 7 · test-cases 12 · analyzer 5 ·
+publish 12. Compute `<R>` as the unfinished stages' budgets scaled by
+the run's own pace (elapsed ÷ sum of finished budgets, clamped to
+0.5–3); round to 5 minutes and keep the `~`. Stamp both ends of any
+user-waiting pause (the publish confirmation) and subtract the waited
+time from elapsed — waiting is not pace. No shell available → skip
+the clock silently.
+
 Execute each stage by reading its `SKILL.md` and following it **in
 full** — do not summarise or shortcut it. Stages share the working
 directory; pass each output file to the next automatically.
