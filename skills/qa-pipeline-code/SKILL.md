@@ -195,6 +195,22 @@ Otherwise, using the Atlassian connector and the Story key:
       `RISK-CR-*` rows;
    3. every case that never got a real verdict: NOT EXECUTED,
       unresolved BLOCKED, rows the human never walked.
+   **Build the scope from the SUITE, not from the local test-cases
+   file.** When the sub-task names a QA Service suite and the connector
+   is present, `get_suite` FIRST and diff it against
+   `<STORY>-test-cases.md`: any requirement or case the suite has and
+   the file does not is IN SCOPE by default, and every such case must
+   be listed by id in `<STORY>-retest-scope.md` with an explicit
+   in/out decision. The suite is the system of record and moves
+   between runs — a PM ruling, a QA-added case or a corrected
+   expectation lands there, not in the file the docs phase wrote.
+   (Real run: the suite had gained a P0 requirement and two P0 manual
+   cases from a PM comment four days after the baseline. The retest
+   scope was derived from the 89-case file, so neither case was in any
+   stage report; one of them was then failed by accident and recorded
+   as an unstatused observation, and the other was never executed at
+   all.) No suite or no connector → say once in the run report that
+   the scope could not be reconciled against the system of record.
    **The scope binds ALL stages including stage 9:** pr-summary runs
    on the fix branch/PR; 6–8 execute only the scoped cases;
    `qa-manual-runsheet` builds rows for the scoped cases ONLY — never

@@ -26,6 +26,15 @@ results-comment-template.md and were inherited only by pointer.
   point at it (the voice list is no longer duplicated);
   **qa-pipeline-docs** grooming-questions comment points at it
   directly. Stage 10 inherits via the two templates it already uses.
+- **qa-pipeline-code retest mode** (recovered from an earlier
+  uncommitted edit): the retest scope is built from the QA Service
+  SUITE, not the local test-cases file — `get_suite` first, diff
+  against the file, suite-only requirements/cases are in scope by
+  default and listed with an explicit in/out decision in
+  `<STORY>-retest-scope.md`. Real run: the suite had gained a P0
+  requirement and two P0 cases from a PM comment after the baseline;
+  a file-derived scope missed both. No suite/connector → the run
+  report says the scope could not be reconciled.
 - No frontmatter descriptions changed — triggering evals untouched.
 
 ## 0.23.0 — 2026-08-14
