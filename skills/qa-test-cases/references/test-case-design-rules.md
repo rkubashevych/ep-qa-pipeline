@@ -1,9 +1,9 @@
 # Test-case building rules — reference
 
 **Contents:** Choosing a technique by requirement type · Coverage
-levels · Mandatory attributes · Quality rules · EP rules · BVA rules ·
-State Transition rules · Decision Table rules · Pairwise rules ·
-Anti-patterns
+levels (risk-scaled) · Core selection rule · Mandatory attributes ·
+Quality rules · EP rules · BVA rules · State Transition rules ·
+Decision Table rules · Pairwise rules · Anti-patterns
 
 ## Choosing a technique by requirement type
 
@@ -19,9 +19,14 @@ Anti-patterns
 Techniques combine: one requirement may need both a Use Case (for the
 flow), EP+BVA (for input fields), and State Transition (for statuses).
 
-## Coverage levels
+## Coverage levels — risk-scaled (machine default)
 
-**Standard (the default for every task):**
+Depth follows the requirement's `[risk: …]` marker (assigned at
+grooming, carried on the checklist heading). The machine stages run
+every generated case; the human walks a selection (see "Core selection
+rule") — so depth is spent where risk lives, not everywhere.
+
+**Standard — the baseline; applies to Medium-risk requirements:**
 - The main scenario (happy path)
 - Invalid partitions (where present in the requirements)
 - Boundary values, 2-value BVA (where there are constraints in the
@@ -29,11 +34,45 @@ flow), EP+BVA (for input fields), and State Transition (for statuses).
 - Alternative and exception scenarios (where described)
 - Valid state transitions (where there are states)
 
-**Extended (only if the user explicitly asks):**
-- 3-value BVA
-- Decision Table for complex business logic
-- Invalid state transitions
-- Pairwise for forms with 3+ parameters
+**High risk — Standard plus** (each item only where its precondition
+exists in the requirement text; the grounding rule always applies):
+- 3-value BVA (where there are constraints)
+- Invalid state transitions (where states exist)
+- Collapsed Decision Table (where 2+ conditions combine)
+- Pairwise, 2-wise (where 3+ closed-set parameters interact — per
+  combinatorial-testing.md, never exhaustive)
+
+**Low risk — reduced:**
+- The main scenario (happy path)
+- Explicitly stated constraints only (a written limit still gets its
+  boundary case); no alternative-flow or transition cases
+
+**Extended (only if the user explicitly asks):** the High-risk depth
+applied to every requirement regardless of risk.
+
+Rules that hold at EVERY depth: EP one-representative-per-class (depth
+comes from more techniques, never from duplicate cases in one class);
+BVA only where constraints are written; pairwise is generated, never
+enumerated exhaustively; every anti-pattern below.
+
+## Core selection rule (the human tier)
+
+Mark exactly ONE test case per behavioural requirement as the core
+case: append ` [core]` to its `### TC-REQ-N.M` heading, after the
+channel tag. The core case is the row a human always walks in the
+stage-9 run sheet — even when the machine settled the requirement —
+so the manual run touches every AC. Pick the case whose failure would
+hurt most, in this preference order:
+
+1. the riskiest invalid partition or denial path, if one exists;
+2. else the version-A case of an unresolved conflict;
+3. else the boundary case at a stated limit;
+4. else the happy path.
+
+Structural requirements (checklist-only, no test case) have no core
+case. Zero or two `[core]` cases on one requirement is an error — the
+verification step counts them. `[core]` is a selection marker, not a
+channel: api-/web-testing routing ignores it.
 
 ## Mandatory attributes of each test case
 

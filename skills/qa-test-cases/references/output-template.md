@@ -30,6 +30,10 @@ Optimise for both: keep them **scannable top-to-bottom with short lines**.
   (`### TC-REQ-5.1 — Counter increments  [API][UI]`; SKILL.md
   "Provenance-sensitive exception"). The per-case
   tag is what api-testing and web-testing route on.
+- **Core marker:** the requirement's ONE core case additionally
+  carries ` [core]` after its channel tag
+  (`### TC-REQ-1.1 — Filtering by state  [UI] [core]`). Stage 9
+  always walks core cases; routing ignores the marker.
 
 ---
 
@@ -65,4 +69,5 @@ Close the file with:
 - Requirements needing clarification: <N>
 - Channel breakdown: [UI] <N> · [API] <N> · [mobile] <N> ·
   [export/email] <N>
+- Core cases: <N> (= behavioural requirements)
 - Total number of test cases: <N>

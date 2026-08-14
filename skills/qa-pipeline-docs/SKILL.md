@@ -99,8 +99,8 @@ directory; pass each output file to the next automatically.
      could not settle go to the ticket. Draft the comment immediately
      — one line per item, grouped Questions / Contradictions / Gaps,
      no pipeline jargon; voice rules:
-     `../qa-pipeline-code/references/results-comment-template.md` →
-     "Writing rules" — show it, and ask ONE quick yes/no: "post these
+     `../qa-pipeline-code/references/jira-writing-style.md`
+     — show it, and ask ONE quick yes/no: "post these
      open questions to <KEY> now?". On yes, post before stage 3; the
      run continues either way. (An answer arriving while stages 3–4
      run can still fix the cases this run; a question first seen at
@@ -169,8 +169,9 @@ directory; pass each output file to the next automatically.
      Pre/Steps/Exp** (inlining them duplicated the machine archive
      99.3% and cost ~15,000 chars/ticket; the steps live in the suite
      and the local file):
-     - `- [ ] TC-REQ-N.M — <name>  [<channel>] · <PREFIX>-<SEG>-NN`
-       (id, short name, channel tag, QA Service case id).
+     - `- [ ] TC-REQ-N.M — <name>  [<channel>][ core] · <PREFIX>-<SEG>-NN`
+       (id, short name, channel tag, ` [core]` marker where the case
+       is the REQ's core case, QA Service case id).
      - Group by `### REQ-N — <label>  [channels]` headings mirroring
        the test-cases file; end with the statistics block from that
        file.
@@ -180,7 +181,9 @@ directory; pass each output file to the next automatically.
        `python3 <plugin>/skills/qa-run-analyzer/scripts/reconcile_counts.py <KEY>`;
        otherwise count the headings directly). If the statistics block
        disagrees, FIX the test-cases file first — never post the
-       mismatched number or use it for suite levels.
+       mismatched number or use it for suite levels. The recount
+       includes the `[core]` markers: the core count must equal the
+       number of behavioural requirements — fix before posting.
      - Nothing else goes in this comment. If one case genuinely needs
        its steps visible in Jira (a blocker reproduced without QA
        Service access), add them to that ONE case.

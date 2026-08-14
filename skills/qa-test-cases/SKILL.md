@@ -146,9 +146,17 @@ that follow from the specific requirement.
 The technique is stated once in the heading of the test-case group
 for the requirement, not in each test case separately.
 
-By default, use the standard coverage level (defined in
-references/test-case-design-rules.md). The extended level is only
-used if the user explicitly asks.
+Coverage depth is risk-scaled: the `[risk: …]` marker on the
+requirement heading selects the depth per the "Coverage levels" table
+in references/test-case-design-rules.md (High = extended techniques,
+Medium = standard, Low = reduced). The full extended level for every
+requirement is only used if the user explicitly asks.
+
+For every behavioural requirement, mark exactly one case as the core
+case — ` [core]` on its heading, after the channel tag — per the
+"Core selection rule" in references/test-case-design-rules.md. The
+core case is the row the manual run sheet (stage 9) always walks, so
+the human touches every requirement even when the machine settled it.
 
 ### Combinatorial requirements (3+ interacting parameters)
 
@@ -225,6 +233,15 @@ After generating the test cases and before saving the file:
   levels. Dual-tagged `[API][UI]` cases are counted once, under a
   separate `[API][UI]` row, not once per tag. The totals row must
   equal the number of headings exactly.
+- Every behavioural requirement has exactly ONE case marked `[core]`
+  on its heading — zero or two is an error. Structural requirements
+  have none. Count the `[core]` markers mechanically (grep-style, like
+  the statistics): the count goes into the statistics block and must
+  equal the number of behavioural requirements.
+- Every High-risk REQ group's `Applied techniques:` line names at
+  least one extended technique (3-value BVA, Decision Table, invalid
+  transitions, Pairwise) OR carries a one-line reason none applies
+  (e.g. "no constraints, no states, 2 parameters").
 
 If a problem is found, fix it before saving.
 
@@ -276,3 +293,6 @@ human and by the code phase. Format for easy human scanning:
   provenance-sensitive cases, which carry the dual `[API][UI]` tag
   (see the Input section). The per-case tag is what the executing
   stages route on.
+- The core case's heading carries ` [core]` after its channel tag
+  (`### TC-REQ-N.M — <name>  [UI] [core]`). `[core]` is a selection
+  marker for stage 9, not a channel — routing ignores it.

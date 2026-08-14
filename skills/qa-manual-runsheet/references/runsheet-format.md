@@ -167,8 +167,9 @@ accounted for rather than silently missing:
   The tester skips it unless they want to confirm. Reserved for
   runtime-verified Low/Medium-risk verdicts only.
 - **VERIFY (spot-check)** — Result left EMPTY (dropdown live), Notes
-  carries `spot-check: machine PASS (<source>) — <why distrusted:
-  High-risk / code-reading only>`. The Do/Expect are trimmed to the
+  carries `spot-check: machine PASS (<source>) — <why walked:
+  High-risk / code-reading only / core — REQ representative>`. The
+  Do/Expect are trimmed to the
   single fastest action that would expose a wrong PASS. Tint like
   READY, not like settled — these rows are work, not history. On a
   typical run this adds roughly the High-risk-PASS count in rows, not
@@ -210,9 +211,10 @@ and any caveat the tester needs only if a row misbehaves (known
 environment faults, timing requirements, surfaces that disagree).
 
 The Reference tab also carries the **coverage map**: one line per REQ —
-which walked row(s) cover it, or `machine-verified (<status>)`, or
-`delegated to machine verdict (<status>)` for unselected cases. No REQ
-line may be blank; that's the selection's floor.
+which walked row(s) cover it (the REQ's `[core]` row at minimum), plus
+`delegated to machine verdict (<status>)` for its unselected cases. No
+REQ line may be blank, and no behavioural REQ line may read
+machine-only; that's the selection's floor.
 
 ## Sheet 5 — Environment
 

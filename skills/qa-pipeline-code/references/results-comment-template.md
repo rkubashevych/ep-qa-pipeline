@@ -173,27 +173,14 @@ Never edit or delete earlier comments — newest pair wins.
 
 ### Writing rules
 
-- Write for a PM/dev skimming Jira: plain words, no pipeline jargon
-  ("checked against the code", not "stage 6").
-- **Voice — applies to every human-facing comment this pipeline posts**
-  (this summary, the status line, story notes, bug drafts, the
-  grooming open-questions comment):
-  - Verdict or point first, support after. Never restate the context
-    before getting to it.
-  - No filler: "it's worth noting", "importantly", "at its core",
-    "when it comes to", "plays a crucial role".
-  - No fake-insight structures: "it's not just X — it's Y",
-    "this isn't about X, it's about Y".
-  - Never the "**Bold term:** explanation" list pattern — say the thing
-    in a sentence.
-  - No summary wrap-up at the end; end on the last piece of substance.
-  - Vary sentence length; use contractions; at most one em dash per
-    comment.
-  - If a sentence would fit in a press release, rewrite it.
-  - Anything a reader must DO (repro steps, fix verification) is a
-    numbered list; cap any list at 5 items — past that, group or cut.
-  - When the comment asks for something, end with the one concrete
-    next step and nothing after it.
+- **Voice, caps and section discipline live in `jira-writing-style.md`**
+  (same folder) — the single home for every human-facing text this
+  pipeline writes into Jira: this summary, the status line, story
+  notes, bug drafts, the grooming open-questions comment, and the
+  stage-10 write-backs. Read it before composing; when it and a
+  template disagree on tone or length, it wins. Machine archive
+  comments are exempt (verbatim by design).
+- Comment-specific rules on top of it:
 - One line per confirmed bug — the evidence lives in the archive
   comment; never restate full findings.
 - FAIL REJECTED items are not bugs — count them as passes in the

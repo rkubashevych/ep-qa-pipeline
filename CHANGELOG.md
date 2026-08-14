@@ -5,6 +5,69 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.24.0 — 2026-08-14
+
+Jira writing style — one home. Real bug drafts (EP-47678) kept the
+skeleton but ballooned inside it: ad-hoc h3 sections ("Secondary
+defect", "Note for triage"), code-path dumps inside Actual result,
+paragraph-long field cells. The voice rules also lived buried in
+results-comment-template.md and were inherited only by pointer.
+
+- **New `qa-pipeline-code/references/jira-writing-style.md`** — the
+  single home for every human-facing Jira text the pipeline writes
+  (bug descriptions, human summary, story notes, grooming questions,
+  stage-10 write-backs; machine archives exempt). Voice rules moved
+  there verbatim, plus hard caps: bug summary ≤ 120 chars; ≤ 8 repro
+  steps; Actual result ≤ 5 observed lines with code paths relegated
+  to Source (≤ 2 lines); one-line field cells; ≤ 4-line comment
+  paragraphs; the h3 skeleton is CLOSED (no ad-hoc sections — a
+  second defect is a second draft); a pre-post self-check.
+- **bug-report-template.md** and **results-comment-template.md** now
+  point at it (the voice list is no longer duplicated);
+  **qa-pipeline-docs** grooming-questions comment points at it
+  directly. Stage 10 inherits via the two templates it already uses.
+- No frontmatter descriptions changed — triggering evals untouched.
+
+## 0.23.0 — 2026-08-14
+
+Two-tier coverage: machine-depth generation, human-core selection
+(design: `SPEC-two-tier-coverage.md`). One corpus, two views — never
+two authored case sets (stage 10 joins human to machine verdicts by
+TC ID, so the human set is a selection, not a rewrite).
+
+- **qa-test-cases**: coverage depth is now risk-scaled instead of one
+  flat Standard — High-risk requirements get extended techniques
+  (3-value BVA, invalid state transitions, collapsed Decision Table,
+  2-wise pairwise), Medium keeps the old Standard, Low shrinks to
+  happy path + explicitly stated constraints. Exactly one case per
+  behavioural REQ is marked ` [core]` on its heading (preference:
+  riskiest invalid partition → conflict version-A → boundary → happy
+  path). Statistics gains a mechanical `Core cases:` line;
+  verification enforces one-core-per-REQ and High-risk technique
+  depth (or a stated reason). Grounding rule, EP dedup and the
+  no-exhaustive-pairwise rule unchanged at every depth.
+- **qa-manual-runsheet** step 2a: the coverage gate tightens — every
+  behavioural REQ needs a WALKED row; a machine verdict alone no
+  longer covers a REQ. The `[core]` case is the default
+  representative, entering short-form (VERIFY-style) where
+  machine-settled at Low/Medium risk; older suites without markers
+  fall back to technique-picked representatives, stated in the
+  Reference tab. Coverage map may not show machine-only behavioural
+  REQ lines.
+- **qa-run-analyzer**: 🔴 zero/multiple `[core]` cases on a
+  behavioural REQ; 🔴 runsheet coverage map with a machine-only
+  behavioural REQ line; 🟡 High-risk REQ group naming no extended
+  technique and no reason. `reconcile_counts.py` counts `[core]`
+  headings on the test-cases file (`core=N`; selftest extended and
+  passing).
+- **qa-pipeline-docs**: tracker-comment case lines carry the
+  ` [core]` marker; the count gate also reconciles core count =
+  behavioural REQs. `qa-service-publish.md`: core cases publish
+  `detail.core: yes` and propose a `core` tag in the tagging step.
+- Fixture `EP-0000-context.md` expectations updated (core marker +
+  statistics line). No frontmatter `description` changed — triggering
+  evals untouched.
+
 ## 0.22.0 — 2026-08-13
 
 `qa-pipeline` — the front door. A 14th, deliberately thin skill: give

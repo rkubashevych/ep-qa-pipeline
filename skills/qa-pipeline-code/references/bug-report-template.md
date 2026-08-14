@@ -4,9 +4,13 @@ Used by qa-pipeline-code step 7 when the `/knowledge-base` skill is
 not installed. One Jira bug per confirmed finding. Draft first, show
 the user, create via `createJiraIssue` only after an explicit yes.
 
-Voice: follow the Voice rules in `results-comment-template.md` →
-"Writing rules" — a dev reads this bug, so the defect statement comes
-first, in plain words, with no filler and no wrap-up.
+Voice, caps and section discipline: **`jira-writing-style.md`** (same
+folder) — read it before drafting. The parts that bite here: summary
+≤ 120 chars; ≤ 8 repro steps; Actual result ≤ 5 observed lines (code
+paths go in Source, ≤ 2 lines); the h3 skeleton is CLOSED — no ad-hoc
+sections; a second defect is a second draft. A dev reads this bug, so
+the defect statement comes first, in plain words, no filler, no
+wrap-up.
 
 ## Duplicate check (before drafting)
 

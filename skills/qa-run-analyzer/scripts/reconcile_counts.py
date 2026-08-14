@@ -25,6 +25,9 @@ PIPELINE-REVIEW-2026-07-30.md):
 - Bold statuses (`**FAIL CONFIRMED**`) and qualified statuses
   (`NOT-TESTABLE (instrumentation)`, `BLOCKED (unverified)`) count.
 - Range rows (`TC-REQ-29.1–29.3`) expand to every id in the range.
+- `[core]` markers (the human-tier selection marker) are counted on
+  `### TC-REQ` headings of the test-cases file only; they never affect
+  status parsing.
 
 Run `--selftest` before trusting the output on a new pipeline version.
 
@@ -54,6 +57,8 @@ STATUSES = (
 STATUS_CELL = re.compile(
     r"(" + "|".join(re.escape(s) for s in STATUSES) +
     r")(?:\s*\(([^)]*)\))?(?:\s*\[([^\]]+)\])?$")
+# Core marker on TC headings (human-tier selection; test-cases file only).
+CORE_MARK = re.compile(r"^### TC-REQ-.*\[core\]", re.M)
 STAGES = ["test-cases", "code-review", "api-testing", "web-testing"]
 
 
@@ -129,8 +134,10 @@ def report(key, d):
         counts, sources = count_statuses(text)
         cstr = " · ".join(f"{k}={v}" for k, v in sorted(counts.items()))
         sstr = "".join(f" · source {k}={v}" for k, v in sorted(sources.items()))
+        corestr = (f" · core={len(CORE_MARK.findall(text))}"
+                   if stage == "test-cases" else "")
         print(f"{stage}: {len(ids[stage])} distinct case ids · "
-              f"{cstr or 'no status rows'}{sstr}")
+              f"{cstr or 'no status rows'}{sstr}{corestr}")
     base = ids.get("test-cases")
     if base:
         for stage in STAGES[1:]:
@@ -164,6 +171,11 @@ SELFTEST_DOC = """
 ## TC-REQ-40.1 — 30 characters accepted and saved
 Prose heading above must NOT parse as a range 40.1–40.30.
 
+### TC-REQ-41.1 — core-marked heading  [UI] [core]
+### TC-REQ-41.2 — plain heading  [UI]
+Exactly one [core] heading above; the bare "[core]" word in this prose
+line must not count (CORE_MARK anchors on the heading).
+
 ## Statistics
 
 | Status | Count |
@@ -184,6 +196,7 @@ SELFTEST_EXPECT = {
                 "TC-REQ-12a.1", "TC-REQ-12b.1", "TC-REQ-40.1"},
     "ids_lacks": {"TC-REQ-7.2.", "TC-REQ-29",
                   "TC-REQ-40.2", "TC-REQ-40.30", "TC-REQ-12"},
+    "core": 1,
 }
 
 
@@ -201,6 +214,9 @@ def selftest():
     phantom = SELFTEST_EXPECT["ids_lacks"] & ids
     if phantom:
         errs.append(f"phantom ids: {sorted(phantom)}")
+    core = len(CORE_MARK.findall(SELFTEST_DOC))
+    if core != SELFTEST_EXPECT["core"]:
+        errs.append(f"core count {core} != {SELFTEST_EXPECT['core']}")
     if errs:
         print("SELFTEST FAIL")
         for e in errs:
@@ -208,7 +224,8 @@ def selftest():
         sys.exit(1)
     print("SELFTEST PASS — statistics-table exclusion, one-status-per-row, "
           "PASS(code) separation, trailing-period ids, bold/qualified "
-          "statuses, RE-ROUTE [UI], range expansion all verified")
+          "statuses, RE-ROUTE [UI], range expansion, [core] heading "
+          "counting all verified")
 
 
 def main():

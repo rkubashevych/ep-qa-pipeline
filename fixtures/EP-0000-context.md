@@ -55,7 +55,9 @@ sort above non-featured ones.
    raised as a Contradiction; the limit-of-10 producing BVA cases at
    10/11; channel tags splitting `[UI]` (badge, toggle, sorting) from
    `[API]` (the `featured` field); REQ-ID traceability intact end to
-   end. If any of that breaks after a skill edit, the edit regressed
+   end; exactly ONE `[core]`-marked case per behavioural REQ, with a
+   matching `Core cases:` line in the test-cases statistics block.
+   If any of that breaks after a skill edit, the edit regressed
    the pipeline.
 
 Do NOT publish this fixture to Jira (skip the publish step of

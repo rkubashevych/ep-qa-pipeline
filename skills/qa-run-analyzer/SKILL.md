@@ -71,6 +71,16 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 - REQ-ID traceability is intact across requirements -> checklist ->
   test-cases -> code-review -> web-testing. Flag IDs that appear in one
   file but vanish in the next.
+- Core marker integrity: every behavioural requirement has exactly ONE
+  test case marked `[core]` on its heading — 🔴 on zero or multiple
+  (structural requirements have none; `reconcile_counts.py` prints the
+  core count). When a run sheet exists for the ticket, every
+  behavioural REQ maps to a walked row on its Reference-tab coverage
+  map — a behavioural REQ line reading machine-only is 🔴 (coverage
+  gate regression).
+- Depth conformance (advisory): a High-risk REQ group whose `Applied
+  techniques:` line names no extended technique (3-value BVA, Decision
+  Table, invalid transitions, Pairwise) and gives no reason is 🟡.
 - Counts reconcile (where a shell is available, run
   `scripts/reconcile_counts.py --selftest` first — if the self-test
   fails, do NOT trust the script: recount by hand and raise a 🔴

@@ -215,18 +215,25 @@ test-design techniques that built the cases:
 1. **Must-walk (never reducible):** every case with no runtime-verified
    machine verdict — QA, FAIL claims, routed-in, unresolved BLOCKED,
    NOT EXECUTED — plus the VERIFY spot-checks (High-risk or
-   code-reading-only machine PASSes).
+   code-reading-only machine PASSes), plus the `[core]` case of every
+   behavioural REQ even when machine-settled. A machine-settled clean
+   PASS on a Low/Medium-risk core case enters in short form
+   (VERIFY-style row: the fastest action that would expose a wrong
+   verdict), so the all-AC guarantee stays cheap.
 2. **Reduce by technique, not by mood:** within the must-walk set, one
    representative per equivalence class; boundary rows only where the
    boundary is the point; a pairwise pick instead of a full combination
    sweep; and when several cases walk the same fixture through the same
    surface, ONE row carries them with a `Covers: TC-x, TC-y, …` note.
 3. **Coverage gate — the floor under the reduction:** after selecting,
-   map rows → REQ ids. Every behavioural REQ of THIS ticket must be
-   covered by a walked row or by a runtime-verified machine verdict.
-   A REQ covered only by code reading is NOT covered — it needs a row.
-   Print the map in the sheet's Reference tab and the final response:
-   "N cases → M rows, covering R/R requirements".
+   map rows → REQ ids. Every behavioural REQ of THIS ticket must have
+   a WALKED ROW — a machine verdict alone no longer covers a REQ. The
+   REQ's `[core]` case is the default representative (short form where
+   machine-settled at Low/Medium risk, full form otherwise). For cases
+   from an older suite without `[core]` markers, pick a representative
+   by the same technique logic and say so in the Reference tab. Print
+   the map in the sheet's Reference tab and the final response:
+   "N cases → M rows, covering R/R requirements walked".
 4. **Risk extras:** add rows for High-risk cases in the fix's blast
    radius even when machine-settled, and anything the QA sub-task's
    ⚠ SPECIAL ATTENTION block names.

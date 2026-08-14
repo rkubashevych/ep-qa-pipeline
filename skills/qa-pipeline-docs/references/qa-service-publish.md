@@ -111,6 +111,7 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 | `Post:` | append to `detail.notes` as `Post: …` |
 | "needs clarification" markers | `detail.notes` |
 | tags applied in step 4 | `detail.tagPlan` = one line naming the tags attached and why (mirrors the reference suites) |
+| ` [core]` heading marker | `detail.core` = `yes` on the REQ's core case (the human-tier representative that stage 9 always walks); omit on all other cases. Also propose a `core` tag in step 4 where the tag catalogue allows — pending approval is fine. |
 
 ### Suite header — set it IN `create_suite`
 
