@@ -5,6 +5,28 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.25.1 — 2026-08-19
+
+Local clones, and three measured corrections to `bitbucket-access.md`
+(each verified against Bitbucket Cloud on 2026-08-19; each would cost
+a failed run): git username for HTTPS is `x-token-auth`, not
+`$BB_EMAIL` (the email works for REST and silently fails git — the
+0.13.2 helper recipe carried the bug; Windows credential-store recipe
+added); the token now has `read:pullrequest` (the 403 claim was
+stale; branch mode stays default); base branches are per repo —
+`expoplatform-main-ira` → **alpha**, `portal-ui`/`admin-ui` → master
+(diffing the monolith against master produced wrong diffs).
+
+New "Local clone — preferred when present" section: blobless clone
+(shallow cannot diff branch bases), what a clone enables in stages
+5–6 (callers of changed methods, does-a-test-already-exist, shared
+helpers — file+line evidence, head-branch-only review rule intact),
+the workspace test-repo map, and the caution that `playwright-tests`
+/ `qa-tests` carry a committed `.env`. The docs-phase recon (0.21.0)
+may read the clone as an observation source — a constant or threshold
+is a current-behaviour fact, cited file+line. `.gitignore`: `GS-*`
+run artifacts covered by broad rule.
+
 ## 0.25.0 — 2026-08-14
 
 Run clock. Both orchestrators now show progress and time remaining

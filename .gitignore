@@ -7,6 +7,8 @@
 
 # Any per-ticket run artifact, any stage, any extension (EP-12345-*.*)
 EP-*
+# feature-scoped run artifacts (e.g. GS-API-V2-* call packs/runsheets)
+GS-*
 # …but pipeline intelligence stays tracked (Windows git matches EP-*
 # case-insensitively, which would silently swallow these):
 !ep-qa-pipeline-retrospective-*.md

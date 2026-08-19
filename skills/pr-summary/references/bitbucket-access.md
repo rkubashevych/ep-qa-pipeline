@@ -23,15 +23,19 @@ parse and use whichever form the URL contains.
 
 ## Branch mode vs PR mode — default to branch mode
 
-The configured API token has `read:repository` scope but NOT
-`read:pullrequest`, so the REST `/pullrequests/...` endpoints return
-403, while git-CLI branch mode (clone/fetch/diff/show + the repository
-`src` endpoint) works fully.
+Both modes work: the token carries `read:repository:bitbucket` AND
+`read:pullrequest:bitbucket` (verified 2026-08-19 via
+`x-oauth-scopes`; an earlier version of this doc said PR mode 403s —
+the scope was widened since). `read:user` is absent, so `/2.0/user`
+403s — harmless.
 
-**Prefer branch mode.** The branch name is the issue key (e.g.
-`EP-54610`); the base branch is `master` unless stated otherwise. Only
-use PR-URL / REST mode if the token has been given the
-`read:pullrequest:bitbucket` scope.
+**Still prefer branch mode** (fewer moving parts; PR metadata rarely
+adds anything the diff doesn't). The branch name is the issue key
+(e.g. `EP-54610`). **Base branch is PER REPO — this matters:**
+`expoplatform-main-ira` (the monolith) branches from **`alpha`**, its
+default branch; `portal-ui` and `admin-ui` branch from `master`.
+Diffing a monolith branch against `master` produces a wrong diff.
+When in doubt, `git remote show origin | grep HEAD`.
 
 ## Authentication setup
 
@@ -39,7 +43,12 @@ use PR-URL / REST mode if the token has been given the
 - Set the `BB_EMAIL` and `BB_API_TOKEN` environment variables for REST
   API access. `BB_EMAIL` is your Atlassian account email;
   `BB_API_TOKEN` is a Bitbucket Cloud API token with scopes.
-- Use Basic auth: `-u "$BB_EMAIL:$BB_API_TOKEN"`.
+- **REST** Basic auth: `-u "$BB_EMAIL:$BB_API_TOKEN"`.
+- **Git over HTTPS uses a DIFFERENT username: `x-token-auth`** (with
+  the same token as the password). Measured 2026-08-19:
+  `username=$BB_EMAIL` + token fails `git` auth on every repo;
+  `username=x-token-auth` works on every repo. Do not conflate the
+  two — email for curl/REST, `x-token-auth` for git.
 
 ### Credential handling — hard rules
 
@@ -55,13 +64,17 @@ a session log on a real run (2026-07-28 run report, 🔴).
   Reference the environment variable (`$BB_API_TOKEN`) so the value
   never appears in chat, logs, or shell history.
 - **Cloning/fetching without stored git credentials:** use a one-shot
-  credential helper that reads the env vars —
+  credential helper that reads the env var —
   ```bash
-  git -c credential.helper='!f() { echo "username=$BB_EMAIL"; echo "password=$BB_API_TOKEN"; }; f' \
+  git -c credential.helper='!f() { echo "username=x-token-auth"; echo "password=$BB_API_TOKEN"; }; f' \
     clone https://bitbucket.org/expoplatform/{repo}.git
   ```
-  (works for `fetch`/`pull` the same way). This keeps the token out of
-  the URL, out of `.git/config`, and out of the process list.
+  (works for `fetch`/`pull` the same way; note `x-token-auth`, NOT
+  `$BB_EMAIL` — the email silently fails git auth). This keeps the
+  token out of the URL, out of `.git/config`, and out of the process
+  list. On Windows, the durable alternative is the credential store:
+  `git credential approve` with `username=x-token-auth` once, then
+  plain `git clone` forever (recipe in the local-clone section below).
 - **A failed command that touched a secret is a rotation event.** If a
   command containing a credential errors in a way that echoes it into a
   log, transcript, or artifact: treat the token as burned — tell the
@@ -116,6 +129,40 @@ git show origin/{branch}:{path}
 
 Read files only from the head branch of the PR — never from the base
 branch, master, or the general repository context.
+
+## Local clone — preferred when present
+
+When a local clone exists (default location:
+`C:\media-files\Coding\ep-code\<repo>`), branch mode should use it
+instead of per-file REST fetches. What it enables beyond the diff:
+find every CALLER of a changed method (`git grep` — the gap that
+produces "diff looked fine, broke three screens over"); check whether
+a test already exists for the changed path
+(`universal/Tests/Codeception`, `universal/Tests/Functional`,
+`backend/tests`, `frontend/tests`); trace shared helpers across
+`backend` / `frontend` / `universal`. Evidence rules unchanged: every
+claim from the clone carries file+line, and only the PR head branch is
+read for the review itself — the wider tree is for callers/blast
+radius, clearly labelled as such.
+
+Setup (once, Windows): clone the monolith **blobless**, not shallow —
+`git clone --filter=blob:none https://bitbucket.org/expoplatform/expoplatform-main-ira.git`
+(measured: shallow can't diff branch bases and is useless for review;
+blobless costs ~100 MB more and holds all 1,075 branches).
+`portal-ui` / `admin-ui` clone normally. Store the credential once
+with the Windows helper (`git config --get credential.helper` →
+`manager`), then:
+`"protocol=https`nhost=bitbucket.org`nusername=x-token-auth`npassword=$env:BB_API_TOKEN`n`n" | git credential approve`
+(load `$env:BB_API_TOKEN` from `.env.qa-agents` first — never type
+it). Keep the clones OUTSIDE the qa-pipeline-skill tree, excluded from
+backups/sharing.
+
+Known workspace repos beyond the product (for the exists-a-test-already
+check): `teststone` (Playwright+Vitest testkit), `playwright-tests`
+(e2e), `ds-api-tests` (Postman regression), `qa-tests` (Cypress+Locust),
+`docker-local` (full local platform via Docker Compose). ⚠
+`playwright-tests` and `qa-tests` have a COMMITTED `.env` in git
+history — never copy values from them into artifacts or chat.
 
 ## If authenticated access is unavailable
 

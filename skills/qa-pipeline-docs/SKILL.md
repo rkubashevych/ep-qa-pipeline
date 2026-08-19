@@ -94,8 +94,12 @@ directory; pass each output file to the next automatically.
      app work today?" — an observable fact). BEHAVIOUR items do not go
      to a human until observation has been tried: dispatch a
      READ-ONLY look at the running system (admin panel, live pages, a
-     generated export, existing Confluence "how it works" pages) and
-     write `<ISSUEKEY>-recon.md`, opening with this header verbatim:
+     generated export, existing Confluence "how it works" pages — and,
+     when a local repo clone exists, the code itself: a constant, a
+     threshold, a column list is a current-behaviour fact, cited
+     file+line; clone location and rules:
+     `../pr-summary/references/bitbucket-access.md` → "Local clone")
+     and write `<ISSUEKEY>-recon.md`, opening with this header verbatim:
      "These are observations of CURRENT behaviour, not requirements.
      They settle what a tester needs to know; they do not change the
      acceptance criteria. Where observed behaviour and the AC could
