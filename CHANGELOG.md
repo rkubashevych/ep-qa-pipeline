@@ -5,6 +5,30 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.25.3 — 2026-08-20
+
+QA Service folders enforced (`qa-service-publish.md`). The folder rule
+existed but real suites still landed in "General"; it is now a gated
+part of the publish, not a preference:
+- `folderName` targets **~5–8 cases per functionality folder** — split
+  big REQ groups into sub-aspect folders, merge tiny ones; any case in
+  "General" or a folder over ~10 cases is a mapping failure to fix
+  before writing.
+- The publish preview states the folder plan (folder → case count);
+  step-5 verification checks the distribution and repairs in place
+  (`create_test_case_folder` + `move_test_case`).
+- Appending reuses the suite's existing folders; a legacy all-General
+  suite gets a reorganization offer in the preview — new cases never
+  join the pile.
+
+## 0.25.2 — 2026-08-19
+
+Windows long-path gotcha recorded in `bitbucket-access.md`:
+`portal-ui`/`admin-ui` checkouts fail half-done on the 260-char limit
+(hit live during first clone setup) — `git config --global
+core.longpaths true` before cloning; recover with
+`git restore --source=HEAD :/`.
+
 ## 0.25.1 — 2026-08-19
 
 Local clones, and three measured corrections to `bitbucket-access.md`

@@ -96,7 +96,7 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 |---|---|
 | `TC-REQ-N.M — <name>` | `title` = scenario name |
 | — | `stableId` = `<PREFIX>-<SEG>-NN`, where `<SEG>` is a 2–5 char aspect code shared by the cases of one behaviour area (`AUTH`, `VAL`, `DATA`, `READ`, `REG`, `CTR`, `BVA`, `PRIV`…), numbered per segment from 01. Fall back to the channel code (`UI`/`API`/`MOB`/`EXP`) only when no aspect is meaningful. **Never a flat `<PREFIX>-01…89`** — IDs must carry meaning. |
-| requirement group `REQ-N` | `folderName` = the REQ group's behaviour-area label (e.g. "Opted-out favourite is invisible to the other party"). Group the file's cases into 4–8 such folders. **Never dump everything into "General".** |
+| requirement group `REQ-N` | `folderName` = a functionality label derived from the REQ group's behaviour area (e.g. "Opted-out favourite is invisible to the other party"). **Target ~5–8 cases per folder:** split a large REQ group into sub-aspect folders ("<area> — validation", "<area> — permissions"), merge adjacent tiny groups under one functional label. **Never dump everything into "General"** — a publish where any case lands in General, or one folder holds >10 cases, is a mapping failure; fix the folder plan before writing. State the folder plan (folder → case count) in the publish preview. |
 | parent `REQ-N` (+ any seam requirements the case also covers) | `traceability` = the requirement stableIds, kind-correct (`["<PREFIX>-RULE-02","<PREFIX>-INV-01"]`) — list every requirement the case verifies, not just the parent |
 | channel tag → level | Pass **`levels`** (the code array — this is what the Coverage-by-level table counts and the implement workflow selects on) AND `levelText`: `[API]` → `levels: ["AE"]`, `API-E2E` · `[UI]` → `["E2E"]`, `E2E (UI)` · `[mobile]` → `["M"]`, `Manual` · `[export/email]` → `["M"]`, `Manual`. Other codes when they genuinely apply: `U` Unit, `I` Integration, `C` Contract, `CFE` Component-FE, `Perf` Performance, `worker` Worker-home. A case with no `levels` is counted nowhere and can never be picked up for automation. **Never invent labels** — `API`, `E2E (mobile)`, `E2E (export/email)` are not canonical. |
 | — | `status` = `planned` (vocabulary: `planned` / `implemented` / `partial` / `deferred` / `na`). **`draft` is NOT in the vocabulary** — it renders as 0 in every readiness bucket. Use `deferred` for a case knowingly not executable yet, `na` for one routed out. |
@@ -142,6 +142,12 @@ mistake surfaces:
 - a requirement that no longer applies → `status: "retired"` (there is
   still no delete).
 - case missing `levels`, or with a stale status/traceability → edit it.
+- **cases piled into "General" (or one oversized folder)** — a legacy
+  publish from before the folder rule: reorganize in place with
+  `create_test_case_folder` (one per functionality label, ~5–8 cases
+  each) + `move_test_case`. When appending to such a suite, offer this
+  reorganization in the publish preview — new cases must never join the
+  General pile.
 
 Prefer correcting in place over creating revision entries; the
 "supersede with `-FR-NNb`" workaround is obsolete.
@@ -256,7 +262,10 @@ preview so the user can redirect:
 3. Create requirements in file order (one `create_requirement` each,
    full content), then cases in file order (one `create_test_case`
    each, full content). Requirements first — cases reference their
-   stableIds in `traceability`.
+   stableIds in `traceability`. Every case carries its `folderName`
+   from the folder plan; when appending, reuse the suite's existing
+   functionality folders where the label matches and create new ones
+   only for genuinely new areas.
 4. **Tag the cases for Coverage.** `list_tags` once to see the
    catalogue, then ONE `apply_auto_tags` call carrying the whole
    `perCase` array (`{stableId, tags}`, up to 400 cases) — not a
@@ -285,6 +294,9 @@ preview so the user can redirect:
      than reporting it.
    - the suite header is filled (`summary`, `status`, `owner`,
      `lastReviewed`) — otherwise call `edit_suite`.
+   - **folder distribution matches the plan** — no case in "General",
+     no folder over ~10 cases. Fixable in place:
+     `create_test_case_folder` + `move_test_case`.
    Fix what is fixable before finishing; report the rest.
 
 > **Verified — all three edit tools MERGE.** Omitted fields are
@@ -388,6 +400,10 @@ The step-6 preview shown to the user must also state:
   `<path>` (K duplicates skipped) — or **creating** suite `<path>`
   (prefix `<PREFIX>`) because the feature has no suite yet — or
   "skipped (connector not enabled)".
+- The **folder plan**: each functionality folder with its case count
+  (target ~5–8 per folder), plus — when the target suite's existing
+  cases sit in "General" — the offer to reorganize them into the same
+  folders.
 - The reason for the choice in one clause ("matches the feature this
   ticket extends" / "no existing suite for this feature"), plus the
   runner-up candidate when the match was ambiguous — this line is what
