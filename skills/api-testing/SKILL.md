@@ -31,8 +31,7 @@ notifications / dashboards, and on every absence check.
 ## Input
 
 1. `<ISSUEKEY>-code-review.md` — which cases to run (`[API]` items
-   with status QA / FAIL). Present automatically in the same chat;
-   uploaded by the user in a new one.
+   with status QA / FAIL).
 2. `<ISSUEKEY>-test-cases.md` — steps, test data, expected results.
 3. **Environment config** — read at runtime from an env file, searched
    in the order defined in the reference §0 (`.env.qa-agents` in the
@@ -42,6 +41,11 @@ notifications / dashboards, and on every absence check.
 4. For any frontend / exhibitor-token case: the **per-event frontend
    host** and an **exhibitor login**. The frontend host is per-event
    and **not discoverable** — it must be supplied (reference §11.1).
+
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
 
 Optional: `<ISSUEKEY>-checklist.md` for `[API]` structural checks that
 did not become test cases.

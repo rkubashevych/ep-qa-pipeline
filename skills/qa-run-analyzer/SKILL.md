@@ -23,8 +23,9 @@ edits the pipeline files, only inspects them and writes its own report.
 
 ## Input
 
-Reads from the working directory whichever of these exist (upload them
-if the chat is new):
+Reads whichever of these exist — resolved per
+`../qa-pipeline/references/data-locations.md` (working directory first;
+asking the user is the last resort):
 `<ISSUEKEY>-context.md`, `<ISSUEKEY>-requirements.md`,
 `<ISSUEKEY>-checklist.md`, `<ISSUEKEY>-test-cases.md`,
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,

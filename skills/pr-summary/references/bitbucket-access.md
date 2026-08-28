@@ -155,7 +155,10 @@ with the Windows helper (`git config --get credential.helper` →
 `"protocol=https`nhost=bitbucket.org`nusername=x-token-auth`npassword=$env:BB_API_TOKEN`n`n" | git credential approve`
 (load `$env:BB_API_TOKEN` from `.env.qa-agents` first — never type
 it). Keep the clones OUTSIDE the qa-pipeline-skill tree, excluded from
-backups/sharing.
+backups/sharing. **Windows: run `git config --global core.longpaths
+true` BEFORE cloning `portal-ui`/`admin-ui`** — their nested React
+component paths exceed the 260-char limit and the checkout fails
+half-done (recover with `git restore --source=HEAD :/`).
 
 Known workspace repos beyond the product (for the exists-a-test-already
 check): `teststone` (Playwright+Vitest testkit), `playwright-tests`

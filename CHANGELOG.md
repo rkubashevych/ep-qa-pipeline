@@ -5,6 +5,76 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.26.0 — 2026-08-28
+
+**Archive target rule: the results archive goes to the QA sub-task and
+nowhere else.** A Story face, a Bug or a Defect now receives exactly two
+comments across a whole run — the wave-1 status line and the wave-2
+human summary — and no fenced file dumps at all.
+
+Why: step 6 had a "No QA sub-task → post the wave-1 comments to the MAIN
+issue" fallback, and three to five comments of unreadable archive walls
+landed on tickets developers and PMs read daily. It was worst exactly
+where it was least noticed: a **Defect is itself a sub-task and can
+never own a QA sub-task**, so every bug-fix run dumped onto the ticket
+face by construction. Observed on EP-56380 — three archive comments on
+the Defect, while `PRIVFAV-98` in the QA Service suite already held the
+full run record.
+
+A QA sub-task is a machine artefact ticket that nobody reads for status,
+so the archive keeps its home there, and cross-machine resume keeps
+working for the Story runs where resume actually matters.
+
+Explicitly NOT done: no walk-up to the parent story's QA sub-task for a
+Bug or Defect. One ticket's run does not belong in another ticket's
+archive, and a resume looking for `<BUG>-code-review.md` should not find
+it filed under a story.
+
+The cost where no archive is posted, guarded rather than hidden:
+
+- `qa-pipeline-code` step 0 resume mode now has an explicit order —
+  working directory, then the archive comment on the QA sub-task when
+  one exists, then **PAUSE**. It says plainly that tickets without a QA
+  sub-task carry no archive by design and asks whether this is the
+  machine the earlier run used. A missing file must not be read as
+  "that stage never ran": on another machine it means "cannot see it
+  from here", and silently re-running a 45-minute browser stage is
+  exactly the waste this prevents.
+- Split Claude Code ↔ Cowork runs: with a QA sub-task the partial
+  archive bridges the environments as before; **without one they must
+  see the same working directory.** Stated up front instead of
+  discovered at step 0.
+- Post-publish verification now checks the archive is on the sub-task
+  where one exists, treats an archive found on a Story face / Bug /
+  Defect as a ❌, and checks every stage report is on disk.
+
+**New: `qa-pipeline/references/data-locations.md`** — one home for a
+fact eleven skills each stated differently, and six stated wrongly. It
+gives the three stores (working directory / QA Service suite / Jira),
+one resolution order for any input file, and two named failure modes:
+never read a missing file as "that stage never ran" (on another machine
+it means "cannot see it from here"), and never read file existence as
+stage completion. It also corrects a wrong instruction that was in six
+skills — *"if the chat is new, the user uploads the file"*. The folder
+is mounted and every previous run's files are still in it: **a new chat
+is not a reason to ask for an upload.** Wired into requirements-grooming,
+qa-checklist, qa-test-cases, code-review, api-testing, web-testing,
+qa-run-analyzer, qa-manual-runsheet, qa-manual-results, qa-pipeline,
+qa-pipeline-docs and qa-pipeline-code.
+
+Changed: `qa-pipeline-code/SKILL.md` (wave 1, comment-1 bullet, confirm
+pause, main-issue fallback, bug-fix mode, resume mode, split runs,
+post-publish verification, final response), `qa-manual-results/SKILL.md`
+(input source, step 4), `qa-pipeline/SKILL.md` (state detection no
+longer infers "did not run" from a missing archive),
+`qa-pipeline-code/references/results-comment-template.md` (archive
+target rule + table, Comment 1 scoped to QA sub-tasks).
+
+Unchanged on purpose: the **docs-phase** archive (`qa-pipeline-docs`
+step 6). It already self-suppresses when a suite exists, and when it
+does post it lands on a QA sub-task — which is exactly where this rule
+says an archive belongs.
+
 ## 0.25.3 — 2026-08-20
 
 QA Service folders enforced (`qa-service-publish.md`). The folder rule

@@ -36,6 +36,11 @@ reimplement them.
 
 ## Input
 
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
+
 - A Jira ticket key or URL (e.g. `EP-44730`). If the key is itself a
   sub-task, use its parent Story as the story for publishing.
 

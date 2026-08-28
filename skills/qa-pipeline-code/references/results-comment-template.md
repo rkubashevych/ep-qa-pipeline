@@ -1,19 +1,53 @@
 # Results comments — two waves (step 6 = wave 1 · stage 10 = wave 2)
 
-**Contents:** Comment 1 — machine archive (wave 1) · Comment 2 — human
-summary (wave 2, incl. Unverified defect claims, Requirements to
-correct, Overall verdict, Partial runs, Writing rules) · Story note —
-QA passed / QA failed (wave 2)
+**Contents:** the archive target rule · Comment 1 — machine archive
+(wave 1, QA sub-task only) · Comment 2 — human summary (wave 2, incl.
+Unverified defect claims, Requirements to correct, Overall verdict,
+Partial runs, Writing rules) · Story note — QA passed / QA failed
+(wave 2)
 
-**Wave 1 (step 6, now):** the machine archive comment(s) + one short
-status comment (`QA automated pass complete — N cases, M settled by
-machine, K for manual. Results published after the manual round.`).
-Agents-only; no verdicts visible to a human skimmer, nobody tagged.
+**Wave 1 (step 6, now):** the QA Service write-back, one short status
+comment (`QA automated pass complete — N cases, M settled by machine,
+K for manual. Results published after the manual round.`), and the
+machine archive comment(s) **if and only if the ticket has a QA
+sub-task**. Agents-only; no verdicts visible to a human skimmer,
+nobody tagged.
 
 **Wave 2 (stage 10, after the manual round):** the human summary below,
 plus story notes / bug filings / decision requests — all on
 human-confirmed verdicts. Narrow wave-1 exception: runtime-confirmed +
 evidenced + blocking the manual round.
+
+## The archive target rule (0.26.0)
+
+**The results archive goes to the QA sub-task and nowhere else.**
+
+| Ticket under test | Archive | Status line | Human summary |
+|---|---|---|---|
+| Story with a QA sub-task | ✅ on the sub-task | on the sub-task | on the sub-task |
+| Story with no QA sub-task | ❌ none | on the story | on the story |
+| Bug | ❌ none | on the bug | on the bug |
+| Defect (is itself a sub-task) | ❌ none | on the defect | on the defect |
+
+A QA sub-task is a machine artefact ticket — nobody reads it for
+status, so fenced file dumps cost nothing there. Every other ticket is
+read by developers and PMs, and step 6 used to have a "No QA sub-task →
+post the wave-1 comments to the MAIN issue" fallback that put three to
+five walls of unreadable dumps straight onto the ticket face. Observed
+on EP-56380: three archive comments on a Defect, while the suite case
+already held the whole run record.
+
+Two consequences, both load-bearing:
+
+- **Do not walk up to the parent story's QA sub-task** for a Bug or
+  Defect. One ticket's run does not belong in another ticket's archive,
+  and a resume looking for `<BUG>-code-review.md` should not find it
+  filed under a story.
+- **Where no archive is posted the reports are local-only.** A resume
+  on another machine, or by a colleague, has nothing to restore — step
+  0's resume mode pauses and says so instead of re-running finished
+  stages. A split Claude Code ↔ Cowork run without a QA sub-task
+  therefore needs both environments to see the same working directory.
 
 Never merge archive and summary into one comment. After posting the
 archive, **read it back and verify fidelity**: fetch the comment,
@@ -23,7 +57,10 @@ truncated an archive with nested code fences before. Choose each fence
 longer than any fence inside the file (dynamic fence length), never a
 bare triple-backtick around content that itself contains fences.
 
-## Comment 1 — machine archive (for agents)
+## Comment 1 — machine archive (for agents) — QA SUB-TASK ONLY
+
+Skip this comment entirely when the ticket has no QA sub-task; name the
+report paths in the final response instead.
 
 Verbatim report files in labeled fenced code blocks — the same
 convention as the docs-phase archive comment (`qa-pipeline-docs`
@@ -135,7 +172,8 @@ confirmed, <N> retracted. (If rows were not walked:
 machine-only.`)
 
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
-report (archive comment above).
+report (`<STORY>-run-report.md`; in the archive comment above when the
+ticket has a QA sub-task, otherwise in the run's working directory).
 
 **Test docs:** <N> requirements / <M> cases, run results written back —
 https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path>
@@ -163,13 +201,16 @@ When some stages have not run yet (e.g. 5–7 done in Claude Code,
 web-testing pending in Cowork), post the same two comments with:
 
 - Verdict: `⏳ PARTIAL — <pending stages> pending`.
-- Archive: only the report files that exist, plus a plain line per
-  missing file: `File <STORY>-web-testing.md not produced — pending
-  (runs in Cowork)`.
+- Archive (QA sub-task only): the report files that exist, plus a
+  plain line per missing file: `File <STORY>-web-testing.md not
+  produced — pending (runs in Cowork)`. With no QA sub-task there is no
+  archive — the finished reports stay on disk and the resuming
+  environment must read the same working directory.
 - Summary: a **Pending** line naming what remains and where it runs.
 
-The resumed session posts a fresh final pair (archive + summary).
-Never edit or delete earlier comments — newest pair wins.
+The resumed session posts a fresh final pair (archive where one
+applies, + summary). Never edit or delete earlier comments — newest
+pair wins.
 
 ### Writing rules
 
@@ -182,7 +223,8 @@ Never edit or delete earlier comments — newest pair wins.
   comments are exempt (verbatim by design).
 - Comment-specific rules on top of it:
 - One line per confirmed bug — the evidence lives in the archive
-  comment; never restate full findings.
+  comment (or, where none was posted, the stage report on disk) and in
+  the suite case notes; never restate full findings.
 - FAIL REJECTED items are not bugs — count them as passes in the
   prose; mention a rejection only when it corrects the ticket's
   stated expectations.

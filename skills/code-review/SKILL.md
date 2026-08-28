@@ -22,17 +22,20 @@ compact results table with findings for the FAIL items.
 
 From the user you need:
 1. The test-cases file `<ISSUEKEY>-test-cases.md` created
-   by the qa-test-cases skill. In the same chat the file is available
-   in the working directory automatically. If the chat is new —
-   the user uploads the file into the chat.
+   by the qa-test-cases skill.
 2. The PR summary file `<ISSUEKEY>-pr-summary.md` created by
-   the pr-summary skill. In the same chat it is available automatically.
+   the pr-summary skill.
 3. One or more PR URLs or branch names. A Story usually has several
    sub-task PRs (backend + frontend); accept all of them. Review each
    test case against whichever PR implements it — backend test cases
    against the backend PR, frontend against the frontend PR(s). Record
    which PR each finding came from. The pr-summary file may already
    cover several PRs grouped by sub-task; use it as the navigation map.
+
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
 
 The PR system is Bitbucket Cloud. Both the frontend and the backend
 repos are on Bitbucket, so a PR may be either. The PR URL format is

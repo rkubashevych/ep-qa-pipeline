@@ -21,9 +21,12 @@ manual testing.
 ## Input
 
 The input is the `<ISSUEKEY>-requirements.md` file created by the
-requirements-grooming skill. In the same chat the file is available
-in the working directory automatically. If the chat is new, the user
-uploads the file to the chat.
+requirements-grooming skill.
+
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
 
 `<ISSUEKEY>` is a Jira (Atlassian Cloud) ticket key in the
 `PROJECT-123` format, for example `EP-1234`.

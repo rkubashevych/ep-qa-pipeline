@@ -127,6 +127,11 @@ When it is a retest:
    environment. Never proceed without that authorisation, and never
    target an event that carries real client data.
 
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
+
 If the test-cases file is missing, ask for it. If the event id or the
 authorisation is missing, PAUSE and ask — do not guess an event.
 

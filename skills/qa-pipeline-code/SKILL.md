@@ -46,6 +46,11 @@ in a fresh chat (separate from the docs phase) for context health.
   not discoverable — must be supplied). api-testing pauses and asks if
   missing.
 
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
+
 ## Step 0 — Gather inputs
 
 **Session name:** suggest renaming this session to
@@ -138,8 +143,12 @@ Otherwise, using the Atlassian connector and the Story key:
      the routing invariant applies as usual.
    - **No checklist, no suite, no QA sub-task.** Structural checks are
      skipped (say so); the write-back targets are the BUG ticket's
-     comments — same two-wave rule: archive + status comment now, the
-     human-facing verdict after your manual check.
+     comments — same two-wave rule: the status comment now, the
+     human-facing verdict after your manual check. **No archive** (the
+     archive target rule, step 6): a Bug or Defect gets exactly two
+     comments across the whole run, and the second is the verdict a
+     person actually wants to read. The reports stay on disk, so a
+     resume of a bug-fix run needs the same working directory.
    - **Stages 5–8 run unchanged** on the derived branch (the bug key
      is the branch, or use the main-issue PR fallback). All evidence
      rules, gates and pauses apply — a small scope is not a licence to
@@ -160,14 +169,28 @@ Otherwise, using the Atlassian connector and the Story key:
    later write-back silently and say so once in the final response.
    Never block on QA Service.
 
-   **Resume mode:** if the sub-task has a results **archive comment**
-   from an earlier partial run (fenced blocks labeled
-   `File: <STORY>-code-review.md` etc. —
-   `references/results-comment-template.md`), extract those files too.
-   Also extract, when present, `File: <STORY>-manual-results.md` and
-   any `File: <STORY>-remaining-cases-triage.md` — they carry verdict
-   corrections that SUPERSEDE the stage reports; a resumed run must
-   honour them over older PASS/FAIL lines. **A stage is done only if
+   **Resume mode — look in this order:**
+   1. **The working directory** — `<STORY>-code-review.md`,
+      `-api-testing.md`, `-web-testing.md`, `-run-report.md` and, when
+      present, `<STORY>-manual-results.md` and
+      `<STORY>-remaining-cases-triage.md`. The last two carry verdict
+      corrections that SUPERSEDE the stage reports; a resumed run must
+      honour them over older PASS/FAIL lines.
+   2. **The results archive comment on the QA sub-task**, when the
+      ticket has one — fenced blocks labeled
+      `File: <STORY>-code-review.md` etc.
+      (`references/results-comment-template.md`). Prefer
+      `scripts/extract_archive.py`. This is what makes a resume on
+      another machine possible.
+   3. **Neither → PAUSE.** Tickets without a QA sub-task carry no
+      archive by design (step 6's archive target rule), so their
+      reports exist only in the working directory. Say that plainly,
+      ask whether this is the machine the earlier run used, and offer
+      either to re-run the missing stages or to have the files
+      attached. Never assume "no file" means "stage never ran" — on a
+      different machine it means "cannot see it from here", and quietly
+      re-running a 45-minute browser stage because a folder was not
+      mounted is exactly the waste this guard exists to prevent. **A stage is done only if
    its report is COMPLETE — file existence is not completion.** Read
    each restored report's `Completeness:` header (older reports lack
    one — then derive it: do Scope and Statistics agree, and is every
@@ -249,11 +272,20 @@ Stages 5–7 need repo/API creds (Claude Code); stage 8 needs a browser
 backend — Playwright MCP (works in Claude Code too, enabling a
 single-environment run) or the Chrome extension (Cowork). When the
 current environment cannot run everything: run what it can, post the
-two step-6 comments marked **PARTIAL** (per the template — name the
-pending stages), then start a fresh chat in the other environment with
-the same Story key. Step 0's resume mode restores the finished
-reports, and the last environment posts the final archive + summary as
-a NEW pair — existing comments are never edited.
+step-6 comments marked **PARTIAL** (per the template — name the pending
+stages), then start a fresh chat in the other environment with the same
+Story key. Step 0's resume mode restores the finished reports, and the
+last environment posts the final archive + summary as a NEW pair —
+existing comments are never edited.
+
+**What bridges the two environments depends on the ticket (0.26.0).**
+With a QA sub-task, the partial archive carries the reports across, so
+the environments need nothing in common. **Without one — a Bug, a
+Defect, a small Story — no archive is posted, so the two environments
+must see the same working directory.** If they cannot, that run cannot
+be split: say so before starting rather than discovering it at step 0,
+and either run everything in one environment or have the files carried
+across by hand.
 
 ## How it runs
 
@@ -306,12 +338,38 @@ story does not exhaust the orchestrator's context:
 6. **Publish in two waves — only the first happens now.** Formats:
    **`references/results-comment-template.md`**.
 
-   **Wave 1 — now, agents only.** The machine archive comment(s) (a
-   resumed run needs them; they are unreadable to a human and tag no
-   one), the QA Service suite write-back, and ONE short status comment
-   on the QA sub-task with no verdicts: `QA automated pass complete —
-   N cases, M settled by machine, K for manual. Results published
-   after the manual round.`
+   **Wave 1 — now, agents only.** The QA Service suite write-back, ONE
+   short status comment with no verdicts (`QA automated pass complete —
+   N cases, M settled by machine, K for manual. Results published after
+   the manual round.`), and the machine archive comment(s) — **only if
+   the ticket has a QA sub-task.**
+
+   **Archive target rule (0.26.0): the results archive goes to the QA
+   sub-task and nowhere else.** A QA sub-task is a machine artefact
+   ticket; nobody reads it for status, so fenced file dumps are free
+   there. Every other ticket type — Story face, Bug, Defect — receives
+   **no archive at all**: the reports stay in the working directory and
+   the QA Service suite carries the per-case record.
+
+   A **Defect is itself a sub-task** and can therefore never own a QA
+   sub-task, so bug-fix mode posts no archive by construction. That is
+   the normal path, not an edge case. Do **not** improvise a walk-up to
+   the parent story's QA sub-task: one ticket's run does not belong in
+   another ticket's archive, and a future resume looking for
+   `<BUG>-code-review.md` would find it filed under the story.
+
+   Why this rule exists: the archive ran to three to five comments of
+   unreadable fenced dumps, and step 6's old "No QA sub-task → post to
+   the MAIN issue" fallback put them straight onto the face of tickets
+   developers and PMs read daily. Observed on EP-56380 — three archive
+   walls on a Defect, while the suite case already held the full run
+   record.
+
+   **When no archive is posted, the reports are local-only, and step 0
+   must guard it:** a resumed run then rebuilds from the working
+   directory, so a resume on a different machine or by a colleague has
+   nothing to restore. Step 0 pauses in that case rather than silently
+   re-running or proceeding empty.
 
    **Wave 2 — after `qa-manual-results` (stage 10), never now.** The
    human summary, the story comment, the stage-verdict table, and any
@@ -334,9 +392,11 @@ story does not exhaust the orchestrator's context:
      mechanical count, or unexplained missing ids) is fixed in the
      report BEFORE the preview — wrong numbers must not reach Jira,
      the suite, or the human summary.
-   - **REQUIRED PAUSE / CONFIRM.** Show what wave 1 will post (archive
-     comment(s) + status comment), to which sub-task, and — connector
-     present — the write-back line (how many cases get a run note).
+   - **REQUIRED PAUSE / CONFIRM.** Show what wave 1 will post (the
+     status comment verbatim, and whether an archive comment is
+     included or skipped — say which, and why), to which ticket, and —
+     connector present — the write-back line (how many cases get a run
+     note).
      Post only after an explicit yes; the one confirmation covers Jira
      and QA Service.
    - **QA Service result write-back:** append each executed case's
@@ -344,11 +404,17 @@ story does not exhaust the orchestrator's context:
      `../qa-pipeline-docs/references/qa-service-publish.md` → "Result
      write-back". Never overwrite lifecycle `status`. Connector absent
      → skip with a note in the final response.
-   - **Comment 1 — machine archive (for agents):** the full
-     `<STORY>-code-review.md`, `-api-testing.md`, `-web-testing.md`
-     and `-run-report.md`, each in its own fenced code block preceded
-     by a plain `File: <name>` line (same convention as the docs-phase
-     archive). Do not shorten or reformat.
+   - **Comment 1 — machine archive (for agents), QA SUB-TASK ONLY:**
+     the full `<STORY>-code-review.md`, `-api-testing.md`,
+     `-web-testing.md` and `-run-report.md`, each in its own fenced
+     code block preceded by a plain `File: <name>` line (same
+     convention as the docs-phase archive). Do not shorten or reformat.
+     **If the ticket under test has no QA sub-task, skip this comment
+     entirely** — the reports stay on disk, and the final response
+     names their paths so the user knows where the evidence is. Never
+     paste report contents onto a Story face, Bug or Defect, and never
+     substitute a prose summary of them there either: the wave-2 human
+     summary is the only narrative those tickets get.
    - **Comment 2 — human summary — is WAVE 2, posted by stage 10, not
      here.** Write `<STORY>-human-summary.md` now (per the template:
      overall verdict, stage-verdict table, confirmed bugs, needs a
@@ -356,8 +422,10 @@ story does not exhaust the orchestrator's context:
      the machine's picture to reconcile against — but do NOT post it.
    - Use comments (`addCommentToJiraIssue`), never a description
      overwrite.
-   - No QA sub-task (the fallback case) → post the wave-1 comments to
-     the MAIN issue — same format, same confirm pause.
+   - No QA sub-task (Bugs, Defects, small Stories) → the status
+     comment goes on the MAIN issue, same confirm pause, and **no
+     archive**. That status line is the ONLY thing a human-facing
+     ticket receives in wave 1.
    - **Tracker note:** the connector cannot tick the docs-phase
      checkbox tracker. The human summary is the source of truth for
      automated results; the tracker holds the human's manual
@@ -447,9 +515,16 @@ story does not exhaust the orchestrator's context:
      three reports has a run-sheet row awaiting the tester, a
      narrow-exception bug key, or an explicit "not carried — <reason>"
      line in the drafted human summary. No silent FAILs.
-   - **Wave-1 comments exist:** the archive comment(s) and the status
-     comment are on the sub-task — re-read, don't assume. The human
-     summary must NOT be posted yet — finding it posted early is a ❌.
+   - **Wave-1 comments exist, on the right ticket:** the status
+     comment, and the archive comment(s) **only where a QA sub-task
+     exists** — re-read, don't assume. A fenced results archive found
+     on a Story face, Bug or Defect is a ❌ (archive target rule). The
+     human summary must NOT be posted yet — finding it posted early is
+     a ❌.
+   - **Reports are on disk:** every stage report the run produced is
+     present in the working directory. Where no archive was posted they
+     are the ONLY copy of the evidence — a missing one is a ❌, not a
+     formality.
    - **Runsheet outputs exist** (unless stage 9 was skipped).
    Append the outcome as `## Post-publish verification` (✅/❌ per
    item) to `<STORY>-run-report.md` and include one line in the final
@@ -493,11 +568,12 @@ story does not exhaust the orchestrator's context:
 
 ## Final response
 
-Report: the files produced; the overall (machine) verdict and
-confirmed bugs; confirmation that the wave-1 comments (machine archive
-+ status comment) were posted to the QA sub-task (key + URL) and that
-the human summary is written but deliberately NOT posted (two-wave
-rule); the QA Service write-back counts (or "skipped — connector not
+Report: the files produced and their full paths — **and, when no
+archive was posted, that they are the only copy of the evidence**; the
+overall (machine) verdict and confirmed bugs; confirmation of what
+wave 1 posted and where (key + URL), including whether the archive was
+posted or skipped and why, and that the human summary is written but
+deliberately NOT posted (two-wave rule); the QA Service write-back counts (or "skipped — connector not
 enabled") and any step-0 reconciliation changes; which bugs (if any)
 passed the narrow exception and were filed, or that filing waits for
 stage 10; which handoff was performed or deferred; the tracker

@@ -1,0 +1,160 @@
+{
+  "navigation_paths": {
+    "App Builder - Features step (alpha2)": {
+      "url": "https://api-alpha2.expoplatform.net/admin/appbuilder/feature/{appId}/{eventId}",
+      "login_required": true,
+      "navigation_steps": [
+        "Admin login (SuperAdmin), event must be selected (e.g. 3551)",
+        "App list at /admin/appbuilder/list; open an app's wizard at /admin/appbuilder/general/{appId}, then click the 'Features' stepper circle (the <a> link click may not fire - click the numbered circle)",
+        "Direct URL /admin/appbuilder/feature/{appId}/{eventId} also works (e.g. feature/1730/3551); /feature/{appId} without event id redirects to the list",
+        "The 'AI Meeting Notes: Toggle' switch sits directly below 'OCR scanning'; save is the APPLY button at the bottom",
+        "WARNING: app 69 is tagged 'Do no touch' - do not APPLY changes on it; spec URL app id 2 does not exist on alpha2"
+      ],
+      "last_used": "2026-07-22T00:00:00Z"
+    },
+    "Global Search page (ep47675 demo-alpha)": {
+      "url": "https://ep47675ep47675_demoalpha.expoplatform.net/global-search",
+      "login_required": false,
+      "navigation_steps": [
+        "Navigate directly to /global-search on the ep47675 demo-alpha host (event 1295, IMEX Frankfurt 2026)",
+        "The sponsored banner is the first child of <main>: an anchor href='/index/out/?type=banner&...&page=global_search&sponsor=...' wrapping the banner image",
+        "Public page - no login required to view the banner"
+      ],
+      "last_used": "2026-07-15T00:00:00Z"
+    },
+    "Marketplace / Search page (ep47675 demo-alpha)": {
+      "url": "https://ep47675ep47675_demoalpha.expoplatform.net/marketplace/exhibitors",
+      "login_required": false,
+      "navigation_steps": [
+        "Navigate directly to /marketplace/exhibitors (this is the standard Search page, page=search)",
+        "Top sponsored banner is the first child of <main> (page=search); a side banner uses page=search_side",
+        "Used as the reference page for comparing Global Search banner rendering/sizing"
+      ],
+      "last_used": "2026-07-15T00:00:00Z"
+    },
+    "Interaction Scores - Popularity": {
+      "url": "https://api-alpha2.expoplatform.net/admin/interactionscores",
+      "login_required": true,
+      "navigation_steps": [
+        "Log into the admin panel and select the event",
+        "Open Networking & Matchmaking -> Interaction scores (Popularity scores tab)",
+        "Or navigate directly to /admin/interactionscores"
+      ],
+      "last_used": "2026-07-09T00:00:00Z"
+    },
+    "Interaction Scores - Activity": {
+      "url": "https://api-alpha2.expoplatform.net/admin/interactionscores/activity",
+      "login_required": true,
+      "navigation_steps": [
+        "From the Interaction scores page click the 'Activity scores' tab",
+        "Or navigate directly to /admin/interactionscores/activity"
+      ],
+      "last_used": "2026-07-09T00:00:00Z"
+    },
+    "Analytics - Marketplace": {
+      "url": "https://api-alpha2.expoplatform.net/admin/stat/general#dashboard",
+      "login_required": true,
+      "navigation_steps": [
+        "Open Analytics (/admin/stat/general)",
+        "Click the 'Marketplace' tab in the analytics left-nav (JS-routed, href='#') - requires a real click; hash-only navigation does not switch the SPA view",
+        "Scroll to Top Suppliers / Top Products / Top Brands widgets"
+      ],
+      "last_used": "2026-07-09T00:00:00Z"
+    },
+    "Sponsor Banner Settings (ep47675 demo-alpha)": {
+      "url": "https://api-ep47675ep47675_demoalpha.expoplatform.net/admin/sponsors/settings",
+      "login_required": true,
+      "navigation_steps": [
+        "Admin login (SuperAdmin) then select event 1295 via /admin/exhibitions/select/1295",
+        "Open /admin/sponsors/settings; each placement is a collapsible accordion; expand 'Banner Ad Settings: Global Search Page'",
+        "Fields: 'Number of banners displayed' radios One/Two, 'Disable link:' checkbox, and a per-section 'Save' button",
+        "Accordion field DOM exists even when collapsed (findable), but the a11y tree does NOT expose radio/checkbox checked state; committing a change needs the per-section Save button click"
+      ],
+      "last_used": "2026-07-15T00:00:00Z"
+    },
+    "Sponsor Edit form (ep47675 demo-alpha)": {
+      "url": "https://api-ep47675ep47675_demoalpha.expoplatform.net/admin/sponsors/edit/14950",
+      "login_required": true,
+      "navigation_steps": [
+        "From /admin/sponsors/list find the sponsor row (e.g. 'Visit California', id 14950) and click edit (href /admin/sponsors/edit/{id}#pages-section)",
+        "The 'pages-section' region lists every banner placement (checkbox + Preview) with 'Global Search Page' FIRST, rendered identically to Search Page (TOP)/etc.",
+        "The sponsors list 'Banners' column already shows which placements are configured per sponsor (Visit California = Global Search Page, Search Page TOP, Visitor/Exhibitor My Profile)"
+      ],
+      "last_used": "2026-07-15T00:00:00Z"
+    },
+    "Banner Statistics (ep47675 demo-alpha)": {
+      "url": "https://api-ep47675ep47675_demoalpha.expoplatform.net/admin/sponsors/statistics",
+      "login_required": true,
+      "navigation_steps": [
+        "Open /admin/sponsors/statistics (STATISTICS tab -> BANNER STATISTICS)",
+        "Each sponsor is a collapsible row with Show Total / Click Total and a per-placement table; per-placement rows (incl. Global Search) only appear once the sponsor has accumulated impressions/clicks",
+        "Visit California currently shows 'There are no statistics for this sponsor yet'"
+      ],
+      "last_used": "2026-07-15T00:00:00Z"
+    },
+    "Website Builder - Global Settings Text styles / font Gallery (alpha2)": {
+      "url": "https://api-alpha2.expoplatform.net/admin/template/builder",
+      "login_required": true,
+      "navigation_steps": [
+        "Admin login (SuperAdmin), select event via /admin/exhibitions/select/{eventId} (e.g. 3551)",
+        "Open Event Setup -> Build Website (/admin/template/builder); the builder app lives in iframe #newAdminIframe",
+        "Click 'Edit website' on a website card (use an Unpublished one for tests)",
+        "In the builder header click the gear button (data-testid=wb-header-settings) -> Global Settings opens on 'Text styles'",
+        "Scroll to 'Custom font' section; 'Upload file' opens the font Gallery modal (GalleryModal, filtered to font extensions)",
+        "Upload control is a react-dropzone: clicking the 'Upload files' tile (not the hidden 'Choose File' input) opens the file chooser; input has data-testid=dropzone-input",
+        "Gallery list is paginated (8/page), sorted oldest-first: newly uploaded files land on the LAST page; the Search box did not filter server-side in this run",
+        "Upload endpoint: POST /api/v1/mediaGallery/uploadFile; list: GET /api/v1/mediaGallery/list/files"
+      ],
+      "last_used": "2026-07-27T00:00:00Z"
+    },
+    "Impersonate a participant (login as) - alpha2 admin": {
+      "url": "https://api-alpha2.expoplatform.net/admin/visitors",
+      "login_required": true,
+      "navigation_steps": [
+        "Admin login (SuperAdmin), select the event via /admin/exhibitions/select/{eventId} (e.g. 3551)",
+        "Open /admin/visitors (Management -> Participants). Per-row 'more_vert' menu holds the impersonation item (class js-impersonate, label 'Customer service'); the same button exists on /admin/visitors/editVisitor?id={accountId}",
+        "Scripted equivalent: POST /admin/visitors/impersonate with body 'account={accountId}' (X-Requested-With: XMLHttpRequest) -> {\"link\":\"/oauth/loginSSO?...\"}",
+        "IMPORTANT: the returned link is RELATIVE TO THE ADMIN HOST. Open https://api-alpha2.expoplatform.net + link (it then redirects to the portal, logged in as that account). Opening the same path on the portal host returns 404",
+        "The impersonation link is single-use/time-stamped - request a fresh one for every switch; switching accounts replaces the portal session but keeps the admin session"
+      ],
+      "last_used": "2026-07-28T00:00:00Z"
+    },
+    "Admin visitor edit - Networking Opt-in (GDPR) field": {
+      "url": "https://api-alpha2.expoplatform.net/admin/visitors/editVisitor?id={accountId}",
+      "login_required": true,
+      "navigation_steps": [
+        "Open /admin/visitors/editVisitor?id={accountId}",
+        "The consent field is a chosen-wrapped <select name='gdpr_accept'> labelled 'Networking Opt-in' (0=No, 1=Yes)",
+        "Set the value, dispatch a change event (jQuery chosen:updated) and submit the form whose action is /admin/visitors/saveVisitor?id={accountId} via its 'Save changes' button",
+        "This path calls clearGDPRCache() - the new opt-state takes effect immediately (the legacy web profile edit does NOT)",
+        "The same page holds 'Customer service' (impersonate), Meeting Wizard, and a leads export form (action /export/leads/{eventId})"
+      ],
+      "last_used": "2026-07-28T00:00:00Z"
+    },
+    "Portal (portal-ui) favourite star + counters - ennies-alpha2 event 3551": {
+      "url": "https://ennies-alpha2.expoplatform.net",
+      "login_required": true,
+      "navigation_steps": [
+        "Event 3551 serves the Next.js portal for EVERY public route (/community, /participants, /participants/{id}, /marketplace/exhibitors, /marketplace/products, /exhibitor/{slug}, /product/{id}, /profile/*). The legacy Volt theme only renders the 404 page - no legacy interactions_inline/material card is reachable",
+        "Favourite control = <button data-testid='favor' data-checked='true|false'> with StarRounded / StarOutlineRounded icon; it calls POST /api/v1/profile/connect|disconnect {id,type,isExternal}",
+        "Exhibitor pages use slugs (/exhibitor/critical-kit), products use ids (/product/168865); an unpublished exhibitor renders the 404 body even though the <title> resolves",
+        "Owner counters: /profile/dashboard -> [data-styleid=ProfileStatisticsBlock] ('Page likes') and [data-styleid=DashboardProductsStatistics] (star = product favourites). Favourites list = /profile/favourites",
+        "Legacy web favourite routes still work on this host: /profile/connectVisitor|disconnectVisitor|connectExhibitor|disconnectExhibitor|favProduct|unFavProduct/{id} (non-AJAX = 301 to '/', no flash on success)",
+        "Language switcher = MUI Select in the header (role=combobox) with options EN/DE/...; DE moves the app under /de/",
+        "Watch-outs: an incomplete profile raises an undismissable 'Required fields' MUI dialog that intercepts pointer events (use element.click() in JS); exhibitor interaction state is cached 300 s (interaction_from_{account}_to_{id})"
+      ],
+      "last_used": "2026-07-28T00:00:00Z"
+    },
+    "Admin Sessions - Speakers / Moderators (speaker validation + search filter)": {
+      "url": "https://api-alpha2.expoplatform.net/admin/events/speakers",
+      "login_required": true,
+      "navigation_steps": [
+        "Open /admin/events (Sessions) -> SPEAKERS / MODERATORS tabs (/admin/events/speakers, /admin/events/moderators)",
+        "Search filter is the 'q' query parameter (/admin/events/speakers?q=David) or the Search box on the page",
+        "'Add New Speaker' opens the bootstrap modal #newSpeakerModal (jQuery('#newSpeakerModal').modal('show')); enter the email in input.username-field and press CHECK USERNAME",
+        "For an existing account the modal answers 'This username already in use. Do you want to add speaker role to this account?' with Type/Name/Email and a 'Link Account' button (do NOT press it in read-only checks)"
+      ],
+      "last_used": "2026-07-28T00:00:00Z"
+    }
+  }
+}

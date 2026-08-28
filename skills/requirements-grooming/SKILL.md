@@ -20,9 +20,12 @@ numbered list of requirements — input for the next skills.
 ## Inputs
 
 The input is the context file `<ISSUEKEY>-context.md` created by the
-context-collection skill (task-context). In the same chat the file is
-available in the working directory automatically. If the chat is new —
-the user uploads the file into the chat.
+context-collection skill (task-context).
+
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
 
 The context-collection skill in this chain is **task-context**.
 

@@ -31,10 +31,17 @@ From the ticket key/URL (ask if the paste has none):
 2. Pipeline QA sub-task? `searchJiraIssuesUsingJql`:
    `parent = <KEY> AND issuetype = "QA sub-task"` (newest with the
    pipeline label wins).
-3. On that sub-task, when it exists: a QA Service suite line? code-phase
-   archive/status comments? a manual-results comment?
+3. On that sub-task, when it exists: a QA Service suite line? a
+   code-phase status comment? a human summary? (Since 0.26.0 the stage
+   reports are local-only — absence of an archive comment says nothing
+   about whether the code phase ran; check the working directory.)
 4. Working directory: `<KEY>-runsheet.xlsx`, `<KEY>-testdata.json`,
    stage reports, `<KEY>-recon.md` — local evidence of a run in flight.
+
+**Where to find inputs:** `references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
 
 ## Step 2 — Propose the route
 

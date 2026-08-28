@@ -40,13 +40,23 @@ keeps asserting PASSes everyone knows are wrong.
 2. **The story / QA sub-task key** — ask if not derivable.
 3. Optional, for reconciliation: this run's verdict files
    (`<ISSUEKEY>-code-review.md`, `-api-testing.md`, `-web-testing.md`)
-   or, in a fresh chat, the archive comment on the QA sub-task
-   (extract per `../qa-pipeline-code/references/results-comment-template.md`).
+   from the working directory; in a fresh chat, from the results
+   archive comment on the QA sub-task when the ticket has one (extract
+   per `../qa-pipeline-code/references/results-comment-template.md`).
+   **A ticket with no QA sub-task carries no archive (0.26.0), so its
+   reports exist only in the working directory** — on another machine
+   they will be missing: say so and ask for them rather than
+   reconciling against nothing.
 4. Optional: the QA Service suite (connector present) — the write-back
    target.
 
 If no Result data is provided at all — ask for the completed sheet or
 table; do not proceed on guesses.
+
+**Where to find inputs:** `../qa-pipeline/references/data-locations.md`
+(working directory first — a new chat is not a reason to ask for an
+upload; then the suite; then the QA sub-task archive if the ticket has
+one; asking the user is the last resort, not the first).
 
 ## Hard rules
 
@@ -115,11 +125,17 @@ Show the user exactly what will be written, then on explicit yes:
   (`Run <date> — SUPERSEDES <prior> (<old> → <new>): <reason>`) plus
   the single `⚠ CURRENT VERDICT:` first line. Never change lifecycle
   `status`.
-- **Jira QA sub-task**: post TWO comments — a machine archive (the full
+- **Jira**: always post **the run's FIRST human-facing summary**
+  (two-wave rule: the code phase posted only an agents-only archive +
+  status line) — to the QA sub-task when the ticket has one, otherwise
+  to the ticket under test.
+  **Plus, QA SUB-TASK ONLY, a machine archive** (the full
   `<ISSUEKEY>-manual-results.md` in a fenced block preceded by
-  `File: <ISSUEKEY>-manual-results.md`) and **the run's FIRST
-  human-facing summary** (two-wave rule: the code phase posted only an
-  agents-only archive + status line). Write it as the complete
+  `File: <ISSUEKEY>-manual-results.md`). Where there is no QA sub-task
+  — a Bug, a Defect — post **no archive**: that ticket gets the verdict
+  and nothing else, and `<ISSUEKEY>-manual-results.md` stays in the
+  working directory (0.26.0 archive target rule,
+  `../qa-pipeline-code/SKILL.md` step 6). Write it as the complete
   picture, not a delta — overall verdict, stage table, confirmed bugs,
   **Retractions listed first with old → new and reason**, what needs a
   human, what was not tested — because no earlier human summary
