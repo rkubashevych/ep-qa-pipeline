@@ -63,3 +63,4 @@ navigation_paths.json
 # fixtures are committed even though they match the patterns above
 !fixtures/EP-*
 !fixtures/*.md
+*.bak
