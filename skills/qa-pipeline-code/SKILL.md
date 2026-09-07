@@ -24,8 +24,9 @@ description: >
 > **Tool names:** bare names like `searchJiraIssuesUsingJql` /
 > `addCommentToJiraIssue` / `getTransitionsForJiraIssue` (here and in
 > this skill's references) are tools of the **Atlassian MCP
-> connector**; `get_suite` / `get_test_case` / `edit_test_case` etc.
-> belong to the **QA Service MCP connector**. The install-specific
+> connector**; `get_suite` / `get_test_case` / `create_test_run` /
+> `record_case_result` etc. belong to the **QA Service MCP
+> connector**. The install-specific
 > server prefix varies — match by tool name on the server that
 > provides it.
 
@@ -56,6 +57,13 @@ one; asking the user is the last resort, not the first).
 passes. Read it before stage 5. The code phase used to read no spec at
 all; that is how a documented-as-designed behaviour reached the point of
 being filed as a Bug.
+
+**The per-case record:** `../qa-pipeline/references/test-runs.md` — the
+QA Service test run step 6 creates and stage 10 closes (verdict mapping,
+what stays `not_run` until the human round, retractions as re-records).
+**Memory across rounds:** `../qa-pipeline/references/open-items-ledger.md`
+— `<KEY>-open-items.md`, read here at step 0 in retest / bug-fix mode,
+written by the analyzer and stage 9, closed only by stage 10.
 
 ## Step 0 — Gather inputs
 
@@ -204,11 +212,15 @@ Otherwise, using the Atlassian connector and the Story key:
 
    **Resume mode — look in this order:**
    1. **The working directory** — `<STORY>-code-review.md`,
-      `-api-testing.md`, `-web-testing.md`, `-run-report.md` and, when
-      present, `<STORY>-manual-results.md` and
+      `-api-testing.md`, `-web-testing.md`, `-run-report.md`,
+      `<STORY>-open-items.md` (the ledger — per ticket, no round
+      suffix) and, when present, `<STORY>-manual-results.md` and
       `<STORY>-remaining-cases-triage.md`. The last two carry verdict
       corrections that SUPERSEDE the stage reports; a resumed run must
-      honour them over older PASS/FAIL lines.
+      honour them over older PASS/FAIL lines. When a QA Service run
+      already exists for this pass (`list_test_runs` on the suite, title
+      `<STORY> …`), its roster verdicts are the machine record — resume
+      into that run, never create a second one for the same pass.
    2. **The results archive comment on the QA sub-task**, when the
       ticket has one — fenced blocks labeled
       `File: <STORY>-code-review.md` etc.
@@ -240,9 +252,10 @@ Otherwise, using the Atlassian connector and the Story key:
    **Retest mode (the fix came back).** Two ways in, both valid: the
    user says so ("retest <KEY>", "the fix landed"), OR step 0 notices
    the signals — newest human summary / manual-results comment is
-   ❌ FAIL, or the suite carries RETEST/supersede lines — and ASKS
-   "full run or retest?" instead of assuming. Never require a magic
-   phrase.
+   ❌ FAIL, or a previous QA Service run for this key holds `fail` /
+   `known_defect` rows (or, pre-0.30, the suite carries RETEST /
+   supersede lines) — and ASKS "full run or retest?" instead of
+   assuming. Never require a magic phrase.
    **Scope (three tiers, confirmed by the user before stage 5):**
    1. every FAIL / FAIL CONFIRMED case (including retracted-to-FAIL) —
       the defects' own cases;
@@ -251,6 +264,20 @@ Otherwise, using the Atlassian connector and the Story key:
       `RISK-CR-*` rows;
    3. every case that never got a real verdict: NOT EXECUTED,
       unresolved BLOCKED, rows the human never walked.
+   **Read the ledger first.** `<STORY>-open-items.md`
+   (`../qa-pipeline/references/open-items-ledger.md`) holds what earlier
+   rounds left undecided — carried risk rows, in/out rulings never made,
+   findings with no case and no key, `[core]` nominations. Show the open
+   rows in the same scope confirmation ("N open items from earlier
+   rounds — decide or carry each") and write any decision the user gives
+   into the `Decision` column before stage 5. Prior verdicts come from
+   the previous pass's QA Service run (`get_test_run`, or
+   `case_execution_history` per case) — that is the record, not the
+   markdown; where the retracted-verdict tier applies, note **where each
+   old verdict was published** (ticket + comment id) in
+   `<STORY>-retest-scope.md`, because stage 10's retraction goes there.
+   Every FAIL / PARTIAL row a pass leaves `not_run` is scope tier 1 or 3
+   of the next pass by construction.
    **Build the scope from the SUITE, not from the local test-cases
    file.** When the sub-task names a QA Service suite and the connector
    is present, `get_suite` FIRST and diff it against
@@ -276,11 +303,13 @@ Otherwise, using the Atlassian connector and the Story key:
    account only for stateless checks, after re-verifying its login and
    baseline.
    Post results as a normal comment pair with the verdict line
-   prefixed `RETEST:`. Write-backs follow the retraction convention (a
-   FAIL that now passes gets its supersede line); verified bugs get a
-   closing comment offered on their tickets. Everything else keeps its
-   verdicts — say so in the summary. Stage 10 ingests the retest sheet
-   like a first run.
+   prefixed `RETEST:`. The retest is a NEW run on the same suite (one
+   run per pass); a FAIL that now passes is simply recorded `pass` in
+   it, and the retraction comment goes to wherever the old FAIL was
+   published (`test-runs.md` → "Retraction target rule"); verified
+   bugs get a closing comment offered on their tickets. Everything else
+   keeps its verdicts — say so in the summary. Stage 10 ingests the
+   retest sheet like a first run.
 
 2. **Dev branches.** `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype in ("Backend sub-task","Frontend
@@ -371,11 +400,12 @@ story does not exhaust the orchestrator's context:
 6. **Publish in two waves — only the first happens now.** Formats:
    **`references/results-comment-template.md`**.
 
-   **Wave 1 — now, agents only.** The QA Service suite write-back, ONE
-   short status comment with no verdicts (`QA automated pass complete —
-   N cases, M settled by machine, K for manual. Results published after
-   the manual round.`), and the machine archive comment(s) — **only if
-   the ticket has a QA sub-task.**
+   **Wave 1 — now, agents only.** The QA Service **test run** (created
+   here, closed by stage 10 — `../qa-pipeline/references/test-runs.md`),
+   ONE short status comment with no verdicts (`QA automated pass
+   complete — N cases, M settled by machine, K for manual — QA Service
+   run <id> open. Results published after the manual round.`), and the
+   machine archive comment(s) — **only if the ticket has a QA sub-task.**
 
    **Archive target rule (0.26.0): the results archive goes to the QA
    sub-task and nowhere else.** A QA sub-task is a machine artefact
@@ -389,7 +419,11 @@ story does not exhaust the orchestrator's context:
    the normal path, not an edge case. Do **not** improvise a walk-up to
    the parent story's QA sub-task: one ticket's run does not belong in
    another ticket's archive, and a future resume looking for
-   `<BUG>-code-review.md` would find it filed under the story.
+   `<BUG>-code-review.md` would find it filed under the story. **The
+   one exception is a retraction** (stage 10, `test-runs.md` →
+   "Retraction target rule"): a ≤ 6-line comment correcting a verdict
+   goes to the ticket where that verdict was published, whatever ticket
+   that is — it is not an archive and carries no dumps.
 
    Why this rule exists: the archive ran to three to five comments of
    unreadable fenced dumps, and step 6's old "No QA sub-task → post to
@@ -441,20 +475,30 @@ story does not exhaust the orchestrator's context:
    - **REQUIRED PAUSE / CONFIRM.** Show what wave 1 will post (the
      status comment verbatim, and whether an archive comment is
      included or skipped — say which, and why), to which ticket, and —
-     connector present — the write-back line (how many cases get a run
-     note).
+     connector present — the run preview: title, `env`, release (or
+     `none`), roster count (= the step-0 scope count, or say why not),
+     how many rows will be recorded per verdict, how many stay
+     `not_run` for the human round, and — narrow exception only — each
+     `fail` **by case**, because recording a `fail` files the Jira
+     defect there and then.
      Post only after an explicit yes; the one confirmation covers Jira
-     and QA Service.
-   - **QA Service result write-back:** append each executed case's
-     outcome to its suite case notes — rules and note format:
-     `../qa-pipeline-docs/references/qa-service-publish.md` → "Result
-     write-back". Never overwrite lifecycle `status`. Connector absent
-     → skip with a note in the final response.
+     and QA Service, and the per-case `fail` list is the per-bug yes.
+   - **QA Service result write-back — the run:** `create_test_run` on
+     the in-scope suite case ids, then `record_case_result` per case,
+     `source: machine`, exactly per the mapping table in
+     `../qa-pipeline/references/test-runs.md`. FAIL / PARTIAL rows stay
+     `not_run` (a machine `fail` would file a bug before the human
+     round; `blocked` would misreport a failure as an environment
+     problem); the run is left `running` for stage 10. A run for this
+     pass already exists (resume) → record into it, never a second one.
+     Never overwrite lifecycle `status`; write no run lines into notes.
+     Connector absent → no run; say so in the final response.
    - **Comment 1 — machine archive (for agents), QA SUB-TASK ONLY:**
      the full `<STORY>-code-review.md`, `-api-testing.md`,
-     `-web-testing.md` and `-run-report.md`, each in its own fenced
-     code block preceded by a plain `File: <name>` line (same
-     convention as the docs-phase archive). Do not shorten or reformat.
+     `-web-testing.md`, `-run-report.md` and `-open-items.md` (the
+     ledger, when it exists), each in its own fenced code block preceded
+     by a plain `File: <name>` line (same convention as the docs-phase
+     archive). Do not shorten or reformat.
      **If the ticket under test has no QA sub-task, skip this comment
      entirely** — the reports stay on disk, and the final response
      names their paths so the user knows where the evidence is. Never
@@ -502,6 +546,14 @@ story does not exhaust the orchestrator's context:
      gate: it shows how a similar-looking case was once ruled, not that
      the clause covers yours. Check the register first, then cite the
      precedent as supporting context if it still applies.
+   - **Cases on the run's roster file through the run.** A `fail`
+     recorded on the QA Service run creates one deduplicated Jira defect
+     for that case (an open issue already referencing the stable id is
+     linked, not duplicated). For roster cases the per-case `fail` list
+     in the confirmation preview IS the draft-and-yes step; the note
+     carries where / expected / actual + `Source:` + `Clause:`. The two
+     paths below are for findings with **no roster case** — `RISK-CR-*`
+     rows not yet promoted, human-confirmed observations.
    - **Preferred path (knowledge-base installed):** hand confirmed
      bugs to `/knowledge-base` — it dedup-searches and creates
      properly routed Jira bugs.
@@ -562,15 +614,23 @@ story does not exhaust the orchestrator's context:
    **Post-publish verification — always the last action of the run.**
    The analyzer ran at step 5, BEFORE steps 6–9 — nothing it certified
    covers what they actually did. Verify the final state now:
-   - **Write-back landed:** connector present → `get_test_case` on a
-     sample (all, if few) of the cases step 6 planned to annotate;
-     confirm the run line is in `notes` and the count matches the
-     plan. Connector absent → state that no durable per-case record
-     exists beyond the Jira comments.
+   - **Write-back landed:** connector present → `get_test_run` on the
+     run step 6 created: roster count == the step-0 scope count, and
+     the `progress` partition matches the stage reports under the
+     `test-runs.md` mapping (`pass` = PASS + FAIL REJECTED, `blocked`,
+     `skipped` = NOT EXECUTED + NOT-TESTABLE + SPEC-DEFECT,
+     `known_defect` = keyed FAIL CONFIRMED, `not_run` = the FAIL /
+     PARTIAL rows the human will walk). Then
+     `executed_coverage(suiteId)`: `neverExecuted` fell by the recorded
+     count. A mismatch is a count-gate ❌ — fix it now. Connector absent
+     → state that no durable per-case record exists beyond the Jira
+     comments.
    - **Findings traceable:** every FAIL / FAIL CONFIRMED across the
-     three reports has a run-sheet row awaiting the tester, a
-     narrow-exception bug key, or an explicit "not carried — <reason>"
-     line in the drafted human summary. No silent FAILs.
+     three reports has a run-sheet row awaiting the tester (and a
+     `not_run` roster row), a narrow-exception bug key, or an explicit
+     "not carried — <reason>" line in the drafted human summary. No
+     silent FAILs. Every 🔴/🟡 the analyzer left unsettled has a row in
+     `<STORY>-open-items.md` (`open-items-ledger.md`).
    - **Wave-1 comments exist, on the right ticket:** the status
      comment, and the archive comment(s) **only where a QA sub-task
      exists** — re-read, don't assume. A fenced results archive found
@@ -639,8 +699,11 @@ archive was posted, that they are the only copy of the evidence**; the
 overall (machine) verdict and confirmed bugs; confirmation of what
 wave 1 posted and where (key + URL), including whether the archive was
 posted or skipped and why, and that the human summary is written but
-deliberately NOT posted (two-wave rule); the QA Service write-back counts (or "skipped — connector not
-enabled") and any step-0 reconciliation changes; which bugs (if any)
+deliberately NOT posted (two-wave rule); the QA Service run id and its
+recorded counts per verdict + how many rows stay `not_run` for the
+human (or "no run — connector not enabled" / "no run — no suite for
+this ticket") and any step-0 reconciliation changes; the open-items
+ledger's open-row count; which bugs (if any)
 passed the narrow exception and were filed, or that filing waits for
 stage 10; which handoff was performed or deferred; the tracker
 reminder (checkboxes are manual-only). Reuse the human-summary content

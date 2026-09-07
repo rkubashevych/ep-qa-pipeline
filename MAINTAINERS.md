@@ -127,6 +127,10 @@ No files need to be carried between environments.
    outputs are git-ignored working files — they do not survive the
    workspace. The CHANGELOG is where their lessons become permanent;
    a lesson that never reaches a tracked file was never learned.
+   The machine-readable input to this rule is the per-ticket ledger
+   `<KEY>-open-items.md` (`skills/qa-pipeline/references/open-items-ledger.md`):
+   grep the latest ledgers for `[Pipeline]` rows with no Decision — each
+   one carried two rounds is a 🔴 the analyzer has already raised.
 2. **Change the relevant `SKILL.md` / `references/`.** Keep `SKILL.md`
    lean; put heavy detail in `references/`.
 3. **If you added or renamed a stage, wire it into the orchestrator and
@@ -184,6 +188,8 @@ No files need to be carried between environments.
 | Bitbucket auth (token/scopes, branch vs PR mode) + the curl/git command workflows | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
 | Jira publish values (project, issue type id, assignee, label) | `skills/qa-pipeline-docs/references/publish-config.md` |
 | Results-comment format (code phase: agent archive + human summary) | `skills/qa-pipeline-code/references/results-comment-template.md` |
+| Per-case verdicts in QA Service (test run per pass, status → verdict mapping, what stays `not_run`, retractions, retraction target rule) | `skills/qa-pipeline/references/test-runs.md` |
+| What earlier rounds left open (carried risk rows, in/out rulings, `[core]` nominations) | `skills/qa-pipeline/references/open-items-ledger.md` → `<KEY>-open-items.md` |
 | Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (see the recipe) |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 

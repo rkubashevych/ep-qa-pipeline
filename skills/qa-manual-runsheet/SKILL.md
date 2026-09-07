@@ -49,12 +49,13 @@ suite. Consequences:
   sheet is *losing* it: the next run regenerates from the suite and
   repeats the mistake. Write it to the suite and note in the sheet that
   you did.
-- **Run outcomes belong in the case's `detail` notes, never in
-  `status`** (a lifecycle field). Record the verdict, the date, whether
-  it was human-executed or analysis-derived, and the defect key. A
-  verdict later found wrong gets an explicit superseding line — the
-  notes are append-only, and two bare verdicts side by side tell a
-  reader nothing.
+- **Run outcomes belong on the pass's QA Service test run, never in
+  `status`** (a lifecycle field) and — since 0.30.0 — no longer in
+  `detail` notes either (`../qa-pipeline/references/test-runs.md`). This
+  stage records nothing on the run itself: the machine verdicts were
+  recorded at step 6, the human verdicts are recorded by stage 10 when
+  the sheet comes back. What this stage may write to the suite is a case
+  correction (above) and a `discrepancy:` note.
 
 ## Retest runs — detect, do not wait to be told
 
@@ -64,8 +65,12 @@ provisioning anything, check for evidence of a prior run:
 
 - `<ISSUEKEY>-testdata.json` or `<ISSUEKEY>-runsheet.xlsx` already
   exists
-- the suite's cases carry `RETEST:`/supersede lines, or run-outcome
-  notes at all
+- a QA Service test run titled `<ISSUEKEY> …` exists for the suite
+  (`list_test_runs`) — `running` with `not_run` rows means the previous
+  pass's manual round was never ingested; older suites may instead
+  carry pre-0.30 run-outcome lines in case notes
+- `<ISSUEKEY>-open-items.md` exists (the ledger only exists after a
+  first round)
 - the QA sub-task's newest human summary or manual-results comment is
   ❌ FAIL
 - defects exist under the story
@@ -236,7 +241,12 @@ test-design techniques that built the cases:
    REQ's `[core]` case is the default representative (short form where
    machine-settled at Low/Medium risk, full form otherwise). For cases
    from an older suite without `[core]` markers, pick a representative
-   by the same technique logic and say so in the Reference tab. Print
+   by the same technique logic, say so in the Reference tab, **and
+   record each nomination as a `nomination` row in
+   `<ISSUEKEY>-open-items.md`**
+   (`../qa-pipeline/references/open-items-ledger.md`) — a nomination
+   already in the ledger from an earlier round is reused, not re-chosen,
+   so the same representative is walked every round. Print
    the map in the sheet's Reference tab and the final response:
    "N cases → M rows, covering R/R requirements walked".
 4. **Risk extras:** add rows for High-risk cases in the fix's blast

@@ -1,0 +1,7 @@
+# Normalise line endings: the repo is LF; Windows editors kept rewriting
+# whole skill files as CRLF, which hid real diffs (0.30.0).
+* text=auto eol=lf
+*.png binary
+*.xlsx binary
+*.pptx binary
+*.plugin binary

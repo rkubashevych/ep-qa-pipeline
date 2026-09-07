@@ -71,3 +71,6 @@ _ep53978_*
 __pycache__/
 # quarantine folder for files a session could not delete
 _to_delete/
+
+# any underscore-prefixed scratch file or folder (stage-9 helpers, cached tokens, login scripts)
+_*

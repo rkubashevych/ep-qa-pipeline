@@ -113,3 +113,12 @@ Cross-stage rules that live with the vocabulary:
 - Manual results (stage 10) use PASS / FAIL / BLOCKED / SKIPPED; any
   other human entry is recorded verbatim as a non-standard verdict,
   never coerced.
+- **The QA Service run is the per-case record.** Every status above maps
+  to a run verdict (`pass | fail | blocked | known_defect | skipped`) by
+  exactly one table — `../../qa-pipeline/references/test-runs.md` →
+  "Verdict mapping", the single home; a status added here gets its row
+  there in the same change. The parts that are easy to get wrong: a
+  machine `fail` files a Jira defect at record time, so FAIL / PARTIAL
+  rows stay `not_run` until the human round; SPEC-DEFECT is `skipped`,
+  never `known_defect`; a human result is `source: manual` with the
+  tester as principal.

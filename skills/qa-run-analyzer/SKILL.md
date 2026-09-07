@@ -14,12 +14,17 @@ description: >
 
 # QA Run Analyzer
 
-> **Tool names:** `list_suites` / `get_suite` are tools of the
-> **QA Service MCP connector** (install-specific server prefix varies —
-> match by tool name).
+> **Tool names:** `list_suites` / `get_suite` / `list_test_runs` /
+> `get_test_run` / `executed_coverage` / `case_execution_history` are
+> tools of the **QA Service MCP connector** (install-specific server
+> prefix varies — match by tool name).
 
-A meta-review of the pipeline RUN, not the product. Read-only: it never
-edits the pipeline files, only inspects them and writes its own report.
+A meta-review of the pipeline RUN, not the product. Read-only toward the
+pipeline files: it never edits a stage report, only inspects them and
+writes its own report — plus the one file it maintains,
+`<ISSUEKEY>-open-items.md` (`../qa-pipeline/references/open-items-ledger.md`),
+where every finding the run did not settle is appended so the next round
+inherits it instead of rediscovering it.
 
 ## Input
 
@@ -155,12 +160,35 @@ suite:` line in the QA sub-task description) and report ONE of:
   after this check — expected, not a failure).
 - 🔴 **publish incomplete / mismatch** — suite exists but counts or
   IDs diverge from the files: list the missing/extra stableIds.
-- 🟡 **write-back missing** — code phase only, when run after step 6:
-  executed cases whose suite notes lack the run line. (In the
-  orchestrated flow this analyzer runs BEFORE step 6, so this check
-  cannot fire there — the orchestrator's mandatory **post-publish
-  verification** after step 9 covers it instead. On an on-demand
-  analyzer run after publish, check it here.)
+- **The run** (`../qa-pipeline/references/test-runs.md`) — code phase,
+  when run after step 6 (on-demand, or a later round's step 0; in the
+  orchestrated flow this analyzer runs BEFORE step 6, so the
+  orchestrator's **post-publish verification** does this check there):
+  `list_test_runs` on the suite, find this pass's run by title.
+  - 🔴 **no run** — verdicts exist in stage reports and none reached
+    the system of record; every "still stands" statement in this
+    ticket's history is about markdown files (EP-53978: five passes,
+    `verified: 0`).
+  - 🔴 **partition mismatch** — `get_test_run` `progress` does not
+    match the stage statistics under the mapping table (`pass` = PASS +
+    FAIL REJECTED, `blocked`, `skipped` = NOT EXECUTED + NOT-TESTABLE +
+    SPEC-DEFECT, `known_defect` = keyed FAIL CONFIRMED, `not_run` = the
+    FAIL / PARTIAL rows awaiting the human), or roster count ≠ scope.
+  - 🔴 **machine `fail` outside the narrow exception** — a `fail`
+    recorded with `source: machine` whose case is not runtime-confirmed
+    + evidenced + blocking: it filed a Jira defect before the human
+    round (`run_defects` shows the key).
+  - 🟡 **SPEC-DEFECT as `known_defect`**, or a human-executed row with
+    `source: machine`, or a machine verdict with a person as principal
+    — the two mapping errors the 2026-09-02 off-book run made.
+  - 🟡 **stale run** — status `running` (`stale: true`) with
+    `not_run` rows and no `<KEY>-manual-results.md`: the manual round
+    was never ingested; the ticket's verdicts are still provisional.
+    Same finding as §5's "manual results never ingested", seen from the
+    service side.
+  - `executed_coverage(suiteId[, releaseId])` is reported in the
+    findings summary as two numbers — machine and manual — never one
+    percentage.
 - 🔴 **zeroed status buckets** — every case-status bucket reads 0
   against a non-zero total: the cases were written with a `status`
   outside `planned/implemented/partial/deferred/na` (e.g. `draft`).
@@ -204,10 +232,13 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
   appears in web-testing's Results (or its Not-executed-here with a
   reason). A routed case that vanished is a coverage hole, not a pass.
 - 🔴 retraction integrity: any case whose manual result / triage entry
-  contradicts a published verdict with no supersede line recorded
-  (`qa-service-publish.md` → "Retraction convention"). The record is
-  asserting something the run's own artifacts disprove — flag it until
-  `qa-manual-results` has been run.
+  contradicts a published verdict and whose roster row was not
+  re-recorded (`get_test_run` — the row still carries the old verdict
+  and no later row has `supersedesId` pointing at it), or whose old
+  verdict reached a Jira comment on some ticket and that ticket carries
+  no retraction comment (`test-runs.md` → "Retraction target rule").
+  The record is asserting something the run's own artifacts disprove —
+  flag it until `qa-manual-results` has been run.
 - 🟡 manual results never ingested: runsheet outputs exist for this
   ticket (`<KEY>-runsheet.xlsx` / testdata files, or the run report
   says stage 9 ran) but no `<KEY>-manual-results.md` exists and no
@@ -270,6 +301,33 @@ is cheaper to find here than after the bug is filed.
 - 🟡 **a defect resting on a precedent ticket instead of a clause.**
   A closed ticket shows how a similar case was ruled; it is not a
   source of record.
+
+### 8. Carried items (Pipeline) — what earlier rounds left open
+
+Rules and format: `../qa-pipeline/references/open-items-ledger.md`.
+Read `<ISSUEKEY>-open-items.md` (per ticket, no round suffix —
+`EP-56133-open-items.md` even when this round's reports are
+`EP-56133-retest3-*`). Then:
+
+- 🔴 **carried item** — any open row (`Closed = —`) whose `First seen`
+  is two or more rounds before this one and whose `Decision` is `—`.
+  Name the row and its owner. When its class is `[Pipeline]`, this 🔴
+  is what MAINTAINERS step 1 requires a CHANGELOG answer to.
+- 🟡 **ledger missing on a retest** — this is a retest / bug-fix round
+  (a prior run report, scope file or QA Service run exists for the key)
+  and there is no ledger: the round started without the previous round's
+  memory. (On EP-56197 four items were "carried a third round" with
+  nothing recording that they had been carried at all.)
+- **Write the ledger** — the one file this skill maintains. For each
+  🔴/🟡 of this report that the run did not settle (unmapped changes
+  awaiting a decision, risk rows carried without a verdict, findings
+  with no case / requirement / bug key, suite-vs-file divergences
+  awaiting an in/out ruling, unanswered open questions the code phase
+  depends on, defects owned by another ticket this close depends on):
+  update `Last seen` on the matching row, or append a row with
+  `First seen` = this round. Never fill `Decision` or `Closed` — stage
+  10 owns those. Product verdicts do not go here (the run holds them);
+  items with their own bug key do not either (Jira holds them).
 
 ## Output
 

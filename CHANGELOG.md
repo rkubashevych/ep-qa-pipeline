@@ -5,6 +5,124 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.30.0 — 2026-09-07 — the record
+
+**Verdicts are now QA Service test runs, not text in case notes.** On
+EP-53978 five verification passes (2026-07-29 → 2026-09-07) each
+appended their verdicts to `detail.notes` exactly as the write-back rule
+said, and the suite read `requirementCoverage.verified: 0` for all 42
+cases after every one of them — text in notes is invisible to every
+coverage read, so each pass reconstructed the previous state by hand
+from markdown. Recorded as 🔴 [Pipeline] #1 on EP-56133 retest 3
+("the durable per-case record does not exist") and left with no
+CHANGELOG answer until now — the longest-standing 🔴 in this repo.
+
+QA Service has a first-class run model and the rest of the team already
+records through it (`create_test_run`, `record_case_result` with native
+supersede, `source: manual | machine`, `principal`, `close_test_run`,
+`executed_coverage`, `case_execution_history`, `run_defects`). A
+pipeline session even used it once, off-book, on 2026-09-02 (run
+`7c3e1ab5…`, "EP-53978 retest 3", 51 cases). That run is the evidence
+behind the mapping — including the two mistakes it made, which the rule
+now forbids: SPEC-DEFECT recorded as `known_defect`, and human-executed
+rows recorded as `source: machine`.
+
+- **New shared reference `qa-pipeline/references/test-runs.md`** — one
+  run per pass (title `<KEY> <mode> <date> — <env>`, roster = the step-0
+  scope, `principal` on every verdict), the status → verdict mapping
+  table (single home; `status-vocabulary.md` points to it), stage 10's
+  manual pass into the same run, retractions as re-records, the
+  verification reads.
+- **A machine `fail` files a Jira defect at record time** — verified:
+  the 2026-09-02 run's one `fail` created EP-56912 immediately, and
+  nothing in `record_case_result` suppresses it. So **FAIL / PARTIAL
+  rows stay `not_run` in wave 1** and the run stays `running` until
+  stage 10 records the human verdict. `blocked` was considered for
+  those rows and rejected: in the executed tier the whole team reads it
+  says "the environment prevented execution", which would hide a defect
+  behind an environment problem. `not_run` is the honest state — no
+  confirmed verdict yet — and it is exactly what the run sheet already
+  means by "the human must walk this row". Narrow wave-1 exception
+  (runtime-confirmed + evidenced + blocking) → `fail`, named case by
+  case in the confirmation preview: recording it is the filing.
+- **For roster cases, the run is the bug-filing path.** A human `fail`
+  at stage 10 files one deduplicated defect per case (`created: false`
+  when an open issue already references the stable id). The per-case
+  `fail` list in the stage-10 preview is the per-bug yes; the
+  template-and-`createJiraIssue` path is now for findings with no
+  roster case (unpromoted `RISK-CR-*` rows, confirmed observations).
+- `qa-service-publish.md` → "Result write-back" and "Retraction
+  convention" rewritten around the run. The `Run <date> …` note lines
+  and the `⚠ CURRENT VERDICT:` first line are **retired**: they
+  re-implemented what the service does natively. Notes keep the
+  `discrepancy:` line (a property of the case) and pre-0.30 history.
+- `qa-pipeline-code` step 6: run preview in the confirm pause (title,
+  env, release or `none`, roster count = scope count, per-verdict
+  counts, `not_run` count, each narrow-exception `fail` by case);
+  post-publish verification reads `get_test_run` (roster == scope,
+  partition == report statistics under the mapping) and
+  `executed_coverage`; resume mode records into the existing run,
+  never a second one. `qa-manual-results`: step 2 reads the run
+  (`get_test_run` / `case_execution_history`) instead of notes; step 4
+  records `source: manual` with the tester as principal,
+  `reopen_test_run` if needed, `close_test_run` when fully ingested.
+- `qa-run-analyzer` §4: 🔴 no run for a pass that produced verdicts;
+  🔴 partition mismatch; 🔴 machine `fail` outside the narrow
+  exception; 🟡 SPEC-DEFECT as `known_defect` / human row as machine;
+  🟡 stale run with `not_run` rows and no manual-results file.
+
+**Retraction target rule — the one exception to the archive target
+rule.** 🔴 [Pipeline] #2 on EP-56133 retest 3: three cases published as
+FAIL CONFIRMED in comments on **EP-56109** (2026-08-12) passed on the
+EP-56133 retest, and 0.26.0's "no walk-up" rule left the correction
+with nowhere to land — a reader of EP-56109 kept seeing three confirmed
+failures that were fixed. Now: **a retraction is posted where the
+verdict it retracts was published**, whatever ticket that is — ≤ 6
+lines (run id, `<case> — <old> → <new>`, reason, where the new verdict
+was established), no dumps. It is a correction, not an archive; the
+archive target rule stands for everything else. Stage 10's
+reconciliation therefore records, per RETRACTS row, where the old
+verdict was published (`output-template.md` gains a "Where published"
+column; the retest-scope file carries the ticket + comment id).
+
+**The open-items ledger — memory across rounds.** EP-56197 round 3 said
+"carried a third round, still open" four times (RISK-CR-1/2/3, six
+uncovered EP-56287 behaviours); EP-53978 pass 5 spent its whole scope
+file reconstructing what passes 1–4 left undecided. Nothing remembered
+an open item except that round's git-ignored run report. New shared
+reference `qa-pipeline/references/open-items-ledger.md` →
+`<KEY>-open-items.md`, per ticket, no round suffix. The analyzer writes
+it (every 🔴/🟡 the run did not settle; new §8 "Carried items", 🔴 for
+any row two or more rounds old with no decision); `qa-pipeline-code`
+step 0 reads it in retest / bug-fix / resume mode and puts the open rows
+in the scope confirmation; `qa-manual-runsheet` records its `[core]`
+nominations there (EP-56133 r3 🟡 #6 — the nomination now survives to
+the next round); **`qa-manual-results` is the only stage that closes a
+row** and lists the still-open ones under "Carried forward" at the end
+of the human summary. Archived with the reports where a QA sub-task
+exists. MAINTAINERS step 1 names it as the machine-readable input to
+"consume the last run's findings first".
+
+Also: `README.md` stage-10 paragraph and a "Memory across rounds"
+paragraph; `data-locations.md` (runs as the verdict store, ledger in the
+working directory, retraction exception); `MAINTAINERS.md` where-to-look
+rows; `.gitattributes` (`* text=auto eol=lf`) — five skill files had been
+rewritten CRLF with zero content change and the whole-file diffs hid
+everything; `.gitignore` `_*` replaces the per-name `_s9_*` / `_ep53978_*`
+patterns (an `_mw_login.js` had already escaped them).
+
+Not done in this release, still open from the two run reports, each
+tracked in the review file `PIPELINE-REVIEW-2026-09-07.md`:
+`reconcile_counts.py` still harvests statuses from the "Not executed
+here" table and cannot find a retest round's case file (EP-56133 r3
+🟡 #5); `playwright-executor.md` still instructs a screenshot path the
+sandboxed backend cannot write (EP-56197 r3); `code-review`'s
+"never read the base branch" rule contradicts the `master` check that
+produced that run's top 🔴. Planned for 0.30.1.
+
+No skill frontmatter description changed, so `evals/triggering.md` needs
+no re-walk. `reconcile_counts.py` untouched — self-test still passes.
+
 ## 0.29.0 — 2026-09-07
 
 **The gate covered every surface except the one that publishes.** 0.28.0

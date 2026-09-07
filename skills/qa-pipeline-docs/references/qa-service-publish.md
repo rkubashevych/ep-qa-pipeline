@@ -337,24 +337,34 @@ CONTENT (the team may have fixed cases in the web UI between phases):
 3. Connector absent or suite not found → the Jira archive comment alone
    is authoritative, exactly as before. Never block on QA Service.
 
-## Result write-back (qa-pipeline-code step 6)
+## Result write-back (qa-pipeline-code step 6) — a QA Service test run
 
-Within the same step-6 confirmation that posts the Jira result
-comments, also write the run outcome to QA Service for every EXECUTED
-case (skip not-executed ones):
+**Since 0.30.0 verdicts are recorded as a test run, not as notes text.**
+The full rule — one run per pass, roster = scope, the status → verdict
+mapping, what stays `not_run` until the human round, stage 10's manual
+pass, retractions as re-records — is
+**`../../qa-pipeline/references/test-runs.md`**, the single home. In
+short, inside the same step-6 confirmation:
 
-- `get_test_case` first (to read the current `notes`), then
-  `edit_test_case` with `detail: { notes: "<existing notes>" + "\nRun
-  <YYYY-MM-DD> (<STORY> code phase): PASS | FAIL — <one-line reason if
-  FAIL>; details: QA sub-task <KEY>" }`. Top-level fields you omit are
-  preserved (verified: `edit_test_case` merges), but inside `detail`
-  send `notes` complete — assume a key you send replaces that key.
-- A FAIL that produced a filed bug also gets `bug <BUGKEY>` appended to
-  that line.
+- `create_test_run` (title `<KEY> <mode> <date> — <env>`, `env`,
+  `releaseId` when one exists, `principal`
+  `ep-qa-pipeline agent (<KEY> <mode>, stage <n>)`, `caseIds` = the
+  in-scope suite case ids) — then `record_case_result` per case using
+  the mapping table, `source: machine`. **A `fail` files a Jira defect
+  at record time**, so FAIL / PARTIAL rows stay `not_run` until stage 10
+  (narrow exception: runtime-confirmed + evidenced + blocking).
+- The run is left `running` when any row is `not_run`; stage 10 records
+  the human pass into the same run and closes it.
 - Do NOT overwrite the lifecycle `status` (e.g. `implemented`) with a
-  run result — run outcomes live in notes; the only status the pipeline
-  ever changes after creation is `na` for a superseded case (docs
-  phase).
+  run result; the only status the pipeline ever changes after creation
+  is `na` for a superseded case (docs phase).
+- Do NOT write run lines into `detail.notes` any more. Notes keep the
+  `discrepancy:` line for SPEC-DEFECTs (a property of the case) and
+  pre-0.30 history; the run is the verdict store. Pre-0.30 practice
+  (append `Run <date> …` lines, the `⚠ CURRENT VERDICT:` first line) is
+  retired — it re-implemented what the service does natively and was
+  invisible to `executed_coverage`, which is how a suite read
+  `verified: 0` after five passes (EP-53978).
 
 ### Improvised coverage becomes permanent (same step-6 write-back)
 
@@ -363,35 +373,48 @@ case (skip not-executed ones):
   suite test case (`suggest_test_case` when available, else
   `create_test_case` after the same confirmation) so next run has a
   case where this run had only an improvisation. Say how many in the
-  preview.
+  preview. Once the case exists, `add_run_cases` puts it on this pass's
+  roster so its verdict is recorded like any other; a risk row not
+  promoted has no roster slot and stays in the stage report and the
+  open-items ledger (`../../qa-pipeline/references/open-items-ledger.md`).
 - **SPEC-DEFECT verdicts:** append a `discrepancy:` line to the suite
   case's notes stating what the case says vs what the spec/behaviour
   is, and list the case under "Requirements to correct" in the human
   summary. Do not silently fix the case text — the correction goes
-  through the docs-phase owner.
+  through the docs-phase owner. On the run the case is `skipped` with a
+  `SPEC-DEFECT —` note — never `known_defect`, which asserts a product
+  defect (`test-runs.md`, mapping table).
 
 ### Retraction convention — how a wrong verdict gets corrected
 
-Binding on EVERY writer of run lines (code-phase step 6,
-`qa-manual-results`, any future stage). Notes are append-only history,
-so a correction is a new line, never an edit of an old one — but it
-must be impossible to read the old verdict as current:
+Binding on EVERY writer of verdicts (code-phase step 6,
+`qa-manual-results`, any future stage). A correction never edits or
+hides the old verdict, and it must be impossible to read the old
+verdict as current:
 
-- When a new verdict **contradicts** a previously recorded run line for
-  the same case, append the supersede form instead of a plain run line:
-  `Run <YYYY-MM-DD> (<source>) — SUPERSEDES <prior date/source>
-  (<old> → <new>): <one-line reason>; bug <KEY if any>`.
-- Additionally maintain a single **first line** of `notes`:
-  `⚠ CURRENT VERDICT: <verdict> (<YYYY-MM-DD>, <source>)`.
-  Add it on the first retraction; rewrite it (that line only) on every
-  later one. Readers that read nothing else read this.
-- The stage that writes a retraction also says so in its Jira human
-  summary — retractions listed first, `old → new` with the reason. A
-  correction that only lives in suite notes has not been communicated.
-- Never delete or edit prior run lines; the history is the audit trail.
-- Include the write-back in the step-6 preview (how many cases get a
-  result note) and report the PASS/FAIL counts written in the final
-  response. Connector absent → skip silently-but-visibly, as always.
+- **A retraction is a re-record on the run** (`record_case_result` on
+  the same case; the service supersedes and keeps both, with each
+  verdict's principal and timestamp — `case_execution_history` shows
+  the chain). The pre-0.30 notes forms (`SUPERSEDES …` lines,
+  `⚠ CURRENT VERDICT:` first line) are no longer written; where they
+  exist they are history, and the run is the current truth.
+- The stage that records a retraction also says so in its Jira human
+  summary — retractions listed first, `old → new` with the reason and
+  the run id. A correction that only lives in the suite has not been
+  communicated.
+- **Retraction target rule:** the retraction comment goes to the ticket
+  and thread where the retracted verdict was **published**, even when
+  that is not the ticket under test — the one exception to the archive
+  target rule, bounded to ≤ 6 lines and no dumps
+  (`../../qa-pipeline/references/test-runs.md` → "Retraction target
+  rule"). Stage 10's reconciliation therefore records, per RETRACTS row,
+  the ticket key + comment id where the old verdict lives.
+- Include the write-back in the step-6 preview (run title, roster count,
+  how many rows will be recorded per verdict, how many stay `not_run`
+  for the human round, and — narrow exception only — each `fail` by
+  case, since recording it files the bug) and report the recorded
+  counts and the run id in the final response. Connector absent → skip
+  silently-but-visibly, as always.
 
 ## Publish preview additions (same single pause)
 

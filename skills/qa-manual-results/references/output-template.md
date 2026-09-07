@@ -1,7 +1,8 @@
 # <ISSUEKEY> - Manual Results
 
 Source: <runsheet.xlsx / TSV paste / triage file — list all used>
-Automated record read from: <verdict files / archive comment / suite>
+Automated record read from: <QA Service run <id> / verdict files / archive comment>
+QA Service run: <id> — <status after this stage: closed / running (why)> · recorded <N> manual verdicts (<N> supersede a machine verdict)
 Date: <YYYY-MM-DD>
 
 ## Summary
@@ -18,9 +19,13 @@ Date: <YYYY-MM-DD>
 ## Retractions
 > The most important section — always first. Never soften.
 
-| TC | Published | Manual | Reason (from Notes) | Bug |
-|----|-----------|--------|---------------------|-----|
-| TC-REQ-37.1 | PASS (api-testing 2026-07-28) | FAIL | organizer Lead dashboard names the opted-out user | EP-55702 |
+| TC | Published | Where published | Manual | Reason (from Notes) | Bug |
+|----|-----------|-----------------|--------|---------------------|-----|
+| TC-REQ-37.1 | PASS (api-testing 2026-07-28) | run 7c3e1ab5 · EP-56109 comment 144183 | FAIL | organizer Lead dashboard names the opted-out user | EP-55702 |
+
+> "Where published" is what the retraction comment is addressed to
+> (`test-runs.md` → "Retraction target rule"): the run always, plus the
+> ticket + comment id when the old verdict reached a Jira comment.
 
 ## Fills
 
@@ -56,7 +61,13 @@ Date: <YYYY-MM-DD>
 | Bug | Cases | Status |
 |-----|-------|--------|
 | EP-55691 | TC-REQ-1.1 | linked from Notes |
-| <new> | TC-REQ-x | filed this session / offered, declined |
+| EP-56912 | TC-REQ-4.2 | filed by the run (`fail` recorded, `created: true`) |
+| <new> | RISK-CR-2 | filed this session via template / offered, declined |
+
+## Ledger
+
+Rows of `<ISSUEKEY>-open-items.md` closed this round (id — decision) and
+rows carried forward (id — first seen). "none" when the ledger is empty.
 
 ---
 

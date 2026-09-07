@@ -8,8 +8,8 @@ disagree, this file wins.
 
 | Store | Holds | Authoritative for |
 |---|---|---|
-| **Working directory** | every `<ISSUEKEY>-*.md` stage file, the runsheet `.xlsx`/`.json`, evidence screenshots | the stage reports — and, where no archive was posted, the ONLY copy |
-| **QA Service suite** | requirements, test cases, per-case verdict history (`notes`, `lastResult`) | test cases and requirements whenever a suite exists; per-case verdicts always |
+| **Working directory** | every `<ISSUEKEY>-*.md` stage file, the open-items ledger `<ISSUEKEY>-open-items.md` (per ticket, no round suffix), the runsheet `.xlsx`/`.json`, evidence screenshots | the stage reports — and, where no archive was posted, the ONLY copy |
+| **QA Service suite + test runs** | requirements, test cases; per-case verdicts as **test runs** (`list_test_runs` / `get_test_run` / `case_execution_history` — one run per pass, `test-runs.md`); `notes` hold only `discrepancy:` lines and pre-0.30 history | test cases and requirements whenever a suite exists; per-case verdicts always |
 | **Jira** | the docs-phase archive (QA sub-task, only when no suite), the results archive (**QA sub-task only** — 0.26.0), the wave-1 status line, the wave-2 human summary, the checkbox tracker | nothing the pipeline generates; it is a publication surface, not a source |
 
 ## Resolution order for an input file
@@ -24,7 +24,10 @@ Look in this order and stop at the first hit:
    `-requirements.md`, rebuild from `get_suite`. The suite is the system
    of record and moves between runs: a PM ruling, a QA-added case or a
    corrected expectation lands there, not in the file the docs phase
-   wrote. On divergence the suite wins.
+   wrote. On divergence the suite wins. **For prior verdicts** (a retest
+   scope, a resume, stage 10's reconciliation) the previous pass's test
+   run is the record — `get_test_run`, not the markdown reports and not
+   the case notes.
 3. **The archive comment on the QA sub-task** — docs-phase artefacts
    (requirements / checklist / test cases) and, since 0.26.0, results
    reports. Parse with
@@ -51,7 +54,10 @@ Statistics disagree, gets its stage re-dispatched for the missing cases.
 The archive target rule lives in `qa-pipeline-code/SKILL.md` step 6 and
 its `references/results-comment-template.md`. In short: archives go to
 QA sub-tasks only; a Story face, Bug or Defect gets the status line and
-the human summary, and nothing else.
+the human summary, and nothing else. The one exception is a
+**retraction** (≤ 6 lines, no dumps), which goes to the ticket where the
+retracted verdict was published, whatever ticket that is
+(`test-runs.md` → "Retraction target rule").
 
 ## Credentials
 

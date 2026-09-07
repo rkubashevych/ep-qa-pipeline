@@ -17,9 +17,16 @@ description: >
 # QA Manual Results
 
 > **Tool names:** `addCommentToJiraIssue` etc. are tools of the
-> **Atlassian MCP connector**; `get_test_case` / `edit_test_case` /
-> `suggest_test_case` belong to the **QA Service MCP connector**
-> (install-specific server prefix varies — match by tool name).
+> **Atlassian MCP connector**; `get_test_run` / `record_case_result` /
+> `reopen_test_run` / `close_test_run` / `suggest_test_case` belong to
+> the **QA Service MCP connector** (install-specific server prefix
+> varies — match by tool name).
+
+The per-case record this stage writes into is the QA Service **test
+run** step 6 opened for this pass — rules, verdict mapping and the
+retraction target rule: `../qa-pipeline/references/test-runs.md`. The
+cross-round memory it closes rows in:
+`../qa-pipeline/references/open-items-ledger.md`.
 
 The pipeline publishes automated verdicts at code-phase step 6 — before
 the human walks the run sheet. This stage exists so what the human
@@ -92,17 +99,24 @@ listed under "Conflicts (resolved by recency)".
 ### Step 2 — Reconcile against the published record
 
 For each case with a manual Result, fetch what the record currently
-says: the automated verdict (from the verdict files or archive
-comment) and, when the connector is present, the suite case's current
-notes (`get_test_case`).
+says: connector present → the pass's QA Service run (`list_test_runs`
+on the suite, title `<KEY> …`; then `get_test_run` — each roster row's
+current verdict, principal and note; `case_execution_history` for a
+case with a longer past). The stage reports are the fallback record when
+there is no run (connector absent, or a bug-fix run with no suite).
 
 Classify each case:
 - **CONFIRMS** — manual result agrees with the published verdict.
-- **FILLS** — case had no automated verdict (QA/routed/not executed);
-  the manual result is the first real verdict.
+- **FILLS** — case had no automated verdict (a `not_run` roster row —
+  QA / routed / not executed / a machine FAIL or PARTIAL awaiting the
+  human); the manual result is the first real verdict.
 - **RETRACTS** — manual result contradicts a published verdict
   (e.g. published PASS, human found FAIL). These are the most
-  important rows of this stage. Never soften them.
+  important rows of this stage. Never soften them. For each, record
+  **where the old verdict was published** — the run id, and the Jira
+  ticket + comment id if it reached a comment (the retest-scope file
+  carries this; otherwise find it) — because the retraction comment
+  goes there (`test-runs.md` → "Retraction target rule").
 
 ### Step 3 — Report
 
@@ -125,18 +139,27 @@ requirement), and a defect owned by another ticket names that key on its
 line. Retractions are held to the same standard: state what the record
 said, what was measured, and the clause the new verdict rests on.
 
-Show the user exactly what will be written, then on explicit yes:
+Show the user exactly what will be written — including **every `fail`
+about to be recorded, case by case**, because recording a `fail` on the
+run files one deduplicated Jira defect for that case (`test-runs.md`);
+that list is the per-bug yes — then on explicit yes:
 
-- **QA Service suite** (connector present): for every case with a
-  manual Result, append to the case notes per the retraction
-  convention in
-  `../qa-pipeline-docs/references/qa-service-publish.md` → "Result
-  write-back": a normal run line for CONFIRMS/FILLS
-  (`Run <date> (<STORY> manual): PASS|FAIL — <reason>; bug <KEY>`),
-  and for RETRACTS additionally the supersede form
-  (`Run <date> — SUPERSEDES <prior> (<old> → <new>): <reason>`) plus
-  the single `⚠ CURRENT VERDICT:` first line. Never change lifecycle
-  `status`.
+- **QA Service run** (connector present): for every case with a manual
+  Result, `record_case_result` on the pass's run with `source: manual`,
+  `principal` = the tester's e-mail (never the agent label), the
+  tester's Notes as the note, the bug key / jam link as evidence. Human
+  PASS / FAIL / BLOCKED / SKIPPED → `pass` / `fail` / `blocked` /
+  `skipped`; non-standard entries are not recorded. A case the machine
+  already recorded is simply re-recorded — the service supersedes and
+  keeps both; that IS the retraction. If the run is `completed`, call
+  `reopen_test_run` first. When the sheet is fully ingested,
+  `close_test_run` (`closed`; `aborted` only if the pass was abandoned).
+  Never change lifecycle `status`; write no run lines into notes (the
+  pre-0.30 `SUPERSEDES` / `⚠ CURRENT VERDICT:` forms are retired).
+- **Retraction comments** — one per ticket that published a now-retracted
+  verdict, **on that ticket**, ≤ 6 lines (run id, `<case> — <old> →
+  <new>`, reason, the ticket/run that established the new verdict). This
+  is the one sanctioned cross-ticket comment; it is not an archive.
 - **Jira**: always post **the run's FIRST human-facing summary**
   (two-wave rule: the code phase posted only an agents-only archive +
   status line) — to the QA sub-task when the ticket has one, otherwise
@@ -154,8 +177,16 @@ Show the user exactly what will be written, then on explicit yes:
   exists. Where the machine's verdict and the human's disagree, state
   the human's and note the machine's in one clause. (On older tickets
   where a pre-two-wave summary WAS posted, open with "supersedes the
-  <date> summary for N cases".)
-- Connector absent → suite write-back is skipped with a visible note;
+  <date> summary for N cases".) End the summary with **Carried
+  forward** — one line per still-open row of `<ISSUEKEY>-open-items.md`,
+  so the reader sees what this round did *not* settle.
+- **The ledger** (`../qa-pipeline/references/open-items-ledger.md`):
+  this is the only stage that closes a row. For every open item a
+  decision landed on in this round — a ruling given, a case promoted, a
+  bug filed (write the key), a risk row executed to a verdict — fill
+  `Decision` and `Closed`. Rows the user drops get the reason as their
+  Decision; never delete a row.
+- Connector absent → the run write-back is skipped with a visible note;
   the Jira comments still carry everything.
 
 ### Step 4b — The deferred handback (this stage owns it)
@@ -179,8 +210,12 @@ manual results are in:
 
 ### Step 5 — Offer to file unfiled bugs
 
-Any FAIL whose Notes carry no bug key: one offer listing them all —
-via the `/knowledge-base` skill when installed, else per
+A human `fail` on a **roster case** already filed (or linked) its
+defect through the run — read the keys back with `run_defects` and put
+them in the report. The offer below is for FAILs with **no roster
+case**: risk rows never promoted, observations the tester confirmed, a
+FAIL on a run without a suite. One offer listing them all — via the
+`/knowledge-base` skill when installed, else per
 `../qa-pipeline-code/references/bug-report-template.md` with duplicate
 search first. File only what the user confirms.
 
@@ -188,5 +223,8 @@ search first. File only what the user confirms.
 
 Report: the report path; counts (CONFIRMS / FILLS / RETRACTS /
 non-standard / unmatched / not run); every RETRACTION on its own line
-(case, old → new, reason); bugs linked and bugs filed; whether the
-suite write-back happened; and what is still untested.
+(case, old → new, reason, and the ticket its retraction comment went
+to); bugs linked and bugs filed (run-filed keys from `run_defects` and
+template-filed keys, separately); the run id and its final status
+(`closed`, or why not); the ledger rows closed and the rows carried
+forward; and what is still untested.

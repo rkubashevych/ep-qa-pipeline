@@ -6,10 +6,12 @@ Unverified defect claims, Requirements to correct, Overall verdict,
 Partial runs, Writing rules) · Story note — QA passed / QA failed
 (wave 2)
 
-**Wave 1 (step 6, now):** the QA Service write-back, one short status
-comment (`QA automated pass complete — N cases, M settled by machine,
-K for manual. Results published after the manual round.`), and the
-machine archive comment(s) **if and only if the ticket has a QA
+**Wave 1 (step 6, now):** the QA Service **test run** (created and
+recorded per `../../qa-pipeline/references/test-runs.md`; FAIL / PARTIAL
+rows stay `not_run` for the human), one short status comment (`QA
+automated pass complete — N cases, M settled by machine, K for manual —
+QA Service run <id> open. Results published after the manual round.`),
+and the machine archive comment(s) **if and only if the ticket has a QA
 sub-task**. Agents-only; no verdicts visible to a human skimmer,
 nobody tagged.
 
@@ -42,7 +44,14 @@ Two consequences, both load-bearing:
 - **Do not walk up to the parent story's QA sub-task** for a Bug or
   Defect. One ticket's run does not belong in another ticket's archive,
   and a resume looking for `<BUG>-code-review.md` should not find it
-  filed under a story.
+  filed under a story. **One exception: a retraction** goes to the
+  ticket where the retracted verdict was published, whatever ticket
+  that is — ≤ 6 lines (run id, `<case> — <old> → <new>`, reason, where
+  the new verdict was established), no dumps. It is a correction, not
+  an archive (`../../qa-pipeline/references/test-runs.md` → "Retraction
+  target rule"; the case that needed it: EP-56109 carried three FAIL
+  CONFIRMEDs that EP-56133 retest 3 passed, and no rule let the fix
+  reach the thread).
 - **Where no archive is posted the reports are local-only.** A resume
   on another machine, or by a colleague, has nothing to restore — step
   0's resume mode pauses and says so instead of re-running finished
@@ -95,6 +104,12 @@ File: <STORY>-run-report.md
 
 ```
 <full file contents>
+```
+
+File: <STORY>-open-items.md
+
+```
+<full file contents — the ledger, when it exists>
 ```
 ````
 
@@ -171,17 +186,22 @@ confirmed, <N> retracted. (If rows were not walked:
 `PARTIALLY VERIFIED — <N> rows not walked; those verdicts remain
 machine-only.`)
 
+**Carried forward** *(omit if the ledger has no open rows)*
+
+- <id> — <one line> (since <round/date>; owner <who>)
+
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
 report (`<STORY>-run-report.md`; in the archive comment above when the
 ticket has a QA sub-task, otherwise in the run's working directory).
 
-**Test docs:** <N> requirements / <M> cases, run results written back —
+**Test docs:** <N> requirements / <M> cases; QA Service run <id>
+(<closed / running>: <N> pass · <N> fail · <N> blocked · <N> skipped) —
 https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path>
 ```
 
 QA Service line rules: include it whenever the docs phase published a
-suite (even if this run's write-back was skipped — then say
-"write-back skipped: <reason>"). Omit the line entirely only when no
+suite (even if this pass recorded no run — then say "no run: <reason>").
+Omit the line entirely only when no
 suite exists for this ticket. **Write the full bare URL** — never
 `[text](url)`: the connector's markdown→ADF conversion drops
 hyperlinks, so a markdown link lands in Jira as unclickable text
@@ -224,7 +244,8 @@ pair wins.
 - Comment-specific rules on top of it:
 - One line per confirmed bug — the evidence lives in the archive
   comment (or, where none was posted, the stage report on disk) and in
-  the suite case notes; never restate full findings.
+  the QA Service run's roster note for that case; never restate full
+  findings.
 - FAIL REJECTED items are not bugs — count them as passes in the
   prose; mention a rejection only when it corrects the ticket's
   stated expectations.

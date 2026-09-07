@@ -12,7 +12,8 @@ Generated: <YYYY-MM-DD>
 | Input quality | 🟢 / 🟡 / 🔴 |
 | Skill / process | 🟢 / 🟡 / 🔴 |
 | Evidence quality | 🟢 / 🟡 / 🔴 (code phase; "—" on docs-only runs) |
-| QA Service sync | 🟢 in sync / 🟢 not published yet / 🟡 write-back missing / 🔴 mismatch / — connector absent |
+| QA Service sync | 🟢 in sync / 🟢 not published yet / 🔴 no run / 🔴 partition mismatch / 🟡 stale run / 🔴 mismatch / — connector absent |
+| Carried items | 🟢 none open ≥2 rounds / 🔴 <N> carried items / — first round |
 
 ## QA Service sync
 
@@ -21,8 +22,21 @@ Generated: <YYYY-MM-DD>
 
 - Suite: `<path>` (<N> requirements / <M> cases) — or "no suite found"
 - Verdict: <in sync / not published yet (docs run, pre-publish) /
-  mismatch: missing <stableIds>, extra <stableIds> / write-back
-  missing on <stableIds>>
+  mismatch: missing <stableIds>, extra <stableIds>>
+- Run (code phase, after step 6): `<title>` `<id>` — status <running /
+  closed>; partition pass <N> · fail <N> · blocked <N> · known_defect
+  <N> · skipped <N> · not_run <N> vs stage statistics <match / mismatch:
+  …>; executed coverage: machine <N> · manual <N> · never executed <N>
+  — or "no run for this pass" / "analyzer ran before step 6".
+
+## Carried items
+
+> From `<ISSUEKEY>-open-items.md` (`open-items-ledger.md`). "First
+> round — ledger created with <N> rows" when none existed.
+
+| # | Item | Class | First seen | Owner | Status this round |
+|---|------|-------|------------|-------|-------------------|
+| 1 | RISK-CR-1 — … | risk row | r1 2026-08-20 | PR author | 🔴 carried (3rd round, no decision) |
 
 ## Issues worth fixing
 
@@ -52,7 +66,7 @@ After writing the file, the chat message is exactly this shape
 (≤10 lines, worst news first, omit empty lines):
 
 ```
-Run health (<docs/code>): 🟢 coverage · 🟡 input · 🟢 process · 🟢 evidence · 🟢 QA-sync (omit when connector absent; evidence on code runs only)
+Run health (<docs/code>): 🟢 coverage · 🟡 input · 🟢 process · 🟢 evidence · 🟢 QA-sync · 🟢 carried (omit QA-sync when connector absent; evidence on code runs only; carried on retest rounds only)
 
 Top issues (max 3):
 1. 🔴 [Input] <one line> — fix: <one line>
