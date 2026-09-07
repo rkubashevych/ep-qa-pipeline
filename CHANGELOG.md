@@ -5,6 +5,55 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.29.0 — 2026-09-07
+
+**The gate covered every surface except the one that publishes.** 0.28.0
+made "no defect without a quoted clause" binding on stage reports, bug
+drafts, run-sheet rows and chat. It said nothing about the step where a
+report is compressed into an outgoing Jira comment — and compression is
+what drops labels.
+
+On EP-56197 (round 3) the web-testing report recorded four readings as
+`OBSERVATION (no source checked)` and stated "not a new defect", because
+the DS contract says so in terms: *"`items` is the ranked set and can be
+longer than `total` — `total` counts matches, while `items` also carries
+the semantic tail marked with `item_weak`."* The drafted Jira comment
+then presented those same readings as a table with a **"True matches"**
+column under **"Still broken — the number is wrong in both directions"**.
+Numbers correct, labels gone, one confirmation away from a developer's
+ticket. The tester caught it by asking which document required the
+rendered count to equal the match count. None did. One of five rows
+survived the check.
+
+- **New: `sources-of-record.md` § 7 — the publication gate.** Line by
+  line on the drafted comment: register row + verbatim clause, or the
+  `OBSERVATION (no source checked)` label and a question, or cut. A
+  correctly labelled observation may not reappear as a defect — not as a
+  bullet under a "not fixed" heading, not as a row in a failure table,
+  and **not under a column header that implies a requirement** ("true
+  matches", "expected"): a column asserts as loudly as a sentence.
+  Sourced defects and unsourced observations get separate headings. A
+  defect owned by another ticket names that key on its line. Final check:
+  read it as the assignee — would a line send a developer hunting a bug
+  no document requires them to fix?
+- `qa-pipeline-code` step 6: the gate runs on the wave-1 comment BEFORE
+  the confirmation preview, alongside the existing count gate.
+- `qa-manual-results` step 4: the gate runs on the human summary, which
+  is the first and often only thing a person reads; retractions are held
+  to the same standard.
+- **Shipped at last: `reconcile_counts.py` recognises flat `TC-<n>` ids.**
+  The fix was written after EP-56289 and never committed, so no installed
+  copy had it: bug-fix and standalone-Bug runs number their cases
+  `TC-1..TC-N`, the pattern matched only `TC-REQ-*`, and the script
+  printed `0 distinct case ids · no status rows` while the self-test
+  passed — a silently absent count gate on exactly the runs that have no
+  suite and no Jira archive to fall back on. Third consecutive run
+  (EP-56197 rounds 1-3) reconciled by hand because of it. A flat range
+  needs `TC-` on both sides; a bare number after a dash stays prose.
+- `.gitignore`: stage-9 scratch patterns (`_s9_*`, `_ep53978_*`),
+  `__pycache__/`, and the `_to_delete/` quarantine folder — the first two
+  carry live credentials.
+
 ## 0.28.0 — 2026-09-07
 
 **The code phase read no source of record at all.** Zero Confluence

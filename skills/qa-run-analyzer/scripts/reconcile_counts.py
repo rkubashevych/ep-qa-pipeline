@@ -26,8 +26,17 @@ PIPELINE-REVIEW-2026-07-30.md):
   (`NOT-TESTABLE (instrumentation)`, `BLOCKED (unverified)`) count.
 - Range rows (`TC-REQ-29.1–29.3`) expand to every id in the range.
 - `[core]` markers (the human-tier selection marker) are counted on
-  `### TC-REQ` headings of the test-cases file only; they never affect
-  status parsing.
+  `## `/`### ` TC headings of the test-cases file only (either id
+  shape); they never affect status parsing.
+- **Flat ids (`TC-1`, `TC-12`) are recognised too.** Bug-fix mode and
+  standalone-Bug runs number their derived cases `TC-1..TC-N` with no
+  REQ group, because no requirements file exists to hang them on. Until
+  0.27.0 this script matched only `TC-REQ-*`, so those runs reported
+  `0 distinct case ids · no status rows` while the self-test still
+  passed — the count gate was silently absent exactly where the run has
+  no suite and no Jira archive to fall back on (found on EP-56289).
+  A flat range needs `TC-` on BOTH sides (`TC-1–TC-7`): a bare number
+  after a dash is prose, the same trap ID_RANGE already guards.
 
 Run `--selftest` before trusting the output on a new pipeline version.
 
@@ -41,13 +50,23 @@ import sys
 
 # Letter suffix allowed (TC-REQ-12a.1) — without it, 12a.1/12b.1/12c.1
 # silently collapse into one id "TC-REQ-12" (real under-count incident).
-CASE_ID = re.compile(r"(?:TC-REQ-\d+[a-z]?(?:\.\d+)*|RISK-[A-Z]+-\d+)")
+# The TC-REQ- alternative comes FIRST so the flat one can never shadow it
+# (it cannot anyway — "R" is not a digit — but order documents intent).
+# The flat `TC-<n>` alternative is bug-fix / standalone-Bug mode's id
+# shape; see the docstring's flat-id rule.
+CASE_ID = re.compile(
+    r"(?:TC-REQ-\d+[a-z]?(?:\.\d+)*|TC-\d+[a-z]?|RISK-[A-Z]+-\d+)")
 # TC-REQ-29.1–29.3 / TC-REQ-29.1-29.3 / TC-REQ-29.1–TC-REQ-29.3
 # The right side MUST be a dotted maj.min — a bare number after a dash
 # is prose ("TC-REQ-20.1 — 30 characters accepted") and once invented
 # 26 phantom ids when treated as a range end.
 ID_RANGE = re.compile(
     r"TC-REQ-(\d+)\.(\d+)\s*[–—-]\s*(?:TC-REQ-)?(\d+)\.(\d+)")
+# TC-1..TC-7 / TC-1–TC-7 — flat-id spans, as bug-fix-mode reports write
+# them when summarising routing ("9 to web-testing (TC-1..TC-7, TC-10)").
+# Both sides MUST carry the TC- prefix, for the same reason ID_RANGE
+# demands a dotted right side: "TC-1 — 30 characters accepted" is prose.
+FLAT_RANGE = re.compile(r"TC-(\d+)\s*(?:\.\.+|[–—-])\s*TC-(\d+)")
 # Longest alternatives first so FAIL CONFIRMED never half-matches as FAIL.
 STATUSES = (
     "FAIL CONFIRMED", "FAIL REJECTED", "NOT-TESTABLE", "NOT EXECUTED",
@@ -58,7 +77,9 @@ STATUS_CELL = re.compile(
     r"(" + "|".join(re.escape(s) for s in STATUSES) +
     r")(?:\s*\(([^)]*)\))?(?:\s*\[([^\]]+)\])?$")
 # Core marker on TC headings (human-tier selection; test-cases file only).
-CORE_MARK = re.compile(r"^### TC-REQ-.*\[core\]", re.M)
+# Accepts both heading levels and both id shapes: docs-phase files write
+# `### TC-REQ-n.m`, bug-fix-mode files write `## TC-n`.
+CORE_MARK = re.compile(r"^#{2,3} TC-(?:REQ-)?\d.*\[core\]", re.M)
 STAGES = ["test-cases", "code-review", "api-testing", "web-testing"]
 
 
@@ -100,6 +121,11 @@ def collect_ids(text):
         if lo_i < hi_i <= lo_i + 50:
             for n in range(lo_i, hi_i + 1):
                 ids.add(f"TC-REQ-{maj}.{n}")
+    for lo, hi in FLAT_RANGE.findall(text):
+        lo_i, hi_i = int(lo), int(hi)
+        if lo_i < hi_i <= lo_i + 50:
+            for n in range(lo_i, hi_i + 1):
+                ids.add(f"TC-{n}")
     return ids
 
 
@@ -199,24 +225,79 @@ SELFTEST_EXPECT = {
     "core": 1,
 }
 
+# Bug-fix / standalone-Bug mode: flat `TC-<n>` ids, no REQ groups, `## `
+# case headings. Added in 0.27.0 — before it, this whole shape parsed as
+# zero ids and zero statuses while the docs-phase fixture above passed.
+SELFTEST_BUGFIX_DOC = """
+## Results
+
+| TC | Name | Source | Status | Comment |
+|----|------|--------|--------|---------|
+| TC-1 | reported defect, 1-result search | QA | PASS | guest only |
+| TC-2 | negative sibling, unfiltered listing | QA | PASS | — |
+| TC-10 | undocumented delta, replace-not-merge | QA | **FAIL** | step 2 |
+| TC-11 | zero counter renders bare | QA | NOT EXECUTED | no such tab here |
+| TC-12 | build provenance | QA | BLOCKED (unverified) | no probe recorded |
+| RISK-CR-2 | pager mount gate | code-review risk 2 | PASS | endlessScroll false |
+
+Routing note: 3 to web-testing (TC-1..TC-3), the rest by channel.
+
+## TC-6 — 8 characters accepted and saved
+Prose heading: the bare "8" after the dash must NOT be read as a range
+end, because it carries no TC- prefix. If the guard ever breaks, this
+line alone invents two phantom ids.
+
+## TC-4 — core-marked heading  [UI] [core]
+## TC-5 — plain heading  [UI]
+
+## Statistics
+
+| Status | Count |
+|--------|-------|
+| PASS | 3 |
+| FAIL | 1 |
+"""
+
+SELFTEST_BUGFIX_EXPECT = {
+    "counts": {
+        "PASS": 3, "FAIL": 1, "NOT EXECUTED": 1,
+        "BLOCKED (unverified)": 1,
+    },
+    "sources": {},
+    # TC-3 comes only from the TC-1..TC-3 span; TC-4/5/6 only from headings.
+    "ids_has": {"TC-1", "TC-2", "TC-3", "TC-4", "TC-5", "TC-6",
+                "TC-10", "TC-11", "TC-12", "RISK-CR-2"},
+    # TC-7/TC-8 would appear if the flat-range guard let a bare number be
+    # a range end; TC-REQ-1 would appear if the id shapes cross-matched.
+    "ids_lacks": {"TC-7", "TC-8", "TC-REQ-1"},
+    "core": 1,
+}
+
+
+def check(doc, expect, label, errs):
+    """Run one fixture and append any mismatches to errs."""
+    counts, sources = count_statuses(doc)
+    ids = collect_ids(doc)
+    if counts != expect["counts"]:
+        errs.append(f"[{label}] status counts {counts} != {expect['counts']}")
+    if sources != expect.get("sources", {}):
+        errs.append(f"[{label}] source counts {sources} != "
+                    f"{expect.get('sources', {})}")
+    missing = expect["ids_has"] - ids
+    if missing:
+        errs.append(f"[{label}] ids missing: {sorted(missing)}")
+    phantom = expect["ids_lacks"] & ids
+    if phantom:
+        errs.append(f"[{label}] phantom ids: {sorted(phantom)}")
+    core = len(CORE_MARK.findall(doc))
+    if core != expect["core"]:
+        errs.append(f"[{label}] core count {core} != {expect['core']}")
+
 
 def selftest():
-    counts, sources = count_statuses(SELFTEST_DOC)
-    ids = collect_ids(SELFTEST_DOC)
     errs = []
-    if counts != SELFTEST_EXPECT["counts"]:
-        errs.append(f"status counts {counts} != {SELFTEST_EXPECT['counts']}")
-    if sources != SELFTEST_EXPECT["sources"]:
-        errs.append(f"source counts {sources} != {SELFTEST_EXPECT['sources']}")
-    missing = SELFTEST_EXPECT["ids_has"] - ids
-    if missing:
-        errs.append(f"ids missing: {sorted(missing)}")
-    phantom = SELFTEST_EXPECT["ids_lacks"] & ids
-    if phantom:
-        errs.append(f"phantom ids: {sorted(phantom)}")
-    core = len(CORE_MARK.findall(SELFTEST_DOC))
-    if core != SELFTEST_EXPECT["core"]:
-        errs.append(f"core count {core} != {SELFTEST_EXPECT['core']}")
+    check(SELFTEST_DOC, SELFTEST_EXPECT, "docs-phase", errs)
+    check(SELFTEST_BUGFIX_DOC, SELFTEST_BUGFIX_EXPECT, "bug-fix", errs)
     if errs:
         print("SELFTEST FAIL")
         for e in errs:
@@ -225,7 +306,8 @@ def selftest():
     print("SELFTEST PASS — statistics-table exclusion, one-status-per-row, "
           "PASS(code) separation, trailing-period ids, bold/qualified "
           "statuses, RE-ROUTE [UI], range expansion, [core] heading "
-          "counting all verified")
+          "counting, and bug-fix-mode flat ids (TC-<n>, flat spans, "
+          "`## ` headings) all verified")
 
 
 def main():

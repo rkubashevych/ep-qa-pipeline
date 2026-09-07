@@ -140,3 +140,51 @@ cite the precedent as supporting context if it still applies.
   is a bounded, read-only exception, same as code-review's existing
   source-fidelity check.
 - A missing source never blocks a run. It downgrades a claim.
+
+## 7. The publication gate — the comment, not only the report
+
+§3 binds every surface. This section exists because one surface keeps
+failing it: **the step where a stage report is compressed into an
+outgoing Jira comment.** The report can be perfectly labelled and the
+comment still wrong, because compression drops labels.
+
+> **Before an outgoing comment is shown for confirmation, every line
+> presented as a defect carries its register row and its verbatim
+> clause. A line with no clause is labelled
+> `OBSERVATION (no source checked)` and phrased as a question, or cut.**
+
+Applies to `qa-pipeline-code` step 6 (wave 1) and `qa-manual-results`
+step 4 (the human summary), and to any other comment a stage posts.
+
+Checks, in order, on the drafted comment:
+
+1. **Line by line.** Take each line that a reader would understand as
+   "this is broken". Name its register row and quote its clause. No
+   clause → relabel or delete.
+2. **An observation the report labelled correctly must not reappear as a
+   defect.** Not as a bullet under a "not fixed" heading, not as a row in
+   a table of failures, and **not as a column that implies one** — a
+   column header such as "true matches" or "expected" asserts a
+   requirement, so it needs a clause exactly as a sentence would.
+3. **Name the owning ticket on the line** when the defect belongs
+   elsewhere, so the reader knows what will fix it: *"`Dark` products 18
+   vs 21 — EP-56739"*, not *"the counter is wrong"*.
+4. **Sourced defects and unsourced observations are not neighbours.**
+   Separate headings, and the observation's heading says it is a
+   question.
+5. **Read the comment as the assignee would.** If a line would send a
+   developer looking for a bug that no document requires them to fix,
+   it fails this gate.
+
+**The real case (2026-09-07, EP-56197).** The DS contract states, in the
+current text: *"Note `items` is the ranked set and can be longer than
+`total` — `total` counts matches, while `items` also carries the semantic
+tail marked with `item_weak`."* The web-testing report recorded the
+readings under `OBSERVATION (no source checked)` and said in terms
+*"not a new defect"*. The drafted Jira comment then rendered the same
+readings as a table with a **"True matches"** column under the heading
+**"Still broken — the number is wrong in both directions"** — an
+unsourced defect claim, contradicted by the contract, one confirmation
+away from a developer's ticket. The tester caught it by asking which
+document required the rendered count to equal the match count. Nothing
+did. One sourced row survived the check; four did not.

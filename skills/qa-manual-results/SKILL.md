@@ -113,6 +113,18 @@ and the bug-key table.
 
 ### Step 4 — Write back (REQUIRED PAUSE / CONFIRM)
 
+**Run the publication gate on the drafted summary first**
+(`../qa-pipeline/references/sources-of-record.md` § 7). This comment is
+the first and often only thing a human reads, so it is the highest-stakes
+compression in the pipeline: every line presented as a defect carries its
+register row and its verbatim clause, a line with no clause is labelled
+`OBSERVATION (no source checked)` and phrased as a question or cut, an
+observation the stage reports labelled correctly does not reappear as a
+defect (nor as a row in a failure table, nor under a column implying a
+requirement), and a defect owned by another ticket names that key on its
+line. Retractions are held to the same standard: state what the record
+said, what was measured, and the clause the new verdict rests on.
+
 Show the user exactly what will be written, then on explicit yes:
 
 - **QA Service suite** (connector present): for every case with a

@@ -425,6 +425,19 @@ story does not exhaust the orchestrator's context:
      mechanical count, or unexplained missing ids) is fixed in the
      report BEFORE the preview — wrong numbers must not reach Jira,
      the suite, or the human summary.
+   - **Publication gate — run it on the drafted comment BEFORE showing
+     it.** Rules: `../qa-pipeline/references/sources-of-record.md` § 7.
+     Every line a reader would take as "this is broken" carries its
+     register row and its verbatim clause; a line with no clause is
+     labelled `OBSERVATION (no source checked)` and phrased as a
+     question, or cut; an observation a stage report labelled correctly
+     must not reappear here as a defect — including inside a table of
+     failures or under a column that implies a requirement ("true
+     matches", "expected"); a defect owned by another ticket names that
+     key on the line. A comment whose numbers are right and whose
+     labels are wrong is the failure this gate exists for: it happened
+     on EP-56197 with a `"True matches"` column, and the tester caught
+     it, not the pipeline.
    - **REQUIRED PAUSE / CONFIRM.** Show what wave 1 will post (the
      status comment verbatim, and whether an archive comment is
      included or skipped — say which, and why), to which ticket, and —
