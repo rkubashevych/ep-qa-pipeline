@@ -266,6 +266,12 @@ statuses land there first. This stage emits:
   ten.
 - `OBSERVATION` — the case passed, but a defect or anomaly outside
   the requirements scope was noticed.
+- `OBSERVATION (no source checked)` — a real thing seen, with no clause
+  in any source of record saying it is wrong. Phrase it as a question,
+  never as a verdict; keep it out of every defect list; it is not a
+  bug candidate and must not be handed to `/knowledge-base` or
+  `createJiraIssue`. Rules and the register:
+  `../qa-pipeline/references/sources-of-record.md`.
 - `SPEC-DEFECT` — executing the case showed its premise or expected
   result is wrong (the assumed UI element does not exist as described,
   the expected behaviour contradicts the ticket's own spec). Not a
@@ -301,6 +307,12 @@ Rules:
   run, and — on analytics-backed surfaces — a second read after the
   measured ingestion lag. A single immediate clean read is not a PASS.
 - BLOCKED is not a FAIL; OBSERVATION never replaces FAIL.
+- **Every FAIL and every `RISK-CR-*` row carries its `Source:` and
+  `Clause:`** — the register row and the verbatim sentence the build
+  contradicts (`../qa-pipeline/references/sources-of-record.md`). Check
+  the as-built document as well as the brief: a behaviour the as-built
+  page records as deliberate is not a defect, however wrong it looks.
+  No clause in any source → `OBSERVATION (no source checked)`.
 - Cases that arrived as FAIL exit only as FAIL CONFIRMED or FAIL
   REJECTED — never plain PASS/FAIL — so the report shows what was a
   bug verification vs a new UI check.

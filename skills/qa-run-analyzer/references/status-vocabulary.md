@@ -30,6 +30,7 @@ Legend for "Emitted by": CR = code-review (stage 6), API = api-testing
 | `NOT-TESTABLE` | API | The case cannot be validated as written — endpoint mapping wrong/ambiguous. | The correct endpoint + what it actually does. |
 | `NOT-TESTABLE (instrumentation)` | API | This stage's instrument cannot measure the claim (instrumented surface + API-created precondition, or absence check with no positive control). Always also listed under "Route to web-testing". | Why the instrument cannot measure it (protocol reference). |
 | `OBSERVATION` | WEB | Case passed, but an out-of-scope anomaly was noticed. Never a substitute for FAIL. | What was seen. |
+| `OBSERVATION (no source checked)` | CR, API, WEB | A real thing seen or measured, with NO clause in any source of record saying it is wrong. Honest output and often worth fixing — but never a FAIL, never a bug candidate, never listed among defects, and phrased as a question not a verdict. Converts to a defect only by finding the clause, or to a product question by being raised with the docs-phase owner. | What was seen + which sources were checked and came back empty. |
 | `SKIPPED` | MR (human) | Human chose not to run the row. | — |
 
 Source markers (not statuses — never counted as verdicts):
@@ -37,8 +38,22 @@ Source markers (not statuses — never counted as verdicts):
   executed code-review-PASS cases. The script tallies it separately.
 - `code-review risk <n>` — Source of a `RISK-CR-<n>` risk-chasing row.
 
-Row identifiers: `TC-REQ-N.M` (regular cases) and `RISK-<TAG>-<n>`
-(risk rows — legal, reported by the script as "ids NOT in test-cases").
+Row identifiers: `TC-REQ-N.M` (regular cases), `TC-N` (bug-fix mode and
+standalone-Bug runs, which derive flat-numbered cases because they have
+no requirements file to group them under) and `RISK-<TAG>-<n>` (risk
+rows — legal, reported by the script as "ids NOT in test-cases").
+
+**A status cell carries a status and nothing else.** The vocabulary
+above is the whole legal set, plus the parenthesised qualifiers named in
+it; `reconcile_counts.py` reads the last cell that matches it exactly.
+A decorated cell — `QA → stage 7`, `PASS (not reachable)`,
+`NOT EXECUTED HERE — orchestrator` — parses as NO status, so the row
+silently leaves the counts and the count gate under-reports without
+saying why. Put the routing, the qualifier and the reasoning in the
+Comment column, and record a case another stage owns the way the routing
+invariant prescribes: a "Not executed here" / "Route to web-testing"
+section row, or an explicit reference to the report that executed it —
+never an invented status token.
 
 ## Routing invariant — one rule, four recorded forms
 
@@ -82,6 +97,19 @@ Cross-stage rules that live with the vocabulary:
   the other interpretation"), that IS the SPEC-DEFECT definition:
   record SPEC-DEFECT, not FAIL. A verdict that needs a caveat to
   survive is the caveat's verdict.
+- **No defect without a clause.** Every FAIL, FAIL CONFIRMED and
+  `RISK-CR-*` row carries `Source:` (the register row) and `Clause:`
+  (the verbatim sentence the build contradicts). The **as-built**
+  document counts as a source alongside the brief, and it is the one
+  that settles "is this deliberate?" — a behaviour it records as
+  intended is not a defect however wrong it looks. No clause anywhere →
+  `OBSERVATION (no source checked)`. Register and precedence:
+  `../qa-pipeline/references/sources-of-record.md`.
+- **Presentation carries the label.** A status is part of the finding,
+  not decoration on it. An unsourced observation listed alongside
+  verified failures — in a report, a summary, or a chat message — has
+  been silently promoted to a defect, which is the failure the status
+  exists to prevent.
 - Manual results (stage 10) use PASS / FAIL / BLOCKED / SKIPPED; any
   other human entry is recorded verbatim as a non-standard verdict,
   never coerced.

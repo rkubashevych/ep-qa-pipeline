@@ -171,6 +171,12 @@ later stage, and this stage is the last one that still holds the
 tracker. (Yes, this is a deliberate, bounded exception to "do not go to
 the tracker" — read-only, and only for the cases below.)
 
+The register the orchestrator built at step 0 (`<KEY>-sources.md`) is
+your source list — rules, precedence and the gate:
+**`../qa-pipeline/references/sources-of-record.md`**. If no register
+exists (this stage invoked directly), build the rows you need yourself;
+do not proceed on test-case text alone.
+
 Before assigning FAIL — and for every `[risk: High]` case regardless of
 verdict — confirm the case's asserted expectation actually appears in a
 source of record:
@@ -180,7 +186,14 @@ source of record:
 2. Open the named acceptance-criteria page or ticket and find the
    sentence the case asserts. One fetch per distinct source, not per
    case — in practice a handful per run.
-3. Also read the IMPLEMENTING sub-task's own acceptance criteria (you
+3. **Check the as-built document as well as the brief.** The brief says
+   what should exist; the as-built page (ExpoPlatform: space `FRON` for
+   the front end, `DS` for the search service) says what the merged code
+   does and what it deliberately does **not** do. A behaviour the
+   as-built doc records as intended is not a defect, however wrong it
+   looks — and this is the check that was missing when a
+   documented-as-designed behaviour reached the bug-drafting step.
+4. Also read the IMPLEMENTING sub-task's own acceptance criteria (you
    already have them from the PR/branch derivation). A clause present
    in an early brief but absent from the sub-task that was built is the
    exact shape of a mis-derived requirement.
@@ -191,10 +204,22 @@ present in only one of several cited sources:
 - name which document does and does not carry the clause;
 - say which version the code implements.
 
-Scope deliberately: FAIL-bound cases and High-risk cases only. This is
-not a re-grooming and you are not re-deriving requirements — you are
-confirming that the sentence you are about to fail a build against
-exists.
+Every FAIL and every `RISK-CR-*` row carries two lines in the report:
+
+```
+Source: <register row #> — <document>, <section>
+Clause: "<the sentence, quoted verbatim>"
+```
+
+A finding with no clause in any source is
+`OBSERVATION (no source checked)`, never FAIL, and never a bug
+candidate. Risk rows are covered by this too — a risk is a claim about
+the product like any other.
+
+Scope deliberately: FAIL-bound cases, High-risk cases, and anything you
+are about to state as a defect. This is not a re-grooming and you are
+not re-deriving requirements — you are confirming that the sentence you
+are about to fail a build against exists.
 
 ### What to look for in the code
 

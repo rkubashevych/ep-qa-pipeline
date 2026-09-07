@@ -51,6 +51,12 @@ in a fresh chat (separate from the docs phase) for context health.
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
+**Sources of record:** `../qa-pipeline/references/sources-of-record.md`
+— the register this phase builds at step 0 and the gate every finding
+passes. Read it before stage 5. The code phase used to read no spec at
+all; that is how a documented-as-designed behaviour reached the point of
+being filed as a Bug.
+
 ## Step 0 — Gather inputs
 
 **Session name:** suggest renaming this session to
@@ -74,9 +80,36 @@ named + no connector + no archive comment → PAUSE and tell the user to
 enable the connector or start from a session that has it. Never
 discover this at extraction time.
 
+**Build the source register — REQUIRED, in every mode.** Rules and the
+table format: `../qa-pipeline/references/sources-of-record.md`. Fetch
+each governing document once and write `<KEY>-sources.md`:
+
+1. The **product brief / acceptance criteria** — the Confluence page
+   linked from the story (`getJiraIssueRemoteIssueLinks`, then
+   `getConfluencePage`). In bug-fix and retest mode fetch the page that
+   governs the *feature*, reached via the parent story or the suite.
+2. The **as-built documentation** — the page written from merged code
+   (ExpoPlatform: space `FRON` for the front end, `DS` for the search
+   service). It is rarely linked from the ticket; the reference file
+   lists the four ways to find it. **This is not optional.** A brief
+   says what should exist; only the as-built doc says what deliberately
+   does not, and that is the document that stops a false defect. No such
+   page → record the row as `NONE FOUND` and flag it in the run report.
+3. The **implementing sub-task's acceptance criteria**, from the PR /
+   branch derivation below.
+4. The **ticket under test** itself — for a Bug, its reproduction steps
+   and stated expected result.
+
+Show the register in chat (one line per source) before dispatching
+stage 5, and pass it to every stage. `task-context` (stage 1) does this
+for the docs phase, but stage 1 does **not** run in retest or bug-fix
+mode — which is why this step lives here and runs unconditionally.
+
 **Same-session shortcut:** if `<STORY>-test-cases.md` (and the
 checklist) are already in the working directory — e.g. the docs phase
-ran in this chat — use them and skip the Jira read-back below.
+ran in this chat — use them and skip the Jira read-back below. The
+source register is still built: test cases are derived artifacts and
+never substitute for it.
 
 Otherwise, using the Atlassian connector and the Story key:
 
@@ -439,13 +472,23 @@ story does not exhaust the orchestrator's context:
    filing does happen, make ONE offer listing all the bugs; file only
    the ones the user confirms.
    - **Source gate — before drafting any bug.** Quote the sentence
-     from the acceptance criteria (or the implementing sub-task) that
-     the build violates, and put it in the draft's "Expected result".
-     If that sentence is in no source of record, the finding is a
-     SPEC-DEFECT or a product question — retract the FAIL per the
+     from the register that the build violates, and put it in the
+     draft's "Expected result". Check the **as-built document too, not
+     only the brief**: a behaviour the as-built doc records as
+     deliberate is not a defect, however wrong it looks. (Real case:
+     "a matching Group renders nowhere" — the as-built FE doc names
+     `groups` as its own example of a type the front end does not
+     render. It reached the drafting step.) If the sentence is in no
+     source of record, the finding is a SPEC-DEFECT, a product question
+     or an `OBSERVATION (no source checked)` — retract the FAIL per the
      supersede convention and raise it to the docs-phase owner instead
      of filing a Bug against a dev. Drafting a "you may get pushed
      back on this" caveat into a bug IS this gate firing — stop.
+   - **A closed ticket is not a source.** Citing a precedent
+     ("EP-XXXXX was accepted for the same thing") does not satisfy the
+     gate: it shows how a similar-looking case was once ruled, not that
+     the clause covers yours. Check the register first, then cite the
+     precedent as supporting context if it still applies.
    - **Preferred path (knowledge-base installed):** hand confirmed
      bugs to `/knowledge-base` — it dedup-searches and creates
      properly routed Jira bugs.
@@ -565,6 +608,16 @@ story does not exhaust the orchestrator's context:
   stage skill under that stage's evidence rules, or dispatched to one.
   On real runs the dominant error source was the orchestrator
   narrating conclusions between stages from a single glance.
+- **Chat is a publication surface, and the gate applies to it.** What
+  is said to the user is held to the report's standard: every finding
+  presented as a defect carries its `Source:` and `Clause:`, and an
+  `OBSERVATION (no source checked)` carries its label. Never list
+  unsourced observations in one numbered run alongside verified
+  failures — equal presentation grants equal authority, and the user
+  then acts on it. (Real case: three observations were presented as
+  "issues 4, 5 and 6" beside two confirmed failures; one was as-built
+  behaviour, two were unfileable. The reports had labelled all three
+  correctly — the chat summary was what lost the labels.)
 
 ## Final response
 

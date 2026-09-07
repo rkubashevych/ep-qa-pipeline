@@ -5,6 +5,121 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.28.0 — 2026-09-07
+
+**The code phase read no source of record at all.** Zero Confluence
+references across `qa-pipeline-code`, `code-review`, `api-testing` and
+`web-testing`. Only `task-context` (stage 1) fetched the acceptance
+criteria — and stage 1 does not run in retest or bug-fix mode, which is
+most code-phase runs. So those runs judged the product against
+test-case text written days earlier by another phase, and nothing
+upstream of bug-drafting ever opened a spec.
+
+Found on **EP-56133** retest 3, where the run produced three
+"findings" that were not defects. One — *"a matching Group renders
+nowhere on the Global Search results page"* — reached the point of
+being drafted as a Bug, with a closed ticket cited as precedent. The
+as-built front-end documentation (Confluence FRON 1885732888) names
+`groups` as its own example of a type the front end **deliberately does
+not render**. The observation was true; the defect claim was false. The
+tester caught it by asking "are you sure these are issues? can you
+check AC?" — the pipeline had no gate that would have.
+
+Two structural holes, not one lapse:
+
+1. **No register.** Nothing collected the governing documents, so
+   nothing could be checked against them.
+2. **Only briefs were ever in scope.** Briefs say what should exist.
+   **As-built documents say what deliberately does not** — and that is
+   the document class that defeats a false defect. The EP-56133 suite
+   summary even cited the as-built page by id; no stage opened it.
+
+And the existing source gate fired last, after a finding had already
+been written into a report, a chat summary and a run sheet as settled.
+
+- **New shared reference `qa-pipeline/references/sources-of-record.md`**
+  — the four source kinds in precedence order (product brief → as-built
+  doc → implementing sub-task's AC → the ticket under test), the
+  register format, the gate, and what is explicitly *not* a source: a
+  test case, a suite requirement, an earlier run's verdict, a
+  developer's comment about intent, a closed precedent ticket.
+- **`qa-pipeline-code` step 0 builds the register in EVERY mode**, and
+  writes `<KEY>-sources.md`. Fetching the as-built document is not
+  optional; absent one, the row is recorded `NONE FOUND` and flagged in
+  the run report. Four documented ways to find it, since it is rarely
+  linked from the ticket. The same-session shortcut no longer skips it —
+  test cases are derived artifacts and never substitute for a source.
+- **The gate moved upstream.** Every FAIL, FAIL CONFIRMED and
+  `RISK-CR-*` row in `code-review`, `api-testing` and `web-testing` now
+  carries `Source:` (register row) + `Clause:` (the verbatim sentence
+  the build contradicts). Risk rows are covered too — a risk is a claim
+  about the product like any other. Previously only FAIL-bound and
+  High-risk *test cases* were checked, and only for their own wording.
+- **New status `OBSERVATION (no source checked)`** (CR/API/WEB) — a real
+  thing seen with no clause saying it is wrong. Honest output, often
+  worth fixing, and barred from every defect list, from
+  `/knowledge-base` and from `createJiraIssue`. Phrased as a question,
+  never a verdict. Three of the four EP-56133 findings were this.
+- **Chat is a publication surface.** The orchestrator's "never asserts a
+  product claim" rule now says so explicitly: findings stated to the
+  user carry their `Source:`/`Clause:`, and unsourced observations
+  carry their label. Listing them in one numbered run beside verified
+  failures grants equal authority — on EP-56133 the reports labelled
+  all three correctly and the chat summary was what lost the labels.
+- **A closed ticket is not a source.** EP-55923 ("Round tables results
+  are found and permitted but never render", COMPLETE) was cited as
+  precedent for the Groups finding. It failed: Round Tables *is* one of
+  the 12 entities the as-built doc lists, so that was a real defect;
+  Groups is not, so the precedent did not transfer.
+- **`qa-run-analyzer` §7 checks the register** — 🔴 no register, 🔴 no
+  as-built row, 🔴 any defect row missing its `Source:`/`Clause:`,
+  🟡 an unsourced observation presented as a defect, 🟡 a defect resting
+  on a precedent ticket instead of a clause.
+
+No skill frontmatter description changed, so `evals/triggering.md` needs
+no re-walk.
+
+## 0.27.0 — 2026-09-03
+
+**The count gate now works in bug-fix mode.** `reconcile_counts.py`
+recognised only `TC-REQ-N.M` ids, but bug-fix mode and standalone-Bug
+runs number their derived cases `TC-1..TC-N` — they have no
+requirements file to group them under. So every such run printed
+`test-cases: 0 distinct case ids · no status rows` while `--selftest`
+kept passing, and the count gate was silently absent.
+
+Worst where it mattered most: those are exactly the runs with no QA
+sub-task and therefore (since 0.26.0's archive target rule) no Jira
+archive and usually no QA Service suite — the local files are the only
+record, and nothing was checking that they agreed. Found on EP-56289,
+where the counts had to be reconciled by hand.
+
+- `CASE_ID` accepts flat `TC-<n>` / `TC-<n>a` alongside `TC-REQ-*` and
+  `RISK-<TAG>-<n>`. The `TC-REQ-` alternative stays first; the shapes
+  cannot cross-match.
+- New `FLAT_RANGE` expands flat spans (`TC-1..TC-7`, `TC-1–TC-7`).
+  Both sides must carry the `TC-` prefix, the same guard `ID_RANGE`
+  already applies to dotted ranges — a bare number after a dash is
+  prose, and that trap once invented 26 phantom ids.
+- `CORE_MARK` accepts `## ` as well as `### `, and both id shapes.
+- `--selftest` now runs TWO fixtures — the existing docs-phase
+  regression document and a new bug-fix-mode one covering flat ids,
+  flat spans, `## ` headings, statistics-table exclusion and the
+  phantom-range guard. A single-fixture self-test is what let this
+  survive: it passed on every release while a whole run shape parsed
+  as empty.
+
+**status-vocabulary.md: flat ids declared, and decorated status cells
+called out.** The vocabulary's "Row identifiers" line named only
+`TC-REQ-N.M` and `RISK-<TAG>-<n>`, so bug-fix mode's ids were
+undeclared in the one file that is supposed to be their single home.
+Added — together with an explicit rule that a status cell carries a
+status and nothing else: `QA → stage 7`, `PASS (not reachable)` and
+`NOT EXECUTED HERE — orchestrator` all parse as NO status and drop the
+row out of the counts silently. Routing and qualifiers belong in the
+Comment column, and a case another stage owns is recorded the way the
+routing invariant already prescribes.
+
 ## 0.26.0 — 2026-08-28
 
 **Archive target rule: the results archive goes to the QA sub-task and

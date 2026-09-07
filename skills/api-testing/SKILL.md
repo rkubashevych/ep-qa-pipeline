@@ -197,10 +197,21 @@ or changed statuses land there first. This stage emits:
   `discrepancy` note on the suite case. **If you write the doubt, you
   must classify it** (status-vocabulary, cross-stage rules): a finding
   that blames the case's wording IS a SPEC-DEFECT, not a FAIL.
+- `OBSERVATION (no source checked)` — a real measurement, with no
+  clause in any source of record saying it is wrong. Phrase it as a
+  question, never a verdict; keep it out of every defect list; not a bug
+  candidate. Rules and the register:
+  `../qa-pipeline/references/sources-of-record.md`.
 
 Rules: prefer BLOCKED/NOT-TESTABLE over a false PASS; never PASS with
 doubt; every FAIL/PARTIAL needs endpoint + observed vs expected;
 arrived-as-FAIL cases exit only as FAIL CONFIRMED / FAIL REJECTED.
+**Every FAIL and every `RISK-CR-*` row carries its `Source:` and
+`Clause:`** — the register row and the verbatim sentence the build
+contradicts. Check the as-built document as well as the brief: a
+behaviour the as-built page records as deliberate is not a defect,
+however wrong the measurement looks. No clause in any source →
+`OBSERVATION (no source checked)`.
 Absence checks and instrumented-surface assertions follow
 `references/absence-check-protocol.md` — no PASS without provenance,
 positive control, and the post-lag second read; "anywhere" claims

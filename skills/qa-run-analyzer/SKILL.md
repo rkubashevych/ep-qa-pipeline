@@ -248,6 +248,29 @@ Flag 🔴 when a published FAIL rests on a clause found in only one of
 several cited sources. That is a retraction waiting to happen, and it
 is cheaper to find here than after the bug is filed.
 
+**The register.** The code phase builds `<KEY>-sources.md` at step 0
+(`../qa-pipeline/references/sources-of-record.md`). Check it:
+
+- 🔴 **no register at all** — the run produced verdicts against no
+  source of record. Every FAIL in it is provisional in a way the
+  reports do not say.
+- 🔴 **no as-built document row** (and no `NONE FOUND` row recording
+  that it was looked for). The brief says what should exist; only the
+  as-built page says what deliberately does not. Missing it is how a
+  documented-as-designed behaviour reaches the bug-drafting step — the
+  incident that created this check (EP-56133, 2026-09-07: `groups`
+  renders nowhere, and the as-built FE doc names `groups` as its own
+  example of a type the front end does not render).
+- 🔴 **any FAIL / FAIL CONFIRMED / `RISK-CR-*` row without a
+  `Source:` + `Clause:` pair.** Count them; name them.
+- 🟡 **any `OBSERVATION (no source checked)` presented as a defect** —
+  in a defect list, a bug draft, a run-sheet row phrased as a fault, or
+  the human summary's confirmed-bugs section. The status is correct and
+  its placement is not.
+- 🟡 **a defect resting on a precedent ticket instead of a clause.**
+  A closed ticket shows how a similar case was ruled; it is not a
+  source of record.
+
 ## Output
 
 Write `<ISSUEKEY>-run-report.md` per references/output-template.md, then
