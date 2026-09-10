@@ -60,13 +60,12 @@ keeps asserting PASSes everyone knows are wrong.
 2. **The story / QA sub-task key** — ask if not derivable.
 3. Optional, for reconciliation: this run's verdict files
    (`<ISSUEKEY>-code-review.md`, `-api-testing.md`, `-web-testing.md`)
-   from the run folder; in a fresh chat, from the results
-   archive comment on the QA sub-task when the ticket has one (extract
-   per `../qa-pipeline-code/references/results-comment-template.md`).
-   **A ticket with no QA sub-task carries no archive (0.26.0), so its
-   reports exist only in the run folder** — on another machine
-   they will be missing: say so and ask for them rather than
-   reconciling against nothing.
+   from the run folder (`runs/<ISSUEKEY>/r<N>/`). **They exist only
+   there** (no archive is posted since 0.33.0) — on another machine
+   they will be missing: the QA Service run still gives every machine
+   verdict (`get_test_run`), so reconcile against the run and say the
+   report prose is unavailable, rather than reconciling against
+   nothing. Pre-0.33 tickets may carry legacy archive comments.
 4. Optional: the QA Service suite (connector present) — the write-back
    target.
 
@@ -75,8 +74,8 @@ table; do not proceed on guesses.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
-upload; then the suite; then the QA sub-task archive if the ticket has
-one; asking the user is the last resort, not the first).
+upload; then the suite; asking the user is the last resort, not the
+first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 ## Hard rules
 
@@ -186,18 +185,14 @@ that list is the per-bug yes — then on explicit yes:
 - **Retraction comments** — one per ticket that published a now-retracted
   verdict, **on that ticket**, ≤ 6 lines (run id, `<case> — <old> →
   <new>`, reason, the ticket/run that established the new verdict). This
-  is the one sanctioned cross-ticket comment; it is not an archive.
+  is the one sanctioned cross-ticket comment; it is not a dump.
 - **Jira**: always post **the run's FIRST human-facing summary**
-  (two-wave rule: the code phase posted only an agents-only archive +
-  status line) — to the QA sub-task when the ticket has one, otherwise
-  to the ticket under test.
-  **Plus, QA SUB-TASK ONLY, a machine archive** (the full
-  `<ISSUEKEY>-manual-results.md` in a fenced block preceded by
-  `File: <ISSUEKEY>-manual-results.md`). Where there is no QA sub-task
-  — a Bug, a Defect — post **no archive**: that ticket gets the verdict
-  and nothing else, and `<ISSUEKEY>-manual-results.md` stays in the
-  run folder (0.26.0 archive target rule,
-  `../qa-pipeline-code/SKILL.md` step 6). Write it as the complete
+  (two-wave rule: the code phase posted only a one-line status
+  comment) — to the QA sub-task when the ticket has one, otherwise to
+  the ticket under test. **No archive of any kind** (retired 0.33.0):
+  `<ISSUEKEY>-manual-results.md` stays in the run folder and the run
+  holds every verdict; a fenced dump on any ticket is a ❌. Write the
+  summary as the complete
   picture, not a delta — overall verdict, stage table, confirmed bugs,
   **Retractions listed first with old → new and reason**, what needs a
   human, what was not tested — because no earlier human summary

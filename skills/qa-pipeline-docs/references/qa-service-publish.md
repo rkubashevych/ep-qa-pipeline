@@ -113,6 +113,32 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 | tags applied in step 4 | `detail.tagPlan` = one line naming the tags attached and why (mirrors the reference suites) |
 | ` [core]` heading marker | `detail.core` = `yes` on the REQ's core case (the human-tier representative that stage 9 always walks); omit on all other cases. Also propose a `core` tag in step 4 where the tag catalogue allows — pending approval is fine. |
 
+### Structural checks → `create_test_case` (STRUCT cases) — since 0.33.0
+
+The checklist's `[UI]` presence / label / field-type checks have no
+test case in `<ISSUEKEY>-test-cases.md` by design (stage 4's rule), but
+web-testing executes them, so they need a home in the record. Until
+0.33.0 they lived only in a fenced "structural checks only" comment on
+the QA sub-task — which also meant their verdicts never reached the run.
+Publish each structural check as a case:
+
+| Checklist | QA Service |
+|---|---|
+| a `[UI]` check under a structural REQ (or a structural check under a behavioural REQ) | one case; `title` = the check rephrased as a scenario ("State label is shown above the State select") |
+| — | `stableId` = `<PREFIX>-STRUCT-NN`, numbered from 01 |
+| REQ | `folderName` = `<REQ area> — structure`; `traceability` = the REQ's stableId |
+| — | `levels: ["E2E"]`, `levelText: "E2E (UI)"`, `techniques: ["UI-CONF"]`, `type: positive`, `status: planned`, `priority` from the REQ's risk |
+| the check text | `detail.goal` = the check verbatim; `detail.steps` = "1. Open <surface>. 2. Locate <element>."; `detail.assertions` = the check; `detail.testData` = "None — uses default event fixtures" |
+| — | `detail.notes` = `Structural check from <ISSUEKEY>-checklist.md — no TC in the test-cases file by design (stage 4 rule).` |
+
+STRUCT cases are **not** counted in the test-cases statistics block and
+never get a `[core]` marker; the publish preview reports them on their
+own line ("N cases + S structural checks"). The analyzer's suite-sync
+check expects exactly S extra `-STRUCT-` ids beyond the test-cases
+file. On the code phase they are roster cases like any other: stage 8
+records their verdicts on the run; step 0 rebuilds the checklist's
+structural section from them.
+
 ### Suite header — set it IN `create_suite`
 
 `create_suite` accepts the header fields directly: `summary` (a
@@ -317,7 +343,7 @@ preview so the user can redirect:
 ## Code phase — suite as the case source (qa-pipeline-code step 0)
 
 When the code phase runs with the QA Service connector present, the
-suite — not the Jira archive comment — is the source of truth for case
+suite — not any local file — is the source of truth for case
 CONTENT (the team may have fixed cases in the web UI between phases):
 
 1. Locate the suite: the `QA Service suite:` line in the QA sub-task
@@ -333,9 +359,48 @@ CONTENT (the team may have fixed cases in the web UI between phases):
      channel-tagged from its `levelText`, and execute it too.
    List every reconciliation change to the user before the stages run.
    If neither an id nor a title match is possible, run that case from
-   the Jira version unchanged and skip the result write-back for it.
-3. Connector absent or suite not found → the Jira archive comment alone
-   is authoritative, exactly as before. Never block on QA Service.
+   the local version unchanged and skip the result write-back for it.
+   `-STRUCT-` cases rebuild the structural section of
+   `<STORY>-checklist.md` (one `[UI]` check per case, under its REQ).
+3. Connector absent or suite not found → `runs/<STORY>/docs/` on this
+   machine is the only source (pre-0.33 tickets: the legacy archive
+   comment via `extract_archive.py`). Neither reachable → PAUSE; never
+   run the code phase on cases you cannot read.
+
+## Bug-fix mode — the regression mini suite (qa-pipeline-code step 0) — since 0.33.0
+
+A standalone Bug or Defect has no docs phase, so until 0.33.0 its 2–4
+mini cases existed only in a local file and its verdicts only in
+markdown: no suite, no run, no durable record (EP-56998 open-items
+#13). Bug-fix mode now publishes the mini cases before stage 5, under
+the same single confirm as the rest of step 0, so that step 6 can open
+a run with a roster and the human round has somewhere to write:
+
+1. **Target suite = the FEATURE's suite**, per "Suite selection" above:
+   `list_suites`, match on the feature the bug touches (the parent
+   story's suite when the Bug is linked to one). Found → append.
+   Not found → create the feature's suite (path / prefix per Config,
+   named after the feature, never after the bug key). Ambiguous →
+   state both candidates and ask.
+2. **One requirement** unless the suite already states the rule:
+   `kind: fr` (or `rule` when the ticket words it as a MUST), `title`
+   = the expected behaviour in ≤ 9 words, `summary` = the ticket's own
+   expected-result sentence verbatim, `priority` from the bug's
+   priority, `detail.source` = `Bug <KEY>: <field>` — the
+   source-of-record rule applies: no expected result the ticket does
+   not state.
+3. **The mini cases** as normal cases: `traceability` → that
+   requirement, `detail.notes` opens with `Regression for <KEY>`,
+   stableIds continue the suite's numbering under an aspect segment
+   (`REG` when nothing better fits). TC-1 (the reproduction) carries
+   `detail.core: yes`.
+4. Regression cases added AFTER stage 5 (from pr-summary's
+   "Behaviours touched") are appended the same way, and the run's
+   roster is extended with `add_run_cases`, with the scope file saying
+   so.
+5. Connector absent → PAUSE and say what is lost (no run, no record,
+   local-only verdicts); continue only on the user's explicit yes, and
+   say so again in the final response.
 
 ## Result write-back (qa-pipeline-code step 6) — a QA Service test run
 
@@ -404,8 +469,8 @@ verdict as current:
   communicated.
 - **Retraction target rule:** the retraction comment goes to the ticket
   and thread where the retracted verdict was **published**, even when
-  that is not the ticket under test — the one exception to the archive
-  target rule, bounded to ≤ 6 lines and no dumps
+  that is not the ticket under test — the one sanctioned cross-ticket
+  comment, bounded to ≤ 6 lines and no dumps
   (`../../qa-pipeline/references/test-runs.md` → "Retraction target
   rule"). Stage 10's reconciliation therefore records, per RETRACTS row,
   the ticket key + comment id where the old verdict lives.

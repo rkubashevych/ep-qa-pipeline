@@ -4,11 +4,10 @@ description: >
   Orchestrator for the documentation half of the QA pipeline (stages
   1-4) plus publishing. Given a Jira ticket, runs task-context, then
   requirements-grooming, then qa-checklist, then qa-test-cases, runs the
-  run-analyzer, then publishes: a QA sub-task on the story holding the
-  checklist + test cases (so the code phase can pick them up without
-  manual file attaching) and, when the QA Service MCP connector is
-  enabled, a QA Service suite with the requirements and test cases as
-  the team's permanent system of record. Auto-advances with default
+  run-analyzer, then publishes: the QA Service suite with the
+  requirements, test cases and structural checks — the record the code
+  phase reads from — and a QA sub-task on the story as the human-facing
+  tracker (no file dumps into Jira). Auto-advances with default
   decisions, pausing only to confirm the publish (say "interactive
   mode" to get the grooming pause back). Use it
   when the user says "run the QA docs pipeline", "build the test cases
@@ -38,8 +37,8 @@ reimplement them.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
-upload; then the suite; then the QA sub-task archive if the ticket has
-one; asking the user is the last resort, not the first).
+upload; then the suite; asking the user is the last resort, not the
+first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 **Where this phase writes:** `runs/<ISSUEKEY>/docs/` — create it before
 stage 1 and print it once (`Run folder: runs/EP-1234/docs`). Every
@@ -151,21 +150,24 @@ directory; pass each output file to the next automatically.
    `<ISSUEKEY>-run-report.md`.
 
 6. **Publish** — two destinations, ONE confirmation:
-   (a) a new QA sub-task on the story (the code phase reads the
-   checklist/test-cases from Jira); (b) a QA Service suite with the
-   same requirements + cases — per
-   **`references/qa-service-publish.md`** (field mapping, suite
-   naming, re-run rules). (b) is on by default when the connector is
-   present; publish (a) only — saying so once in the final response —
-   when the connector is absent or the user declines. Never block (a)
-   on (b).
+   (a) a new QA sub-task on the story (the human-facing tracker); (b)
+   the QA Service suite with the requirements, cases **and the
+   structural checks** — per **`references/qa-service-publish.md`**
+   (field mapping, suite naming, re-run rules, the STRUCT cases). **(b)
+   is the record the code phase reads from** — since 0.33.0 no fenced
+   copy of any file is posted to Jira. (b) is on whenever the connector
+   is present; when it is absent or the user declines, publish (a) only
+   and say so plainly in the final response: the code phase for this
+   ticket can then run only on this machine, from
+   `runs/<ISSUEKEY>/docs/`. Never block (a) on (b).
 
    - **REQUIRED PAUSE / CONFIRM.** Before writing anything, show ONE
      preview: the parent story, the sub-task summary, the assignee,
      what will be posted, and the QA Service line (new suite path +
-     requirement/case counts, or "appending to existing suite", or
-     "skipped — connector not enabled"). Proceed only after an
-     explicit yes.
+     requirement / case / structural-check counts, or "appending to
+     existing suite", or "skipped — connector not enabled: code phase
+     will read runs/<ISSUEKEY>/docs/ on this machine only"). Proceed
+     only after an explicit yes.
    - Create via `createJiraIssue` with the project key, issue type,
      assignee, summary format, and label from
      **`references/publish-config.md`** (edit that file, not this one,
@@ -216,42 +218,37 @@ directory; pass each output file to the next automatically.
      - Nothing else goes in this comment. If one case genuinely needs
        its steps visible in Jira (a blocker reproduced without QA
        Service access), add them to that ONE case.
-   - **Machine-readable archive → only when QA Service did NOT
-     publish.** The code phase reads cases from the suite when there
-     is one:
-     - **Suite published** → skip the archive comment, with ONE
-       exception: the checklist's **structural checks that have no
-       test case** (the `[UI]` presence / label / field-type checks)
-       exist nowhere else — not in the suite, not in the tracker — and
-       web-testing executes them. Post those, and only those, as a
-       short fenced block headed
-       `File: <ISSUEKEY>-checklist.md (structural checks only)`,
-       preserving REQ grouping and channel tags. State in the final
-       response that the code phase will read the cases from the
-       suite. (Saves ~45,000 chars/ticket; one authoritative copy.)
-     - **No suite (connector absent / user declined)** → post the full
-       `<ISSUEKEY>-requirements.md`, `-checklist.md` and
-       `-test-cases.md` contents, each inside its own fenced code
-       block preceded by a plain `File: <name>` line, so
-       `qa-pipeline-code` step 0 can rebuild them (the requirements
-       file is what lets the code-phase analyzer re-verify upstream
-       traceability). Do not shorten or reformat file contents. Choose
-       fence lengths longer than any fence inside the file, and after
-       posting, READ THE COMMENT BACK and verify each file's length
-       against disk — Jira's markdown→ADF conversion has silently
-       truncated an archive containing nested code fences.
-     - **Size limit:** a Jira comment maxes out around ~32,000
-       characters. Measure before posting; above ~30,000, split into
-       several comments of the same shape, labelling split files
-       `File: <name> (part i/N)` — split only at line boundaries. The
-       code phase re-joins parts in order.
+   - **No machine-readable archive — retired in 0.33.0.** Nothing that
+     is a file is pasted into Jira any more: not the requirements, not
+     the checklist, not the test cases, not the "structural checks
+     only" block. Why: the fenced dumps ran to 45,000 characters per
+     ticket, were silently truncated by Jira's markdown→ADF conversion
+     at least once, had to be split into parts and re-joined by a
+     script, and duplicated a record the team already keeps in QA
+     Service. The two things the archive used to carry now live where
+     they belong:
+     - **Cases and requirements** → the suite (already the rule since
+       0.11.2).
+     - **Structural checks** (the checklist's `[UI]` presence / label /
+       field-type checks that have no test case) → the suite too, as
+       `STRUCT` cases per `qa-service-publish.md` → "Structural checks".
+       They used to live only in a fenced block on the sub-task, which
+       also meant web-testing's verdicts on them never reached the run.
+       Now they are roster cases like any other.
+     - **No suite** (connector absent / user declined) → nothing is
+       posted in their place. `runs/<ISSUEKEY>/docs/` is the only copy;
+       the code phase reads it on this machine and pauses on any other
+       (`qa-pipeline-code` step 0). Say so in the final response.
+     Pre-0.33 tickets still carry archive comments; the code phase can
+     still read them (`scripts/extract_archive.py`, legacy).
 
 ## Final response
 
 After publishing, report:
-- The paths of the four stage files + the run report.
-- The QA sub-task key + URL and what was posted (tracker comment +
-  archive comment).
+- The paths of the four stage files + the run report
+  (`runs/<ISSUEKEY>/docs/`).
+- The QA sub-task key + URL and what was posted (description + tracker
+  comment — no archive).
 - The QA Service suite path + requirement/case counts and the
   count-verification result (or "QA Service publish skipped —
   connector not enabled").

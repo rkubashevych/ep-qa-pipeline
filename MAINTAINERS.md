@@ -81,7 +81,7 @@ The stages need different things, so they run in different places:
 | Stage(s) | Needs | Run in |
 |---|---|---|
 | 1–4 docs (`task-context` … `qa-test-cases`) + `qa-pipeline-docs` | Jira/Confluence only (+ QA Service connector for the suite publish) | **Cowork** (or Claude Code) |
-| code-phase step 0 (case rebuild) | the **QA Service connector** whenever the docs phase published a suite — since 0.11.2 a suite-published ticket has NO Jira archive, so without the connector there is nothing to rebuild the cases from | wherever `qa-pipeline-code` starts |
+| code-phase step 0 (case rebuild) | the **QA Service connector** — the suite is the record of the cases (no Jira archive is posted since 0.33.0); without it only this machine's `runs/<KEY>/docs/` can supply them, and no run can be written | wherever `qa-pipeline-code` starts |
 | 5–6 `pr-summary`, `code-review` | the code: a **backend/portal-ui repo clone** OR a Bitbucket **API token** (`BB_EMAIL`+`BB_API_TOKEN`) | **Claude Code** |
 | 7 `api-testing` | the e2e **`.env`** (API creds) + a per-event frontend host | **Claude Code** |
 | 8 `web-testing` | a connected Chrome + logged-in test env | **Cowork** (Chrome extension) |
@@ -95,10 +95,11 @@ in the repo that has the `.env`; keep Cowork for the docs half and, when
 Chrome cooperates, `[UI]` web-testing.
 
 **Split runs are supported:** run 5–7 in Claude Code, post the step-6
-comments marked PARTIAL, then resume in Cowork with the same Story key —
-`qa-pipeline-code` Step 0 restores the finished stage reports from the
-archive comment on the QA sub-task (see "Split runs" in its SKILL.md).
-No files need to be carried between environments.
+status line marked PARTIAL, then resume in Cowork with the same Story
+key — `qa-pipeline-code` Step 0 restores the finished stage reports
+from the run folder `runs/<KEY>/r<N>/` (see "Split runs" in its
+SKILL.md). Both environments mount this repo, so no files need to be
+carried between them; the QA Service run carries the verdicts anyway.
 
 ## Where things live
 
@@ -118,10 +119,13 @@ No files need to be carried between environments.
   — written to the **run folder** `runs/<KEY>/…` inside the mounted
   repo (`data-locations.md`); the next stage reads them from there,
   in this session or the next. They are git-ignored, not committed.
-- **Hand-off between docs and code** — docs publishes the checklist +
-  test cases to the Story's **QA sub-task** on Jira; `qa-pipeline-code`
-  reads them back from there, so you don't carry files between sessions
-  — you only need the same ticket key.
+- **Hand-off between docs and code** — docs publishes requirements,
+  test cases and structural checks to the **QA Service suite**;
+  `qa-pipeline-code` reads them back from there (or from
+  `runs/<KEY>/docs/` on the same machine), so you don't carry files
+  between sessions — you only need the same ticket key. Nothing is
+  pasted into Jira any more (0.33.0); pre-0.33 tickets still carry the
+  old archive comments, which `extract_archive.py` can read.
 
 ## How to update — recipe
 
@@ -197,7 +201,8 @@ No files need to be carried between environments.
 | Jira custom-field / AC source | `skills/task-context/references/field-maps.md` |
 | Bitbucket auth (token/scopes, branch vs PR mode) + the curl/git command workflows | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
 | Jira publish values (project, issue type id, assignee, label) | `skills/qa-pipeline-docs/references/publish-config.md` |
-| Results-comment format (code phase: agent archive + human summary) | `skills/qa-pipeline-code/references/results-comment-template.md` |
+| Results-comment format (wave-1 status line, wave-2 human summary, story notes) | `skills/qa-pipeline-code/references/results-comment-template.md` |
+| Structural checks in the suite (`-STRUCT-` cases), bug-fix mini suite | `skills/qa-pipeline-docs/references/qa-service-publish.md` |
 | Per-case verdicts in QA Service (test run per pass, status → verdict mapping, what stays `not_run`, retractions, retraction target rule) | `skills/qa-pipeline/references/test-runs.md` |
 | What earlier rounds left open (carried risk rows, in/out rulings, `[core]` nominations) | `skills/qa-pipeline/references/open-items-ledger.md` → `<KEY>-open-items.md` |
 | Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (see the recipe) |

@@ -1,130 +1,69 @@
 # Results comments — two waves (step 6 = wave 1 · stage 10 = wave 2)
 
-**Contents:** the archive target rule · Comment 1 — machine archive
-(wave 1, QA sub-task only) · Comment 2 — human summary (wave 2, incl.
-Unverified defect claims, Requirements to correct, Overall verdict,
-Partial runs, Writing rules) · Story note — QA passed / QA failed
-(wave 2)
+**Contents:** wave 1 (one status line) · the retired archive (0.33.0) ·
+Comment — human summary (wave 2, incl. Unverified defect claims,
+Requirements to correct, Overall verdict, Partial runs, Writing rules)
+· Story note — QA passed / QA failed (wave 2)
 
 **Wave 1 (step 6, now):** the QA Service **test run** (created and
 recorded per `../../qa-pipeline/references/test-runs.md`; FAIL / PARTIAL
-rows stay `not_run` for the human), one short status comment (`QA
-automated pass complete — N cases, M settled by machine, K for manual —
-QA Service run <id> open. Results published after the manual round.`),
-and the machine archive comment(s) **if and only if the ticket has a QA
-sub-task**. Agents-only; no verdicts visible to a human skimmer,
-nobody tagged.
+rows stay `not_run` for the human) and **one short status comment**:
+
+```
+QA automated pass complete — N cases, M settled by machine, K for manual
+— QA Service run <id> open. Results published after the manual round.
+```
+
+Posted on the QA sub-task when the ticket has one, otherwise on the
+ticket under test. Agents-only wording; no verdicts visible to a human
+skimmer, nobody tagged. **Nothing else is posted in wave 1.**
 
 **Wave 2 (stage 10, after the manual round):** the human summary below,
 plus story notes / bug filings / decision requests — all on
 human-confirmed verdicts. Narrow wave-1 exception: runtime-confirmed +
 evidenced + blocking the manual round.
 
-## The archive target rule (0.26.0)
+## The retired archive (0.33.0) — and the rules that survive it
 
-**The results archive goes to the QA sub-task and nowhere else.**
+Until 0.33.0 wave 1 also posted a "machine archive": every stage report
+pasted verbatim into fenced blocks on the QA sub-task, split into parts
+above ~30,000 characters and re-joined by `scripts/extract_archive.py`.
+It is gone. The per-case record is the QA Service run (0.30.0); the
+reports' home is the run folder `runs/<STORY>/r<N>/` (0.32.0); the
+docs-phase files are the suite. The archive duplicated all three,
+ran to three to five unreadable comments per pass, and was silently
+truncated by Jira's markdown→ADF conversion at least once.
 
-| Ticket under test | Archive | Status line | Human summary |
+What survives from the 0.26.0 archive-target rule, because it was never
+really about archives:
+
+| Ticket under test | Status line | Human summary | Anything else |
 |---|---|---|---|
-| Story with a QA sub-task | ✅ on the sub-task | on the sub-task | on the sub-task |
-| Story with no QA sub-task | ❌ none | on the story | on the story |
-| Bug | ❌ none | on the bug | on the bug |
-| Defect (is itself a sub-task) | ❌ none | on the defect | on the defect |
+| Story with a QA sub-task | on the sub-task | on the sub-task | nothing |
+| Story with no QA sub-task | on the story | on the story | nothing |
+| Bug | on the bug | on the bug | nothing |
+| Defect (is itself a sub-task) | on the defect | on the defect | nothing |
 
-A QA sub-task is a machine artefact ticket — nobody reads it for
-status, so fenced file dumps cost nothing there. Every other ticket is
-read by developers and PMs, and step 6 used to have a "No QA sub-task →
-post the wave-1 comments to the MAIN issue" fallback that put three to
-five walls of unreadable dumps straight onto the ticket face. Observed
-on EP-56380: three archive comments on a Defect, while the suite case
-already held the whole run record.
-
-Two consequences, both load-bearing:
-
+- **A fenced file dump on any ticket is a ❌** in the post-publish
+  check — a Story face, a Bug, a Defect, and now the QA sub-task too.
 - **Do not walk up to the parent story's QA sub-task** for a Bug or
-  Defect. One ticket's run does not belong in another ticket's archive,
-  and a resume looking for `<BUG>-code-review.md` should not find it
-  filed under a story. **One exception: a retraction** goes to the
-  ticket where the retracted verdict was published, whatever ticket
-  that is — ≤ 6 lines (run id, `<case> — <old> → <new>`, reason, where
-  the new verdict was established), no dumps. It is a correction, not
-  an archive (`../../qa-pipeline/references/test-runs.md` → "Retraction
-  target rule"; the case that needed it: EP-56109 carried three FAIL
-  CONFIRMEDs that EP-56133 retest 3 passed, and no rule let the fix
-  reach the thread).
-- **Where no archive is posted the reports are local-only.** A resume
-  on another machine, or by a colleague, has nothing to restore — step
-  0's resume mode pauses and says so instead of re-running finished
-  stages. A split Claude Code ↔ Cowork run without a QA sub-task
-  therefore needs both environments to see the same run folder.
+  Defect. One ticket's run does not write into another ticket's thread.
+  **One exception: a retraction** goes to the ticket where the
+  retracted verdict was published, whatever ticket that is — ≤ 6 lines
+  (run id, `<case> — <old> → <new>`, reason, where the new verdict was
+  established), no dumps (`../../qa-pipeline/references/test-runs.md`
+  → "Retraction target rule"; the case that needed it: EP-56109 carried
+  three FAIL CONFIRMEDs that EP-56133 retest 3 passed, and no rule let
+  the fix reach the thread).
+- **The reports are local-only.** A resume on another machine, or by a
+  colleague, restores verdicts from the run and nothing else — step 0's
+  resume mode pauses and says so instead of re-running finished stages.
+  A split Claude Code ↔ Cowork run needs both environments to see the
+  same run folder (in this setup they do).
+- **Pre-0.33 tickets** still carry archive comments; `extract_archive.py`
+  reads them (legacy). Never post a new one.
 
-Never merge archive and summary into one comment. After posting the
-archive, **read it back and verify fidelity**: fetch the comment,
-run it through `scripts/extract_archive.py`, and compare each file's
-length with disk — Jira's markdown→ADF conversion has silently
-truncated an archive with nested code fences before. Choose each fence
-longer than any fence inside the file (dynamic fence length), never a
-bare triple-backtick around content that itself contains fences.
-
-## Comment 1 — machine archive (for agents) — QA SUB-TASK ONLY
-
-Skip this comment entirely when the ticket has no QA sub-task; name the
-report paths in the final response instead.
-
-Verbatim report files in labeled fenced code blocks — the same
-convention as the docs-phase archive comment (`qa-pipeline-docs`
-step 6), so any future agent can rebuild the full reports from Jira
-with the same parser. **Do not shorten, reformat, or paraphrase the
-file contents.**
-
-Shape (one `File:` line + one fenced block per file):
-
-````
-Machine-readable results archive (for agents). Humans: see the summary comment.
-
-File: <STORY>-code-review.md
-
-```
-<full file contents>
-```
-
-File: <STORY>-api-testing.md
-
-```
-<full file contents>
-```
-
-File: <STORY>-web-testing.md
-
-```
-<full file contents>
-```
-
-File: <STORY>-run-report.md
-
-```
-<full file contents>
-```
-
-File: <STORY>-open-items.md
-
-```
-<full file contents — the ledger, when it exists>
-```
-````
-
-Include every report file that exists. If a stage produced no file
-(e.g. no `[API]` cases → no api-testing report), add a plain line
-instead: `File <STORY>-api-testing.md not produced — <reason>`.
-
-**Size limit:** a Jira comment body maxes out around ~32,000
-characters. If the assembled archive exceeds ~30,000, split it into
-several archive comments (posted in order, all before the human
-summary), each with the same shape, labelling split files
-`File: <name> (part i/N)`. Split only at line boundaries; parts
-re-join by simple concatenation.
-
-## Comment 2 — human summary (for people)
+## Comment — human summary (for people) — wave 2
 
 Target **≤ 30 lines**. No fenced file dumps, no per-TC tables of
 passes. Most important information first. **Omit any section that
@@ -191,8 +130,7 @@ machine-only.`)
 - <id> — <one line> (since <round/date>; owner <who>)
 
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
-report (`<STORY>-run-report.md`; in the archive comment above when the
-ticket has a QA sub-task, otherwise in the run's run folder).
+report (`runs/<STORY>/r<N>/<STORY>-run-report.md`).
 
 **Test docs:** <N> requirements / <M> cases; QA Service run <id>
 (<closed / running>: <N> pass · <N> fail · <N> blocked · <N> skipped) —
@@ -218,19 +156,17 @@ hyperlinks, so a markdown link lands in Jira as unclickable text
 ### Partial runs (split environments)
 
 When some stages have not run yet (e.g. 5–7 done in Claude Code,
-web-testing pending in Cowork), post the same two comments with:
+web-testing pending in Cowork):
 
 - Verdict: `⏳ PARTIAL — <pending stages> pending`.
-- Archive (QA sub-task only): the report files that exist, plus a
-  plain line per missing file: `File <STORY>-web-testing.md not
-  produced — pending (runs in Cowork)`. With no QA sub-task there is no
-  archive — the finished reports stay on disk and the resuming
-  environment must read the same run folder.
-- Summary: a **Pending** line naming what remains and where it runs.
+- Status line: append `— PARTIAL: <pending stages> pending (runs in
+  <environment>)`. The finished reports stay in the run folder and the
+  resuming environment reads the same folder.
+- Summary (wave 2, later): a **Pending** line naming what remains and
+  where it runs, if anything is still pending by then.
 
-The resumed session posts a fresh final pair (archive where one
-applies, + summary). Never edit or delete earlier comments — newest
-pair wins.
+The resumed session posts a fresh status line. Never edit or delete
+earlier comments — newest wins.
 
 ### Writing rules
 
@@ -239,11 +175,10 @@ pair wins.
   pipeline writes into Jira: this summary, the status line, story
   notes, bug drafts, the grooming open-questions comment, and the
   stage-10 write-backs. Read it before composing; when it and a
-  template disagree on tone or length, it wins. Machine archive
-  comments are exempt (verbatim by design).
+  template disagree on tone or length, it wins.
 - Comment-specific rules on top of it:
-- One line per confirmed bug — the evidence lives in the archive
-  comment (or, where none was posted, the stage report on disk) and in
+- One line per confirmed bug — the evidence lives in the stage report
+  in the run folder and in
   the QA Service run's roster note for that case; never restate full
   findings.
 - FAIL REJECTED items are not bugs — count them as passes in the

@@ -46,7 +46,7 @@ suite. Consequences:
 
 - **Read the cases from the suite** when one exists and the connector
   is available, exactly as `qa-pipeline-code` step 0 does. Fall back to
-  `<ISSUEKEY>-test-cases.md` / the Jira archive only when it does not.
+  `<ISSUEKEY>-test-cases.md` in the run folder only when it does not.
 - **The walk plan (and any exported sheet) is never an input.** No
   automated stage reads it, and none ever should. It carries less
   detail than the machine needs by design, so treating it as a source
@@ -148,8 +148,8 @@ When it is a retest:
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
-upload; then the suite; then the QA sub-task archive if the ticket has
-one; asking the user is the last resort, not the first).
+upload; then the suite; asking the user is the last resort, not the
+first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 If the test-cases file is missing, ask for it. If the event id or the
 authorisation is missing, PAUSE and ask — do not guess an event.

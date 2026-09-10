@@ -10,7 +10,7 @@ this file disagree, this file wins.
 |---|---|---|
 | **The run folder** (`runs/<ISSUEKEY>/…`, below) | every `<ISSUEKEY>-*.md` stage file, the open-items ledger, the manual round's files — `-walk-plan.md`, `-walk-state.json`, `-walk-results.md`, `-testdata.json`, the optional runsheet `.xlsx` — evidence screenshots | the stage reports — and, where no archive was posted, the ONLY copy |
 | **QA Service suite + test runs** | requirements, test cases; per-case verdicts as **test runs** (`list_test_runs` / `get_test_run` / `case_execution_history` — one run per pass, `test-runs.md`); `notes` hold only `discrepancy:` lines and pre-0.30 history | test cases and requirements whenever a suite exists; per-case verdicts always |
-| **Jira** | the docs-phase archive (QA sub-task, only when no suite), the results archive (**QA sub-task only** — 0.26.0), the wave-1 status line, the wave-2 human summary | nothing the pipeline generates; it is a publication surface, not a source |
+| **Jira** | the QA sub-task (description + checkbox tracker), the wave-1 status line, the wave-2 human summary, retractions. **No archives since 0.33.0** — pre-0.33 tickets still carry legacy fenced dumps | nothing the pipeline generates; it is a publication surface, not a source |
 
 ## The run folder — `runs/<ISSUEKEY>/`
 
@@ -89,14 +89,11 @@ Look in this order and stop at the first hit:
    scope, a resume, stage 10's reconciliation) the previous pass's test
    run is the record — `get_test_run`, not the markdown reports and not
    the case notes.
-4. **The archive comment on the QA sub-task** — docs-phase artefacts
-   (requirements / checklist / test cases) and, since 0.26.0, results
-   reports. Parse with
+4. **Legacy only — the archive comment on the QA sub-task** of a
+   ticket run before 0.33.0 (fenced docs-phase files and results
+   reports). Parse with
    `<plugin>/skills/qa-pipeline-code/scripts/extract_archive.py -o
-   runs/<ISSUEKEY>/<folder>`.
-   **Only tickets with a QA sub-task have one.** A Bug, a Defect (which
-   is itself a sub-task and can never own one) and a small Story carry
-   no archive by design.
+   runs/<ISSUEKEY>/<folder>`. Never post a new one.
 5. **Ask the user to attach it.** Last resort, not first.
 
 ## Two mistakes this file exists to prevent
@@ -113,10 +110,11 @@ Statistics disagree, gets its stage re-dispatched for the missing cases.
 
 ## Which ticket receives what
 
-The archive target rule lives in `qa-pipeline-code/SKILL.md` step 6 and
-its `references/results-comment-template.md`. In short: archives go to
-QA sub-tasks only; a Story face, Bug or Defect gets the status line and
-the human summary, and nothing else. The one exception is a
+The rule lives in `qa-pipeline-code/SKILL.md` step 6 and its
+`references/results-comment-template.md`. In short: every ticket — QA
+sub-task, Story face, Bug or Defect — gets the wave-1 status line and
+the wave-2 human summary, and nothing else; **no fenced file dumps
+anywhere** since 0.33.0. The one cross-ticket comment is a
 **retraction** (≤ 6 lines, no dumps), which goes to the ticket where the
 retracted verdict was published, whatever ticket that is
 (`test-runs.md` → "Retraction target rule").

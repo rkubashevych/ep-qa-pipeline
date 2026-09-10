@@ -5,6 +5,80 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.33.0 — 2026-09-10 — one record
+
+**Jira archive comments are retired. The QA Service suite + run and the
+run folder are the record; Jira gets one status line and one human
+summary per pass.** The archive was a text-in-comments data store built
+before the suite existed: fenced dumps of the checklist, test cases and
+every stage report, re-joined by a script, split into parts above
+30,000 characters, silently truncated by Jira's markdown→ADF at least
+once, and running to three to five unreadable comments per pass — the
+0.11.2 dedup, the 0.26.0 target rule and the 0.30.0 run were each a
+step away from it. Second of the five "old beside new" clean-ups agreed
+on 2026-09-10; closes EP-56998 open-items #13.
+
+- **Docs phase posts no fenced file into Jira.** `qa-pipeline-docs`
+  step 6: the "no suite → full archive" branch and the "structural
+  checks only" block are gone. The QA sub-task keeps its description
+  and the one-line-per-case tracker comment. No suite (connector absent
+  / declined) → nothing is posted in its place; `runs/<KEY>/docs/` is
+  the only copy and the code phase reads it on this machine.
+- **Structural checks become suite cases.** The checklist's `[UI]`
+  presence / label / field-type checks — no test case by stage 4's
+  rule, executed by stage 8 — used to live only in a fenced block on
+  the sub-task, so their verdicts never reached the run. They are now
+  `<PREFIX>-STRUCT-NN` cases (`levels: ["E2E"]`, `techniques:
+  ["UI-CONF"]`, folder `<REQ area> — structure`, traced to the REQ;
+  `qa-service-publish.md` → "Structural checks"). Not counted in the
+  test-cases statistics; the publish preview reports "N cases + S
+  structural checks"; the analyzer's sync check expects exactly S
+  extras. Step 0 rebuilds the checklist's structural section from them;
+  stage 8 reports each with its stable id and its verdict goes on the
+  run.
+- **Bug-fix mode gets a record.** A standalone Bug / Defect had no suite,
+  no run and no durable verdict (EP-56998 #13). Step 0 now publishes
+  the 2–4 mini cases to the FEATURE's suite before stage 5 — append
+  when the feature has one, create it when not, named after the
+  feature per the existing "Suite selection" rule — with one
+  requirement carrying the ticket's own expected result verbatim
+  (`detail.source: Bug <KEY>`), `Regression for <KEY>` in each case's
+  notes, TC-1 as `core`, and later regression cases added via
+  `add_run_cases`. Same single step-0 confirm. Connector absent → PAUSE
+  and say what is lost (`qa-service-publish.md` → "Bug-fix mode").
+- **Code phase wave 1 = the run + one status line.** "Comment 1 —
+  machine archive" is removed from `qa-pipeline-code` step 6 and from
+  `results-comment-template.md` (whose head is rewritten; the 0.26.0
+  target table survives as "which ticket gets the status line and
+  summary" — the answer is now "every ticket, and nothing else"). The
+  post-publish check: exactly one wave-1 comment, and **a fenced file
+  dump on ANY ticket is a ❌** — the QA sub-task included. Split runs:
+  both environments read the same `runs/<KEY>/r<N>/` (they mount the
+  same repo); the run carries the verdicts regardless.
+- **Stage 10 posts no archive of `-manual-results.md`** either; a resume
+  or reconciliation on another machine takes the machine verdicts from
+  `get_test_run` and says the report prose is unavailable, instead of
+  reconciling against nothing.
+- **Resume order** (step 0): run folder → the QA Service run for
+  verdicts → PAUSE. `extract_archive.py` stays as a **legacy reader**
+  for pre-0.33 tickets and says so in its docstring; the shared
+  input-resolution boilerplate in 11 skills now names the archive as
+  legacy only. `data-locations.md` Jira row and resolution step 4,
+  `test-runs.md` retraction section ("the one sanctioned cross-ticket
+  comment"), `open-items-ledger.md` durable-copy paragraph, MAINTAINERS
+  environment matrix / split-run note / hand-off bullet / lookup table,
+  README, dispatcher, web-testing input 3 and the analyzer (new 🟡
+  "archive posted") updated to match. Descriptions: qa-pipeline-code
+  989, qa-pipeline-docs 788 chars.
+- **What was not weakened:** the two-wave rule, the retraction target
+  rule, the "no walk-up" rule, the 0.11.2 one-copy principle (now
+  literally one copy), the source-of-record gate for bug-fix expected
+  results.
+- **Deliberately not changed:** the checkbox tracker comment on the QA
+  sub-task (item 3 of the review — next release), and stage 4's rule
+  that structural checks get no TC in the test-cases file (the suite
+  holds them; the file's register is unchanged).
+
 ## 0.32.0 — 2026-09-10 — the run folder
 
 **Run artefacts move out of the repo root into `runs/<KEY>/`.** When

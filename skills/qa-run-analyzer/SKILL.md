@@ -160,7 +160,14 @@ suite:` line in the QA sub-task description) and report ONE of:
 - 🟢 **in sync** — suite exists; its requirement stableIds and case
   count match the requirements/test-cases files (compare via
   `get_suite`; account for deliberately skipped duplicates listed in
-  the publish preview).
+  the publish preview). **`-STRUCT-` cases are expected extras**
+  (0.33.0): their count must equal the checklist's structural `[UI]`
+  checks, not appear in the test-cases file — S structural cases
+  beyond N test cases is in sync; S ≠ the checklist's count is the
+  mismatch below.
+- 🟡 **archive posted** — any fenced `File: <name>` block found in a
+  comment written by this round on any ticket. Archives were retired
+  in 0.33.0; name the comment so it can be deleted.
 - 🟢 **not published yet** — no suite found AND this analyzer run is
   inside the docs orchestrator (publish is its step 6, which runs
   after this check — expected, not a failure).

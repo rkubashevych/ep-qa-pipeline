@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Extract `File: <name>` fenced blocks from Jira archive comments.
 
+LEGACY READER (0.33.0). Archive comments are no longer posted: the
+QA Service suite + run hold the record and runs/<KEY>/ holds the
+reports (data-locations.md). This script exists only to read tickets
+run before 0.33.0. Never use it to justify posting a new archive.
+
 qa-pipeline-code Step 0 helper. Save the archive comment body/bodies
 to text files, then:
 

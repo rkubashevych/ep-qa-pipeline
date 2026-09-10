@@ -5,8 +5,8 @@ description: >
   5-10). Given a Story key, reads the test cases from the story's QA
   sub-task and derives the dev branches, then runs pr-summary, then
   code-review, then api-testing, then web-testing, then run-analyzer,
-  archives machine results on the QA sub-task (human summary follows
-  at stage 10), builds the manual walk plan so a human can walk what
+  records machine verdicts on a QA Service test run (human summary
+  follows at stage 10), builds the manual walk plan so a human can walk what
   the machine could not settle, verifies the published state, and
   defers the final handback to qa-manual-results (stage 10). Also:
   retest mode ("retest <KEY>", "the fix landed") and bug-fix mode
@@ -49,8 +49,8 @@ in a fresh chat (separate from the docs phase) for context health.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
-upload; then the suite; then the QA sub-task archive if the ticket has
-one; asking the user is the last resort, not the first).
+upload; then the suite; asking the user is the last resort, not the
+first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 **Sources of record:** `../qa-pipeline/references/sources-of-record.md`
 — the register this phase builds at step 0 and the gate every finding
@@ -93,13 +93,13 @@ If not, say so NOW and ask the user to mount the folder or run this
 phase from Claude Code (MAINTAINERS "Where to run each stage") — do
 not discover this mid-run at stage 5.
 
-**QA Service connector is part of this check.** If the QA sub-task's
-description names a QA Service suite and the connector is NOT in this
-session, there is nothing to rebuild the cases from — a
-suite-published ticket carries no Jira archive (0.11.2 dedup). Suite
-named + no connector + no archive comment → PAUSE and tell the user to
-enable the connector or start from a session that has it. Never
-discover this at extraction time.
+**QA Service connector is part of this check.** The suite is the only
+copy of the cases outside this machine's run folder (no Jira archive is
+posted since 0.33.0). Suite named + no connector → PAUSE and tell the
+user to enable the connector or start from a session that has it —
+unless `runs/<STORY>/docs/<STORY>-test-cases.md` exists here, in which
+case say the run will use the local copy and cannot write verdicts to a
+run. Never discover this at extraction time.
 
 **Build the source register — REQUIRED, in every mode.** Rules and the
 table format: `../qa-pipeline/references/sources-of-record.md`. Fetch
@@ -139,8 +139,8 @@ Otherwise, using the Atlassian connector and the Story key:
    `parent = <STORY> AND issuetype = "QA sub-task"` (prefer the newest
    with label `qa-pipeline` or a `[QA-PIPELINE]` summary).
 
-   **Source order — suite first** (since 0.11.2 the docs phase posts
-   no fenced archive when it published a suite):
+   **Source order — suite first** (the docs phase posts no fenced copy
+   of any file since 0.33.0; the suite is the record):
    - Sub-task names a **QA Service suite** + connector present →
      `get_suite` and rebuild `<STORY>-test-cases.md` from the suite's
      cases (id, title, levels → channel tag, traceability, `detail`
@@ -155,26 +155,25 @@ Otherwise, using the Atlassian connector and the Story key:
        response. Report: "suite holds N cases; M in scope for
        <STORY>".
      - Rebuild `<STORY>-checklist.md` from the suite's requirements
-       PLUS the `(structural checks only)` fenced block on the
-       sub-task — those `[UI]` presence/label/field-type checks exist
-       only there and stage 8 needs them. Block missing on an older
-       ticket → say so; structural checks will be skipped.
+       PLUS its `-STRUCT-` cases — the `[UI]` presence/label/field-type
+       checks stage 8 executes, one `[UI]` check per case under its REQ
+       (`qa-service-publish.md` → "Structural checks"). They are roster
+       cases: stage 8's verdicts on them go on the run. Pre-0.33 ticket
+       with no STRUCT cases → read the legacy `(structural checks
+       only)` fenced block on the sub-task if present; otherwise say so
+       and skip structural checks.
      - **Rebuild `<STORY>-requirements.md`** from the suite's
        requirements (title, kind, risk, stableId → REQ-N mapping from
        the tracker lines) — without it the analyzer's traceability
        check silently cannot run in any fresh-chat code phase. No
-       suite → use the requirements block from the docs archive
-       comment (posted since 0.17.0); neither exists (older tickets)
-       → say once that upstream traceability cannot be re-verified.
-   - No suite line, or no connector → fall back to the **fenced
-     archive comments** (posted exactly in that case). Extract the
-     fenced blocks from the description/comments; large files may be
-     split as `File: <name> (part i/N)` blocks — collect and
-     concatenate in order. Prefer `scripts/extract_archive.py` (this
-     skill's folder) on the saved comment bodies — it handles labels,
-     parts, and nested fences deterministically; extract manually only
-     if it cannot run. Write `<STORY>-checklist.md` and
-     `<STORY>-test-cases.md` to the run folder.
+       suite → `runs/<STORY>/docs/<STORY>-requirements.md` on this
+       machine; neither → say once that upstream traceability cannot
+       be re-verified.
+   - No suite line, or no connector → **`runs/<STORY>/docs/`** on this
+     machine (the docs phase wrote its files there). Pre-0.33 tickets
+     may instead carry fenced archive comments on the sub-task —
+     `scripts/extract_archive.py` (legacy) still reads them, parts and
+     nested fences included.
    - Neither available → offer the choice: re-run `qa-pipeline-docs`
      (or attach the files), or — for a Bug ticket — **Bug-fix mode**
      below.
@@ -195,14 +194,22 @@ Otherwise, using the Atlassian connector and the Story key:
      the fix PR touches beyond the bug (from pr-summary's "Behaviours
      touched" — add these AFTER stage 5 runs). Channel-tag each case;
      the routing invariant applies as usual.
-   - **No checklist, no suite, no QA sub-task.** Structural checks are
-     skipped (say so); the write-back targets are the BUG ticket's
-     comments — same two-wave rule: the status comment now, the
-     human-facing verdict after your manual check. **No archive** (the
-     archive target rule, step 6): a Bug or Defect gets exactly two
-     comments across the whole run, and the second is the verdict a
-     person actually wants to read. The reports stay on disk, so a
-     resume of a bug-fix run needs the same run folder.
+   - **No checklist, no QA sub-task — but a suite.** Structural checks
+     are skipped (say so). **Publish the mini cases to the FEATURE's
+     suite before stage 5** (append, or create the feature's suite),
+     with one requirement carrying the ticket's own expected result,
+     per `../qa-pipeline-docs/references/qa-service-publish.md` →
+     "Bug-fix mode — the regression mini suite" — same single confirm
+     as the rest of step 0. That is what lets step 6 open a run with a
+     roster and stage 10 record the human verdicts; until 0.33.0 a
+     bug-fix run left no durable record at all (EP-56998 open-items
+     #13). Connector absent → PAUSE, say what is lost, continue only
+     on an explicit yes. The Jira write-back targets are the BUG
+     ticket's comments — same two-wave rule: the status comment now,
+     the human-facing verdict after your manual check. A Bug or Defect
+     gets exactly two comments across the whole run, and the second is
+     the verdict a person actually wants to read. The reports stay in
+     the run folder, so a resume needs the same machine.
    - **Stages 5–8 run unchanged** on the derived branch (the bug key
      is the branch, or use the main-issue PR fallback). All evidence
      rules, gates and pauses apply — a small scope is not a licence to
@@ -219,9 +226,9 @@ Otherwise, using the Atlassian connector and the Story key:
    in the web UI between phases); rules:
    `../qa-pipeline-docs/references/qa-service-publish.md` → "Code
    phase — suite as the case source". No suite line or no connector →
-   the Jira archive is authoritative; skip reconciliation and the
-   later write-back silently and say so once in the final response.
-   Never block on QA Service.
+   the local docs-phase files are all there is; skip reconciliation and
+   the later write-back and say so once in the final response — the
+   run will leave no durable per-case record.
 
    **Resume mode — look in this order:**
    1. **The run folder** — `<STORY>-code-review.md`,
@@ -234,15 +241,15 @@ Otherwise, using the Atlassian connector and the Story key:
       already exists for this pass (`list_test_runs` on the suite, title
       `<STORY> …`), its roster verdicts are the machine record — resume
       into that run, never create a second one for the same pass.
-   2. **The results archive comment on the QA sub-task**, when the
-      ticket has one — fenced blocks labeled
-      `File: <STORY>-code-review.md` etc.
-      (`references/results-comment-template.md`). Prefer
-      `scripts/extract_archive.py`. This is what makes a resume on
-      another machine possible.
-   3. **Neither → PAUSE.** Tickets without a QA sub-task carry no
-      archive by design (step 6's archive target rule), so their
-      reports exist only in the run folder. Say that plainly,
+   2. **The QA Service run** — for the *verdicts* of a pass whose
+      reports are not here: `get_test_run` gives every roster row's
+      verdict, principal and note. The prose of a stage report
+      (findings, blast radius, unmapped changes) exists only in the run
+      folder; pre-0.33 tickets may still carry it in legacy archive
+      comments on the QA sub-task (`scripts/extract_archive.py`).
+   3. **No run folder for this pass → PAUSE.** The reports live only on
+      the machine that ran the stages (no archive is posted since
+      0.33.0). Say that plainly,
       ask whether this is the machine the earlier run used, and offer
       either to re-run the missing stages or to have the files
       attached. Never assume "no file" means "stage never ran" — on a
@@ -349,18 +356,19 @@ single-environment run) or the Chrome extension (Cowork). When the
 current environment cannot run everything: run what it can, post the
 step-6 comments marked **PARTIAL** (per the template — name the pending
 stages), then start a fresh chat in the other environment with the same
-Story key. Step 0's resume mode restores the finished reports, and the
-last environment posts the final archive + summary as a NEW pair —
-existing comments are never edited.
+Story key. Step 0's resume mode restores the finished reports from the
+run folder, and the last environment posts the final status line +
+(at stage 10) the summary as NEW comments — existing comments are never
+edited.
 
-**What bridges the two environments depends on the ticket (0.26.0).**
-With a QA sub-task, the partial archive carries the reports across, so
-the environments need nothing in common. **Without one — a Bug, a
-Defect, a small Story — no archive is posted, so the two environments
-must see the same run folder.** If they cannot, that run cannot
-be split: say so before starting rather than discovering it at step 0,
-and either run everything in one environment or have the files carried
-across by hand.
+**What bridges the two environments is the run folder (0.33.0).** Both
+must see `runs/<STORY>/r<N>/` — in this setup Cowork and Claude Code
+mount the same qa-pipeline-skill repo, so they do. The QA Service run
+carries the verdicts across regardless; the reports' prose does not
+travel any other way (no archive is posted). If the two environments
+cannot share the folder, that run cannot be split: say so before
+starting rather than discovering it at step 0, and either run
+everything in one environment or have the files carried across by hand.
 
 ## How it runs
 
@@ -417,39 +425,27 @@ story does not exhaust the orchestrator's context:
    here, closed by stage 10 — `../qa-pipeline/references/test-runs.md`),
    ONE short status comment with no verdicts (`QA automated pass
    complete — N cases, M settled by machine, K for manual — QA Service
-   run <id> open. Results published after the manual round.`), and the
-   machine archive comment(s) — **only if the ticket has a QA sub-task.**
+   run <id> open. Results published after the manual round.`). **That
+   is all wave 1 posts to Jira — one status line, on the QA sub-task
+   when the ticket has one, otherwise on the ticket under test.**
 
-   **Archive target rule (0.26.0): the results archive goes to the QA
-   sub-task and nowhere else.** A QA sub-task is a machine artefact
-   ticket; nobody reads it for status, so fenced file dumps are free
-   there. Every other ticket type — Story face, Bug, Defect — receives
-   **no archive at all**: the reports stay in the run folder and
-   the QA Service suite carries the per-case record.
+   **No archive comments — retired in 0.33.0.** Until then wave 1 also
+   pasted every stage report into fenced blocks on the QA sub-task
+   ("Comment 1 — machine archive"). Why it is gone: the run is the
+   per-case record (0.30.0), the run folder is the reports' home
+   (0.32.0), and the dumps ran to three to five unreadable comments
+   per pass — on EP-56380 three of them landed on a Defect's face,
+   which is what produced the 0.26.0 target rule. A fenced file dump
+   on ANY ticket is now a ❌ in the post-publish check. One ticket's
+   run never writes into another ticket's thread; **the one sanctioned
+   cross-ticket comment is a retraction** (stage 10, `test-runs.md` →
+   "Retraction target rule"): ≤ 6 lines correcting a verdict, posted
+   where that verdict was published.
 
-   A **Defect is itself a sub-task** and can therefore never own a QA
-   sub-task, so bug-fix mode posts no archive by construction. That is
-   the normal path, not an edge case. Do **not** improvise a walk-up to
-   the parent story's QA sub-task: one ticket's run does not belong in
-   another ticket's archive, and a future resume looking for
-   `<BUG>-code-review.md` would find it filed under the story. **The
-   one exception is a retraction** (stage 10, `test-runs.md` →
-   "Retraction target rule"): a ≤ 6-line comment correcting a verdict
-   goes to the ticket where that verdict was published, whatever ticket
-   that is — it is not an archive and carries no dumps.
-
-   Why this rule exists: the archive ran to three to five comments of
-   unreadable fenced dumps, and step 6's old "No QA sub-task → post to
-   the MAIN issue" fallback put them straight onto the face of tickets
-   developers and PMs read daily. Observed on EP-56380 — three archive
-   walls on a Defect, while the suite case already held the full run
-   record.
-
-   **When no archive is posted, the reports are local-only, and step 0
-   must guard it:** a resumed run then rebuilds from the working
-   directory, so a resume on a different machine or by a colleague has
-   nothing to restore. Step 0 pauses in that case rather than silently
-   re-running or proceeding empty.
+   **The reports are local-only, and step 0 guards it:** a resume
+   rebuilds from `runs/<STORY>/r<N>/`; on a different machine step 0
+   pauses rather than silently re-running or proceeding empty. The
+   verdicts themselves are always recoverable from the run.
 
    **Wave 2 — after `qa-manual-results` (stage 10), never now.** The
    human summary, the story comment, the stage-verdict table, and any
@@ -486,8 +482,7 @@ story does not exhaust the orchestrator's context:
      on EP-56197 with a `"True matches"` column, and the tester caught
      it, not the pipeline.
    - **REQUIRED PAUSE / CONFIRM.** Show what wave 1 will post (the
-     status comment verbatim, and whether an archive comment is
-     included or skipped — say which, and why), to which ticket, and —
+     status comment verbatim — the only comment), to which ticket, and —
      connector present — the run preview: title, `env`, release (or
      `none`), roster count (= the step-0 scope count, or say why not),
      how many rows will be recorded per verdict, how many stay
@@ -506,29 +501,21 @@ story does not exhaust the orchestrator's context:
      pass already exists (resume) → record into it, never a second one.
      Never overwrite lifecycle `status`; write no run lines into notes.
      Connector absent → no run; say so in the final response.
-   - **Comment 1 — machine archive (for agents), QA SUB-TASK ONLY:**
-     the full `<STORY>-code-review.md`, `-api-testing.md`,
-     `-web-testing.md`, `-run-report.md` and `-open-items.md` (the
-     ledger, when it exists), each in its own fenced code block preceded
-     by a plain `File: <name>` line (same convention as the docs-phase
-     archive). Do not shorten or reformat.
-     **If the ticket under test has no QA sub-task, skip this comment
-     entirely** — the reports stay on disk, and the final response
-     names their paths so the user knows where the evidence is. Never
-     paste report contents onto a Story face, Bug or Defect, and never
-     substitute a prose summary of them there either: the wave-2 human
-     summary is the only narrative those tickets get.
-   - **Comment 2 — human summary — is WAVE 2, posted by stage 10, not
-     here.** Write `<STORY>-human-summary.md` now (per the template:
-     overall verdict, stage-verdict table, confirmed bugs, needs a
-     human, not tested, run-health line, ≤30 lines) so stage 10 has
-     the machine's picture to reconcile against — but do NOT post it.
+   - **The status comment is the only Jira write in wave 1.** Never
+     paste report contents onto any ticket, and never substitute a
+     prose summary of them either: the wave-2 human summary is the only
+     narrative a ticket gets. The final response names the report paths
+     (`runs/<STORY>/r<N>/`) so the user knows where the evidence is.
+   - **The human summary is WAVE 2, posted by stage 10, not here.**
+     Write `<STORY>-human-summary.md` now (per the template: overall
+     verdict, stage-verdict table, confirmed bugs, needs a human, not
+     tested, run-health line, ≤30 lines) so stage 10 has the machine's
+     picture to reconcile against — but do NOT post it.
    - Use comments (`addCommentToJiraIssue`), never a description
      overwrite.
    - No QA sub-task (Bugs, Defects, small Stories) → the status
-     comment goes on the MAIN issue, same confirm pause, and **no
-     archive**. That status line is the ONLY thing a human-facing
-     ticket receives in wave 1.
+     comment goes on the MAIN issue, same confirm pause. That status
+     line is the ONLY thing a human-facing ticket receives in wave 1.
    - **Tracker note:** the connector cannot tick the docs-phase
      checkbox tracker. The human summary is the source of truth for
      automated results; the tracker holds the human's manual
@@ -647,16 +634,15 @@ story does not exhaust the orchestrator's context:
      "not carried — <reason>" line in the drafted human summary. No
      silent FAILs. Every 🔴/🟡 the analyzer left unsettled has a row in
      `<STORY>-open-items.md` (`open-items-ledger.md`).
-   - **Wave-1 comments exist, on the right ticket:** the status
-     comment, and the archive comment(s) **only where a QA sub-task
-     exists** — re-read, don't assume. A fenced results archive found
-     on a Story face, Bug or Defect is a ❌ (archive target rule). The
+   - **Wave-1 comment exists, on the right ticket, and nothing else
+     does:** exactly one status comment (QA sub-task when there is one,
+     else the ticket under test) — re-read, don't assume. A fenced file
+     dump found on ANY ticket is a ❌ (archives retired 0.33.0). The
      human summary must NOT be posted yet — finding it posted early is
      a ❌.
    - **Reports are on disk:** every stage report the run produced is
-     present in the run folder. Where no archive was posted they
-     are the ONLY copy of the evidence — a missing one is a ❌, not a
-     formality.
+     present in the run folder. They are the ONLY copy of the evidence
+     — a missing one is a ❌, not a formality.
    - **Walk-plan outputs exist** — `<STORY>-walk-plan.md` and
      `-testdata.json` (unless stage 9 was skipped), and every card in
      the plan passed stage 9's voice check (no HTTP verb, curl line or
@@ -699,7 +685,7 @@ story does not exhaust the orchestrator's context:
   exactly ONE line per boundary:
   `⏱ Stage <n>/<total> done — <name> · elapsed <E> min · ~<R> min left`.
   Initial budgets (minutes): step 0 8 · pr-summary 15 · code-review 30
-  · api-testing 25 · web-testing 45 · analyzer 8 · archive + publish
+  · api-testing 25 · web-testing 45 · analyzer 8 · run + publish
   10 · walk plan 30. Compute `<R>` as the unfinished budgets scaled by
   the run's own pace (elapsed ÷ sum of finished budgets, clamped to
   0.5–3); round to 5 minutes, keep the `~`. Stamp both ends of every
@@ -726,11 +712,11 @@ story does not exhaust the orchestrator's context:
 
 ## Final response
 
-Report: the files produced and their full paths — **and, when no
-archive was posted, that they are the only copy of the evidence**; the
+Report: the files produced and their full paths — **and that they are
+the only copy of the evidence**; the
 overall (machine) verdict and confirmed bugs; confirmation of what
-wave 1 posted and where (key + URL), including whether the archive was
-posted or skipped and why, and that the human summary is written but
+wave 1 posted and where (key + URL — one status comment, nothing
+else), and that the human summary is written but
 deliberately NOT posted (two-wave rule); the QA Service run id and its
 recorded counts per verdict + how many rows stay `not_run` for the
 human (or "no run — connector not enabled" / "no run — no suite for

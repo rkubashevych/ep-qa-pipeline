@@ -95,11 +95,8 @@ answer to, when the class is `[Pipeline]`.
 ## Where it lives
 
 `runs/<KEY>/` — beside the pass folders, not inside one
-(`data-locations.md` resolution order). Durable copy: where the ticket has a QA sub-task, the
-ledger is archived with the reports in wave 1 (`File:
-<KEY>-open-items.md` in the machine archive comment) and restored by
-step 0 like any other file. Where there is no QA sub-task — a Bug, a
-Defect — the run folder is the only copy, exactly as for the
-reports; a resume on another machine pauses for it rather than starting
+(`data-locations.md` resolution order). It is the only copy — no
+archive is posted since 0.33.0 — exactly as for the reports; a resume
+on another machine pauses for it rather than starting
 a fresh, memory-less ledger. It matches the `EP-*` ignore rule and is
 never committed.

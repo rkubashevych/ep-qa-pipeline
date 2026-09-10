@@ -26,14 +26,18 @@ files. Output: a detailed per-case report.
 2. `<ISSUEKEY>-test-cases.md` (from qa-test-cases).
 3. `<ISSUEKEY>-checklist.md` — source of the `[UI]` structural checks
    (presence / type / label) that deliberately have no test case.
-   Execute them for the pages you visit and report them in the
-   "Structural checks" section. If genuinely unavailable, note that in
-   the report's Notes line and continue with test cases only.
+   Since 0.33.0 each of them is also a `-STRUCT-` case in the QA
+   Service suite (step 0 rebuilds the checklist's structural section
+   from those), so report each with its stable id and treat them as
+   roster cases: their PASS/FAIL reaches the run like any other. Execute
+   them for the pages you visit and report them in the "Structural
+   checks" section. If genuinely unavailable, note that in the report's
+   Notes line and continue with test cases only.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
-upload; then the suite; then the QA sub-task archive if the ticket has
-one; asking the user is the last resort, not the first).
+upload; then the suite; asking the user is the last resort, not the
+first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 Optional: a per-task **base URL / test host**. Many tasks are tested
 on a task-specific alpha host (e.g. an `*alphanext*.expoplatform.net`

@@ -34,9 +34,10 @@ From the ticket key/URL (ask if the paste has none):
    `parent = <KEY> AND issuetype = "QA sub-task"` (newest with the
    pipeline label wins).
 3. On that sub-task, when it exists: a QA Service suite line? a
-   code-phase status comment? a human summary? (Since 0.26.0 the stage
-   reports are local-only — absence of an archive comment says nothing
-   about whether the code phase ran; check the run folder.)
+   code-phase status comment? a human summary? (The stage reports are
+   local-only — Jira carries no archive since 0.33.0, so their absence
+   on the ticket says nothing about whether the code phase ran; check
+   the run folder and `list_test_runs` on the suite.)
 4. Run folder: `<KEY>-walk-plan.md`, `<KEY>-walk-state.json`
    (a walk in progress), `<KEY>-walk-results.md`, `<KEY>-runsheet.xlsx`,
    `<KEY>-testdata.json`, stage reports, `<KEY>-recon.md` — local
@@ -44,8 +45,8 @@ From the ticket key/URL (ask if the paste has none):
 
 **Where to find inputs:** `references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
-upload; then the suite; then the QA sub-task archive if the ticket has
-one; asking the user is the last resort, not the first).
+upload; then the suite; asking the user is the last resort, not the
+first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 ## Step 2 — Propose the route
 

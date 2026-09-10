@@ -122,8 +122,8 @@ row exists, and the wave-1 status comment says so
 (`… K for manual — QA Service run <id> open`). Stage 10 closes it.
 
 The machine's evidence for those rows is not lost: it is in the stage
-report (on disk, and in the archive where a QA sub-task exists) and in
-the run-sheet row's pre-filled "machine says" column. What is withheld
+report (in the run folder — the only copy since 0.33.0) and in the
+walk plan card's `machine:` backstage key. What is withheld
 is only the *verdict*, until a person confirms it.
 
 ## Stage 10 — the human pass
@@ -160,19 +160,18 @@ The communication half is unchanged and load-bearing: a stage that
 records a retraction says so in its Jira human summary — retractions
 first, `old → new` with the reason and the run id.
 
-## Retraction target rule — the one exception to the archive target rule
+## Retraction target rule — the one sanctioned cross-ticket comment
 
 **A retraction is posted where the verdict it retracts was published**,
 on whatever ticket that is. On EP-53978 (retest 3), three cases were
 published as FAIL CONFIRMED in comments on **EP-56109**; the retest that
 passed them ran under **EP-56133**, a Bug with no QA sub-task. The 0.26.0
-archive target rule ("no walk-up") left the retraction with nowhere to
-land, and a reader of EP-56109 kept seeing three confirmed failures that
-were fixed.
+"no walk-up" rule left the retraction with nowhere to land, and a reader
+of EP-56109 kept seeing three confirmed failures that were fixed.
 
 Rules:
 
-- The retraction comment is **not an archive**: ≤ 6 lines — the run id,
+- The retraction comment is **not a dump**: ≤ 6 lines — the run id,
   each case (`<stable id> — <old> → <new>`), the reason, and the
   ticket/run that established the new verdict. No fenced dumps, no
   summary of the new run.
@@ -182,8 +181,9 @@ Rules:
   row, *where* the old verdict was published (ticket key + comment id —
   the retest-scope file already carries it; it is now a required
   column).
-- Nothing else crosses tickets. The archive target rule stands for
-  archives, status lines and summaries.
+- Nothing else crosses tickets: status lines and summaries stay on the
+  ticket under test (its QA sub-task when it has one). Archive comments
+  no longer exist at all (0.33.0).
 
 ## Notes are retired as a verdict store
 

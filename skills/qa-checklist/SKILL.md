@@ -25,8 +25,8 @@ requirements-grooming skill.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
-upload; then the suite; then the QA sub-task archive if the ticket has
-one; asking the user is the last resort, not the first).
+upload; then the suite; asking the user is the last resort, not the
+first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 `<ISSUEKEY>` is a Jira (Atlassian Cloud) ticket key in the
 `PROJECT-123` format, for example `EP-1234`.
