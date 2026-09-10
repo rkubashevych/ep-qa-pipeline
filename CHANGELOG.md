@@ -5,6 +5,38 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.41.0 — 2026-09-10 — the orchestrator reads as a contract
+
+`qa-pipeline-code/SKILL.md` was 763 lines — the one WARN the verify gate
+had carried since 0.36.0, and the file every code-phase run loads whole.
+It is now 495. **No rule changed.** The detail moved, verbatim, into two
+new references; the SKILL.md keeps the sequence, every pause, every
+gate and the one-paragraph summary of each mode, and names where the
+rest lives.
+
+- **`references/run-modes.md`** — the full bug-fix, resume and retest
+  rules (the two ways into each mode, the three-tier retest scope built
+  from the suite, the ledger read, the completeness rule on resume, the
+  real-run rationales). The SKILL.md has a "Which mode" decision and
+  one paragraph per mode.
+- **`references/wave1-and-verification.md`** — why two waves and why a
+  PROVISIONAL label prevented nothing; why archive comments were
+  retired; and the complete post-publish verification list. The
+  SKILL.md keeps the wave-1 procedure in order (count gate →
+  publication gate → REQUIRED PAUSE → create run → record → draft
+  summary → status comment) and a one-paragraph version of the closing
+  check.
+- Compressed in place, nothing dropped: the step-0 source order (now a
+  pointer to `qa-service-publish.md` → "Code phase" plus the five
+  decisions), Split runs, bug filing's source gate, stage 9, stage 10,
+  the run clock, Between stages, Final response, the tool-names note.
+  Two historical asides (why the code phase reads a spec; the docs
+  phase posted no fenced copy) are in the CHANGELOG already and left
+  the SKILL.
+
+**What this closes:** the last item of the 0.36.0 cold review. The
+gate is `9 ok · 0 warn · 0 fail` for the first time since it shipped.
+
 ## 0.40.0 — 2026-09-10 — the docs phase loses a stage
 
 The docs-phase half of the same-day cold review of 0.36.0 ("three
