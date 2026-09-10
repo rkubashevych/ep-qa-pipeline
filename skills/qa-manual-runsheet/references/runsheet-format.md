@@ -1,9 +1,36 @@
-# Run sheet format
+# Run sheet format — the optional export
 
-**Contents:** Sheet 1 — Case index (columns, row states incl. VERIFY
-spot-check, colour spec + REJECTED muted palette, formatting) ·
-Sheet 2 — Accounts · Sheet 3 — Entities · Sheet 4 — Reference ·
-Sheet 5 — Environment · Credentials · What must not happen
+**Contents:** Status since 0.31.0 · Sheet 1 — Case index (columns, row
+states incl. VERIFY spot-check, colour spec + REJECTED muted palette,
+formatting) · Sheet 2 — Accounts · Sheet 3 — Entities · Sheet 4 —
+Reference · Sheet 5 — Environment · Credentials · What must not happen
+
+## Status since 0.31.0 — rendered from the walk plan, on request
+
+The primary deliverable of stage 9 is the **walk plan**
+(`walk-plan-format.md`), presented card by card by `qa-manual-walk`.
+This workbook is an **export** for a tester who works from a file
+without the agent, generated only when asked ("export the sheet"), and
+always **rendered from the plan** by `build_runsheet_<ISSUEKEY>.py`:
+
+- one row per card, in plan order (session by session); the session's
+  account line fills **Log in as**;
+- **Do** = the card's Do; **Expect** = the card's You should see,
+  followed — because no agent is present to say them — by the backstage
+  lines a tester needs on paper: `say-first`, `wait`,
+  `positive-control`, `how-to`, and for AGENT-RUNS cards the `run:`
+  line prefixed *"(agent-run in a walk; by hand:)"*;
+- `covers:` → the Covers column; BLOCKED cards → the NEEDS FIXTURE row
+  state with the probed reason; settled cases → ALREADY SETTLED rows
+  pre-filled from the coverage map, so the sheet still accounts for
+  every case;
+- the Reference tab carries the coverage map verbatim.
+
+The sheet is never edited on its own: a change to a card is made in the
+plan and the sheet re-rendered. Everything below is the rendering spec
+and is unchanged; the rejected variants stay recorded so they are not
+reinvented. A filled sheet is still ingested by `qa-manual-results`
+exactly as before (join by TC id).
 
 The deliverable is a workbook whose first sheet is the only thing the
 tester needs open. Everything else is reference material they consult

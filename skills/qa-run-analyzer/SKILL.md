@@ -36,12 +36,18 @@ asking the user is the last resort):
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
 `<ISSUEKEY>-recon.md`,
+`<ISSUEKEY>-walk-plan.md` (stage 9's plan — for the voice check and
+the coverage map), `<ISSUEKEY>-walk-results.md` (the walk's verdicts),
 `<ISSUEKEY>-manual-results.md`,
 `<ISSUEKEY>-remaining-cases-triage.md`, and any tester results table
 (`<ISSUEKEY>-preserved-entries.tsv` or similar TC/Result/Notes file).
-The last three carry post-publication corrections: when present, they
+The last four carry post-publication corrections: when present, they
 are MORE current than the stage reports — a stage-report PASS
-contradicted there is a retracted verdict, not a pass.
+contradicted there is a retracted verdict, not a pass. **Match them to
+the round first:** a walk-results or manual-results file whose `Run:`
+line names an earlier run is a stale artefact (EP-56197 r4 open-items
+#24), not this round's correction — flag it 🟡 and do not read it as
+current.
 
 Detect the phase from what is present:
 - Docs phase = context/requirements/checklist/test-cases.
@@ -239,12 +245,24 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
   no retraction comment (`test-runs.md` → "Retraction target rule").
   The record is asserting something the run's own artifacts disprove —
   flag it until `qa-manual-results` has been run.
-- 🟡 manual results never ingested: runsheet outputs exist for this
-  ticket (`<KEY>-runsheet.xlsx` / testdata files, or the run report
-  says stage 9 ran) but no `<KEY>-manual-results.md` exists and no
-  manual-results comment is on the QA sub-task. The ticket's verdicts
-  are still PROVISIONAL however old they are — say so, never let
-  silence read as "verified".
+- 🟡 manual results never ingested: stage-9 outputs exist for this
+  ticket (`<KEY>-walk-plan.md` / `<KEY>-runsheet.xlsx` / testdata
+  files, or the run report says stage 9 ran) but no
+  `<KEY>-manual-results.md` exists and no manual-results comment is on
+  the QA sub-task. A `<KEY>-walk-state.json` with no results file is a
+  walk stopped mid-way — say so ("walk in progress, N of M cards
+  answered, nothing recorded"). The ticket's verdicts are still
+  PROVISIONAL however old they are — say so, never let silence read as
+  "verified".
+- 🟡 walk-plan voice: a card body in `<KEY>-walk-plan.md` carries an
+  HTTP verb, an endpoint, a status code, a curl line or a file path
+  outside an AGENT-RUNS card's `run:` key, or a caveat / scope warning
+  / machine verdict outside its backstage block
+  (`qa-manual-runsheet/references/walk-plan-format.md` → Voice rules).
+  The plan is unreadable to the person it is for; name the cards.
+- 🟡 source mislabel in the walk: a `machine (witnessed)` row of
+  `<KEY>-walk-results.md` recorded as `source: manual` on the run (or
+  the reverse) — the 0.30.0 honesty rule, checked from the walk side.
 
 ### 6. Findings summary (Product)
 - Docs phase: # requirements, # checks, # test cases, channel

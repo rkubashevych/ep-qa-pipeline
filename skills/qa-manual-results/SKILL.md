@@ -1,17 +1,20 @@
 ---
 name: qa-manual-results
 description: >
-  Stage 10 of task processing — the return leg of the manual run. Takes
-  the completed run sheet (the Result/Notes columns the human tester
-  filled in) and/or a triage file, joins the verdicts to test cases BY
-  TC ID (never by row position), reconciles them against the published
-  automated verdicts, and writes the outcome back to Jira and the QA
-  Service suite — including explicit RETRACTIONS where the human result
-  overturns a published PASS/FAIL. Use when the user says "ingest the
-  manual results", "the tester finished the run sheet", "read the
-  completed runsheet", "write back the manual results", "process the
-  test results", or uploads/pastes a filled run sheet or TC/Result/Notes
-  table.
+  Stage 10 of task processing — the write-back half of the manual
+  round. Takes the walk results written by qa-manual-walk, or a
+  completed run sheet (the Result/Notes columns a tester filled in),
+  or a triage file; joins the verdicts to test cases BY TC ID (never by
+  row position), reconciles them against the published automated
+  verdicts, and writes the outcome back to Jira and the QA Service
+  suite — including explicit RETRACTIONS where the human result
+  overturns a published PASS/FAIL. Invoked automatically at the end of
+  a walk; use it directly when the user says "ingest the manual
+  results", "the tester finished the run sheet", "read the completed
+  runsheet", "write back the manual results", "process the test
+  results", or uploads/pastes a filled run sheet or TC/Result/Notes
+  table. Do NOT use to run the session itself (qa-manual-walk), or to
+  answer "what were the results?" — that is read from the report.
 ---
 
 # QA Manual Results
@@ -37,6 +40,16 @@ keeps asserting PASSes everyone knows are wrong.
 ## Input
 
 1. **The completed results — any of these forms:**
+   - `<ISSUEKEY>-walk-results.md` written by `qa-manual-walk`
+     (`../qa-manual-walk/references/walk-results-format.md`) — the
+     usual form since 0.31.0. It carries, per case, the verdict, the
+     tester's words verbatim, evidence, the card kind and the
+     `source` (`manual`, or `machine (witnessed)` for cards the agent
+     executed), plus `Case corrections`, `Blocked reasons` and
+     `Observations` sections. **Check its `Run:` line names the run you
+     are about to write to** — a results file from an earlier round
+     beside this round's reports is the stale-artefact trap EP-56197
+     r4 recorded (open-items #24); on mismatch stop and ask;
    - `<ISSUEKEY>-runsheet.xlsx` with the Result column (K) filled
      (values from its dropdown: PASS / FAIL / BLOCKED / SKIPPED) and
      the Notes column;
@@ -78,6 +91,17 @@ one; asking the user is the last resort, not the first).
   machine-only, never as human-confirmed.
 - Empty Result = not run. Report it as such; it is not SKIPPED and not
   PASS.
+- **Honour the `source` column of a walk-results file.** A row marked
+  `machine (witnessed)` was executed by the agent during the walk with
+  the tester watching: record it with `source: machine` and the
+  principal `ep-qa-pipeline agent (<KEY> walk, witnessed by <tester>)`,
+  and count it in the summary as machine-in-walk, never as
+  human-confirmed. Only `manual` rows carry the tester's e-mail. (The
+  0.30.0 rule against mislabelling the source cuts both ways.)
+- **A `Half` row is half a verdict.** The human PASS covers the
+  visible half; the note names the machine verdict the rest rests on.
+  Record the human verdict with that note; the summary's PARTIALLY
+  VERIFIED wording covers it.
 - Normalize statuses case-insensitively to PASS / FAIL / BLOCKED /
   SKIPPED; anything else (e.g. "N/A — spec premise false") is recorded
   verbatim under "Non-standard verdicts" for a human decision, not
@@ -92,9 +116,12 @@ one; asking the user is the last resort, not the first).
 ### Step 1 — Parse and join
 
 Read the results source(s). Build one entry per TC id: Result, Notes,
-bug keys, evidence links. When both a runsheet and a triage file exist
+bug keys, evidence links, source. When both a runsheet and a triage file exist
 and disagree on a case, the LATER source wins and the disagreement is
-listed under "Conflicts (resolved by recency)".
+listed under "Conflicts (resolved by recency)". A walk-results file
+marked `Completeness: stopped early` is a partial round: say so, list
+its `Not run` cases as not run, and ask whether to write back now or
+wait for the walk to resume — never record half a round as the round.
 
 ### Step 2 — Reconcile against the published record
 
@@ -186,6 +213,16 @@ that list is the per-bug yes — then on explicit yes:
   bug filed (write the key), a risk row executed to a verdict — fill
   `Decision` and `Closed`. Rows the user drops get the reason as their
   Decision; never delete a row.
+- **Case corrections** (walk-results `Case corrections` section, or a
+  tester's note that says the case is wrong): apply to the suite under
+  the same confirm — `suggest_test_case` / `edit_test_case` per
+  `../qa-pipeline-docs/references/qa-service-publish.md` — and list
+  what changed in the report. A correction that reveals the expected
+  result was wrong makes the case's verdict a **case-premise** finding,
+  not a product defect: do not record a `fail` for it.
+- **Observations** (walk-results `Observations`): reported in the human
+  summary as `OBSERVATION (no source checked)` questions per
+  `sources-of-record.md` § 7 — never as defects, never as `fail`.
 - Connector absent → the run write-back is skipped with a visible note;
   the Jira comments still carry everything.
 

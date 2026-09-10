@@ -8,7 +8,7 @@ disagree, this file wins.
 
 | Store | Holds | Authoritative for |
 |---|---|---|
-| **Working directory** | every `<ISSUEKEY>-*.md` stage file, the open-items ledger `<ISSUEKEY>-open-items.md` (per ticket, no round suffix), the runsheet `.xlsx`/`.json`, evidence screenshots | the stage reports — and, where no archive was posted, the ONLY copy |
+| **Working directory** | every `<ISSUEKEY>-*.md` stage file, the open-items ledger `<ISSUEKEY>-open-items.md` (per ticket, no round suffix), the manual round's files — `-walk-plan.md`, `-walk-state.json`, `-walk-results.md`, `-testdata.json`, the optional runsheet `.xlsx` — evidence screenshots | the stage reports — and, where no archive was posted, the ONLY copy |
 | **QA Service suite + test runs** | requirements, test cases; per-case verdicts as **test runs** (`list_test_runs` / `get_test_run` / `case_execution_history` — one run per pass, `test-runs.md`); `notes` hold only `discrepancy:` lines and pre-0.30 history | test cases and requirements whenever a suite exists; per-case verdicts always |
 | **Jira** | the docs-phase archive (QA sub-task, only when no suite), the results archive (**QA sub-task only** — 0.26.0), the wave-1 status line, the wave-2 human summary, the checkbox tracker | nothing the pipeline generates; it is a publication surface, not a source |
 
@@ -63,6 +63,7 @@ retracted verdict was published, whatever ticket that is
 
 Never in the working directory's committed files, never in Jira, never
 in a suite note. `.env.qa-agents` in the mounted qa-pipeline-skill repo,
-then the e2e `.env`, then env vars. The runsheet `.xlsx` and
-`-testdata.json` carry live credentials and are git-ignored — they are
-never attached to Jira.
+then the e2e `.env`, then env vars. The walk plan, the runsheet `.xlsx`
+and `-testdata.json` carry live credentials and are git-ignored — they
+are never attached to Jira. `-walk-state.json` and `-walk-results.md`
+carry none by rule.

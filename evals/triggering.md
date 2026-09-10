@@ -60,22 +60,41 @@ names who should handle it instead).
 - ✅ "browser testing for EP-55123"
 - ❌ "manual testing" / "I'll test by hand, prepare it" →
   qa-manual-runsheet (9)
-- ❌ "I finished testing, here are my results" → qa-manual-results (10)
+- ❌ "walk me through EP-55123" / "let's test it together" →
+  qa-manual-walk (10a) — a guided session, not an unattended run
+- ❌ "I finished testing, here are my results" → qa-manual-results (10b)
 
 ## qa-manual-runsheet (stage 9)
-- ✅ "prepare the manual tests", "make a run sheet"
+- ✅ "prepare the manual tests", "make a run sheet", "build the walk plan"
 - ✅ "set up the data so I can just check the cases"
 - ❌ "run the manual tests yourself" → web-testing does browser runs
+- ❌ "walk me through EP-1234" → qa-manual-walk (the plan must already
+  exist; if it does not, the walk says to run this stage first)
 - ❌ "the sheet is filled, update the results" → qa-manual-results
 - ❌ "retest EP-1234, the fix landed" → qa-pipeline-code retest mode
   (which then invokes this stage scoped; invoked bare on a story with
   prior artifacts, this stage must PAUSE and ask full-run vs retest)
 
-## qa-manual-results (stage 10)
+## qa-manual-walk (stage 10a)
+- ✅ "walk me through EP-55123", "let's test EP-55123 together"
+- ✅ "start the manual walk", "continue the walk", "next case"
+- ✅ "I want to hand-test this with you instead of the spreadsheet"
+- ❌ "prepare the manual tests" / "build the walk plan" →
+  qa-manual-runsheet (9) — the walk presents a plan, it does not build one
+- ❌ "test in the browser" / "run the QA checks" → web-testing (8),
+  unattended machine run
+- ❌ "here's my filled sheet" / "ingest the results" → qa-manual-results
+- ❌ "walk me through the PR" / "walk me through the code" → not a test
+  session; pr-summary, code-review, or chat
+
+## qa-manual-results (stage 10b)
 - ✅ "ingest the manual results"
 - ✅ "the tester finished the run sheet" / pasted TC-Result-Notes table
 - ✅ "write back my manual results"
+- ✅ (auto) at the end of a qa-manual-walk session, with
+  `<KEY>-walk-results.md`
 - ❌ "build me the run sheet" → qa-manual-runsheet
+- ❌ "walk me through EP-55123" → qa-manual-walk (results come after)
 - ❌ "what were the results of the run?" → read the report/Jira, chat
 
 ## qa-run-analyzer
@@ -89,6 +108,7 @@ names who should handle it instead).
 - ✅ "process EP-55123 for testing" / pasted ticket + "test this"
 - ❌ "run the QA docs pipeline for EP-55123" → qa-pipeline-docs
 - ❌ "retest EP-55123" / "test the bugfix EP-55123" → qa-pipeline-code
+- ❌ "walk me through EP-55123" → qa-manual-walk
 - ❌ "ingest the manual results" → qa-manual-results
 
 ## qa-pipeline-docs (orchestrator)

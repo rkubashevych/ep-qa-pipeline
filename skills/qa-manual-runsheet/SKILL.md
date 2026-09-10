@@ -3,31 +3,39 @@ name: qa-manual-runsheet
 description: >
   Stage 9 of task processing — the last automated step of
   qa-pipeline-code. Takes the test cases and the automated verdicts
-  from stages 6-8, provisions and verifies the fixture data on a
-  throwaway test event, then produces a lean run sheet a human can work
-  straight through — one explicit "Log in as" account, one action, one
-  expected result per row, with machine-settled rows pre-filled and
-  High-risk machine PASSes as spot-checks.
-  Use it when the user says "prepare the manual tests", "make a run
-  sheet", "prepare test data", "set up the data so I can just check the
-  cases", or after the automated code-phase stages finish and before
-  anyone starts testing by hand. Handles retests too ("retest", "the fix
-  landed") — it detects a prior run rather than waiting to be told,
-  scopes the sheet to the fix's blast radius, and always provisions
-  fresh fixtures. The completed sheet is later ingested by
-  qa-manual-results (stage 10).
+  from stages 6-8, provisions and verifies fixture data on a throwaway
+  test event, then builds the manual walk plan — plain-language cards
+  grouped by login ("as <who>, do <this>, you should see <that>") with
+  the machine's evidence kept backstage — that qa-manual-walk presents
+  one card at a time. A run sheet (.xlsx) can be exported on request.
+  Use it when the user says "prepare the manual tests", "build the walk
+  plan", "make a run sheet", "prepare test data", "set up the data so I
+  can just check the cases", or after the automated code-phase stages
+  finish and before anyone tests by hand. Retest rounds reach it via
+  qa-pipeline-code retest mode, scoped to the fix's blast radius;
+  invoked bare on a story with prior artifacts it detects the prior run
+  and asks, and it always provisions fresh fixtures. Do NOT use to run
+  the session (qa-manual-walk) or to ingest results (qa-manual-results).
 ---
 
-# QA Manual Run Sheet
+# QA Manual Run Sheet — fixtures and the walk plan
 
 Turns finished test cases into something a person can actually execute:
-the data already exists on the event, and each row says who to log in
-as, what to do, and what counts as a pass.
+the data already exists on the event, and each card says who to log in
+as, what to do, and what you should see.
 
 This stage exists because a test case and a runnable instruction are not
 the same thing. "Call the public favourite-action endpoints and confirm
 none returns the private favourites" is a valid test case and a useless
 instruction — it names no account, no endpoint and no pass condition.
+
+Since 0.31.0 the deliverable is the **walk plan**
+(`references/walk-plan-format.md`), read by `qa-manual-walk` in a live
+session; the spreadsheet (`references/runsheet-format.md`) is an
+optional export generated from the plan. The reason is recorded in the
+plan format's first section: the sheet had to carry everything in every
+cell, and the tester could not concentrate on it. The plan keeps the
+card human and moves the rigour backstage, where the agent applies it.
 
 ## Source of truth — read this before anything else
 
@@ -39,16 +47,17 @@ suite. Consequences:
 - **Read the cases from the suite** when one exists and the connector
   is available, exactly as `qa-pipeline-code` step 0 does. Fall back to
   `<ISSUEKEY>-test-cases.md` / the Jira archive only when it does not.
-- **The run sheet is never an input.** No automated stage reads it, and
-  none ever should. It carries less detail than the machine needs by
-  design, so treating it as a source would silently degrade every later
-  run.
+- **The walk plan (and any exported sheet) is never an input.** No
+  automated stage reads it, and none ever should. It carries less
+  detail than the machine needs by design, so treating it as a source
+  would silently degrade every later run.
 - **Corrections must go back to the suite.** When a tester discovers
   that an expected result is wrong, that a case needs a UI-only
   condition, or that a blocked reason was false, writing it only in the
-  sheet is *losing* it: the next run regenerates from the suite and
-  repeats the mistake. Write it to the suite and note in the sheet that
-  you did.
+  plan is *losing* it: the next run regenerates from the suite and
+  repeats the mistake. Write it to the suite and note in the plan that
+  you did. (Corrections found *during* the walk are collected by
+  `qa-manual-walk` and applied by stage 10 under its confirm.)
 - **Run outcomes belong on the pass's QA Service test run, never in
   `status`** (a lifecycle field) and — since 0.30.0 — no longer in
   `detail` notes either (`../qa-pipeline/references/test-runs.md`). This
@@ -63,7 +72,8 @@ A retest is the common case, not the exception: every ticket that fails
 comes back. **Never assume a bare invocation means a first run.** Before
 provisioning anything, check for evidence of a prior run:
 
-- `<ISSUEKEY>-testdata.json` or `<ISSUEKEY>-runsheet.xlsx` already
+- `<ISSUEKEY>-testdata.json`, `<ISSUEKEY>-walk-plan.md`,
+  `<ISSUEKEY>-walk-results.md` or `<ISSUEKEY>-runsheet.xlsx` already
   exists
 - a QA Service test run titled `<ISSUEKEY> …` exists for the suite
   (`list_test_runs`) — `running` with `not_run` rows means the previous
@@ -76,19 +86,19 @@ provisioning anything, check for evidence of a prior run:
 - defects exist under the story
 
 Any of these found → **PAUSE and ask: "prior run detected — full fresh
-run, or retest?"** Never silently rebuild the full sheet on top of a
-finished run. On a real story the difference is 89 rows and 84 accounts
-versus about 30 rows and a dozen.
+run, or retest?"** Never silently rebuild the full plan on top of a
+finished run. On a real story the difference is 89 cards and 84 accounts
+versus about 30 cards and a dozen.
 
 When it is a retest:
 
-- **Scope the sheet.** Rows ONLY for the retest scope (provided by
+- **Scope the plan.** Cards ONLY for the retest scope (provided by
   `qa-pipeline-code` retest mode, or ask for it): the failed cases,
   the other cases in the same REQ groups (the fix's blast radius), any
   case whose defect is marked fixed, and every case that never got a
   real verdict — blocked, amber, or skipped. Cases that passed on an
-  unrelated path keep their verdict and get no row; say so in the
-  final response. A retest sheet is short by design — that is its
+  unrelated path keep their verdict and get no card; say so in the
+  final response. A retest plan is short by design — that is its
   value.
 - **Fixtures are always fresh. This is not negotiable.** Prior
   fixtures are presumed contaminated for every counter / analytics /
@@ -101,10 +111,11 @@ When it is a retest:
   prior account only for stateless checks, after re-proving its login.
   Note in the testdata-notes file which prior fixtures were abandoned
   as contaminated, so cleanup can target them.
-- **Carry the history into the row.** A row being retested says so in
-  Notes: the prior verdict, the defect key, and the date. A tester who
-  cannot see that a row failed last time cannot tell a fix from a
-  fluke.
+- **Carry the history into the card.** A card being retested carries
+  the prior verdict, the defect key, and the date in its `retest:`
+  backstage key, and the agent says so when the card comes up. A
+  tester who cannot learn that a case failed last time cannot tell a
+  fix from a fluke.
 - **Ask which fix landed.** If the user has not said, ask. A retest
   scoped to defects that were not actually fixed wastes the whole run.
 
@@ -112,8 +123,10 @@ When it is a retest:
 
 - Not a test-case authoring tool. Cases come from `qa-test-cases`; this
   stage makes them executable, and reports back when one is wrong.
-- Not a results store. The suite holds outcomes; the sheet is a working
+- Not a results store. The suite holds outcomes; the plan is a working
   surface.
+- Not the session itself. Presenting the cards and collecting verdicts
+  is `qa-manual-walk`; recording them is `qa-manual-results`.
 - Not an input to `api-testing`, `web-testing` or either orchestrator.
 
 ## Input
@@ -122,8 +135,9 @@ When it is a retest:
    Otherwise `<ISSUEKEY>-test-cases.md` from the qa-test-cases skill.
 2. `<ISSUEKEY>-checklist.md` — supplies the structural checks. Optional.
 3. Any verdict files that already exist — `<ISSUEKEY>-code-review.md`,
-   `-api-testing.md`, `-web-testing.md`. Optional; used to mark rows
-   that are already settled so the human does not re-walk them.
+   `-api-testing.md`, `-web-testing.md` — and the pass's QA Service
+   test run when one exists. Optional; used to decide which cases are
+   settled without a card and to fill each card's `machine:` key.
 4. `.env.qa-agents` (or the e2e project `.env`) for host and credentials.
 5. **Whether this is a first run or a retest** — see "Retest runs"
    above. Detect it; ask when the evidence is ambiguous.
@@ -146,46 +160,64 @@ authorisation is missing, PAUSE and ask — do not guess an event.
   and entity created, keyed so a script can map case → data.
 - `<ISSUEKEY>-testdata-notes.md` — human log: what was created, what
   could not be, what behaved unexpectedly, what needs manual cleanup.
-- `<ISSUEKEY>-runsheet.xlsx` — the run sheet (format:
-  **references/runsheet-format.md**).
-- `build_runsheet_<ISSUEKEY>.py` — the generator, so the sheet can be
-  rebuilt when data changes instead of hand-patched.
+- `<ISSUEKEY>-walk-plan.md` — **the deliverable**: the cards, grouped
+  into login sessions, each with its backstage block, plus the coverage
+  map (format: **references/walk-plan-format.md**). Read by
+  `qa-manual-walk`.
+- **On request only** ("export the sheet", or a tester who will work
+  from a file without the agent): `<ISSUEKEY>-runsheet.xlsx` generated
+  **from the plan** by `build_runsheet_<ISSUEKEY>.py` (format:
+  **references/runsheet-format.md**). Do = the card's Do; Expect = the
+  card's You should see followed by the backstage lines a tester
+  without an agent still needs (`say-first`, `wait`, `positive-control`,
+  `how-to`, and for AGENT-RUNS the `run` line). The sheet is a
+  rendering of the plan, never edited on its own.
 
-## The six rules that make a run sheet usable
+## The six rules that make a card usable
 
 These come from a real run where the sheet was technically complete and
-still cost the tester hours. Follow them literally.
+still cost the tester hours. They apply to every card, and to the
+exported sheet's rows. Follow them literally.
 
-1. **One explicit "Log in as" per row.** Exactly one account, with email
-   and password inline. Not a role name, not an internal fixture key,
-   not a list of three accounts for the tester to choose between. If a
-   case genuinely needs two sessions, split it into two rows or put the
-   second in the Do column as a numbered step.
+1. **One explicit "Log in as" per card.** Exactly one account, with
+   email and password stated once in the session header the card
+   belongs to. Not a role name, not an internal fixture key, not a list
+   of three accounts for the tester to choose between. If a case
+   genuinely needs two sessions, it is a card in the second account's
+   session, or a numbered switch inside Do.
 
-2. **Every row has an Expect.** The pass condition, stated so a verdict
-   can be reached without opening another file. A sheet without this
-   column cannot be used to record results, only to look busy.
+2. **Every card has a "You should see".** The pass condition, stated so
+   a verdict can be reached without opening another file. A card
+   without it cannot be judged, only performed.
 
 3. **Name the surface, not the intent.** "Open Marketplace → Brands and
    click the star on any brand card", not "attempt to favourite a
    brand".
 
-4. **Record the positive control on absence checks.** A row whose pass
+4. **Record the positive control on absence checks.** A card whose pass
    condition is "nothing appears" is worthless alone — it passes when
    the feature is broken and nothing was ever created. Pair it with the
-   thing that proves the state existed, e.g. "interactions list empty
-   **and** the counter reads 1".
+   thing that proves the state existed, in the same sentence:
+   "interactions list empty **and** the counter reads 1".
 
 5. **Verify every blocked reason before writing it.** A wrong "blocked"
-   is worse than no row: it removes a case from testing on a false
+   is worse than no card: it removes a case from testing on a false
    premise. In one run, four cases were wrongly blocked on reasons that
    dissolved on a single check — a setting that did exist, a count
-   surface that did exist, a brand that did exist.
+   surface that did exist, a brand that did exist. The probe goes in
+   the card's `blocked:` key; `qa-manual-walk` re-probes it live.
 
 6. **Never share a fixture across counter cases.** Anything that asserts
    on a number needs its own dedicated target with a verified zero
    baseline. Shared "main" fixtures accumulate interactions from other
    cases and make every counter assertion unreadable.
+
+And the rule the sheet taught last: **the card says who, do, see — the
+backstage says why.** No caveat, scope warning, machine verdict, HTTP
+verb or harness line in the card body; every one of those has a
+backstage key (`walk-plan-format.md` → Voice rules). A case that *is* a
+request is an AGENT-RUNS card the agent executes, not a curl line the
+tester pastes.
 
 ## Traps that produce false passes
 
@@ -200,7 +232,7 @@ It carries the environment-specific detail. The three that matter most:
 - **Analytics-backed surfaces lag.** Reading immediately after an action
   shows a clean result. Establish the lag for the surface before
   trusting any "nothing appeared" verdict, and put the required wait in
-  the row.
+  the card's `wait:` and `say-first:` keys.
 - **A flag named like state may be a capability.** Confirm what a field
   means before building assertions on it. Prefer what the UI renders
   over what an endpoint reports when the two can disagree.
@@ -214,13 +246,14 @@ target entities and their types, the precondition, and the pass
 condition. Group cases that can share a fixture — but never counter
 cases (rule 6).
 
-### Step 2a — Select the manual set: minimum rows, full AC coverage
+### Step 2a — Select the manual set: minimum cards, full AC coverage
 
 The machine runs ALL cases (stages 6–8) and the QA Service suite keeps
 ALL cases — that never changes. The human walks a SELECTED set, because
 a full hand-run of 90 cases costs a day and most of it re-proves what a
 representative would prove. Build the selection with the same
-test-design techniques that built the cases:
+test-design techniques that built the cases ("row" below = one card in
+the plan, one row in an exported sheet):
 
 1. **Must-walk (never reducible):** every case with no runtime-verified
    machine verdict — QA, FAIL claims, routed-in, unresolved BLOCKED,
@@ -241,24 +274,25 @@ test-design techniques that built the cases:
    REQ's `[core]` case is the default representative (short form where
    machine-settled at Low/Medium risk, full form otherwise). For cases
    from an older suite without `[core]` markers, pick a representative
-   by the same technique logic, say so in the Reference tab, **and
+   by the same technique logic, say so in the Coverage section, **and
    record each nomination as a `nomination` row in
    `<ISSUEKEY>-open-items.md`**
    (`../qa-pipeline/references/open-items-ledger.md`) — a nomination
    already in the ledger from an earlier round is reused, not re-chosen,
    so the same representative is walked every round. Print
-   the map in the sheet's Reference tab and the final response:
-   "N cases → M rows, covering R/R requirements walked".
+   the map in the plan's Coverage section and the final response:
+   "N cases → M cards, covering R/R requirements walked".
 4. **Risk extras:** add rows for High-risk cases in the fix's blast
    radius even when machine-settled, and anything the QA sub-task's
    ⚠ SPECIAL ATTENTION block names.
 5. **What's left out is named, not dropped:** unselected cases appear
-   on the Reference tab as "delegated to machine verdict (<status>)".
+   in the Coverage section as `settled (<status>, <source>)`.
    Stage 10 records those verdicts as machine-only — the summary's
    PARTIALLY VERIFIED wording already covers that honestly.
 
-A row's Result applies to every case in its `Covers` list unless the
-tester's Notes single one out — stage 10 expands the list on ingestion.
+A card's verdict applies to every case in its `covers:` list unless the
+tester singles one out — the walk names them when recording, and stage
+10 expands the list on ingestion.
 
 ### Step 2 — Classify every case
 
@@ -273,11 +307,17 @@ tester's Notes single one out — stage 10 expands the list on ingestion.
 - **VERIFY (spot-check)** — the machine has a PASS, but it is exactly
   the kind the creator's error model distrusts: a PASS on a
   `[risk: High]` requirement, or ANY PASS whose only evidence is code
-  reading (code-review PASS, never executed). One short-form row: same
-  Log in as / Do / Expect, trimmed to the fastest action that would
-  expose a wrong PASS. Never mark these skipped — ~half of unverified
-  machine PASSes are historically wrong, and the High-risk ones are
-  where that hurts.
+  reading (code-review PASS, never executed). One SPOT-CHECK card:
+  same who / do / see, trimmed to the fastest action that would expose
+  a wrong PASS. Never mark these skipped — ~half of unverified machine
+  PASSes are historically wrong, and the High-risk ones are where that
+  hurts.
+- **AGENT-RUNS** — READY, but the case is a request (an `[API]` case
+  with no UI path, a harness line, anything with an HTTP verb). It gets
+  a card the *agent* executes during the walk, with the tester supplying
+  only the human-only input (a token from an email, a code from a
+  phone). This is what keeps curl out of the human's hands: on EP-56998
+  nine of eleven rows handed the tester a harness command.
 
 Probe every NEEDS FIXTURE reason against the live system before
 accepting it (rule 5).
@@ -301,19 +341,33 @@ actually authenticates and lands cleanly — no blocking profile-completion
 dialog, no forced redirect. For every target used in a counter case,
 record its zero baseline and read it **twice** so the figure is trusted.
 
-Report the verification result honestly. A sheet full of ids that do not
-resolve is worse than no sheet.
+Report the verification result honestly. A plan full of ids that do not
+resolve is worse than no plan.
 
-### Step 5 — Emit the run sheet
+### Step 5 — Emit the walk plan
 
-Per **references/runsheet-format.md**. Lead with the six columns the
-tester works in; push accounts, entities, prior verdicts and caveats to
-reference sheets they open only when something looks wrong.
+Per **references/walk-plan-format.md**. Group the cards into sessions
+by login account, order each session the way the product presents its
+surfaces (destructive cards last), and write every card in the human
+voice: who, do, see — with everything else in the backstage block.
+Before writing a card, apply the voice rules' test: could a colleague
+who has never read the ticket do this and tell you pass or fail from
+what they saw?
+
+**Translation is the work of this step.** The test-cases file is
+written for stages 6–8 and the count gate — `Pre:` / `Steps:` / `Exp:`,
+`[data: …]`, channel tags, technique names, forbidden-word discipline.
+That register is correct there and wrong on a card. Rewrite; do not
+copy. The case id on the card is what keeps the two joined.
+
+Then the coverage map. Then, **only if asked**, the exported sheet via
+`build_runsheet_<ISSUEKEY>.py` (per **references/runsheet-format.md**),
+rendered from the plan.
 
 ### Step 6 — Write findings back to the suite
 
 Anything this stage *learned* about a case goes back to the QA Service
-suite before you hand over, because the sheet is not a source:
+suite before you hand over, because the plan is not a source:
 
 - a blocked reason you probed and disproved
 - an expected result that contradicts the documented behaviour
@@ -321,27 +375,34 @@ suite before you hand over, because the sheet is not a source:
   an instrument that cannot be trusted)
 - a behaviour with no case covering it — create the case
 
-Then note in the sheet's reference material that the suite was updated,
-so the next person knows the two agree.
+Then note in the plan's header that the suite was updated, so the next
+person knows the two agree.
 
 ### Step 7 — Self-check before handing over
 
-- Every case in the test-cases file appears exactly once.
-- Every READY row names exactly one login and has a non-empty Expect.
-- Every account and entity referenced resolves to a row on the reference
-  sheets.
-- No blocked reason is unverified.
-- No absence-check row is missing its positive control.
+- Every case in scope appears exactly once: on a card, in a `covers:`
+  list, or as `settled` in the coverage map.
+- Every card names exactly one login (via its session) and has a
+  non-empty "You should see".
+- **Voice check, every card:** no HTTP verb, endpoint, status code,
+  curl line, DevTools recipe or file path outside an AGENT-RUNS card's
+  `run:` key; no caveat, scope warning or machine verdict in the card
+  body; Do ≤ 3 lines, You should see ≤ 2; title reads as a sentence.
+- Every account and entity referenced resolves to `-testdata.json`.
+- No blocked reason is unverified; every BLOCKED card's `blocked:` key
+  names its probe.
+- No absence-check card is missing its positive control.
+- Every behavioural REQ has a card in the coverage map.
 - **Secret scan before handover.** The emitted artifacts carry live
-  credentials by design (`-testdata.json`, the runsheet, the generator
-  script). Confirm every emitted file matches a `.gitignore` broad rule
-  (`git status --short` shows none of them as untracked-unignored), and
-  run a secret scan over the working tree (the `secret-leak-scan` skill
-  or `gitleaks`). If any emitted artifact escapes the ignore rules,
-  widen the pattern in `.gitignore` before handing over — never leave it
-  for the commit step to catch.
+  credentials by design (`-testdata.json`, the walk plan, any exported
+  runsheet, the generator script). Confirm every emitted file matches a
+  `.gitignore` broad rule (`git status --short` shows none of them as
+  untracked-unignored), and run a secret scan over the working tree
+  (the `secret-leak-scan` skill or `gitleaks`). If any emitted artifact
+  escapes the ignore rules, widen the pattern in `.gitignore` before
+  handing over — never leave it for the commit step to catch.
 
-State the counts (ready / needs fixture / already settled) and the
+State the counts (cards by kind / settled without a card) and the
 verification results in the final response.
 
 ## Rules
@@ -356,12 +417,16 @@ verification results in the final response.
   requires that state to exist. Preconditions are yours; steps are
   theirs.
 - Where a precondition must be created through the UI to be valid (see
-  the tracking trap above), say so in the row rather than creating it
+  the tracking trap above), say so in the card rather than creating it
   over the API and leaving a fixture that cannot pass.
 
 ## Final response
 
-Report: the four output paths; ready / needs-fixture / already-settled
-counts; the verification results including how many logins were proven
-to work; anything that could not be provisioned and what would unblock
-it; and any live data left in a mutated state that a human must clean up.
+Report: the output paths (testdata, notes, walk plan; the sheet only if
+exported); cards by kind (WALK / SPOT-CHECK / AGENT-RUNS / DEVICE /
+BLOCKED) and how many cases were settled without a card; the coverage
+line ("N cases → M cards, R/R requirements walked"); the verification
+results including how many logins were proven to work; anything that
+could not be provisioned and what would unblock it; any live data left
+in a mutated state that a human must clean up; and the one-line
+hand-off: "walk me through <KEY>" starts the session.

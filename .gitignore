@@ -49,6 +49,8 @@ repro_*.py
 *-testdata.json
 *-testdata-notes.md
 *-testdata.md
+# stage 9/10 manual-round files: the plan carries passwords; state/results are run artifacts
+*-walk-*
 *-runsheet.xlsx
 *-runsheet-*.xlsx
 *-sample-runsheet.xlsx

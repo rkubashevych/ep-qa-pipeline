@@ -6,7 +6,7 @@ description: >
   sub-task and derives the dev branches, then runs pr-summary, then
   code-review, then api-testing, then web-testing, then run-analyzer,
   archives machine results on the QA sub-task (human summary follows
-  at stage 10), builds the manual run sheet so a human can walk what
+  at stage 10), builds the manual walk plan so a human can walk what
   the machine could not settle, verifies the published state, and
   defers the final handback to qa-manual-results (stage 10). Also:
   retest mode ("retest <KEY>", "the fix landed") and bug-fix mode
@@ -195,7 +195,7 @@ Otherwise, using the Atlassian connector and the Story key:
      rules, gates and pauses apply — a small scope is not a licence to
      skip the absence-check protocol or the probe rule.
    - **The manual round shrinks to fit:** stage 9 emits a handful of
-     rows (or, if you say you'll verify directly, skip the sheet and
+     cards (or, if you say you'll verify directly, skip the plan and
      just report your result — "the fix works, ingest it" runs stage
      10 against your one-line verdict, joined to the mini cases).
      Verdict flip / bug reopen offers happen at stage 10, as always.
@@ -296,8 +296,8 @@ Otherwise, using the Atlassian connector and the Story key:
    the scope could not be reconciled against the system of record.
    **The scope binds ALL stages including stage 9:** pr-summary runs
    on the fix branch/PR; 6–8 execute only the scoped cases;
-   `qa-manual-runsheet` builds rows for the scoped cases ONLY — never
-   a full-sheet rebuild. Fixtures are FRESH by default: prior fixtures
+   `qa-manual-runsheet` builds cards for the scoped cases ONLY — never
+   a full-plan rebuild. Fixtures are FRESH by default: prior fixtures
    are presumed contaminated for any counter/analytics assertion (one
    run left a phantom like and a counter stuck at 15). Reuse a prior
    account only for stateless checks, after re-verifying its login and
@@ -523,7 +523,7 @@ story does not exhaust the orchestrator's context:
 
 7. **Bug filing — after the manual round, not before.** A bug drafted
    from an automated verdict waits for the human to walk that case:
-   it goes into the run sheet as a row, and becomes a bug in stage 10
+   it goes into the walk plan as a card, and becomes a bug in stage 10
    if it survives contact. The exception is identical to step 6's:
    runtime-confirmed, evidenced, and blocking the manual round. When
    filing does happen, make ONE offer listing all the bugs; file only
@@ -588,26 +588,29 @@ story does not exhaust the orchestrator's context:
      exists via `getTransitionsForJiraIssue`; if the configured name
      is absent, list the available ones and ask.
 
-9. **Build the manual run sheet — `qa-manual-runsheet` (stage 9).**
+9. **Build the manual walk plan — `qa-manual-runsheet` (stage 9).**
    Every ticket is hand-tested after the machine finishes — this is a
    real step. Read its SKILL.md and follow it in full. It runs at the
-   END of the phase because the sheet's value is telling the human
-   what is *left*: it needs the verdict files to mark settled rows and
-   VERIFY spot-checks (on a real ticket: 89 blind rows vs 11 + a few
-   spot-checks), and stages 7–8 create ad-hoc data that clean fixtures
-   must not collide with.
+   END of the phase because the plan's value is telling the human
+   what is *left*: it needs the verdict files to decide which cases
+   are settled without a card and which get SPOT-CHECK cards (on a
+   real ticket: 89 blind rows vs 11 + a few spot-checks), and stages
+   7–8 create ad-hoc data that clean fixtures must not collide with.
 
    - **REQUIRED PAUSE.** This stage creates accounts and entities on a
      live event. Ask for the throwaway test event id and explicit
      authorisation before provisioning anything. Never target an event
      with real client data; never guess an event.
    - Feed it this run's verdict files (`-code-review.md`,
-     `-api-testing.md`, `-web-testing.md`).
-   - Outputs `<STORY>-runsheet.xlsx`, `<STORY>-testdata.json`,
-     `<STORY>-testdata-notes.md`. **They carry live credentials —
-     git-ignored, never committed or attached to Jira.**
-   - Report account/entity counts, the ready / must-test / blocked
-     split, and anything not provisionable.
+     `-api-testing.md`, `-web-testing.md`) and the step-6 run id.
+   - Outputs `<STORY>-walk-plan.md`, `<STORY>-testdata.json`,
+     `<STORY>-testdata-notes.md` (and `<STORY>-runsheet.xlsx` only when
+     the user asks for the export). **The plan, the testdata and the
+     sheet carry live credentials — git-ignored, never committed or
+     attached to Jira.**
+   - Report account/entity counts, cards by kind (WALK / SPOT-CHECK /
+     AGENT-RUNS / DEVICE / BLOCKED), how many cases were settled
+     without a card, and anything not provisionable.
 
    Skip only if the user says they are not hand-testing this ticket.
 
@@ -626,7 +629,7 @@ story does not exhaust the orchestrator's context:
      → state that no durable per-case record exists beyond the Jira
      comments.
    - **Findings traceable:** every FAIL / FAIL CONFIRMED across the
-     three reports has a run-sheet row awaiting the tester (and a
+     three reports has a walk-plan card awaiting the tester (and a
      `not_run` roster row), a narrow-exception bug key, or an explicit
      "not carried — <reason>" line in the drafted human summary. No
      silent FAILs. Every 🔴/🟡 the analyzer left unsettled has a row in
@@ -641,22 +644,34 @@ story does not exhaust the orchestrator's context:
      present in the working directory. Where no archive was posted they
      are the ONLY copy of the evidence — a missing one is a ❌, not a
      formality.
-   - **Runsheet outputs exist** (unless stage 9 was skipped).
+   - **Walk-plan outputs exist** — `<STORY>-walk-plan.md` and
+     `-testdata.json` (unless stage 9 was skipped), and every card in
+     the plan passed stage 9's voice check (no HTTP verb, curl line or
+     caveat in a card body outside an AGENT-RUNS `run:` key).
    Append the outcome as `## Post-publish verification` (✅/❌ per
    item) to `<STORY>-run-report.md` and include one line in the final
    response. A ❌ here is a real finding — fix it or tell the user,
    never bury it.
 
-10. **Ingest the manual results — `qa-manual-results` (stage 10,
-    deferred).** The human run happens after this orchestrator
-    finishes — often days later, in a different chat. When the tester
-    hands back the filled sheet (or a TC/Result/Notes table), run
-    `qa-manual-results`: it joins by TC id, reconciles against the
-    machine record, writes back with explicit retractions, and — per
-    the two-wave rule — posts the FIRST human-facing summary, files
-    the surviving bugs, and makes the handback offers. End THIS run by
-    telling the user plainly: nothing human-facing has been published
-    yet; stage 10 is where the team hears the result.
+10. **The human round — `qa-manual-walk` then `qa-manual-results`
+    (stage 10, deferred).** The human run happens after this
+    orchestrator finishes — often days later, in a different chat.
+    It has two halves:
+    - **The walk (live half).** The tester says "walk me through
+      <STORY>" and `qa-manual-walk` presents the plan one card at a
+      time, answers questions from backstage, runs the AGENT-RUNS
+      cards itself, keeps `<STORY>-walk-state.json` for resume, and
+      writes `<STORY>-walk-results.md`. It records nothing.
+    - **The write-back.** At the end of the walk — or when a tester
+      hands back a filled sheet / TC-Result-Notes table instead —
+      `qa-manual-results` joins by TC id, reconciles against the
+      machine record, shows every `fail` about to be recorded, and on
+      the tester's yes writes back with explicit retractions and — per
+      the two-wave rule — posts the FIRST human-facing summary, files
+      the surviving bugs, and makes the handback offers.
+    End THIS run by telling the user plainly: nothing human-facing has
+    been published yet; the walk is next, and stage 10's write-back is
+    where the team hears the result.
 
 ## Between stages
 
@@ -668,7 +683,7 @@ story does not exhaust the orchestrator's context:
   `⏱ Stage <n>/<total> done — <name> · elapsed <E> min · ~<R> min left`.
   Initial budgets (minutes): step 0 8 · pr-summary 15 · code-review 30
   · api-testing 25 · web-testing 45 · analyzer 8 · archive + publish
-  10 · runsheet 30. Compute `<R>` as the unfinished budgets scaled by
+  10 · walk plan 30. Compute `<R>` as the unfinished budgets scaled by
   the run's own pace (elapsed ÷ sum of finished budgets, clamped to
   0.5–3); round to 5 minutes, keep the `~`. Stamp both ends of every
   user-waiting pause (browser login, Jira write confirmation, test-
@@ -709,7 +724,8 @@ stage 10; which handoff was performed or deferred; the tracker
 reminder (checkboxes are manual-only). Reuse the human-summary content
 rather than inventing a third format.
 
-Then, from step 9: the run-sheet path, how many cases the tester still
-has to walk vs how many the machine settled, and the reminder that the
-run sheet and provisioning record hold live credentials and stay out
-of version control and Jira.
+Then, from step 9: the walk-plan path, how many cards the tester will
+walk (by kind) vs how many cases the machine settled, the reminder that
+the plan and provisioning record hold live credentials and stay out of
+version control and Jira, and the hand-off line: "walk me through
+<STORY>" starts the session.

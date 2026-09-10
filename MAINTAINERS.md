@@ -33,8 +33,9 @@ skills/
   code-review/                 # stage 6
   api-testing/                 # stage 7  — [API] cases, REST/curl
   web-testing/                 # stage 8  — [UI] cases, browser
-  qa-manual-runsheet/          # stage 9  — fixture provisioning + human run sheet
-  qa-manual-results/           # stage 10 — ingest completed sheet, retract wrong verdicts
+  qa-manual-runsheet/          # stage 9  — fixture provisioning + the walk plan (sheet = optional export)
+  qa-manual-walk/              # stage 10a — the live, card-by-card manual session in chat
+  qa-manual-results/           # stage 10b — write back walk results / a completed sheet, retract wrong verdicts
   qa-run-analyzer/             # run-health check (both phases)
   qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
   qa-pipeline-docs/            # orchestrator: stages 1-4 + Jira publish
@@ -77,7 +78,7 @@ The stages need different things, so they run in different places:
 | 5–6 `pr-summary`, `code-review` | the code: a **backend/portal-ui repo clone** OR a Bitbucket **API token** (`BB_EMAIL`+`BB_API_TOKEN`) | **Claude Code** |
 | 7 `api-testing` | the e2e **`.env`** (API creds) + a per-event frontend host | **Claude Code** |
 | 8 `web-testing` | a connected Chrome + logged-in test env | **Cowork** (Chrome extension) |
-| 9–10 `qa-manual-runsheet`, `qa-manual-results` | QA Service connector (suite read/write-back) + `.env` for provisioning | either, connector present |
+| 9–10 `qa-manual-runsheet`, `qa-manual-walk`, `qa-manual-results` | QA Service connector (suite read/write-back) + `.env` for provisioning and for the walk's AGENT-RUNS cards | either, connector present (the walk needs `.env` only if the plan has AGENT-RUNS cards) |
 
 **Why:** Cowork has no repo clone, no `BB_API_TOKEN`, and no `.env`, so
 5–7 can't authenticate there — `api-testing` will pause ("no .env"),
@@ -180,7 +181,9 @@ No files need to be carried between environments.
 | A skill doesn't trigger / triggers wrongly | its `SKILL.md` frontmatter `description` |
 | Report format wrong | that stage's `references/output-template.md` |
 | API auth / route discovery / write-safety | `skills/api-testing/references/api-testing-reference.md` |
-| Manual run-sheet format (columns, row states) | `skills/qa-manual-runsheet/references/runsheet-format.md` |
+| Walk plan format (sessions, cards, backstage keys, voice rules) | `skills/qa-manual-runsheet/references/walk-plan-format.md` |
+| The walk itself (turn shape, words → verdict mapping, positive-control question, card kinds, resume) | `skills/qa-manual-walk/references/walk-session-rules.md`; results file: `.../walk-results-format.md` |
+| Manual run-sheet format (the optional export: columns, row states) | `skills/qa-manual-runsheet/references/runsheet-format.md` |
 | Fixture provisioning rules + false-pass traps (UI-only, ingestion lag, unreliable instruments) | `skills/qa-manual-runsheet/references/provisioning-rules.md` |
 | Browser interaction rules | `skills/web-testing/references/browser-rules.md` |
 | Test login / host | `skills/web-testing/references/login-config.md` |
@@ -210,7 +213,8 @@ No files need to be carried between environments.
   or use `;`.
 - **Don't commit secrets or run outputs** — `.gitignore` ignores run
   artifacts by BROAD rule (`EP-*`, `build_*.py`, `*-testdata*`,
-  `*runsheet*.xlsx`, the `<KEY>-<stage>.md` patterns, `.env*`). If you
+  `*-walk-*`, `*runsheet*.xlsx`, the `<KEY>-<stage>.md` patterns,
+  `.env*`). If you
   create a run artifact whose name escapes those patterns, widen the
   pattern — do not add one filename. And commit explicit paths only;
   `git add -A` is banned in this repo (recipe step 6). On one run, 84

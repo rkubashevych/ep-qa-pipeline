@@ -5,12 +5,14 @@ description: >
   it reads the ticket's type and pipeline state, proposes the right
   route, and on confirmation invokes it: docs phase for a fresh
   Story/Task, code phase when the docs are published, bug-fix mode for
-  a standalone Bug, retest when a fix landed, manual-results ingestion
-  when the run sheet is back. Use when the user says "qa this ticket",
-  "process EP-1234 for testing", "run the pipeline on this", or pastes
-  a ticket and asks to test it without naming a mode. Do NOT use when
-  the user names a specific mode or stage ("run the docs pipeline",
-  "retest", "ingest the results") — those skills trigger directly.
+  a standalone Bug, retest when a fix landed, the guided manual walk
+  when the walk plan is built, manual-results ingestion when a filled
+  sheet is back. Use when the user says "qa this ticket", "process
+  EP-1234 for testing", "run the pipeline on this", or pastes a ticket
+  and asks to test it without naming a mode. Do NOT use when the user
+  names a specific mode or stage ("run the docs pipeline", "retest",
+  "walk me through", "ingest the results") — those skills trigger
+  directly.
 ---
 
 # QA Pipeline — dispatcher
@@ -35,8 +37,10 @@ From the ticket key/URL (ask if the paste has none):
    code-phase status comment? a human summary? (Since 0.26.0 the stage
    reports are local-only — absence of an archive comment says nothing
    about whether the code phase ran; check the working directory.)
-4. Working directory: `<KEY>-runsheet.xlsx`, `<KEY>-testdata.json`,
-   stage reports, `<KEY>-recon.md` — local evidence of a run in flight.
+4. Working directory: `<KEY>-walk-plan.md`, `<KEY>-walk-state.json`
+   (a walk in progress), `<KEY>-walk-results.md`, `<KEY>-runsheet.xlsx`,
+   `<KEY>-testdata.json`, stage reports, `<KEY>-recon.md` — local
+   evidence of a run in flight.
 
 **Where to find inputs:** `references/data-locations.md`
 (working directory first — a new chat is not a reason to ask for an
@@ -51,7 +55,8 @@ one; asking the user is the last resort, not the first).
 | Bug, no QA sub-task, no suite | **Bug-fix mode** — `qa-pipeline-code`, cases derived from the ticket |
 | QA sub-task/suite exists, no code-phase results | **Code phase** — `qa-pipeline-code` (fresh chat recommended if this one already ran the docs phase) |
 | Code-phase results exist, newest summary ❌ or user says the fix landed | **Retest mode** — `qa-pipeline-code` retest |
-| Run sheet emitted, user holds results / filled sheet | **Ingestion** — `qa-manual-results` |
+| Walk plan emitted, no walk results yet (or a `-walk-state.json` in progress) | **Guided walk** — `qa-manual-walk` (resume when state exists) |
+| Filled sheet / TC-Result-Notes table in hand, or a complete `-walk-results.md` not yet written back | **Ingestion** — `qa-manual-results` |
 | Signals conflict or several apply | Present the observed state and the 2–3 plausible routes; the user picks |
 
 Always show the evidence with the proposal, one line each ("QA sub-task

@@ -6,9 +6,11 @@ description: >
   via a Chrome extension, checks the expected results, and builds a
   detailed report. Use when the user says "web testing",
   "test in the browser", "run the QA checks", "browser testing",
-  or after code review is finished. NOT for hand-testing by the user:
-  the manual run sheet is qa-manual-runsheet (stage 9) and ingesting
-  the human's results is qa-manual-results (stage 10).
+  "run the cases yourself in the browser", or after code review is
+  finished. NOT for hand-testing by the user: fixtures and the walk
+  plan are qa-manual-runsheet (stage 9), the guided hand-test session
+  is qa-manual-walk (stage 10a), and ingesting the human's results is
+  qa-manual-results (stage 10b).
 ---
 
 # Web Testing

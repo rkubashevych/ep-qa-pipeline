@@ -1,8 +1,9 @@
 # <ISSUEKEY> - Manual Results
 
-Source: <runsheet.xlsx / TSV paste / triage file — list all used>
+Source: <walk-results.md (walk <start>→<end>, tester <e-mail>) / runsheet.xlsx / TSV paste / triage file — list all used>
 Automated record read from: <QA Service run <id> / verdict files / archive comment>
-QA Service run: <id> — <status after this stage: closed / running (why)> · recorded <N> manual verdicts (<N> supersede a machine verdict)
+QA Service run: <id> — <status after this stage: closed / running (why)> · recorded <N> manual verdicts + <N> agent-run witnessed verdicts (<N> supersede a machine verdict)
+Case corrections applied to the suite: <N> (listed under Ledger) · Observations carried as questions: <N>
 Date: <YYYY-MM-DD>
 
 ## Summary

@@ -5,6 +5,140 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.31.0 — 2026-09-10 — the walk
+
+**The manual round is a guided session, not a spreadsheet.** The run
+sheet was designed as "one login, one action, one expected result per
+row" (0.12.0) and had drifted into something the person it was built
+for could not concentrate on. On EP-56998 the real sheet carried Do /
+Expect cells of 500–1500 characters each — harness commands with host
+prefixes, WHY THIS IS FIRST, MUST NOT HAPPEN (quoted), HALF-OBSERVABLE
+stated plainly, SCOPE — STATE THIS WHEN REPORTING — across twelve
+columns of which seven were machine state, on five sheets. Every one
+of those fragments was a correct rule (probe the blocker, positive
+control, half-verified is not verified, source clause) applied in the
+wrong place: the cell, because nobody was there to answer a question.
+Nine of the eleven rows handed the tester a curl line. The tester's own
+report: "hard to track cases, everything shown in the face, hard to
+concentrate; the cases feel robotic; I liked walking them with you one
+by one and asking questions." So that is now the stage.
+
+- **New skill `qa-manual-walk` — stage 10a, the live half of the human
+  round.** "Walk me through EP-1234": the agent presents the stage-9
+  plan one card at a time — who / do / you should see — asks *what
+  happened?* (never *did it pass?*), answers questions from the card's
+  backstage block, re-probes BLOCKED cards live, and **runs the API /
+  harness cards itself** while the tester supplies only what a human
+  can (the token from the MORE link, the phone). The tester's words are
+  saved verbatim as the note; absence checks and half-observable cards
+  get the positive-control question before any verdict; a resumable
+  `<KEY>-walk-state.json` survives a chat break. **It records nothing**
+  — it writes `<KEY>-walk-results.md` and hands it to
+  `qa-manual-results`, whose fail-by-fail confirm and write-back are
+  unchanged (`references/walk-session-rules.md`,
+  `references/walk-results-format.md`).
+- **`qa-manual-runsheet` now emits a walk plan** (`<KEY>-walk-plan.md`,
+  new `references/walk-plan-format.md`): cards grouped into login
+  sessions in the order a tester moves through the product, each with
+  a fixed-key **backstage** block (`machine`, `why-walked`, `source`,
+  `positive-control`, `half-observable`, `covers`, `entity`, `wait`,
+  `scope`, `say-first`, `retest`, `how-to`, `run`, `blocked`) that the
+  agent reads and the tester never sees unasked. Card kinds: WALK,
+  SPOT-CHECK, **AGENT-RUNS** (anything with an HTTP verb — the agent
+  executes it), BLOCKED (probed), DEVICE. **Voice rules** with a test —
+  could a colleague who never read the ticket do this card and tell you
+  pass or fail from what they saw? Step 5 is now explicitly a
+  *translation* from the stage-4 register (correct for stages 6–8 and
+  the count gate, wrong on a card); the self-check gains a voice check.
+  All six usability rules, every provisioning rule and trap, the
+  selection method (2a), the coverage floor and the retest detection
+  are unchanged — they moved from the cell to the backstage.
+- **The spreadsheet is an export, on request.** `runsheet-format.md`
+  stays as the rendering spec (its REJECTED sections included) and now
+  opens with the rendering rule: one row per card, Expect = the card's
+  "You should see" plus the backstage lines a tester without an agent
+  still needs. Rendered from the plan, never edited on its own. A filled
+  sheet is still ingested by stage 10 exactly as before.
+- **`qa-manual-results` (stage 10b)** accepts `<KEY>-walk-results.md`
+  as its primary input; honours its `source` column (an agent-run,
+  witnessed card is recorded `source: machine` with a witnessed
+  principal — the 0.30.0 mislabel rule cuts both ways); treats `Half`
+  rows as half a verdict; applies the walk's **Case corrections** to
+  the suite under the same confirm and never records a `fail` for a
+  case whose premise was wrong; reports **Observations** as
+  `OBSERVATION (no source checked)` questions; refuses to write back a
+  `stopped early` file as a round. New: it must check the results
+  file's `Run:` line against the run it is writing to — see the
+  open-items answer below.
+- **Wiring:** `qa-pipeline-code` steps 9 and 10, the post-publish
+  check ("walk-plan outputs exist", voice check), the final response
+  and the run-clock label; `qa-pipeline` dispatcher gains the "Guided
+  walk" route and reads `-walk-state.json` as a walk in flight;
+  `qa-run-analyzer` reads the plan and the walk results, flags 🟡 for a
+  plan that fails the voice check, for a walk stopped mid-way, and for
+  a source mislabel; `data-locations.md`, README (stage table 9 / 10a /
+  10b, flow), MAINTAINERS (layout, environment matrix, where-to-look),
+  `evals/triggering.md` (new section + the ❌ arrows on web-testing,
+  runsheet, results, dispatcher), `.gitignore` (`*-walk-*` under
+  SECRETS — the plan carries passwords by design).
+- **Trigger walk (MAINTAINERS step 4), done by a cold reader on the
+  descriptions alone.** It found one hard miss that predates this
+  release — `qa-manual-runsheet` quoted `"retest"` / `"the fix landed"`
+  verbatim, tying with `qa-pipeline-code`'s retest mode — and two
+  risks: "walk me through the PR" pulling toward the new skill, and
+  `web-testing`'s NOT clause still naming only stages 9 and 10. Fixed
+  in the three descriptions (`web-testing` gains "run the cases
+  yourself in the browser" so the runsheet ❌ arrow has a claimant;
+  `qa-manual-results` gains the "what were the results?" exclusion).
+  All descriptions ≤ 1024 chars (walk 965, runsheet 1013, code 983).
+- **Deliberately not changed:** `qa-test-cases`. The "robotic" register
+  originates there and is *correct* there — `Pre:`/`Steps:`/`Exp:`,
+  `[data: …]`, channel tags and forbidden-word discipline feed
+  code-review, api-testing and `reconcile_counts.py`. Translation
+  happens once, at stage 9, keyed by the case id. Changing the docs
+  stages would have required the fixture smoke test and re-walking
+  the gate for no gain to the tester.
+
+**Open `[Pipeline]` / `[Pipeline/skill]` items answered (MAINTAINERS
+step 1)**, from the newest ledgers and run reports (EP-56197 r4,
+EP-56998 r1, EP-56740):
+
+- EP-56197 #24 — stale unsuffixed round-3 results files read as
+  current by stage 10 / the analyzer: **implemented in part** — the walk
+  results file carries `Run:` and `Round:` in its header, stage 10 must
+  match the `Run:` line to the run it writes to and stop on mismatch,
+  and the analyzer flags a results file whose run is not this round's.
+  The remaining half (round-suffixing every manual-results artefact)
+  is deferred to the count-gate release.
+- EP-56197 #25 — round-4 verdicts machine-only, TC-11 a standing
+  spot-check: **addressed by design** — a SPOT-CHECK card is presented
+  like any other and cannot be skipped silently (one sentence of
+  pushback, then SKIPPED with reason, never dropped).
+- EP-56998 #6 — TC-12 / TC-13 device half is the ticket's only
+  decisive instrument: **addressed by design** — the DEVICE card kind,
+  platform recorded per answer.
+- EP-56998 #2 — the meeting token leaves the platform only by email:
+  **addressed by design** — AGENT-RUNS cards name the one human-only
+  input (`how-to:`) and the agent runs the rest; the tester never
+  pastes a harness line.
+- EP-56197 #12 — Playwright FAIL evidence path impossible under the MCP
+  sandbox (`playwright-executor.md`): **DEFERRED** to the next release
+  with §4.5 of `PIPELINE-REVIEW-2026-09-07.md`; not a manual-round
+  change, and this release already changes three stages.
+- EP-56197 #17 — `NOT-A-DEFECT (stated exclusion…)` is an invented
+  status token: **DEFERRED** to the status-vocabulary release with
+  §4.7 (the `OBSERVATION` rename); the two belong together.
+- EP-56197 #18 — a falsified process claim reached two published stage
+  reports: **no repo change** — the correction is recorded in the
+  ledger row; the process fix is `verify_plugin.py` (§4.9, still
+  parked).
+- EP-56998 #13 — no durable record for a standalone Bug's verdicts:
+  **not changed, made visible** — the walk state and results files are
+  working-directory-only like every other artefact of a suite-less
+  ticket; the results header says so (`Run: no run — <why>`).
+- EP-56740 OI-6 — DS repo outside the Bitbucket workspace: **not a
+  plugin defect**; raise with the DS team as the ledger says.
+
 ## 0.30.0 — 2026-09-07 — the record
 
 **Verdicts are now QA Service test runs, not text in case notes.** On
