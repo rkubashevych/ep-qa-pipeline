@@ -6,7 +6,14 @@
     python3 reconcile_counts.py --selftest
 
 Reads whichever of <KEY>-test-cases/code-review/api-testing/web-testing
-.md exist in dir (default cwd). Prints, per file: the set size of case
+.md exist. Where to look (data-locations.md → "The run folder"): when
+no dir is given, the newest pass folder `runs/<KEY>/r<N>/` under the
+cwd, falling back to the cwd itself for legacy tickets. The test-cases
+file is looked up in the pass folder first, then `runs/<KEY>/docs/`
+(where the docs phase writes it), then the given dir — so a retest
+round reconciles against its case list without being told twice.
+Pass an explicit dir (e.g. `runs/EP-1234/r2`) to pin an older round.
+Prints, per file: the set size of case
 ids, status counts from RESULT ROWS ONLY, and the TC ids that are in
 the test-cases file but missing from each downstream file. The analyzer
 verifies this output instead of recounting by hand — it still judges
@@ -148,11 +155,48 @@ def count_statuses(text):
     return counts, sources
 
 
-def report(key, d):
+def resolve_run_dir(key, d=None):
+    """Return the folder to read stage reports from.
+
+    Explicit dir → as given. Otherwise the newest `runs/<key>/r<N>` under
+    the cwd; when none exists, the cwd (legacy layout: files beside the
+    repo root). Also returns the docs folder used as the test-cases
+    fallback (may not exist).
+    """
+    docs = os.path.join("runs", key, "docs")
+    if d is not None:
+        return d, docs
+    base = os.path.join("runs", key)
+    rounds = []
+    if os.path.isdir(base):
+        for name in os.listdir(base):
+            if name.startswith("r") and name[1:].isdigit() and \
+                    os.path.isdir(os.path.join(base, name)):
+                rounds.append(int(name[1:]))
+    if rounds:
+        return os.path.join(base, f"r{max(rounds)}"), docs
+    return ".", docs
+
+
+def locate(key, stage, d, docs):
+    """Pass folder first; test-cases may also live in docs/ or the cwd."""
+    candidates = [os.path.join(d, f"{key}-{stage}.md")]
+    if stage == "test-cases":
+        candidates += [os.path.join(docs, f"{key}-{stage}.md"),
+                       f"{key}-{stage}.md"]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def report(key, d=None):
+    d, docs = resolve_run_dir(key, d)
+    print(f"run folder: {d}")
     ids = {}
     for stage in STAGES:
-        path = os.path.join(d, f"{key}-{stage}.md")
-        if not os.path.exists(path):
+        path = locate(key, stage, d, docs)
+        if path is None:
             print(f"{stage}: file not present")
             continue
         text = open(path, encoding="utf-8").read()
@@ -294,10 +338,52 @@ def check(doc, expect, label, errs):
         errs.append(f"[{label}] core count {core} != {expect['core']}")
 
 
+def check_run_folder(errs):
+    """runs/<KEY>/r<N> resolution: newest round wins, docs/ supplies the
+    case file, legacy cwd is the fallback (data-locations.md 0.32.0)."""
+    import tempfile
+    key = "EP-0"
+    cwd = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmp:
+        os.chdir(tmp)
+        try:
+            # legacy: nothing under runs/ → cwd
+            d, _ = resolve_run_dir(key)
+            if d != ".":
+                errs.append(f"run-folder: legacy fallback gave {d!r}, want '.'")
+            # rounds: r1, r2, r10 → r10 (numeric, not lexical)
+            for r in ("r1", "r2", "r10"):
+                os.makedirs(os.path.join("runs", key, r))
+            os.makedirs(os.path.join("runs", key, "docs"))
+            d, docs = resolve_run_dir(key)
+            if d != os.path.join("runs", key, "r10"):
+                errs.append(f"run-folder: newest round gave {d!r}, want r10")
+            # explicit dir pins an older round
+            d2, _ = resolve_run_dir(key, os.path.join("runs", key, "r2"))
+            if not d2.endswith("r2"):
+                errs.append(f"run-folder: explicit dir ignored ({d2!r})")
+            # test-cases: pass folder first, then docs/, then cwd
+            open(os.path.join(docs, f"{key}-test-cases.md"), "w").write("x")
+            p = locate(key, "test-cases", d, docs)
+            if p != os.path.join(docs, f"{key}-test-cases.md"):
+                errs.append(f"run-folder: docs/ fallback for test-cases gave {p!r}")
+            open(os.path.join(d, f"{key}-test-cases.md"), "w").write("x")
+            p = locate(key, "test-cases", d, docs)
+            if p != os.path.join(d, f"{key}-test-cases.md"):
+                errs.append(f"run-folder: pass folder should win for test-cases ({p!r})")
+            # a stage report is never taken from docs/ or cwd
+            open(f"{key}-code-review.md", "w").write("x")
+            if locate(key, "code-review", d, docs) is not None:
+                errs.append("run-folder: code-review must not fall back to cwd")
+        finally:
+            os.chdir(cwd)
+
+
 def selftest():
     errs = []
     check(SELFTEST_DOC, SELFTEST_EXPECT, "docs-phase", errs)
     check(SELFTEST_BUGFIX_DOC, SELFTEST_BUGFIX_EXPECT, "bug-fix", errs)
+    check_run_folder(errs)
     if errs:
         print("SELFTEST FAIL")
         for e in errs:
@@ -306,8 +392,10 @@ def selftest():
     print("SELFTEST PASS — statistics-table exclusion, one-status-per-row, "
           "PASS(code) separation, trailing-period ids, bold/qualified "
           "statuses, RE-ROUTE [UI], range expansion, [core] heading "
-          "counting, and bug-fix-mode flat ids (TC-<n>, flat spans, "
-          "`## ` headings) all verified")
+          "counting, bug-fix-mode flat ids (TC-<n>, flat spans, "
+          "`## ` headings), and runs/<KEY>/r<N> folder resolution "
+          "(newest round, docs/ case-file fallback, legacy cwd) all "
+          "verified")
 
 
 def main():
@@ -316,7 +404,7 @@ def main():
     if sys.argv[1] == "--selftest":
         selftest()
         return
-    report(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else ".")
+    report(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
 
 if __name__ == "__main__":

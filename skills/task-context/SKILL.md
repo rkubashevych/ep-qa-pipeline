@@ -324,10 +324,10 @@ before saving.
 
 ## Output file
 
-Create the file <ISSUEKEY>-context.md in the working directory and give
+Create the file <ISSUEKEY>-context.md in the run folder and give
 it to the user for download.
 
-The file stays in the working directory — the next skill in the same
+The file stays in the run folder — the next skill in the same
 chat picks it up automatically.
 
 If the file already exists — delete it completely and create a new one.

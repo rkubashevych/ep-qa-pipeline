@@ -29,7 +29,7 @@ inherits it instead of rediscovering it.
 ## Input
 
 Reads whichever of these exist — resolved per
-`../qa-pipeline/references/data-locations.md` (working directory first;
+`../qa-pipeline/references/data-locations.md` (run folder first;
 asking the user is the last resort):
 `<ISSUEKEY>-context.md`, `<ISSUEKEY>-requirements.md`,
 `<ISSUEKEY>-checklist.md`, `<ISSUEKEY>-test-cases.md`,
@@ -323,9 +323,9 @@ is cheaper to find here than after the bug is filed.
 ### 8. Carried items (Pipeline) — what earlier rounds left open
 
 Rules and format: `../qa-pipeline/references/open-items-ledger.md`.
-Read `<ISSUEKEY>-open-items.md` (per ticket, no round suffix —
-`EP-56133-open-items.md` even when this round's reports are
-`EP-56133-retest3-*`). Then:
+Read `runs/<ISSUEKEY>/<ISSUEKEY>-open-items.md` (per ticket, one level
+above this round's `r<N>/` folder; legacy tickets: the repo root).
+Then:
 
 - 🔴 **carried item** — any open row (`Closed = —`) whose `First seen`
   is two or more rounds before this one and whose `Decision` is `—`.

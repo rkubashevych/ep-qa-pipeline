@@ -37,9 +37,14 @@ reimplement them.
 ## Input
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
+
+**Where this phase writes:** `runs/<ISSUEKEY>/docs/` — create it before
+stage 1 and print it once (`Run folder: runs/EP-1234/docs`). Every
+stage 1–4 file and this phase's run report go there; a re-run
+overwrites in place. Nothing is written to the repo root.
 
 - A Jira ticket key or URL (e.g. `EP-44730`). If the key is itself a
   sub-task, use its parent Story as the story for publishing.

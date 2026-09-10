@@ -24,7 +24,7 @@ The input is the `<ISSUEKEY>-checklist.md` file created by the
 qa-checklist skill.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
@@ -250,10 +250,10 @@ If a problem is found, fix it before saving.
 
 ## Output file
 
-Create the `<ISSUEKEY>-test-cases.md` file in the working directory
+Create the `<ISSUEKEY>-test-cases.md` file in the run folder
 and give it to the user to download.
 
-The file stays in the working directory — the next skill in the same
+The file stays in the run folder — the next skill in the same
 chat picks it up automatically.
 
 If the file already exists, delete it completely and create a new

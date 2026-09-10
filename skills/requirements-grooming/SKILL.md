@@ -23,7 +23,7 @@ The input is the context file `<ISSUEKEY>-context.md` created by the
 context-collection skill (task-context).
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
@@ -207,7 +207,7 @@ messages", "handle", "support".
   class — the orchestrator answers BEHAVIOUR items by read-only
   observation (recon) before anything reaches a human. Most
   "questions" on past runs were BEHAVIOUR wearing a SPEC costume. If
-  a `<ISSUEKEY>-recon.md` already exists in the working directory,
+  a `<ISSUEKEY>-recon.md` already exists in the run folder,
   read it before raising any BEHAVIOUR question — it may already hold
   the answer, with evidence.
 - Do not generate questions about:
@@ -305,10 +305,10 @@ covers what matters most.
 
 ## Output file
 
-Create the file <ISSUEKEY>-requirements.md in the working directory and
+Create the file <ISSUEKEY>-requirements.md in the run folder and
 give it to the user for download.
 
-The file stays in the working directory — the next skill in the same
+The file stays in the run folder — the next skill in the same
 chat picks it up automatically.
 
 If the file already exists — delete it completely and create a new one.

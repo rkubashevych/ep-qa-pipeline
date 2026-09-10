@@ -42,7 +42,7 @@ the product.
 
 ## 2. The register
 
-Every code-phase run keeps `<KEY>-sources.md` in the working directory:
+Every code-phase run keeps `<KEY>-sources.md` in the run folder:
 one row per source, with its id, what it governs, and the fetch date.
 
 ```markdown

@@ -5,6 +5,64 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.32.0 — 2026-09-10 — the run folder
+
+**Run artefacts move out of the repo root into `runs/<KEY>/`.** When
+this was written the root held 688 `EP-*` files, 17 `build_*` /
+`repro_*` scripts and every walk plan and testdata pack with live
+passwords, beside the distributable. Every MAINTAINERS gotcha about
+`git add -A` — including the run where 84 account passwords were one
+command from a commit — exists because the repo doubled as the run
+workspace with no structure. `.gitignore` had anticipated the fix
+since 0.13 ("future layout: per-run folders — `runs/`") and nothing
+ever used it. First of the five "old beside new" clean-ups agreed on
+2026-09-10.
+
+- **Layout, defined once** in `qa-pipeline/references/data-locations.md`
+  (which already outranks every skill's Input/Output section by its own
+  rule): `runs/<KEY>/docs/` for stages 1–4, `runs/<KEY>/r<N>/` for
+  each code-phase pass, `runs/<KEY>/<KEY>-open-items.md` for the ledger.
+  **File names do not change** — `<KEY>-<stage>.md` stays, so every
+  script, regex and archive label keeps working; only the directory
+  changes.
+- **Rounds are folders, not suffixes.** `r1` is the first pass, `r2`
+  the first retest (the QA Service run titled `retest k` is `r<k+1>`).
+  The `-retestN-` file-name convention is retired. This closes two
+  recorded items at once: the stale-artefact trap (EP-56197 r4
+  open-items #24 — a round-3 results file read as round 4's; a folder
+  cannot be mistaken for another round) and review item #12
+  (`reconcile_counts.py` could not find a retest's case file without
+  being told the key twice).
+- **Who decides the folder:** `qa-pipeline-code` step 0 lists
+  `runs/<KEY>/r*` first thing — a resume continues in the newest
+  folder, anything else creates `r<max+1>` — and prints it. The
+  post-publish check gains "everything is in the run folder; a
+  `<KEY>-*` file in the repo root is a ❌". `qa-pipeline-docs` writes to
+  `docs/` and says so once. A stage invoked bare uses the newest round
+  or asks.
+- **`reconcile_counts.py`** resolves the run folder itself (newest
+  `r<N>`, numeric not lexical; legacy cwd when none exists), looks for
+  the test-cases file in the pass folder, then `docs/`, then the cwd,
+  and never takes a stage report from anywhere but the pass folder. New
+  self-test fixture `check_run_folder` covers all of that — the 0.27
+  lesson (one fixture let a whole run shape parse as empty) applied to
+  directories. `--selftest` passes.
+- **"working directory" → "run folder"** across 21 files (skills, README,
+  MAINTAINERS); the web-testing persistence note now says plainly that
+  `navigation_paths.json` is cross-ticket memory and does not live in a
+  run folder. The ledger reference and analyzer §8 lose their
+  `-retestN-` examples. MAINTAINERS layout, data-flow and "where things
+  live" updated; `.gitignore` reorders so `runs/` is the rule and `EP-*`
+  in the root is documented as legacy.
+- **Legacy is read-only, not migrated.** Pre-0.32 artefacts in the root
+  stay readable as resolution step 2; nothing is written beside them
+  again. Optional tidy-up by hand: `runs/<KEY>/legacy/`. No automatic
+  move — 688 files with credentials are not something a skill should
+  shuffle unattended.
+- **Deliberately not changed:** the archive comments, the checkbox
+  tracker and the `.env.qa-agents` location — items 2, 3 and the
+  housekeeping note of the same review; each gets its own release.
+
 ## 0.31.0 — 2026-09-10 — the walk
 
 **The manual round is a guided session, not a spreadsheet.** The run

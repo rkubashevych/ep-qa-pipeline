@@ -65,7 +65,7 @@ Each skill folder still has a `setup-guide.md` with the remaining team-specific 
 
 ## Where to run each stage
 
-Stages 1–4 (ticket → context → requirements → checklist → test cases) chain naturally in **one chat**, since each output file stays in the working directory for the next skill. Stage 5 (`pr-summary`) switches from reading the ticket to reading code; the recommended practice is to **start a fresh chat there** — no files need carrying: `qa-pipeline-code` Step 0 reads the test cases (and, on resume, earlier stage reports) back from the QA sub-task's archive comments on Jira. Runs can be **split across environments** (5–7 in Claude Code, 8 in Cowork): the first environment posts PARTIAL results, the second resumes from them and posts the final pair.
+Every file a stage writes lands in the **run folder** — `runs/<KEY>/docs/` for the docs phase, `runs/<KEY>/r<N>/` for each code-phase pass (first run `r1`, first retest `r2`, …), the open-items ledger one level up — never in the repo root; the layout and resolution order are defined once in `skills/qa-pipeline/references/data-locations.md`. Stages 1–4 (ticket → context → requirements → checklist → test cases) chain naturally in **one chat**, since each output file stays in the run folder for the next skill. Stage 5 (`pr-summary`) switches from reading the ticket to reading code; the recommended practice is to **start a fresh chat there** — no files need carrying: `qa-pipeline-code` Step 0 reads the test cases (and, on resume, earlier stage reports) back from the QA sub-task's archive comments on Jira. Runs can be **split across environments** (5–7 in Claude Code, 8 in Cowork): the first environment posts PARTIAL results, the second resumes from them and posts the final pair.
 
 ## Multi-surface, multi-PR features
 
@@ -82,7 +82,7 @@ Mobile (Android/iOS) and non-HTTP outputs (exports, emails, integrations) are ge
 
 ## Installing the skills
 
-This repo is a Claude **plugin** (`.claude-plugin/plugin.json`); each folder under `skills/` is one skill. Install the whole plugin (Settings → Capabilities / your plugin marketplace) so every stage plus the `qa-pipeline-docs` and `qa-pipeline-code` orchestrators arrive together. They run in sequence within a chat, each output file staying in the working directory for the next stage.
+This repo is a Claude **plugin** (`.claude-plugin/plugin.json`); each folder under `skills/` is one skill. Install the whole plugin (Settings → Capabilities / your plugin marketplace) so every stage plus the `qa-pipeline-docs` and `qa-pipeline-code` orchestrators arrive together. They run in sequence within a chat, each output file staying in the run folder for the next stage.
 
 ## Maintaining / updating
 

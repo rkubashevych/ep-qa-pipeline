@@ -33,7 +33,7 @@ From the user you need:
    cover several PRs grouped by sub-task; use it as the navigation map.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
@@ -361,7 +361,7 @@ as "None".
 Create the file `<ISSUEKEY>-code-review.md` in the working
 directory and hand it to the user for download.
 
-The file stays in the working directory — the next skill
+The file stays in the run folder — the next skill
 in the same chat picks it up automatically.
 
 If the file already exists — delete it completely and create a new one.

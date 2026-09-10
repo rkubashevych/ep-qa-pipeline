@@ -31,7 +31,7 @@ files. Output: a detailed per-case report.
    the report's Notes line and continue with test cases only.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
@@ -148,12 +148,12 @@ exist, create `{"navigation_paths": {}}`. If `TARGET_PAGE_NAME` has an
 entry, use its `url` / `login_required` / `navigation_steps`
 (`PATH_EXISTS = true`); otherwise `PATH_EXISTS = false`.
 
-> **Persistence note.** In Cowork the working directory is per-session
-> scratch. If a persistent folder is mounted (the `qa-pipeline-skill`
+> **Persistence note.** `navigation_paths.json` is cross-ticket memory, not a run
+> artefact, so it does NOT live in the run folder. If a persistent folder is mounted (the `qa-pipeline-skill`
 > repo keeps a git-ignored copy under `skills/web-testing/`, or the
 > e2e project folder), read and write `navigation_paths.json` THERE so
-> the memory survives across sessions; fall back to the working
-> directory only when nothing persistent is mounted.
+> the memory survives across sessions; fall back to the session's
+> scratch folder only when nothing persistent is mounted.
 
 ### Step 4 — Login (if needed)
 
@@ -357,7 +357,7 @@ section. Do not go looking for bugs deliberately.
 
 ## Output file
 
-Create `<ISSUEKEY>-web-testing.md` in the working directory (template:
+Create `<ISSUEKEY>-web-testing.md` in the run folder (template:
 references/output-template.md) and hand it to the user for download.
 If the file already exists — delete it and create a new one: a single
 coherent document with the latest run only, never merged or appended.

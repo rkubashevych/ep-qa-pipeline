@@ -64,7 +64,7 @@ listbox portals; date pickers need keyboard entry).
 On every FAIL / FAIL CONFIRMED:
 
 - Take a screenshot of the failing state; save as
-  `<ISSUEKEY>-<TC-ID>-fail.png` in the working directory and
+  `<ISSUEKEY>-<TC-ID>-fail.png` in the run folder and
   reference it from the report row.
 - Capture browser console errors for the failing page and quote the
   relevant line(s) in the finding.

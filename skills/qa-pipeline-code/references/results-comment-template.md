@@ -56,7 +56,7 @@ Two consequences, both load-bearing:
   on another machine, or by a colleague, has nothing to restore — step
   0's resume mode pauses and says so instead of re-running finished
   stages. A split Claude Code ↔ Cowork run without a QA sub-task
-  therefore needs both environments to see the same working directory.
+  therefore needs both environments to see the same run folder.
 
 Never merge archive and summary into one comment. After posting the
 archive, **read it back and verify fidelity**: fetch the comment,
@@ -192,7 +192,7 @@ machine-only.`)
 
 Run health: 🟢 coverage · 🟢 input · 🟡 process — detail in the run
 report (`<STORY>-run-report.md`; in the archive comment above when the
-ticket has a QA sub-task, otherwise in the run's working directory).
+ticket has a QA sub-task, otherwise in the run's run folder).
 
 **Test docs:** <N> requirements / <M> cases; QA Service run <id>
 (<closed / running>: <N> pass · <N> fail · <N> blocked · <N> skipped) —
@@ -225,7 +225,7 @@ web-testing pending in Cowork), post the same two comments with:
   plain line per missing file: `File <STORY>-web-testing.md not
   produced — pending (runs in Cowork)`. With no QA sub-task there is no
   archive — the finished reports stay on disk and the resuming
-  environment must read the same working directory.
+  environment must read the same run folder.
 - Summary: a **Pending** line naming what remains and where it runs.
 
 The resumed session posts a fresh final pair (archive where one

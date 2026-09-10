@@ -60,11 +60,11 @@ keeps asserting PASSes everyone knows are wrong.
 2. **The story / QA sub-task key** — ask if not derivable.
 3. Optional, for reconciliation: this run's verdict files
    (`<ISSUEKEY>-code-review.md`, `-api-testing.md`, `-web-testing.md`)
-   from the working directory; in a fresh chat, from the results
+   from the run folder; in a fresh chat, from the results
    archive comment on the QA sub-task when the ticket has one (extract
    per `../qa-pipeline-code/references/results-comment-template.md`).
    **A ticket with no QA sub-task carries no archive (0.26.0), so its
-   reports exist only in the working directory** — on another machine
+   reports exist only in the run folder** — on another machine
    they will be missing: say so and ask for them rather than
    reconciling against nothing.
 4. Optional: the QA Service suite (connector present) — the write-back
@@ -74,7 +74,7 @@ If no Result data is provided at all — ask for the completed sheet or
 table; do not proceed on guesses.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
@@ -196,7 +196,7 @@ that list is the per-bug yes — then on explicit yes:
   `File: <ISSUEKEY>-manual-results.md`). Where there is no QA sub-task
   — a Bug, a Defect — post **no archive**: that ticket gets the verdict
   and nothing else, and `<ISSUEKEY>-manual-results.md` stays in the
-  working directory (0.26.0 archive target rule,
+  run folder (0.26.0 archive target rule,
   `../qa-pipeline-code/SKILL.md` step 6). Write it as the complete
   picture, not a delta — overall verdict, stage table, confirmed bugs,
   **Retractions listed first with old → new and reason**, what needs a

@@ -36,14 +36,14 @@ From the ticket key/URL (ask if the paste has none):
 3. On that sub-task, when it exists: a QA Service suite line? a
    code-phase status comment? a human summary? (Since 0.26.0 the stage
    reports are local-only — absence of an archive comment says nothing
-   about whether the code phase ran; check the working directory.)
-4. Working directory: `<KEY>-walk-plan.md`, `<KEY>-walk-state.json`
+   about whether the code phase ran; check the run folder.)
+4. Run folder: `<KEY>-walk-plan.md`, `<KEY>-walk-state.json`
    (a walk in progress), `<KEY>-walk-results.md`, `<KEY>-runsheet.xlsx`,
    `<KEY>-testdata.json`, stage reports, `<KEY>-recon.md` — local
    evidence of a run in flight.
 
 **Where to find inputs:** `references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 

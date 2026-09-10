@@ -72,7 +72,7 @@ cell.
    start if it is not obvious from the session.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first; asking the user is the last resort).
+(run folder first; asking the user is the last resort).
 
 ## Output
 

@@ -193,7 +193,7 @@ Create the file `<ISSUEKEY>-pr-summary.md` in the working
 directory and hand it to the user for download. The issue key
 follows the Jira format `PROJECT-123` (for example `EP-1234`).
 
-The file stays in the working directory — the next skill
+The file stays in the run folder — the next skill
 in the same chat picks it up automatically.
 
 If the file already exists — delete it completely and create a new one.

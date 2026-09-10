@@ -43,7 +43,7 @@ notifications / dashboards, and on every absence check.
    and **not discoverable** — it must be supplied (reference §11.1).
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
@@ -233,7 +233,7 @@ enumerate surfaces per role or cap at PARTIAL.
 - Every write has a documented revert (or throwaway-entity cleanup).
 
 ## Output file
-Create `<ISSUEKEY>-api-testing.md` in the working directory per
+Create `<ISSUEKEY>-api-testing.md` in the run folder per
 `references/output-template.md`. If it already exists — delete it and
 create a new one (single latest run, no append).
 

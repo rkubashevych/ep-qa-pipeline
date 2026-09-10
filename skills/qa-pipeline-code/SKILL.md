@@ -48,7 +48,7 @@ in a fresh chat (separate from the docs phase) for context health.
   missing.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(working directory first — a new chat is not a reason to ask for an
+(run folder first — a new chat is not a reason to ask for an
 upload; then the suite; then the QA sub-task archive if the ticket has
 one; asking the user is the last resort, not the first).
 
@@ -70,6 +70,19 @@ written by the analyzer and stage 9, closed only by stage 10.
 **Session name:** suggest renaming this session to
 `QA-pipeline <STORY> — code` (Claude Code: `/rename …`; Cowork: click
 the chat title). One short reminder, then move on.
+
+**Establish the run folder — before any other read or write**
+(`../qa-pipeline/references/data-locations.md` → "The run folder").
+List `runs/<STORY>/r*`. A **resume** (newest folder's run report is
+`partial`, or its QA Service run is `running` with `not_run` rows and
+no `-manual-results.md`) continues in that folder. Anything else —
+first run, retest mode, bug-fix mode, "the fix landed" — creates
+`runs/<STORY>/r<max+1>/`. Print one line: `Run folder: runs/EP-1234/r2
+(retest 1)`. Every stage this orchestrator dispatches writes there and
+nowhere else; the ledger is `runs/<STORY>/<STORY>-open-items.md`, the
+docs-phase files are `runs/<STORY>/docs/`. Nothing is written to the
+repo root — a `<STORY>-*` file appearing there is a ❌ in the
+post-publish check.
 
 **Environment check first.** Stages 5–7 need things Cowork usually
 lacks: a repo clone or `BB_EMAIL`+`BB_API_TOKEN` (5–6) and API
@@ -114,7 +127,7 @@ for the docs phase, but stage 1 does **not** run in retest or bug-fix
 mode — which is why this step lives here and runs unconditionally.
 
 **Same-session shortcut:** if `<STORY>-test-cases.md` (and the
-checklist) are already in the working directory — e.g. the docs phase
+checklist) are already in the run folder — e.g. the docs phase
 ran in this chat — use them and skip the Jira read-back below. The
 source register is still built: test cases are derived artifacts and
 never substitute for it.
@@ -161,7 +174,7 @@ Otherwise, using the Atlassian connector and the Story key:
      skill's folder) on the saved comment bodies — it handles labels,
      parts, and nested fences deterministically; extract manually only
      if it cannot run. Write `<STORY>-checklist.md` and
-     `<STORY>-test-cases.md` to the working directory.
+     `<STORY>-test-cases.md` to the run folder.
    - Neither available → offer the choice: re-run `qa-pipeline-docs`
      (or attach the files), or — for a Bug ticket — **Bug-fix mode**
      below.
@@ -189,7 +202,7 @@ Otherwise, using the Atlassian connector and the Story key:
      archive target rule, step 6): a Bug or Defect gets exactly two
      comments across the whole run, and the second is the verdict a
      person actually wants to read. The reports stay on disk, so a
-     resume of a bug-fix run needs the same working directory.
+     resume of a bug-fix run needs the same run folder.
    - **Stages 5–8 run unchanged** on the derived branch (the bug key
      is the branch, or use the main-issue PR fallback). All evidence
      rules, gates and pauses apply — a small scope is not a licence to
@@ -211,7 +224,7 @@ Otherwise, using the Atlassian connector and the Story key:
    Never block on QA Service.
 
    **Resume mode — look in this order:**
-   1. **The working directory** — `<STORY>-code-review.md`,
+   1. **The run folder** — `<STORY>-code-review.md`,
       `-api-testing.md`, `-web-testing.md`, `-run-report.md`,
       `<STORY>-open-items.md` (the ledger — per ticket, no round
       suffix) and, when present, `<STORY>-manual-results.md` and
@@ -229,7 +242,7 @@ Otherwise, using the Atlassian connector and the Story key:
       another machine possible.
    3. **Neither → PAUSE.** Tickets without a QA sub-task carry no
       archive by design (step 6's archive target rule), so their
-      reports exist only in the working directory. Say that plainly,
+      reports exist only in the run folder. Say that plainly,
       ask whether this is the machine the earlier run used, and offer
       either to re-run the missing stages or to have the files
       attached. Never assume "no file" means "stage never ran" — on a
@@ -344,7 +357,7 @@ existing comments are never edited.
 With a QA sub-task, the partial archive carries the reports across, so
 the environments need nothing in common. **Without one — a Bug, a
 Defect, a small Story — no archive is posted, so the two environments
-must see the same working directory.** If they cannot, that run cannot
+must see the same run folder.** If they cannot, that run cannot
 be split: say so before starting rather than discovering it at step 0,
 and either run everything in one environment or have the files carried
 across by hand.
@@ -360,7 +373,7 @@ Cowork), run stages 5–7 each as a SEPARATE subagent so a multi-PR
 story does not exhaust the orchestrator's context:
 
 - Give the subagent the stage's SKILL.md path, the input file paths,
-  and the working directory. It follows the SKILL.md in full, writes
+  and the run folder. It follows the SKILL.md in full, writes
   the stage report, and returns only a short summary (<= 10 lines:
   counters, verdict, blockers) — never the report content.
 - Resolve everything that could pause BEFORE dispatching (step 0's
@@ -411,7 +424,7 @@ story does not exhaust the orchestrator's context:
    sub-task and nowhere else.** A QA sub-task is a machine artefact
    ticket; nobody reads it for status, so fenced file dumps are free
    there. Every other ticket type — Story face, Bug, Defect — receives
-   **no archive at all**: the reports stay in the working directory and
+   **no archive at all**: the reports stay in the run folder and
    the QA Service suite carries the per-case record.
 
    A **Defect is itself a sub-task** and can therefore never own a QA
@@ -641,13 +654,17 @@ story does not exhaust the orchestrator's context:
      human summary must NOT be posted yet — finding it posted early is
      a ❌.
    - **Reports are on disk:** every stage report the run produced is
-     present in the working directory. Where no archive was posted they
+     present in the run folder. Where no archive was posted they
      are the ONLY copy of the evidence — a missing one is a ❌, not a
      formality.
    - **Walk-plan outputs exist** — `<STORY>-walk-plan.md` and
      `-testdata.json` (unless stage 9 was skipped), and every card in
      the plan passed stage 9's voice check (no HTTP verb, curl line or
      caveat in a card body outside an AGENT-RUNS `run:` key).
+   - **Everything is in the run folder:** every file this pass wrote is
+     under `runs/<STORY>/r<N>/` (ledger one level up), and **no
+     `<STORY>-*` file was written to the repo root**. One in the root is
+     a ❌ — move it and say so.
    Append the outcome as `## Post-publish verification` (✅/❌ per
    item) to `<STORY>-run-report.md` and include one line in the final
    response. A ❌ here is a real finding — fix it or tell the user,

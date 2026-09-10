@@ -40,6 +40,8 @@ skills/
   qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
   qa-pipeline-docs/            # orchestrator: stages 1-4 + Jira publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
+runs/                          # git-ignored RUN WORKSPACE (0.32.0): runs/<KEY>/docs/, runs/<KEY>/r<N>/
+                               # — every artefact a stage writes; nothing goes in the repo root any more
 ```
 
 Each stage folder is the same shape:
@@ -50,9 +52,14 @@ Each stage folder is the same shape:
   `web-testing/references/browser-rules.md` + `login-config.md`).
 - `setup-guide.md` — team-specific values to confirm before running.
 
-Data flows between stages as files in the working directory, named
-`<ISSUEKEY>-<stage>.md` (e.g. `EP-44730-code-review.md`). Each stage
-reads the previous stage's file. These outputs are git-ignored.
+Data flows between stages as files in the run folder —
+`runs/<ISSUEKEY>/docs/` for stages 1–4, `runs/<ISSUEKEY>/r<N>/` per
+code-phase pass — named `<ISSUEKEY>-<stage>.md` (e.g.
+`EP-44730-code-review.md`). Each stage reads the previous stage's file.
+The layout, the round rule and the resolution order live in ONE place:
+`skills/qa-pipeline/references/data-locations.md`. `runs/` is
+git-ignored as a whole. Files from before 0.32.0 sit in the repo root
+and stay readable; nothing new is written there.
 
 ## Pipeline order & channel routing
 
@@ -108,9 +115,9 @@ No files need to be carried between environments.
 - **Per-event frontend host** — not discoverable; supply it per event
   (see `skills/api-testing/references/api-testing-reference.md` §11.1).
 - **Pipeline output files** (`<KEY>-context.md` … `<KEY>-run-report.md`)
-  — written to the **working directory** of whatever chat/session runs
-  the stage; the next stage in the same session reads them. They are
-  git-ignored, not committed to this repo.
+  — written to the **run folder** `runs/<KEY>/…` inside the mounted
+  repo (`data-locations.md`); the next stage reads them from there,
+  in this session or the next. They are git-ignored, not committed.
 - **Hand-off between docs and code** — docs publishes the checklist +
   test cases to the Story's **QA sub-task** on Jira; `qa-pipeline-code`
   reads them back from there, so you don't carry files between sessions
