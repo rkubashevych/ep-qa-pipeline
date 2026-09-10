@@ -4,6 +4,7 @@
     python3 scripts/verify_plugin.py            # check the repo you are in
     python3 scripts/verify_plugin.py --root X   # check another checkout
     python3 scripts/verify_plugin.py --no-git   # skip the staged-paths check
+    python3 scripts/verify_plugin.py --selftest # the guard's own pattern test
 
 Runs in a few seconds and exits non-zero on any FAIL. Parked since 0.18.2,
 shipped in 0.36.0 after two days in which every class of defect it
@@ -11,7 +12,7 @@ catches actually happened: two skill descriptions over the 1024-char
 discovery ceiling, a fix "written and never committed" for two rounds,
 CRLF churn on five files, two files without a trailing newline.
 
-Checks (MAINTAINERS recipe step 6.0):
+Checks (MAINTAINERS recipe step 6.4):
   1. versions   plugin.json == marketplace.json == CHANGELOG top heading
   2. skills     every skills/*/SKILL.md: frontmatter `name` == folder,
                 `description` <= 1024 chars (joined), <= 500 lines (WARN)
@@ -25,9 +26,13 @@ Checks (MAINTAINERS recipe step 6.0):
   6. vocabulary every status in status-vocabulary.md has its base token
                 in reconcile_counts.py STATUSES
   7. selftest   reconcile_counts.py --selftest passes
-  8. staged     `git diff --cached --name-only` has no run-artefact path
-                (runs/, EP-*, GS-*, build_*, repro_*, *-testdata*,
-                *-runsheet*, *-walk-*, .env*, _*) — the `git add -A` guard
+  8. staged     `git diff --cached --name-only -z` has no run-artefact path
+                — judged on the first segment (`runs/`) and the BASENAME
+                only (EP-*, GS-*, build_*, repro_*, *-testdata*, *-runsheet*,
+                *-walk-*, .env*, _*, navigation_paths.json, *.bak, *.diff,
+                *-open-items.md, *-manual-results.md, *-human-summary.md,
+                *-web-evidence.md); `fixtures/` is always allowed —
+                the `git add -A` guard
 """
 import os
 import re
@@ -37,12 +42,31 @@ import sys
 TEXT_GLOBS = ("README.md", "MAINTAINERS.md", "CHANGELOG.md", "CLAUDE.md",
               ".gitignore", ".claude-plugin/plugin.json",
               ".claude-plugin/marketplace.json", "evals/triggering.md")
-ARTEFACT_PATTERNS = [
+# Matched against the path's FIRST segment (`runs/`) or its BASENAME only —
+# never against intermediate folder names. 0.36.0 matched the whole path
+# and `-runsheet` fired on `skills/qa-manual-runsheet/SKILL.md`, so every
+# commit touching that skill failed the gate (the one check that guards
+# credentials is the one people then learn to skip with --no-git).
+ARTEFACT_DIRS = ("runs",)
+ARTEFACT_BASENAMES = [
     re.compile(p) for p in (
-        r"^runs/", r"(^|/)EP-\d", r"(^|/)GS-", r"(^|/)build_", r"(^|/)repro_",
-        r"-testdata", r"-runsheet", r"-walk-", r"(^|/)\.env", r"(^|/)_[^_]",
+        r"^EP-\d", r"^GS-", r"^build_", r"^repro_", r"-testdata", r"-runsheet",
+        r"-walk-", r"^\.env", r"^_[^_]", r"^navigation_paths\.json", r"\.bak$",
+        r"\.diff$", r"-preserved-entries", r"-open-items\.md$",
+        r"-manual-results\.md$", r"-human-summary\.md$", r"-web-evidence\.md$",
     )
 ]
+
+
+def is_artefact(path):
+    """True when a staged path is a run artefact (see ARTEFACT_* above)."""
+    parts = path.replace("\\", "/").split("/")
+    if parts[0] in ARTEFACT_DIRS:
+        return True
+    if parts[0] == "fixtures":
+        return False
+    base = parts[-1]
+    return any(pat.search(base) for pat in ARTEFACT_BASENAMES)
 DESC_LIMIT = 1024
 LINES_WARN = 500
 
@@ -62,7 +86,9 @@ class Report:
 
 
 def read(root, rel):
-    with open(os.path.join(root, rel), encoding="utf-8") as f:
+    # utf-8-sig: PowerShell 5.1's Set-Content writes a BOM; a BOM before the
+    # frontmatter made check 2 report "name None" on an otherwise fine file.
+    with open(os.path.join(root, rel), encoding="utf-8-sig") as f:
         return f.read()
 
 
@@ -170,7 +196,7 @@ def check_references(root, r):
             for f in files:
                 if not f.endswith(".md"):
                     continue
-                text = open(os.path.join(dirpath, f), encoding="utf-8").read()
+                text = open(os.path.join(dirpath, f), encoding="utf-8-sig").read()
                 for skill, ref in REF_RE.findall(text):
                     target = os.path.join(root, "skills", skill or d, "references", ref)
                     if not os.path.exists(target):
@@ -199,7 +225,8 @@ def check_vocabulary(root, r):
 
 def check_selftest(root, r):
     p = subprocess.run([sys.executable, "skills/qa-run-analyzer/scripts/reconcile_counts.py", "--selftest"],
-                       cwd=root, capture_output=True, text=True)
+                       cwd=root, capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
     if p.returncode == 0 and "SELFTEST PASS" in p.stdout:
         r.ok("selftest: reconcile_counts.py --selftest PASS")
     else:
@@ -208,24 +235,52 @@ def check_selftest(root, r):
 
 def check_staged(root, r):
     try:
-        p = subprocess.run(["git", "diff", "--cached", "--name-only"], cwd=root,
-                           capture_output=True, text=True, timeout=20)
+        # -z: NUL-separated, unquoted — paths with spaces or non-ASCII stay whole
+        p = subprocess.run(["git", "diff", "--cached", "--name-only", "-z"], cwd=root,
+                           capture_output=True, timeout=20)
     except Exception:  # noqa: BLE001
         r.warn("staged: git not available — staged-paths check skipped")
         return
     if p.returncode != 0:
         r.warn("staged: not a git repo (or git failed) — staged-paths check skipped")
         return
-    bad = [f for f in p.stdout.split() if any(pat.search(f) for pat in ARTEFACT_PATTERNS)
-           and not f.startswith("fixtures/")]
+    staged = [f for f in p.stdout.decode("utf-8", "replace").split("\0") if f]
+    bad = [f for f in staged if is_artefact(f)]
     for f in bad:
         r.fail(f"staged: run artefact staged for commit — {f} (never `git add -A`)")
     if not bad:
-        r.ok(f"staged: {len(p.stdout.split())} staged path(s), none a run artefact")
+        r.ok(f"staged: {len(staged)} staged path(s), none a run artefact")
+
+
+def selftest_patterns():
+    """The guard must bite artefacts and never the skill folders."""
+    must_catch = ["runs/EP-1/r1/EP-1-code-review.md", "EP-99-runsheet.xlsx",
+                  "_s9_tok.json", ".env.qa-agents", "build_runsheet_EP-1.py",
+                  "skills/web-testing/navigation_paths.json", "GS-API-V2-context.md",
+                  "some/dir/EP-5-testdata.json", "x.diff", "EP-1-walk-plan.md"]
+    must_pass = ["skills/qa-manual-runsheet/SKILL.md",
+                 "skills/qa-manual-runsheet/references/runsheet-format.md",
+                 "skills/qa-manual-walk/references/walk-plan-format.md",
+                 "skills/api-testing/scripts/load-env.sh", "fixtures/EP-0000-context.md",
+                 "scripts/verify_plugin.py", "skills/x/__init__.py", ".gitignore",
+                 "docs/ep-qa-pipeline-retrospective-EP-47675.md"]
+    bad = [p for p in must_catch if not is_artefact(p)] + \
+          [p for p in must_pass if is_artefact(p)]
+    if bad:
+        print("PATTERN SELFTEST FAIL:", bad)
+        sys.exit(1)
+    print("PATTERN SELFTEST PASS —", len(must_catch), "caught,", len(must_pass), "allowed")
 
 
 def main():
     args = sys.argv[1:]
+    if "--selftest" in args:
+        selftest_patterns()
+        return
+    try:  # Windows consoles default to cp1252; the vocabulary rows carry ⚠/🔴
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
     root = os.getcwd()
     if "--root" in args:
         root = args[args.index("--root") + 1]

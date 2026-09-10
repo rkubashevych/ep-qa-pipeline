@@ -5,6 +5,30 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.36.1 — 2026-09-10 — the gate bites the right thing
+
+Hotfix from the same-day cold review of 0.36.0 (security lens), before
+the gate blocked its first legitimate commit.
+
+- **False positive that would have taught bypass.** The staged-artefact
+  guard matched its patterns against the whole path, so `-runsheet`
+  fired on `skills/qa-manual-runsheet/SKILL.md` and every commit
+  touching that skill would FAIL — the only way past being `--no-git`,
+  which switches off exactly the check that guards credentials. Now
+  judged on the path's first segment (`runs/`) and its **basename**
+  only; `fixtures/` always allowed. Patterns extended to the names
+  `.gitignore` already knows (`navigation_paths.json`, `*.bak`,
+  `*.diff`, `*-preserved-entries`, `*-open-items.md`,
+  `*-manual-results.md`, `*-human-summary.md`, `*-web-evidence.md`).
+- **`--selftest`** for the guard itself: 10 paths it must catch, 9 it
+  must allow (the skill folders among them). Run it after any pattern
+  edit.
+- **Windows:** files read as `utf-8-sig` (PowerShell 5.1's BOM made
+  check 2 report "name None"); `git diff -z` with NUL splitting (paths
+  with spaces or non-ASCII stayed whole); subprocess and stdout forced
+  to UTF-8 with replacement so a ⚠/🔴 in the output cannot crash the
+  report on a cp1252 console. Docstring step reference fixed (6.4).
+
 ## 0.36.0 — 2026-09-10 — the gate
 
 **`scripts/verify_plugin.py` ships** — parked since 0.18.2 (review
