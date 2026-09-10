@@ -16,7 +16,7 @@ Run: <QA Service run id> · <run title>            (or "no run — <why>")
 Round: r<N> · Env: <label> · Event: <id>
 Plan: <ISSUEKEY>-walk-plan.md (built <YYYY-MM-DD>) · State: <ISSUEKEY>-walk-state.json
 Tester: <e-mail>                 (principal for every source: manual row)
-Session: <start> → <end> UTC · Completeness: complete | stopped early (<N> cards not run)
+Session: <start> → <end> UTC · Completeness: complete | complete (<N> cards declared not run) | stopped early (<N> cards not run — resume later)
 
 ## Summary
 
@@ -89,4 +89,8 @@ Session: <start> → <end> UTC · Completeness: complete | stopped early (<N> ca
 - **Stopped early → no hand-over.** The file is still written (with
   `Completeness: stopped early`) so the session is not lost, but stage
   10 is invoked only when the walk is finished or the tester says the
-  remaining cards will not be run.
+  remaining cards will not be run — the latter is `complete (N cards
+  declared not run)`, and stage 10 writes it back without asking.
+- **No credentials.** Tokens, codes and passwords the tester pasted
+  appear as `<token supplied>` in Notes (redacted in the state file
+  already).

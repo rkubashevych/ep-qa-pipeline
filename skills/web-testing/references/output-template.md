@@ -31,14 +31,17 @@ Date: <YYYY-MM-DD>
 
 ## Structural checks (from the checklist)
 > `[UI]` presence/type/label checks that have no test case, executed on
-> the pages this run visited. Checks on pages not visited are listed as
-> "not visited". Omit the section only if the checklist itself was
-> unavailable (then explain on the Notes line).
+> the pages this run visited. `Case` = the suite's STRUCT stableId from
+> the checklist line (step 6 joins the verdict to the roster by it).
+> Status uses the vocabulary — a page not visited is
+> `NOT EXECUTED — page not visited`, never a bare "not visited". Omit
+> the section only if the checklist itself was unavailable (then explain
+> on the Notes line).
 
-| Check | Description | Status |
-|-------|-------------|--------|
-| REQ-3.1 | "State" label above the State select | PASS |
-| REQ-7.2 | Reset button has type "button" | not visited (settings page) |
+| Check | Case | Description | Status |
+|-------|------|-------------|--------|
+| REQ-3/struct-1 | PSRCH-STRUCT-01 | "State" label above the State select | PASS |
+| REQ-7/struct-2 | PSRCH-STRUCT-05 | Reset button has type "button" | NOT EXECUTED — page not visited (settings page) |
 
 ## Results
 

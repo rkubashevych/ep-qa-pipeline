@@ -73,10 +73,13 @@ comes back. **Never assume a bare invocation means a first run.** Before
 provisioning anything, check for evidence of a prior run:
 
 - `<ISSUEKEY>-testdata.json`, `<ISSUEKEY>-walk-plan.md`,
-  `<ISSUEKEY>-walk-results.md` or `<ISSUEKEY>-runsheet.xlsx` already
-  exists
+  `<ISSUEKEY>-walk-results.md` or `<ISSUEKEY>-runsheet.xlsx` exists in
+  **any earlier `runs/<ISSUEKEY>/r*/` folder** (this pass's folder is
+  empty by construction)
 - a QA Service test run titled `<ISSUEKEY> …` exists for the suite
-  (`list_test_runs`) — `running` with `not_run` rows means the previous
+  (`list_test_runs`) **other than the one this pass's step 6 just
+  created** (the orchestrator hands you its id — ignore it here) —
+  an older run still `running` with `not_run` rows means the previous
   pass's manual round was never ingested; older suites may instead
   carry pre-0.30 run-outcome lines in case notes
 - `<ISSUEKEY>-open-items.md` exists (the ledger only exists after a
@@ -270,7 +273,11 @@ the plan, one row in an exported sheet):
    surface, ONE row carries them with a `Covers: TC-x, TC-y, …` note.
 3. **Coverage gate — the floor under the reduction:** after selecting,
    map rows → REQ ids. Every behavioural REQ of THIS ticket must have
-   a WALKED ROW — a machine verdict alone no longer covers a REQ. The
+   a WALKED ROW — a machine verdict alone no longer covers a REQ. **In
+   retest mode the floor applies to the scoped REQs only** — the fix's
+   blast radius — never to REQs whose cases passed on an unrelated
+   path in the previous round; re-walking those is the waste the
+   retest scope exists to prevent. The
    REQ's `[core]` case is the default representative (short form where
    machine-settled at Low/Medium risk, full form otherwise). For cases
    from an older suite without `[core]` markers, pick a representative
@@ -367,7 +374,10 @@ rendered from the plan.
 ### Step 6 — Write findings back to the suite
 
 Anything this stage *learned* about a case goes back to the QA Service
-suite before you hand over, because the plan is not a source:
+suite before you hand over, because the plan is not a source. **Batch
+them into ONE preview and wait for a yes** — the suite is shared
+production data (`qa-service-publish.md` → Preconditions), and the
+walk routes the same kind of correction through stage 10's confirm:
 
 - a blocked reason you probed and disproved
 - an expected result that contradicts the documented behaviour

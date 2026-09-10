@@ -56,7 +56,11 @@ keeps asserting PASSes everyone knows are wrong.
    - an exported/pasted TSV or CSV with columns `TC`, `Result`,
      `Notes` (this is what testers actually hand over — accept it);
    - a triage file (`<ISSUEKEY>-remaining-cases-triage.md`) when one
-     was produced.
+     was produced;
+   - **a one-line verdict from the user** ("the fix works", bug-fix
+     mode) — treated as a TC / Result / Notes row per mini case,
+     `source: manual`, principal = the user; anything less than a clear
+     PASS / FAIL per case is asked about, never inferred.
 2. **The story / QA sub-task key** — ask if not derivable.
 3. Optional, for reconciliation: this run's verdict files
    (`<ISSUEKEY>-code-review.md`, `-api-testing.md`, `-web-testing.md`)
@@ -122,6 +126,11 @@ listed under "Conflicts (resolved by recency)". A walk-results file
 marked `Completeness: stopped early` is a partial round: say so, list
 its `Not run` cases as not run, and ask whether to write back now or
 wait for the walk to resume — never record half a round as the round.
+`complete (N cards declared not run)` is a finished round: write it
+back without asking; the declared cards stay `not_run` and are named
+in the summary's "not tested" line. Keep `<ISSUEKEY>-walk-state.json`
+beside the results file — it is the session's audit trail (every
+earlier answer in `history`); never delete it.
 
 ### Step 2 — Reconcile against the published record
 
@@ -171,10 +180,15 @@ about to be recorded, case by case**, because recording a `fail` on the
 run files one deduplicated Jira defect for that case (`test-runs.md`);
 that list is the per-bug yes — then on explicit yes:
 
-- **QA Service run** (connector present): for every case with a manual
-  Result, `record_case_result` on the pass's run with `source: manual`,
-  `principal` = the tester's e-mail (never the agent label), the
-  tester's Notes as the note, the bug key / jam link as evidence. Human
+- **QA Service run** (connector present): for every case with a
+  Result, `record_case_result` on the pass's run — **`source` and
+  `principal` follow the row**: a `manual` row → `source: manual`,
+  `principal` = the tester's e-mail (never the agent label); a
+  `machine (witnessed)` row (an AGENT-RUNS card) → `source: machine`,
+  `principal` = `ep-qa-pipeline agent (<KEY> walk, witnessed by
+  <tester>)`. The note = the tester's Notes verbatim, plus
+  ` · Half: rests on <machine verdict>` on a `Half` row; the bug key /
+  jam link as evidence. Human
   PASS / FAIL / BLOCKED / SKIPPED → `pass` / `fail` / `blocked` /
   `skipped`; non-standard entries are not recorded. A case the machine
   already recorded is simply re-recorded — the service supersedes and
@@ -204,7 +218,12 @@ that list is the per-bug yes — then on explicit yes:
   forward** — one line per still-open row of `<ISSUEKEY>-open-items.md`,
   so the reader sees what this round did *not* settle.
 - **The ledger** (`../qa-pipeline/references/open-items-ledger.md`):
-  this is the only stage that closes a row. For every open item a
+  this is the only stage that closes a row — and it also **appends** a
+  row for anything this round reported but did not settle (a
+  non-roster FAIL the user declined to file, an observation carried as
+  a question, a case correction not yet applied), because the analyzer
+  does not run after stage 10 and a leftover with no row is forgotten
+  by round 2. For every open item a
   decision landed on in this round — a ruling given, a case promoted, a
   bug filed (write the key), a risk row executed to a verdict — fill
   `Decision` and `Closed`. Rows the user drops get the reason as their

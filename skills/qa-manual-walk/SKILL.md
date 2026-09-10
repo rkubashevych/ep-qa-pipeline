@@ -99,10 +99,13 @@ The shape:
 ### Step 0 — Pre-flight (one short message)
 
 Confirm you are on the environment and event the plan was built for
-(the plan header names them); confirm the tester's e-mail; state the
-size — "N cards in M sessions, roughly T minutes; the machine settled K
-cases without a card" — and where a previous walk stopped, if
-resuming. Then start. Do not re-explain the pipeline.
+(the plan header names them); confirm the tester's e-mail; **if the
+plan has AGENT-RUNS cards, check `.env.qa-agents` (or the e2e `.env`)
+is reachable** — absent → every AGENT-RUNS card is BLOCKED (`no
+credentials in this session`), said once here, not discovered at card
+7; state the size — "N cards in M sessions, roughly T minutes; the
+machine settled K cases without a card" — and where a previous walk
+stopped, if resuming. Then start. Do not re-explain the pipeline.
 
 ### Step 1 — Present one card
 
@@ -132,8 +135,12 @@ An **AGENT-RUNS** card (API / harness / anything with an HTTP verb in
 it) is executed by the agent under `api-testing`'s write-safety rules,
 with the tester watching. The tester supplies only the human-only
 input the card names (a token from a mailbox, a code from a phone).
-Show the call and its result in five lines or fewer, state the verdict
-against the card, ask the tester to confirm. **Record it as
+**A read-only call runs at once; a call whose write class is
+snapshot-revert or throwaway is shown first (the `run:` line, redacted)
+and runs only on "run it"** — the tester confirms the write before,
+not just the verdict after. Show the call and its result in five lines
+or fewer, state the verdict against the card, ask the tester to
+confirm. **Record it as
 `source: machine`, principal `ep-qa-pipeline agent (<KEY> walk,
 witnessed by <tester>)`** — the agent executed it, so it is a machine
 verdict a human watched, and it is counted that way in the summary.
@@ -142,7 +149,8 @@ Never dress it as human-confirmed.
 ### Step 4 — Blocked cards are re-probed live
 
 Before presenting a **BLOCKED** card, re-probe its reason (stage 9
-rule 5 — probe every blocker). Dissolved → present it as a WALK or
+rule 5 — probe every blocker) with **read-only** means only: a login
+check, a GET, a page load. A probe never writes. Dissolved → present it as a WALK or
 AGENT-RUNS card and say why. Still standing → present the one-line
 reason and the unblock, and ask whether the tester can supply it now
 ("do you have an activation code to hand?"). Otherwise BLOCKED, reason

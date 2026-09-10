@@ -73,11 +73,12 @@ the chat title). One short reminder, then move on.
 
 **Establish the run folder — before any other read or write**
 (`../qa-pipeline/references/data-locations.md` → "The run folder").
-List `runs/<STORY>/r*`. A **resume** (newest folder's run report is
-`partial`, or its QA Service run is `running` with `not_run` rows and
-no `-manual-results.md`) continues in that folder. Anything else —
-first run, retest mode, bug-fix mode, "the fix landed" — creates
-`runs/<STORY>/r<max+1>/`. Print one line: `Run folder: runs/EP-1234/r2
+List `runs/<STORY>/r*`. **An explicit retest / "the fix landed" /
+bug-fix request always creates `runs/<STORY>/r<max+1>/`** — the
+signals below never override what the user asked for. Otherwise a
+**resume** (newest folder's run report is `partial`, or its QA Service
+run is `running` with `not_run` rows and no `-manual-results.md`)
+continues in that folder; anything else is a first run in `r1`. Print one line: `Run folder: runs/EP-1234/r2
 (retest 1)`. Every stage this orchestrator dispatches writes there and
 nowhere else; the ledger is `runs/<STORY>/<STORY>-open-items.md`, the
 docs-phase files are `runs/<STORY>/docs/`. Nothing is written to the
@@ -154,13 +155,18 @@ Otherwise, using the Atlassian connector and the Story key:
        the reconciliation list). Pre-0.34 suites carry neither: use
        the case ids on the sub-task's legacy checkbox-tracker lines.
        Never execute the whole suite because it was in the response.
-       Report: "suite holds N cases; M in scope for <STORY>".
+       Report: "suite holds N cases; M + S in scope for <STORY>"
+       (M behavioural, S structural — both go on the roster).
        Local ids (`TC-REQ-N.M`) come from `detail.pipelineId`.
      - Rebuild `<STORY>-checklist.md` from the suite's requirements
        PLUS its `-STRUCT-` cases — the `[UI]` presence/label/field-type
-       checks stage 8 executes, one `[UI]` check per case under its REQ
-       (`qa-service-publish.md` → "Structural checks"). They are roster
-       cases: stage 8's verdicts on them go on the run. Pre-0.33 ticket
+       checks stage 8 executes, one line per case under its REQ, **the
+       stableId on the line**
+       (`- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check>`;
+       `qa-service-publish.md` → "Structural checks"). They are roster
+       cases: stage 8 reports each by that id and step 6 records the
+       verdict on the run (`NOT EXECUTED — page not visited` →
+       `skipped`). Pre-0.33 ticket
        with no STRUCT cases → read the legacy `(structural checks
        only)` fenced block on the sub-task if present; otherwise say so
        and skip structural checks.
@@ -201,8 +207,9 @@ Otherwise, using the Atlassian connector and the Story key:
      suite before stage 5** (append, or create the feature's suite),
      with one requirement carrying the ticket's own expected result,
      per `../qa-pipeline-docs/references/qa-service-publish.md` →
-     "Bug-fix mode — the regression mini suite" — same single confirm
-     as the rest of step 0. That is what lets step 6 open a run with a
+     "Bug-fix mode — the regression mini suite" — **behind its own
+     REQUIRED PAUSE** (preview the suite, the requirement and each case;
+     write nothing before the yes). That is what lets step 6 open a run with a
      roster and stage 10 record the human verdicts; until 0.33.0 a
      bug-fix run left no durable record at all (EP-56998 open-items
      #13). Connector absent → PAUSE, say what is lost, continue only
@@ -219,7 +226,8 @@ Otherwise, using the Atlassian connector and the Story key:
    - **The manual round shrinks to fit:** stage 9 emits a handful of
      cards (or, if you say you'll verify directly, skip the plan and
      just report your result — "the fix works, ingest it" runs stage
-     10 against your one-line verdict, joined to the mini cases).
+     10 against your one-line verdict, which stage 10 treats as a
+     one-row TC / Result / Notes table per mini case, principal = you).
      Verdict flip / bug reopen offers happen at stage 10, as always.
 
    **QA Service reconciliation:** whenever the sub-task names a suite

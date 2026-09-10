@@ -5,6 +5,73 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.37.0 — 2026-09-10 — the record cannot lie
+
+Implements the record-affecting findings of the same-day cold review
+(four readers: consistency, executability dry-run on a fictional
+EP-57000, docs-phase quality, security) of 0.36.0. Each item below
+would have produced a *wrong record* with no rule violated. The stale
+one-liners the same review found are the next release; the layout
+and docs-phase items after that.
+
+- **Walk: a failed positive control is BLOCKED, not FAIL.** An absence
+  check answered "the list is empty… and the counter reads 0" mapped to
+  FAIL, which at stage 10 files a Jira defect — for a fixture that was
+  never there (the tracking trap of `provisioning-rules.md`). New row in
+  the verdict table: BLOCKED (`fixture not proven`), unless the control
+  is the case's own assertion.
+- **Walk: "deferred twice" is not run, never SKIPPED** — two files
+  said different things and stage 10 records them differently
+  (`skipped` vs untouched `not_run`).
+- **Walk: the state file can rebuild the results file.** Schema gains
+  `verdicts` (per-case split of a `covers` list), `half`/`restsOn`,
+  `history` (every earlier answer; a changed verdict never overwrites),
+  `run` (AGENT-RUNS call + result, redacted), `blocked` (reason, probe
+  time, unblock), `observations`; `position` = the next card. Tokens,
+  codes and passwords the tester pastes are written as
+  `<token supplied>` — the one edit ever made to the tester's words.
+- **Walk: writes are confirmed before, not after.** An AGENT-RUNS call
+  whose write class is snapshot-revert or throwaway is shown and runs
+  only on "run it"; re-probing a BLOCKED card uses read-only means
+  only; pre-flight checks `.env` when the plan has AGENT-RUNS cards
+  (absent → those cards BLOCKED up front, not discovered at card 7).
+- **Walk → stage 10 seam.** `Completeness: complete (N cards declared
+  not run)` for a walk the tester ends for good — stage 10 writes it
+  back without asking; `stopped early` still means "resume later".
+  Stage 10's write-back bullet no longer says `source: manual` for
+  every row — it follows the row (`manual` → tester; `machine
+  (witnessed)` → agent label), and a `Half` row's note carries
+  ` · Half: rests on <machine verdict>`. `-walk-state.json` is kept as
+  the audit trail. A one-line "the fix works" verdict is accepted as a
+  per-case TC/Result/Notes row (bug-fix mode).
+- **STRUCT cases join by stableId, end to end.** Step 0 rebuilds each
+  structural check as `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI]
+  <check>`; web-testing's Structural checks table gains a `Case` column
+  and uses the vocabulary (`NOT EXECUTED — page not visited`, never a
+  bare "not visited"); step 6 records them per the mapping; scope is
+  reported `M + S` and roster count = M + S in the post-publish check.
+  Without this, 0.33's STRUCT verdicts could not reach the run.
+- **Bug-fix mode publishes behind its own REQUIRED PAUSE.** 0.33 said
+  "the same single confirm as step 0" — step 0 has none in normal mode,
+  so a shared-production write had no yes. Now: derive → preview (suite,
+  requirement, each case) → yes → publish → stages 5–8 → run. Later
+  regression cases go through the same preview; `add_run_cases` only
+  for a case learned after the run exists.
+- **Never delete.** `qa-service-publish.md` claimed "there are no
+  delete tools"; the connector has `delete_suite`, `delete_test_cases`,
+  `delete_requirements`, two folder deletes and `merge_duplicate_case`.
+  Named, and forbidden to every stage: correct, retire (`status: na` +
+  `discrepancy:`), or leave to a human — never delete or merge.
+- **Stage 9 suite corrections get one preview + yes** (they were the
+  only unconfirmed writes to the suite left); retest detection ignores
+  the run this pass's step 6 just created and looks for prior artefacts
+  in earlier `r*` folders (both fired on every first run otherwise);
+  the coverage floor in retest mode applies to the scoped REQs only.
+- **Orchestrator:** an explicit retest / fix-landed / bug-fix request
+  always creates a new pass folder — the resume signals never override
+  the user. **Stage 10 appends ledger rows** for what its summary
+  reports as unsettled, since no analyzer pass follows it.
+
 ## 0.36.1 — 2026-09-10 — the gate bites the right thing
 
 Hotfix from the same-day cold review of 0.36.0 (security lens), before

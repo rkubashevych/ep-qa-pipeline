@@ -41,6 +41,7 @@ store the words verbatim** as the note.
 | "pass", "ok", "yes", "works", "as expected", "✓" | PASS | On a card with ONE visible pass condition: record and move on. On an absence-check or half-observable card: ask the positive-control question first (below). |
 | any description of a mismatch — "the star lit up", "it shows 0", "I got a 500", "the button isn't there" | FAIL | Restate once, naming the expectation: "So the star lit — recording FAIL against 'star stays empty'. Right?" One confirmation, then ask for evidence once (screenshot / Jam link / the exact error text). Never nag for evidence. |
 | "can't", "no access", "page won't load", "the account doesn't log in", "the email never came" | BLOCKED | Record the reason in the tester's words. Probe the blocker if it is something the agent can check from here (a login, a host, a fixture id) — a dissolved blocker turns the card back into a WALK card. |
+| on an absence check, the **positive control is missing** — "the list is empty… and the counter reads 0", "the existing favourite isn't there either" | BLOCKED (`fixture not proven`) | Not a FAIL: the state the case depends on was never there (the fixture, the tracking, the login), so the product was not tested. A FAIL here would file a Jira defect for a broken fixture (`provisioning-rules.md` → the tracking trap). Record the tester's words, note which control failed, and tell the tester in one sentence. Exception: when the control IS the case's own assertion (the case says the counter must read 1), that is a FAIL. |
 | "skip", "not now", "not relevant" | SKIPPED | Ask for the reason in one clause if none was given; record it. A SKIPPED core card gets one sentence of pushback ("this is the REQ's only walked row") — once. |
 | "later", "come back to this" | deferred | Card moves to the end of the walk. Not a verdict. |
 | a question ("where is that menu?", "which account?", "why does this matter?") | — | Answer from backstage in one or two sentences, then re-ask "what happened?" |
@@ -51,7 +52,15 @@ Ambiguous words ("hmm", "sort of", "mostly") are not a verdict. Ask
 what specifically differed. Never resolve ambiguity toward PASS.
 
 A verdict once mapped can be changed by the tester at any time in the
-walk ("actually, card 4 was a fail") — update the state file and say so.
+walk ("actually, card 4 was a fail") — append to the card's `history`
+in the state file (never overwrite the first answer), update the
+verdict, and say so.
+
+**Redaction — the one edit ever made to the tester's words.** A token,
+code or password the tester pastes for an AGENT-RUNS card is replaced
+in `words` by `<token supplied>` before it is written to the state or
+results file; those files carry no credentials by rule. The agent uses
+the value and does not repeat it back in chat.
 
 ## The positive-control question
 
@@ -134,8 +143,11 @@ tester's language. Typical:
 ## Deferring, skipping, stopping
 
 - **Deferred** cards run at the end of the walk in the order deferred.
-  A card deferred twice is asked about once more, then recorded as
-  SKIPPED with "deferred twice, not run".
+  A card deferred twice is asked about once more, then left **not run**
+  ("deferred twice") — it goes to the results file's `Not run` list,
+  never to SKIPPED. SKIPPED is a tester's decision about a card;
+  not-run is the absence of one, and stage 10 records them differently
+  (`skipped` vs untouched `not_run`).
 - **Stopping early** ("let's stop here", no answer for a long time,
   the tester says they'll continue tomorrow): write the results file
   with the cards answered so far and a `Not run` list, say plainly that
@@ -143,8 +155,10 @@ tester's language. Typical:
   hand to stage 10 — a partial write-back is a partial record, and the
   two-wave rule wants one human summary per round.
 - **Stopping for good** (the tester says the rest will not be run):
-  hand to stage 10 with the results file as it stands; the not-run
-  cards are reported as not run, never as skipped or passed.
+  write the results file with `Completeness: complete (N cards declared
+  not run)` — not `stopped early`, which means "resume later" — and
+  hand to stage 10; the not-run cards are reported as not run, never as
+  skipped or passed.
 
 ## The state file
 
@@ -158,17 +172,40 @@ tester's language. Typical:
   "tester": "qa-tester@example.test",
   "env": "alpha2", "event": 3551,
   "started": "2026-09-10T09:12:00Z", "updated": "2026-09-10T09:40:12Z",
-  "position": 7,
+  "position": 8,
   "cards": {
-    "4": {"tc": ["TC-REQ-3.2"], "kind": "WALK", "verdict": "FAIL",
-          "words": "the star lit up and Northwind is in my favourites",
+    "4": {"tc": ["TC-REQ-3.2", "TC-REQ-3.3"], "kind": "WALK",
+          "verdict": "FAIL",
+          "verdicts": {"TC-REQ-3.3": "PASS"},
+          "words": "the star lit up and Northwind is in my favourites; 3.3 was fine",
           "evidence": ["https://jam.dev/c/…"], "source": "manual",
-          "at": "2026-09-10T09:31:02Z"}
+          "half": null, "restsOn": null,
+          "history": [{"verdict": "PASS", "words": "ok", "at": "…"}],
+          "at": "2026-09-10T09:31:02Z"},
+    "7": {"tc": ["TC-1"], "kind": "AGENT-RUNS", "verdict": "PASS",
+          "source": "machine (witnessed)",
+          "run": {"call": "harness meeting <token supplied>", "result": "200, token in body"},
+          "words": "yes that's the 200", "at": "…"},
+    "9": {"tc": ["TC-3"], "kind": "BLOCKED", "verdict": "BLOCKED",
+          "blocked": {"reason": "activation code reaches the platform only by email",
+                      "probedAt": "…", "unblock": "one registration on a Gmail address"},
+          "words": "no, I don't have a code", "at": "…"}
   },
-  "deferred": [9],
+  "deferred": [11],
+  "observations": ["footer year still says 2025 on /brands"],
   "corrections": [{"tc": "TC-REQ-5.1", "note": "button is now called Save"}]
 }
 ```
+
+Field rules: `position` = the number of the **next** card to present.
+`verdict` is the card's verdict; `verdicts` holds per-case overrides
+when the tester splits a `covers` list. `half` / `restsOn` mirror the
+results file's Half column. `history` keeps every earlier answer for
+the card. `run` (AGENT-RUNS) holds the call as shown to the tester,
+redacted, and the result line. `blocked` holds what the results file's
+Blocked reasons table needs. `observations` are things no card asked
+about. Everything the results file prints must be reconstructible from
+this file alone — a resume rebuilds it from here.
 
 No credentials in it, ever. It is the audit trail of the session —
 stage 10 keeps it beside the results file and never deletes it.

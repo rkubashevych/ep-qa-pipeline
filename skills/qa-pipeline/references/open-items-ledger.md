@@ -74,7 +74,10 @@ verdicts (the QA Service run holds those — `test-runs.md`).
   for a file without markers (class `nomination`), so the next round's
   stage 9 starts from the same choice instead of choosing again.
 - **`qa-manual-results` (stage 10) is the only stage that closes a
-  row**: when a decision lands (a PM ruling, a case promoted to the
+  row** — and the last writer of the round: it appends rows for what
+  its own summary reports as unsettled (declined non-roster FAILs,
+  observations carried as questions, corrections not applied), since no
+  analyzer pass follows it. Closing: when a decision lands (a PM ruling, a case promoted to the
   suite, an item filed as a bug — write the key, a risk row executed to
   a verdict), fill `Decision` and `Closed`. It also lists the still-open
   rows at the end of the human summary under **Carried forward** — one

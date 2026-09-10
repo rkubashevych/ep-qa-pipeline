@@ -27,9 +27,15 @@ invoking the pipeline; honour that for the run without arguing.
   do everything else as normal and add one line to the final response —
   "QA Service publish skipped (connector not enabled)". Never block the
   Jira publish on it.
-- QA Service is **production data shared with the whole team**; there
-  are no delete tools. Publish only after the user's explicit yes at the
-  step-6 pause (one confirmation covers Jira + QA Service).
+- QA Service is **production data shared with the whole team.** The
+  connector DOES expose destructive tools — `delete_suite`,
+  `delete_test_cases`, `delete_requirements`, `delete_suite_folder`,
+  `delete_test_case_folder`, `merge_duplicate_case` — and **no pipeline
+  stage ever calls one of them.** A wrong case is corrected
+  (`edit_test_case`), retired (`status: na` + a `discrepancy:` note) or
+  left for a human in the web UI; "skip duplicates" never becomes
+  "delete duplicates". Publish only after the user's explicit yes at
+  the step-6 pause (one confirmation covers Jira + QA Service).
 
 ## Config
 
@@ -138,9 +144,22 @@ STRUCT cases are **not** counted in the test-cases statistics block and
 never get a `[core]` marker; the publish preview reports them on their
 own line ("N cases + S structural checks"). The analyzer's suite-sync
 check expects exactly S extra `-STRUCT-` ids beyond the test-cases
-file. On the code phase they are roster cases like any other: stage 8
-records their verdicts on the run; step 0 rebuilds the checklist's
-structural section from them.
+file.
+
+**The join key is the stableId, end to end.** On the code phase STRUCT
+cases are roster cases like any other, and every surface that names a
+structural check carries the same id so step 6 can join the verdict to
+the roster row:
+
+- step 0 rebuilds the checklist's structural section as
+  `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check text>`;
+- web-testing's "Structural checks" table has a `Case` column = that
+  stableId, and its Status uses the vocabulary: `PASS` / `FAIL` /
+  `NOT EXECUTED — page not visited` (never a bare "not visited");
+- step 6 records them per the `test-runs.md` mapping (`NOT EXECUTED` →
+  `skipped` with the reason);
+- the scope count is reported as `M + S` (behavioural + structural),
+  and roster count = M + S in the post-publish check.
 
 ### Suite header — set it IN `create_suite`
 
@@ -379,9 +398,18 @@ CONTENT (the team may have fixed cases in the web UI between phases):
 A standalone Bug or Defect has no docs phase, so until 0.33.0 its 2–4
 mini cases existed only in a local file and its verdicts only in
 markdown: no suite, no run, no durable record (EP-56998 open-items
-#13). Bug-fix mode now publishes the mini cases before stage 5, under
-the same single confirm as the rest of step 0, so that step 6 can open
-a run with a roster and the human round has somewhere to write:
+#13). Bug-fix mode now publishes the mini cases before stage 5 —
+**behind its own REQUIRED PAUSE**, because normal step 0 has no confirm
+and this is a write to shared production data — so that step 6 can
+open a run with a roster and the human round has somewhere to write.
+Order of operations: derive the mini cases → **preview + yes** →
+publish → stages 5–8 → step 6 creates the run (roster = the published
+cases) → stage 9 → walk → stage 10.
+
+**The preview** (one message, one yes): the target suite (existing
+path, or "new: <path>, prefix <PREFIX>"), the requirement (kind, title,
+the ticket sentence it quotes), each case (stableId, title, channel),
+and the `Regression for <KEY>` note. Nothing is written before the yes.
 
 1. **Target suite = the FEATURE's suite**, per "Suite selection" above:
    `list_suites`, match on the feature the bug touches (the parent
@@ -402,9 +430,10 @@ a run with a roster and the human round has somewhere to write:
    (`REG` when nothing better fits). TC-1 (the reproduction) carries
    `detail.core: yes`.
 4. Regression cases added AFTER stage 5 (from pr-summary's
-   "Behaviours touched") are appended the same way, and the run's
-   roster is extended with `add_run_cases`, with the scope file saying
-   so.
+   "Behaviours touched") are appended the same way, through the same
+   kind of preview + yes. Before step 6 they simply join the roster the
+   run is created with; only a case learned after the run exists needs
+   `add_run_cases`. The scope file says which cases were added when.
 5. Connector absent → PAUSE and say what is lost (no run, no record,
    local-only verdicts); continue only on the user's explicit yes, and
    say so again in the final response.

@@ -29,8 +29,11 @@ files. Output: a detailed per-case report.
    (presence / type / label) that deliberately have no test case.
    Since 0.33.0 each of them is also a `-STRUCT-` case in the QA
    Service suite (step 0 rebuilds the checklist's structural section
-   from those), so report each with its stable id and treat them as
-   roster cases: their PASS/FAIL reaches the run like any other. Execute
+   from those, one `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] …`
+   line each), so the report's "Structural checks" table carries that
+   stableId in its `Case` column and uses the status vocabulary
+   (`PASS` / `FAIL` / `NOT EXECUTED — page not visited`): they are
+   roster cases and step 6 joins the verdict by that id. Execute
    them for the pages you visit and report them in the "Structural
    checks" section. If genuinely unavailable, note that in the report's
    Notes line and continue with test cases only.
