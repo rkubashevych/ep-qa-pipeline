@@ -47,9 +47,6 @@ notifications / dashboards, and on every absence check.
 upload; then the suite; asking the user is the last resort, not the
 first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
-Optional: `<ISSUEKEY>-checklist.md` for `[API]` structural checks that
-did not become test cases.
-
 Missing code-review or test-cases file — ask before starting. Missing
 `.env.qa-agents` values — **pause and ask**; never guess, never proceed
 unauthenticated. Missing frontend host / exhibitor login for a

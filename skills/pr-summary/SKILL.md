@@ -65,7 +65,7 @@ Data sources for this skill:
 
 Do not go to the tracker, do not use external tools,
 do not search the internet, do not use the browser.
-Do not read requirements, checklist or test-case files —
+Do not read requirements or test-case files —
 this skill works only with code.
 
 ## Rules

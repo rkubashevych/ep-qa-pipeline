@@ -84,10 +84,10 @@ follow-up `edit_requirement` is needed on a fresh publish.
 | `REQ-N: <text>` | `summary` = the requirement's full text, verbatim and self-contained (a reader must understand it without the ticket). **Never a bare `[risk: …]` tag** — the risk suffix goes at the END, after the text. Never omit `summary`. |
 | kind (classify — do not default everything to `fr`) | `rule` = a MUST/MUST-NOT constraint · `invariant` = a property that must always hold · `risk` = a grooming risk · `nfr` = performance/security/limit/compat requirement · `fr` = functional behaviour · `oq` = still-open grooming question · `discrepancy` = "(unresolved conflict)" item. A suite with 0 rules / 0 invariants / 0 risks is a mis-classification, not a fact about the feature. |
 | kind → stableId segment | `<PREFIX>-RULE-NN` · `-INV-NN` · `-R-NN` (risk) · `-NFR-NN` · `-FR-NN` · `-OQ-NN` · `-DISC-NN`, each numbered per kind from 01. The ID must match the kind — never file an invariant as `-FR-`. |
-| `[risk: High/Medium/Low]` | `priority`: High → `P0`, Medium → `P1`, Low → `P2`. Keep the ` [risk: High]` suffix on `summary` too — it is what the checklist/test-case files carry. |
+| `[risk: High/Medium/Low]` | `priority`: High → `P0`, Medium → `P1`, Low → `P2`. Keep the ` [risk: High]` suffix on `summary` too — it is what the test-cases file carries. |
 | requirement `detail` (ALWAYS populate — this is what makes it more than a line of text) | `type` (short classifier: Constraint / Data integrity / Security / State machine / Referential…), `statement`, `rationale`, `scope`, `source` — the document containing the WHOLE statement; if more than one document is involved, attribute per clause and mark the spec of record, e.g. `spec of record: Confluence AC page item 4. Clause "no larger than other result cards": design sub-task EP-55708 item 2 ONLY — not in the AC page`. A bare list of documents joined by "and" is not acceptable: it asserts that all of them support all of the statement. Per kind: `actor` / `trigger` / `outcome` for `fr`; `metric` / `target` for `nfr`; `impact` / `likelihood` / `mitigation` for `risk` (vocab `low`/`medium`/`high`). |
 | cross-references between requirements | `detail.related` / `enforces` / `threatens` / `implements` / `constrainedBy` — arrays of stableIds. All but `related` become trace-graph edges on write, so a rule that enforces an invariant, or a risk that threatens one, must say so here. |
-| REQ-N → stableId map | `detail.pipelineId` = `REQ-N` on the requirement (since 0.34.0 — the map lives on the item, nowhere else); the checklist/test-case files still use REQ-N |
+| REQ-N → stableId map | `detail.pipelineId` = `REQ-N` on the requirement (since 0.34.0 — the map lives on the item, nowhere else); the test-cases file still uses REQ-N |
 | the ticket the requirement came from | `sources` = `[{kind: "jira", label: "<ISSUEKEY>", url: "<ticket URL>"}]` plus one entry per governing document (`confluence` for the AC page, `anchorUrl` to the exact heading when there is one). This is the per-ticket **scope marker** inside a per-feature suite — the code phase selects this run's requirements by it |
 
 ### Test cases → `create_test_case` (one call each — it takes everything)
@@ -124,21 +124,24 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 
 ### Structural checks → `create_test_case` (STRUCT cases) — since 0.33.0
 
-The checklist's `[UI]` presence / label / field-type checks have no
-test case in `<ISSUEKEY>-test-cases.md` by design (stage 4's rule), but
-web-testing executes them, so they need a home in the record. Until
-0.33.0 they lived only in a fenced "structural checks only" comment on
-the QA sub-task — which also meant their verdicts never reached the run.
-Publish each structural check as a case:
+The `[UI]` presence / label / field-type checks have no test case by
+design (stage 4's rule) — since 0.40.0 they are the lines of the
+**Structural checks** section at the end of `<ISSUEKEY>-test-cases.md`
+(`- [ ] REQ-N/struct-k [UI] <check>`; before that, a separate
+`<ISSUEKEY>-checklist.md`). web-testing executes them, so they need a
+home in the record. Until 0.33.0 they lived only in a fenced
+"structural checks only" comment on the QA sub-task — which also meant
+their verdicts never reached the run. Publish each structural line as a
+case:
 
-| Checklist | QA Service |
+| Structural checks line | QA Service |
 |---|---|
-| a `[UI]` check under a structural REQ (or a structural check under a behavioural REQ) | one case; `title` = the check rephrased as a scenario ("State label is shown above the State select") |
+| one `- [ ] REQ-N/struct-k [UI] <check>` line | one case; `title` = the check rephrased as a scenario ("State label is shown above the State select") |
 | — | `stableId` = `<PREFIX>-STRUCT-NN`, numbered from 01 |
 | REQ | `folderName` = `<REQ area> — structure`; `traceability` = the REQ's stableId |
 | — | `levels: ["E2E"]`, `levelText: "E2E (UI)"`, `techniques: ["UI-CONF"]`, `type: positive`, `status: planned`, `priority` from the REQ's risk |
 | the check text | `detail.goal` = the check verbatim; `detail.steps` = "1. Open <surface>. 2. Locate <element>."; `detail.assertions` = the check; `detail.testData` = "None — uses default event fixtures" |
-| — | `detail.notes` = `Structural check from <ISSUEKEY>-checklist.md — no TC in the test-cases file by design (stage 4 rule).`; `detail.ticket` = `<ISSUEKEY>`; `detail.pipelineId` = `REQ-N/struct-k` (k = the check's position under its REQ) |
+| — | `detail.notes` = `Structural check from <ISSUEKEY>-test-cases.md → Structural checks — no TC by design (stage 4 rule).`; `detail.ticket` = `<ISSUEKEY>`; `detail.pipelineId` = `REQ-N/struct-k` — the line's own id, copied, never renumbered |
 
 STRUCT cases are **not** counted in the test-cases statistics block and
 never get a `[core]` marker; the publish preview reports them on their
@@ -151,7 +154,7 @@ cases are roster cases like any other, and every surface that names a
 structural check carries the same id so step 6 can join the verdict to
 the roster row:
 
-- step 0 rebuilds the checklist's structural section as
+- step 0 rebuilds the test-cases file's Structural checks section as
   `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check text>`;
 - web-testing's "Structural checks" table has a `Case` column = that
   stableId, and its Status uses the vocabulary: `PASS` / `FAIL` /
@@ -386,8 +389,9 @@ CONTENT (the team may have fixed cases in the web UI between phases):
    List every reconciliation change to the user before the stages run.
    If neither an id nor a title match is possible, run that case from
    the local version unchanged and skip the result write-back for it.
-   `-STRUCT-` cases rebuild the structural section of
-   `<STORY>-checklist.md` (one `[UI]` check per case, under its REQ).
+   `-STRUCT-` cases rebuild the Structural checks section of
+   `<STORY>-test-cases.md` (one `[UI]` line per case, under its REQ,
+   the stableId on the line).
 3. Connector absent or suite not found → `runs/<STORY>/docs/` on this
    machine is the only source (pre-0.33 tickets: the legacy archive
    comment via `extract_archive.py`). Neither reachable → PAUSE; never
@@ -528,9 +532,10 @@ old ticket without guessing.
   `detail.pipelineId` replaced. Checkboxes were manual-only and are not
   verdicts; the run is.
 - **Structural checks (0.26 – 0.34):** a fenced block on the sub-task
-  labelled `(structural checks only)` — the checklist's `[UI]`
-  structural section verbatim (`- [ ] REQ-N.M [UI] <check>` lines), no
-  case ids, because they had no suite case until STRUCT cases (0.35).
+  labelled `(structural checks only)` — the then-separate checklist
+  file's `[UI]` structural section verbatim (`- [ ] REQ-N.M [UI]
+  <check>` lines), no case ids, because they had no suite case until
+  STRUCT cases (0.35).
   Execute them from that block; promote them to `<PREFIX>-STRUCT-NN`
   cases only if the ticket is re-published.
 - **Machine archive (pre-0.33):** comments made of `File: <name>` labels

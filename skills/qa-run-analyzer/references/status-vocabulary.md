@@ -75,7 +75,8 @@ binding rule is:
 
 The four recorded forms of this one rule — keep the names; they are
 what the templates and `reconcile_counts.py` parse:
-- the **per-case channel tag** (qa-checklist / qa-test-cases) — the
+- the **per-case channel tag** (qa-test-cases; the checks it derives
+  them from were a separate stage until 0.40.0) — the
   initial routing hint;
 - the **dual `[API][UI]` tag** — provenance-sensitive cases: the call
   is API-shaped but the verdict needs the browser (absence-check

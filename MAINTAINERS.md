@@ -27,7 +27,6 @@ MAINTAINERS.md                 # this file
 skills/
   task-context/                # stage 1  (docs phase)
   requirements-grooming/       # stage 2
-  qa-checklist/                # stage 3
   qa-test-cases/               # stage 4
   pr-summary/                  # stage 5  (code phase)
   code-review/                 # stage 6
@@ -38,7 +37,7 @@ skills/
   qa-manual-results/           # stage 10b — write back walk results / a completed sheet, retract wrong verdicts
   qa-run-analyzer/             # run-health check (both phases)
   qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
-  qa-pipeline-docs/            # orchestrator: stages 1-4 + Jira publish
+  qa-pipeline-docs/            # orchestrator: stages 1, 2, 4 + publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
 fixtures/EP-0000-context.md    # synthetic docs-phase smoke-test input (the one EP-* file that is tracked)
 docs/                          # reviews, retrospectives, specs, design prompts — history, not contract
@@ -55,7 +54,9 @@ Each stage folder is the same shape:
 - `references/` — the detail: `output-template.md` (report shape) plus
   any method docs (e.g. `api-testing/references/api-testing-reference.md`,
   `web-testing/references/browser-rules.md` + `login-config.md`).
-- `setup-guide.md` — team-specific values to confirm before running.
+(The per-skill `setup-guide.md` files were retired in 0.40.0 — the
+team-specific values live in README → "Before you run" and
+`skills/qa-pipeline/references/environment.md`.)
 
 Data flows between stages as files in the run folder —
 `runs/<ISSUEKEY>/docs/` for stages 1–4, `runs/<ISSUEKEY>/r<N>/` per
@@ -71,11 +72,12 @@ check 9 fails while a `.env*` or `runs/` is inside it.
 
 ## Pipeline order & channel routing
 
-`task-context → requirements-grooming → qa-checklist → qa-test-cases`
-(docs) then `pr-summary → code-review → api-testing → web-testing`
-(code), with `qa-run-analyzer` at the end of each phase.
+`task-context → requirements-grooming → qa-test-cases` (docs; stage 3
+folded into 4 in 0.40.0, stage numbers kept) then `pr-summary →
+code-review → api-testing → web-testing` (code), with `qa-run-analyzer`
+at the end of each phase.
 
-Every checklist item / test case carries a channel tag that decides who
+Every test case / structural check carries a channel tag that decides who
 runs it:
 - `[UI]` → **web-testing** (browser — Playwright MCP by default, Chrome extension fallback)
 - `[API]` → **api-testing** (REST/curl, creds from `.env`)
@@ -171,9 +173,11 @@ carried between them; the QA Service run carries the verdicts anyway.
 4. **Smoke-test the docs stages** if you touched them: run
    `fixtures/EP-0000-context.md` (synthetic — the one `EP-*` file that
    is tracked, via the `.gitignore` negation) through grooming →
-   checklist → test-cases (skip the publish) and check the expectations
-   listed at the bottom of the fixture still hold; then
-   `reconcile_counts.py` on the result. If you touched
+   test-cases (skip the publish), compare with
+   `skills/qa-test-cases/references/test-cases-example.md` (the
+   fixture's expected output) and check the expectations listed at the
+   bottom of the fixture still hold; then `reconcile_counts.py` on the
+   result. If you touched
    `reconcile_counts.py`, run `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`.
    If you touched ANY skill's frontmatter `description`, walk
    `evals/triggering.md` — every ✅ query must still route to that

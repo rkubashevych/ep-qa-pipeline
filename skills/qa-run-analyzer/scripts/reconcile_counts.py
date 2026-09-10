@@ -89,7 +89,37 @@ STATUS_CELL = re.compile(
 # Accepts both heading levels and both id shapes: docs-phase files write
 # `### TC-REQ-n.m`, bug-fix-mode files write `## TC-n`.
 CORE_MARK = re.compile(r"^#{2,3} TC-(?:REQ-)?\d.*\[core\]", re.M)
+# TC headings with their channel tags (test-cases file). The publish count
+# gate reads these instead of a hand tally (0.40.0): a dual-tagged
+# `[API][UI]` case counts once, under its own key.
+TC_HEADING = re.compile(r"^#{2,3} TC-(?:REQ-)?\d[^\n]*$", re.M)
+CHANNEL_TAGS = ("[API][UI]", "[UI]", "[API]", "[mobile]", "[export/email]")
+# Structural check lines (0.40.0 — the former checklist's [UI] presence /
+# label / type lines live in the test-cases file's "Structural checks"
+# section as `- [ ] REQ-N/struct-k [UI] <check>`; after publish the code
+# phase rebuilds them with the stableId: `REQ-N/struct-k · PFX-STRUCT-01`).
+STRUCT_LINE = re.compile(r"^- \[[ xX]\] REQ-\d+[a-z]?/struct-\d+\b", re.M)
 STAGES = ["test-cases", "code-review", "api-testing", "web-testing"]
+
+
+def count_tags(text):
+    """Channel-tag histogram over TC headings; a heading with `[API][UI]`
+    counts under that key only. Also returns the structural-line count."""
+    tags = {t: 0 for t in CHANNEL_TAGS}
+    tags["untagged"] = 0
+    for h in TC_HEADING.findall(text):
+        if "[core]" in h:
+            h = h.replace("[core]", "")
+        if "[API][UI]" in h.replace(" ", ""):
+            tags["[API][UI]"] += 1
+            continue
+        for t in CHANNEL_TAGS[1:]:
+            if t in h:
+                tags[t] += 1
+                break
+        else:
+            tags["untagged"] += 1
+    return tags, len(STRUCT_LINE.findall(text))
 
 
 def norm_cell(cell):
@@ -224,6 +254,10 @@ def report(key, d=None):
                    if stage == "test-cases" else "")
         print(f"{stage}: {len(ids[stage])} distinct case ids · "
               f"{cstr or 'no status rows'}{sstr}{corestr}")
+        if stage == "test-cases":
+            tags, struct = count_tags(text)
+            tstr = " · ".join(f"{k}={v}" for k, v in tags.items() if v or k != "untagged")
+            print(f"test-cases tags: {tstr} · struct={struct}")
     base = ids.get("test-cases")
     if base:
         for stage in STAGES[1:]:
@@ -259,7 +293,14 @@ Prose heading above must NOT parse as a range 40.1–40.30.
 
 ### TC-REQ-41.1 — core-marked heading  [UI] [core]
 ### TC-REQ-41.2 — plain heading  [UI]
-Exactly one [core] heading above; the bare "[core]" word in this prose
+### TC-REQ-42.1 — dual-tagged counter case  [API][UI] [core]
+### TC-REQ-43.1 — api case  [API]
+Exactly one [core] heading above per REQ; the bare "[core]" word in this prose
+
+## Structural checks  [UI]
+- [ ] REQ-3/struct-1 [UI] "State" label above the State select
+- [x] REQ-7/struct-2 · PSRCH-STRUCT-05 [UI] Reset button has type "button"
+- [ ] REQ-99.1: [UI] legacy checklist line — must NOT count as structural
 line must not count (CORE_MARK anchors on the heading).
 
 ## Statistics
@@ -282,7 +323,10 @@ SELFTEST_EXPECT = {
                 "TC-REQ-12a.1", "TC-REQ-12b.1", "TC-REQ-40.1"},
     "ids_lacks": {"TC-REQ-7.2.", "TC-REQ-29",
                   "TC-REQ-40.2", "TC-REQ-40.30", "TC-REQ-12"},
-    "core": 1,
+    "core": 2,
+    "tags": {"[API][UI]": 1, "[UI]": 2, "[API]": 1, "[mobile]": 0,
+             "[export/email]": 0, "untagged": 1},
+    "struct": 2,
 }
 
 # Bug-fix / standalone-Bug mode: flat `TC-<n>` ids, no REQ groups, `## `
@@ -352,6 +396,12 @@ def check(doc, expect, label, errs):
     core = len(CORE_MARK.findall(doc))
     if core != expect["core"]:
         errs.append(f"[{label}] core count {core} != {expect['core']}")
+    if "tags" in expect:
+        tags, struct = count_tags(doc)
+        if tags != expect["tags"]:
+            errs.append(f"[{label}] tag counts {tags} != {expect['tags']}")
+        if struct != expect["struct"]:
+            errs.append(f"[{label}] struct count {struct} != {expect['struct']}")
 
 
 def check_run_folder(errs):
@@ -424,7 +474,8 @@ def selftest():
     print("SELFTEST PASS — statistics-table exclusion, one-status-per-row, "
           "PASS(code) separation, trailing-period ids, bold/qualified "
           "statuses, RE-ROUTE [UI], range expansion, [core] heading "
-          "counting, bug-fix-mode flat ids (TC-<n>, flat spans, "
+          "counting, channel-tag histogram + structural-line count, "
+          "bug-fix-mode flat ids (TC-<n>, flat spans, "
           "`## ` headings), and runs/<KEY>/r<N> folder resolution "
           "(EP_QA_HOME first, newest round, docs/ case-file fallback, "
           "legacy cwd) all "

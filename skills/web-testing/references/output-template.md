@@ -31,14 +31,14 @@ Date: <YYYY-MM-DD>
 | TC-REQ-6.3 | <scenario name> | [mobile] | mobile app — verify on Android/iOS |
 | TC-REQ-6.2 | <scenario name> | [API] | api-testing did not run in this flow — verify with API tooling |
 
-## Structural checks (from the checklist)
+## Structural checks (from the test-cases file's Structural checks section)
 > `[UI]` presence/type/label checks that have no test case, executed on
 > the pages this run visited. `Case` = the suite's STRUCT stableId from
-> the checklist line (step 6 joins the verdict to the roster by it).
+> the section's line (step 6 joins the verdict to the roster by it).
 > Status uses the vocabulary — a page not visited is
 > `NOT EXECUTED — page not visited`, never a bare "not visited". Omit
-> the section only if the checklist itself was unavailable (then explain
-> on the Notes line).
+> the section only if the test-cases file has no Structural checks
+> section (then say so on the Notes line).
 
 | Check | Case | Description | Status |
 |-------|------|-------------|--------|

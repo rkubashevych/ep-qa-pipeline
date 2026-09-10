@@ -5,6 +5,98 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.40.0 — 2026-09-10 — the docs phase loses a stage
+
+The docs-phase half of the same-day cold review of 0.36.0 ("three
+changes that would most improve the docs phase for a weekly QA
+engineer"). One structural change and a set of dead weight removed.
+
+**Stage 3 (`qa-checklist`) is folded into stage 4 (`qa-test-cases`).**
+
+- Nothing downstream read `<KEY>-checklist.md` for anything but its
+  `[UI]` structural lines: the test cases restated every behavioural
+  check, the publish turned the structural ones into STRUCT cases, the
+  analyzer counted both. So the decomposition into checks is now the
+  **first working step of qa-test-cases** — done in full, method
+  unchanged (`references/check-decomposition.md`, the former
+  checklist-design-rules with a "Behavioural vs structural — where each
+  check goes" section) — and only two things are written: **test
+  cases** for the behavioural checks and a **`## Structural checks`
+  section** at the end of the test-cases file for the structural ones,
+  one line each: `- [ ] REQ-N/struct-k [UI] <check>`. The id is the one
+  STRUCT cases already carried as `detail.pipelineId`, so the publish
+  mapping and the code phase's rebuild (`REQ-N/struct-k ·
+  <PREFIX>-STRUCT-NN`) change source file, not shape.
+- One fewer file, stage, pause and budget; the docs orchestrator runs
+  1 → 2 → 4 → analyzer → publish. **Stage numbers 4–10 are unchanged**
+  so every cross-reference in the plugin still holds; stage 3 is listed
+  as retired where the sequence is spelled out. `skills/qa-checklist/`
+  is deleted; its trigger phrases ("build a checklist", "make the QA
+  checklist") route to qa-test-cases. `<KEY>-checklist.md` is read-only
+  legacy on tickets run before 0.40.0 (web-testing, the analyzer,
+  data-locations say so).
+- Every consumer re-pointed: qa-service-publish (STRUCT source table,
+  `detail.notes`, the rebuild line, the legacy-format appendix),
+  qa-pipeline-code step 0 (rebuilds the section, not a file),
+  web-testing (input 3, data sources, step 6.6, the report section
+  header), playwright-executor, api-testing (its optional checklist
+  input is gone — `[API]` "field present" checks are cases), pr-summary,
+  qa-manual-runsheet, the analyzer (§1 coverage, traceability,
+  structural presence, §3 tags, §4 STRUCT count), status-vocabulary,
+  requirements-grooming, test-case-design-rules, the fixture, evals,
+  README, MAINTAINERS, CLAUDE.md.
+- `reconcile_counts.py` now prints, for the test-cases file, the
+  **channel-tag histogram** (`[API][UI]` counted once, under its own
+  key; `untagged=` when a heading has none) and the **structural-line
+  count** (`struct=`), so the Statistics block and the publish count
+  gate are mechanical, not a hand tally — the SKILL's verification
+  step and the template point at it. Self-test covers both, including
+  a rebuilt line with a stableId and a legacy `REQ-99.1:` line that
+  must not count.
+
+**One ExpoPlatform calibration example instead of two leads-CRM ones.**
+
+- `qa-test-cases/references/test-cases-example.md` is now the expected
+  docs-phase output for the tracked fixture `fixtures/EP-0000-context.md`
+  (the "Featured exhibitor" toggle): six REQs with `[risk]`, `[UI]` /
+  `[API]` tags, one `[core]` per behavioural REQ, the 3-value BVA the
+  High-risk limit demands, both versions of the unresolved badge text
+  asserted, a Structural checks section and a Statistics block that
+  `reconcile_counts.py EP-0000` reproduces (10 cases, 6 core, 3
+  structural). MAINTAINERS' smoke test compares against it.
+  `checklist-example.md` went with its folder.
+
+**Dead weight removed.**
+
+- The eight per-skill `setup-guide.md` files (task-context,
+  requirements-grooming, qa-checklist, qa-test-cases, pr-summary,
+  code-review, api-testing, web-testing) — DOU-template "how to adapt
+  for your tracker" text that nothing read, half of it stale (rules
+  called "ISTQB, fully universal" now carried ExpoPlatform-specific
+  provenance / `[core]` / PICT rules; two said `.env` lived in the e2e
+  repo). Everything still true is in README → "Before you run",
+  `environment.md`, or the reference the bullet names.
+- README's per-stage "Suggested settings" column — stages 1–4 run in
+  Cowork where no per-stage model choice exists, and both orchestrators
+  override it; the one-line orchestrator note stays.
+- `task-context/references/field-maps.md`: one table instead of the
+  same table five times (the types differ in one cell and one row's
+  weight).
+- "give it to the user for download" (task-context,
+  requirements-grooming, web-testing) → "report its path" — the files
+  live in the run folder, not in a chat download.
+- requirements-grooming's input boilerplate no longer says a context
+  file may come from "the suite" — it never can.
+- The analyzer's § 4 says when it actually runs: at the docs phase's
+  step 5 there is no suite yet, so it reports `not published yet` and
+  the real sync check is the code phase's step 0 or an on-demand run.
+
+**Not in this release:** `qa-pipeline-code/SKILL.md` is still 762
+lines (the gate's one WARN) — moving its step-0 and step-6 detail into
+references is the next, purely mechanical release. The analyzer's
+"Legacy tickets" appendix and the `[core]` ↔ `detail.core` / STRUCT
+title ↔ check text diffs in § 4 stay on the list.
+
 ## 0.39.0 — 2026-09-10 — the tree is clean
 
 The security half of the same-day cold review of 0.36.0. One idea:

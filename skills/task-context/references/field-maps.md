@@ -23,13 +23,17 @@ These maps use Jira's standard fields and stay generic to Jira:
 These field maps are fixed for the project. Do not reopen them every
 time — use them as is.
 
-## Story
+## The map — one table for every issue type
+
+Story, Task, Bug, Epic and Sub-task read the same nine fields; the
+types differ in one cell (what the Description holds) and one row's
+weight (Acceptance Criteria on an Epic).
 
 | Value | Field key | Mandatory |
 |---|---|---|
 | Summary | summary | — |
-| Description | description | yes |
-| Acceptance Criteria | Confluence page (linked from ticket) | important |
+| Description — Story/Task/Sub-task: the spec; Bug: steps to reproduce / bug description; Epic: the epic summary / goal | description | yes |
+| Acceptance Criteria | Confluence page (linked from ticket) | important (Epic: no — an Epic's AC page is optional, the child stories carry theirs) |
 | Comments | comment | no |
 | Attachments | attachment | no |
 | Linked issues | issuelinks | no |
@@ -37,58 +41,5 @@ time — use them as is.
 | Components | components | no |
 | Status | status | no |
 
-## Task
-
-| Value | Field key | Mandatory |
-|---|---|---|
-| Summary | summary | — |
-| Description | description | yes |
-| Acceptance Criteria | Confluence page (linked from ticket) | important |
-| Comments | comment | no |
-| Attachments | attachment | no |
-| Linked issues | issuelinks | no |
-| Labels | labels | no |
-| Components | components | no |
-| Status | status | no |
-
-## Bug
-
-| Value | Field key | Mandatory |
-|---|---|---|
-| Summary | summary | — |
-| Description (steps to reproduce / bug description) | description | yes |
-| Acceptance Criteria | Confluence page (linked from ticket) | important |
-| Comments | comment | no |
-| Attachments | attachment | no |
-| Linked issues | issuelinks | no |
-| Labels | labels | no |
-| Components | components | no |
-| Status | status | no |
-
-## Epic
-
-| Value | Field key | Mandatory |
-|---|---|---|
-| Summary | summary | — |
-| Description (epic summary / goal) | description | yes |
-| Acceptance Criteria | Confluence page (linked from ticket) | no |
-| Comments | comment | no |
-| Attachments | attachment | no |
-| Linked issues | issuelinks | no |
-| Labels | labels | no |
-| Components | components | no |
-| Status | status | no |
-
-## Sub-task
-
-| Value | Field key | Mandatory |
-|---|---|---|
-| Summary | summary | — |
-| Description | description | yes |
-| Acceptance Criteria | Confluence page (linked from ticket) | important |
-| Comments | comment | no |
-| Attachments | attachment | no |
-| Linked issues | issuelinks | no |
-| Labels | labels | no |
-| Components | components | no |
-| Status | status | no |
+Until 0.40.0 this file carried the same table five times, once per
+type; nothing read them differently.

@@ -22,7 +22,7 @@ flow), EP+BVA (for input fields), and State Transition (for statuses).
 ## Coverage levels — risk-scaled (machine default)
 
 Depth follows the requirement's `[risk: …]` marker (assigned at
-grooming, carried on the checklist heading). The machine stages run
+grooming, carried on the `## REQ-N` group heading). The machine stages run
 every generated case; the human walks a selection (see "Core selection
 rule") — so depth is spent where risk lives, not everywhere.
 
@@ -69,8 +69,8 @@ hurt most, in this preference order:
 3. else the boundary case at a stated limit;
 4. else the happy path.
 
-Structural requirements (checklist-only, no test case) have no core
-case. Zero or two `[core]` cases on one requirement is an error — the
+Structural requirements (Structural checks section only, no test case)
+have no core case. Zero or two `[core]` cases on one requirement is an error — the
 verification step counts them. `[core]` is a selection marker, not a
 channel: api-/web-testing routing ignores it.
 

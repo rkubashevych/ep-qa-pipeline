@@ -1,6 +1,6 @@
 # qa-pipeline-skill
 
-ExpoPlatform's QA pipeline plugin (15 skills) AND a one-plugin
+ExpoPlatform's QA pipeline plugin (14 skills) AND a one-plugin
 marketplace. The run workspace and the credentials are NOT here since
 0.39.0 — they live in `~/.ep-qa` (`EP_QA_HOME`). Full map: `MAINTAINERS.md` — read it before
 changing anything. This file is only the gotchas that must be loaded
@@ -31,7 +31,8 @@ from message one.
   the checkout. FAIL = do not commit.
 - Counting script: `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`
 - Docs-stage smoke test: run `fixtures/EP-0000-context.md` through
-  grooming → checklist → test-cases (expectations at the fixture's foot)
+  grooming → test-cases (expectations at the fixture's foot; expected
+  output = `skills/qa-test-cases/references/test-cases-example.md`)
 - Trigger regression: walk `evals/triggering.md` after ANY frontmatter
   description edit
 - Secret scan before commit: `secret-leak-scan` skill or gitleaks

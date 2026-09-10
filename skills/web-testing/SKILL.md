@@ -25,10 +25,11 @@ files. Output: a detailed per-case report.
 
 1. `<ISSUEKEY>-code-review.md` (from code-review).
 2. `<ISSUEKEY>-test-cases.md` (from qa-test-cases).
-3. `<ISSUEKEY>-checklist.md` — source of the `[UI]` structural checks
-   (presence / type / label) that deliberately have no test case.
-   Since 0.33.0 each of them is also a `-STRUCT-` case in the QA
-   Service suite (step 0 rebuilds the checklist's structural section
+3. The **Structural checks** section of `<ISSUEKEY>-test-cases.md`
+   (a separate `<ISSUEKEY>-checklist.md` on tickets run before 0.40.0)
+   — the `[UI]` structural checks (presence / type / label) that
+   deliberately have no test case. Since 0.33.0 each of them is also a
+   `-STRUCT-` case in the QA Service suite (step 0 rebuilds the section
    from those, one `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] …`
    line each), so the report's "Structural checks" table carries that
    stableId in its `Case` column and uses the status vocabulary
@@ -79,8 +80,8 @@ their origin noted. In practice:
   their tag, so they are visibly routed rather than silently dropped.
 
 Data sources: the code-review file (QA/FAIL items), the test-cases
-file (steps, data, expected results), the checklist (structural
-checks), the product UI via the browser backend,
+file (steps, data, expected results, and its Structural checks
+section), the product UI via the browser backend,
 `navigation_paths.json` (navigation memory), and
 `references/login-config.md`. All input files are read-only. Do not go
 to the tracker, do not use external tools, do not inspect code.
@@ -250,9 +251,10 @@ For each test case in the scope:
    one. No screenshots for PASS, BLOCKED, FAIL REJECTED.
 5. **Continue to the next case** without stopping.
 6. **Structural checks for the page:** after a page group's cases,
-   run the checklist's `[UI]` structural checks belonging to that
-   page and record PASS / FAIL per check ID (REQ-N.M) for the
-   "Structural checks" section. Do not navigate to extra pages only
+   run the `[UI]` structural checks belonging to that page (the
+   test-cases file's Structural checks section) and record PASS / FAIL
+   per line id (`REQ-N/struct-k`, with its STRUCT stableId) for the
+   report's "Structural checks" section. Do not navigate to extra pages only
    for structural checks — cover the pages the run already visits;
    list the rest as not visited.
 
@@ -387,7 +389,7 @@ section. Do not go looking for bugs deliberately.
 ## Output file
 
 Create `<ISSUEKEY>-web-testing.md` in the run folder (template:
-references/output-template.md) and hand it to the user for download.
+references/output-template.md) and report its path.
 If the file already exists — delete it and create a new one: a single
 coherent document with the latest run only, never merged or appended.
 

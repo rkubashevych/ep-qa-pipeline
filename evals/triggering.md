@@ -24,14 +24,12 @@ names who should handle it instead).
 - ❌ "write requirements for a new feature" → not this pipeline; chat
 - ❌ "groom the backlog" → PM activity, no skill
 
-## qa-checklist (stage 3)
-- ✅ "build a checklist from the requirements"
-- ✅ "make the QA checklist"
-- ❌ "make me a checklist for the release day" → generic list, chat
-- ❌ "make a packing checklist" → chat
 
 ## qa-test-cases (stage 4)
-- ✅ "write test cases from the checklist"
+- ✅ "write test cases from the requirements"
+- ✅ "build a checklist from the requirements" / "make the QA checklist"
+  (stage 3 folded in — the checks are this stage's first step)
+- ❌ "make me a checklist for the release day" → generic list, chat
 - ✅ "generate test cases for the requirements"
 - ❌ "write unit tests for this function" → coding task, no skill
 - ❌ "add these cases to QA Service" → qa-pipeline-docs, publish-only

@@ -50,13 +50,19 @@ sort above non-featured ones.
 **How to use this fixture (smoke-testing skill edits):**
 
 1. Copy this file into a chat's working directory.
-2. Run `requirements-grooming` → `qa-checklist` → `qa-test-cases` on it.
+2. Run `requirements-grooming` → `qa-test-cases` on it (stage 3 is
+   folded into 4 since 0.40.0).
 3. Expect: ~6 REQs (5 + 1 from comments); the badge-label conflict
    raised as a Contradiction; the limit-of-10 producing BVA cases at
-   10/11; channel tags splitting `[UI]` (badge, toggle, sorting) from
-   `[API]` (the `featured` field); REQ-ID traceability intact end to
-   end; exactly ONE `[core]`-marked case per behavioural REQ, with a
-   matching `Core cases:` line in the test-cases statistics block.
+   9/10/11; channel tags splitting `[UI]` (badge, toggle, sorting) from
+   `[API]` (the `featured` field); the toggle's presence and default
+   OFF as Structural checks lines, not cases; REQ-ID traceability
+   intact end to end; exactly ONE `[core]`-marked case per behavioural
+   REQ, with a matching `Core cases:` line in the test-cases statistics
+   block — compare with
+   `skills/qa-test-cases/references/test-cases-example.md`, which is
+   this fixture's expected output, and run `reconcile_counts.py
+   EP-0000` on the result.
    If any of that breaks after a skill edit, the edit regressed
    the pipeline.
 

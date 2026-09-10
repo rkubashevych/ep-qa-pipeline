@@ -132,15 +132,16 @@ stage 5, and pass it to every stage. `task-context` (stage 1) does this
 for the docs phase, but stage 1 does **not** run in retest or bug-fix
 mode — which is why this step lives here and runs unconditionally.
 
-**Same-session shortcut:** if `<STORY>-test-cases.md` (and the
-checklist) are already in the run folder — e.g. the docs phase
-ran in this chat — use them and skip the Jira read-back below. The
+**Same-session shortcut:** if `<STORY>-test-cases.md` is already in
+the run folder — e.g. the docs phase ran in this chat — use it and
+skip the Jira read-back below. The
 source register is still built: test cases are derived artifacts and
 never substitute for it.
 
 Otherwise, using the Atlassian connector and the Story key:
 
-1. **Test cases / checklist.** Find the story's QA sub-task:
+1. **Test cases (and their Structural checks section).** Find the
+   story's QA sub-task:
    `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype = "QA sub-task"` (prefer the newest
    with label `qa-pipeline` or a `[QA-PIPELINE]` summary).
@@ -166,10 +167,10 @@ Otherwise, using the Atlassian connector and the Story key:
        Report: "suite holds N cases; M + S in scope for <STORY>"
        (M behavioural, S structural — both go on the roster).
        Local ids (`TC-REQ-N.M`) come from `detail.pipelineId`.
-     - Rebuild `<STORY>-checklist.md` from the suite's requirements
-       PLUS its `-STRUCT-` cases — the `[UI]` presence/label/field-type
-       checks stage 8 executes, one line per case under its REQ, **the
-       stableId on the line**
+     - Rebuild the **Structural checks** section of
+       `<STORY>-test-cases.md` from the suite's `-STRUCT-` cases — the
+       `[UI]` presence/label/field-type checks stage 8 executes, one
+       line per case under its REQ, **the stableId on the line**
        (`- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check>`;
        `qa-service-publish.md` → "Structural checks"). They are roster
        cases: stage 8 reports each by that id and step 6 records the
@@ -210,7 +211,7 @@ Otherwise, using the Atlassian connector and the Story key:
      the fix PR touches beyond the bug (from pr-summary's "Behaviours
      touched" — add these AFTER stage 5 runs). Channel-tag each case;
      the routing invariant applies as usual.
-   - **No checklist, no QA sub-task — but a suite.** Structural checks
+   - **No docs phase, no QA sub-task — but a suite.** Structural checks
      are skipped (say so). **Publish the mini cases to the FEATURE's
      suite before stage 5** (append, or create the feature's suite),
      with one requirement carrying the ticket's own expected result,
@@ -426,8 +427,8 @@ story does not exhaust the orchestrator's context:
    credentials. **PAUSE** if values are missing or a host is not in
    `ALLOWED_HOSTS`. Produces `<STORY>-api-testing.md`.
 
-4. **web-testing (stage 8)** — on the code-review + test-cases +
-   checklist (the checklist supplies the `[UI]` structural checks).
+4. **web-testing (stage 8)** — on the code-review + test-cases (its
+   Structural checks section supplies the `[UI]` structural checks).
    Scope per the routing invariant
    (`../qa-run-analyzer/references/status-vocabulary.md`). Backend:
    Playwright MCP by default, Chrome extension only when its tools are

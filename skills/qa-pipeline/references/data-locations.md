@@ -30,7 +30,8 @@ runs/<ISSUEKEY>/
   <ISSUEKEY>-open-items.md      the ledger — one per ticket, no round
   docs/                         stages 1–4 (re-run = overwrite in place):
     <ISSUEKEY>-context.md · -requirements.md · -recon.md ·
-    -checklist.md · -test-cases.md · -run-report.md
+    -test-cases.md · -run-report.md
+    (-checklist.md on tickets run before 0.40.0 — read-only)
   r1/  r2/  r3/ …               one folder per code-phase PASS:
     <ISSUEKEY>-pr-summary.md · -sources.md · -code-review.md ·
     -api-testing.md · -web-testing.md · -web-evidence.md ·

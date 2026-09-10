@@ -207,7 +207,8 @@ Sub-task. Determine the type from the issue's `issuetype` field in the
 Jira response.
 
 1. Determine the task type from the tracker response.
-2. Load the field map for that type from references/field-maps.md.
+2. Read the field map in references/field-maps.md — one table for all
+   types; the type only decides what the Description holds.
 3. Read only the fields listed in the map. Ignore other fields.
 4. Do not reopen the field maps every time — they are fixed for your
    project.
@@ -325,8 +326,8 @@ before saving.
 
 ## Output file
 
-Create the file <ISSUEKEY>-context.md in the run folder and give
-it to the user for download.
+Create the file `<ISSUEKEY>-context.md` in the run folder
+(`runs/<ISSUEKEY>/docs/`) and report its path.
 
 The file stays in the run folder — the next skill in the same
 chat picks it up automatically.

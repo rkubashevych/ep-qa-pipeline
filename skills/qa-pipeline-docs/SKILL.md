@@ -2,9 +2,9 @@
 name: qa-pipeline-docs
 description: >
   Orchestrator for the documentation half of the QA pipeline (stages
-  1-4) plus publishing. Given a Jira ticket, runs task-context, then
-  requirements-grooming, then qa-checklist, then qa-test-cases, runs the
-  run-analyzer, then publishes: the QA Service suite with the
+  1, 2 and 4 — stage 3 folded into 4 in 0.40.0) plus publishing. Given
+  a Jira ticket, runs task-context, then requirements-grooming, then
+  qa-test-cases, runs the run-analyzer, then publishes: the QA Service suite with the
   requirements, test cases and structural checks — the record the code
   phase reads from — and a QA sub-task on the story as the human-facing
   tracker (no file dumps into Jira). Auto-advances with default
@@ -13,7 +13,7 @@ description: >
   when the user says "run the QA docs pipeline", "build the test cases
   for a ticket", "groom and write test cases", "publish the test cases
   / add these cases to QA Service" (publish-only on existing files), or
-  gives a ticket and wants the full checklist/test-case set without
+  gives a ticket and wants the full test-case set without
   invoking each stage by hand.
 ---
 
@@ -83,8 +83,8 @@ exactly ONE progress line per boundary — nothing more:
 `⏱ Stage <n>/6 done — <stage name> · elapsed <E> min · ~<R> min left`
 
 Initial per-stage budgets (minutes): task-context 8 · grooming 12
-(+10 when recon runs) · checklist 7 · test-cases 12 · analyzer 5 ·
-publish 12. Compute `<R>` as the unfinished stages' budgets scaled by
+(+10 when recon runs) · test-cases 15 (it decomposes first, then
+writes) · analyzer 5 · publish 12. Compute `<R>` as the unfinished stages' budgets scaled by
 the run's own pace (elapsed ÷ sum of finished budgets, clamped to
 0.5–3); round to 5 minutes and keep the `~`. Stamp both ends of any
 user-waiting pause (the publish confirmation) and subtract the waited
@@ -149,13 +149,15 @@ full** — do not summarise or shortcut it. Stages share the run folder
      settled — do not post those. If the user declines, include the
      draft in the stage-6 publish preview instead.
 
-3. **qa-checklist** — do not pause for clarifying questions: build on
-   what is written, note ambiguity in the file ("needs
-   clarification"). Produces `<ISSUEKEY>-checklist.md` (with channel
-   tags).
+3. *(retired in 0.40.0 — the checklist is now the first working step
+   of qa-test-cases; no file, no pause. Stage numbers 4+ are unchanged
+   so every cross-reference still holds.)*
 
-4. **qa-test-cases** — do not pause: the grounding rule already
-   handles ambiguity. Produces `<ISSUEKEY>-test-cases.md`.
+4. **qa-test-cases** — do not pause: build on what is written, note
+   ambiguity as "needs clarification"; the grounding rule handles the
+   rest. Produces `<ISSUEKEY>-test-cases.md` — the test cases AND the
+   Structural checks section (the former checklist's `[UI]` presence /
+   label / type lines, id `REQ-N/struct-k`).
 
 5. **qa-run-analyzer** — run automatically; writes
    `<ISSUEKEY>-run-report.md`.
@@ -204,7 +206,7 @@ full** — do not summarise or shortcut it. Stages share the run folder
      - An "Open questions from grooming" list — the same open items as
        the story comment, so a manual tester sees them without opening
        the story. Omit if none.
-     - Do NOT paste the checklist or the cases here.
+     - Do NOT paste the cases or the structural checks here.
    - **No checkbox tracker comment — retired in 0.34.0.** Until then a
      follow-up comment listed one `- [ ] TC-REQ-N.M …` line per case.
      Nobody ticked it (the connector cannot; the human's verdicts go to
@@ -225,8 +227,7 @@ full** — do not summarise or shortcut it. Stages share the run folder
      behavioural requirements — fix before publishing.
    - **No machine-readable archive — retired in 0.33.0.** Nothing that
      is a file is pasted into Jira any more: not the requirements, not
-     the checklist, not the test cases, not the "structural checks
-     only" block. Why: the fenced dumps ran to 45,000 characters per
+     the test cases, not the "structural checks only" block. Why: the fenced dumps ran to 45,000 characters per
      ticket, were silently truncated by Jira's markdown→ADF conversion
      at least once, had to be split into parts and re-joined by a
      script, and duplicated a record the team already keeps in QA
@@ -234,9 +235,10 @@ full** — do not summarise or shortcut it. Stages share the run folder
      they belong:
      - **Cases and requirements** → the suite (already the rule since
        0.11.2).
-     - **Structural checks** (the checklist's `[UI]` presence / label /
-       field-type checks that have no test case) → the suite too, as
-       `STRUCT` cases per `qa-service-publish.md` → "Structural checks".
+     - **Structural checks** (the `[UI]` presence / label / field-type
+       lines in the test-cases file's Structural checks section — no
+       test case by design) → the suite too, as `STRUCT` cases per
+       `qa-service-publish.md` → "Structural checks".
        They used to live only in a fenced block on the sub-task, which
        also meant web-testing's verdicts on them never reached the run.
        Now they are roster cases like any other.

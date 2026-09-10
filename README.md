@@ -12,21 +12,20 @@ These skills were adapted for ExpoPlatform's stack:
 
 ## Pipeline stages
 
-| # | Skill | Input | Output | Suggested settings |
-|---|-------|-------|--------|--------------------|
-| 1 | `task-context` | Jira ticket key/URL | `<KEY>-context.md` | Sonnet · Medium |
-| 2 | `requirements-grooming` | `<KEY>-context.md` | `<KEY>-requirements.md` | Opus · High · thinking on |
-| 3 | `qa-checklist` | `<KEY>-requirements.md` | `<KEY>-checklist.md` | Sonnet · Medium |
-| 4 | `qa-test-cases` | `<KEY>-checklist.md` | `<KEY>-test-cases.md` | Sonnet · High |
-| 5 | `pr-summary` | PR URL / branch | `<KEY>-pr-summary.md` | Sonnet · Medium |
-| 6 | `code-review` | test-cases + pr-summary | `<KEY>-code-review.md` | Opus · High · thinking on |
-| 7 | `api-testing` | code-review + test-cases (+ `.env.qa-agents`) | `<KEY>-api-testing.md` | Sonnet · High |
-| 8 | `web-testing` | code-review + test-cases | `<KEY>-web-testing.md` | Sonnet · High |
-| 9 | `qa-manual-runsheet` | verdicts from 6/7/8 + test cases | `<KEY>-walk-plan.md` + `-testdata.json` (+ `-runsheet.xlsx` on request) | Sonnet · High |
-| 10a | `qa-manual-walk` | `<KEY>-walk-plan.md` + the tester, live | `<KEY>-walk-results.md` (+ `-walk-state.json` for resume) | Opus · High · thinking on |
-| 10b | `qa-manual-results` | walk results, or a completed runsheet (Result/Notes) | `<KEY>-manual-results.md` + Jira/suite write-back | Sonnet · Medium |
+| # | Skill | Input | Output |
+|---|-------|-------|--------|
+| 1 | `task-context` | Jira ticket key/URL | `<KEY>-context.md` |
+| 2 | `requirements-grooming` | `<KEY>-context.md` | `<KEY>-requirements.md` |
+| 4 | `qa-test-cases` | `<KEY>-requirements.md` | `<KEY>-test-cases.md` |
+| 5 | `pr-summary` | PR URL / branch | `<KEY>-pr-summary.md` |
+| 6 | `code-review` | test-cases + pr-summary | `<KEY>-code-review.md` |
+| 7 | `api-testing` | code-review + test-cases (+ `.env.qa-agents`) | `<KEY>-api-testing.md` |
+| 8 | `web-testing` | code-review + test-cases | `<KEY>-web-testing.md` |
+| 9 | `qa-manual-runsheet` | verdicts from 6/7/8 + test cases | `<KEY>-walk-plan.md` + `-testdata.json` (+ `-runsheet.xlsx` on request) |
+| 10a | `qa-manual-walk` | `<KEY>-walk-plan.md` + the tester, live | `<KEY>-walk-results.md` (+ `-walk-state.json` for resume) |
+| 10b | `qa-manual-results` | walk results, or a completed runsheet (Result/Notes) | `<KEY>-manual-results.md` + Jira/suite write-back |
 
-> Per-stage settings apply when running a stage on its own. The orchestrators (`qa-pipeline-docs`, `qa-pipeline-code`) instead recommend one setting for the whole run (Opus · High · thinking on) to avoid switching models mid-run — with subagent dispatch, heavy stages get fresh context anyway.
+> Stage 3 (`qa-checklist`) was folded into stage 4 in 0.40.0: the decomposition into checks is qa-test-cases' first working step, and the structural checks it yields are a section of the test-cases file. Stage numbers 4–10 are unchanged. Model settings: run the orchestrators (`qa-pipeline-docs`, `qa-pipeline-code`) with one setting for the whole run (Opus · High · thinking on) — with subagent dispatch, heavy stages get fresh context anyway.
 
 > **Stage 7 = `api-testing`.** Executes the `[API]` test cases directly against the ExpoPlatform REST API (curl / HTTP, no browser), so API cases are verified instead of routed out. Credentials are read at runtime from `~/.ep-qa/.env.qa-agents` — never hardcoded — and only hosts in its `ALLOWED_HOSTS` are called. Stage 8 (`web-testing`) then runs only `[UI]` cases; `[mobile]` / `[export/email]` remain routed out. See `skills/api-testing/references/api-testing-reference.md` for the full method (auth contexts, route discovery, write-safety, frontend/exhibitor-token cases).
 
@@ -44,8 +43,7 @@ These skills were adapted for ExpoPlatform's stack:
 
 1. **task-context** — pulls the Jira ticket (description, acceptance criteria, comments, attachments, links) and consolidates it into one enriched Markdown file: the single source of truth for everything downstream.
 2. **requirements-grooming** — reviews those requirements with a QA grooming eye (coverage, clarity, contradictions, risks, missing detail), numbers them, and produces a clean requirements file. Reads only the context file — no tracker, no internet.
-3. **qa-checklist** — decomposes each numbered requirement into atomic checks.
-4. **qa-test-cases** — turns the checklist into concrete test cases (steps, inputs, expected results). The checklist says *what* to check; the test case says *how*.
+4. **qa-test-cases** — decomposes each numbered requirement into atomic checks (the former stage 3, now a working step), then writes the behavioural ones as concrete test cases (steps, inputs, expected results) and the structural ones (presence, label, type, default) as a Structural checks section. The check says *what* to verify; the test case says *how*.
 5. **pr-summary** — reads the Bitbucket PR (or branch) and builds a navigation map of the changes for the reviewer.
 6. **code-review** — verifies each test case against the PR code and produces a compact pass/fail table with findings for failures.
 7. **api-testing** — executes the `[API]` cases (code-review QA/FAIL items) against the running REST API via curl using `.env` credentials; covers admin REST, legacy admin-panel, and exhibitor-token (frontend) cases. Read-only by default; any write snapshots-and-reverts or uses a throwaway entity. Pauses if `.env` / a per-event frontend host is missing.
@@ -55,7 +53,7 @@ These skills were adapted for ExpoPlatform's stack:
 
 ## Before you run
 
-Each skill folder still has a `setup-guide.md` with the remaining team-specific choices to confirm:
+The team-specific choices to confirm before a first run (the per-skill `setup-guide.md` files were retired in 0.40.0 — everything they said is here, in `skills/qa-pipeline/references/environment.md`, or in the reference the bullet names):
 
 - **Confluence access** — Acceptance Criteria live on Confluence pages linked from the ticket, so the Atlassian connector must have **Confluence enabled**, not just Jira. (No custom-field ID needed — stage 1 reads the linked Confluence page directly.)
 - **Bitbucket API token** — set `BB_EMAIL` (your Atlassian email) and `BB_API_TOKEN`. App passwords no longer work (disabled June 9, 2026). A `read:repository`-scoped token (like the existing `bitbucket-git-cli`) is enough for **branch mode** (give the skill the branch = issue key, e.g. `EP-54610`). **PR-URL mode** also needs `read:pullrequest:bitbucket` — add it via a new "with scopes" token, or just use branch mode. Workspace/repo in PR URLs may be slugs or UUIDs — both are handled.
@@ -73,7 +71,7 @@ Every file a stage writes lands in the **run folder** — `~/.ep-qa/runs/<KEY>/d
 ExpoPlatform features span more than one surface and one repo, so the pipeline accounts for that:
 
 - **Sub-task gathering** — fed a parent Story, stage 1 pulls the child sub-tasks (backend / frontend / QA) and folds their detail in, since the concrete specs live there.
-- **Channel tags** — every checklist item and test case is tagged `[UI]`, `[API]`, `[mobile]`, or `[export/email]`. `[UI]` items run in the browser (web-testing); `[API]` items run against the REST API (api-testing); `[mobile]` / `[export/email]` are explicitly routed under "Not executed here" rather than dropped (exception: an `[export/email]` artifact fetchable over HTTP, like an XLS/CSV export endpoint, may be executed by api-testing).
+- **Channel tags** — every test case and structural check is tagged `[UI]`, `[API]`, `[mobile]`, or `[export/email]`. `[UI]` items run in the browser (web-testing); `[API]` items run against the REST API (api-testing); `[mobile]` / `[export/email]` are explicitly routed under "Not executed here" rather than dropped (exception: an `[export/email]` artifact fetchable over HTTP, like an XLS/CSV export endpoint, may be executed by api-testing).
 - **Multi-PR review** — stages 5–6 accept several sub-task PRs (one backend + one or more frontend) for a single Story and produce a combined review keyed by REQ-ID, with a PR column showing which PR each result came from.
 - **Per-task host** — web-testing accepts a task-specific test host (e.g. an alpha host named in the QA sub-task), overriding the default site in `login-config.md`.
 - **Blast radius** — stage 5 flags changed **shared** files ("Shared / high blast-radius files" in the pr-summary) and the run-analyzer surfaces them as a 🟡 regression-risk note, since the pipeline itself is strictly ticket-scoped.

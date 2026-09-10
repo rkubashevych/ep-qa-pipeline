@@ -136,7 +136,8 @@ When it is a retest:
 
 1. The **QA Service suite** for the story, when one exists — primary.
    Otherwise `<ISSUEKEY>-test-cases.md` from the qa-test-cases skill.
-2. `<ISSUEKEY>-checklist.md` — supplies the structural checks. Optional.
+2. The Structural checks section of `<ISSUEKEY>-test-cases.md`
+   (STRUCT cases in the suite) — the structural checks. Optional.
 3. Any verdict files that already exist — `<ISSUEKEY>-code-review.md`,
    `-api-testing.md`, `-web-testing.md` — and the pass's QA Service
    test run when one exists. Optional; used to decide which cases are

@@ -2,8 +2,8 @@
 name: qa-run-analyzer
 description: >
   Post-run health check for the QA pipeline. Reads whatever pipeline
-  output files are present (context, requirements, checklist,
-  test-cases, pr-summary, code-review, web-testing) and reports how the
+  output files are present (context, requirements, test-cases,
+  pr-summary, code-review, api-testing, web-testing) and reports how the
   run went: coverage/traceability gaps, weak inputs, signs a stage
   misbehaved, and a findings digest. Writes a short run report and a
   chat summary. Auto-called at the end of qa-pipeline-docs and
@@ -32,7 +32,8 @@ Reads whichever of these exist — resolved per
 `../qa-pipeline/references/data-locations.md` (run folder first;
 asking the user is the last resort):
 `<ISSUEKEY>-context.md`, `<ISSUEKEY>-requirements.md`,
-`<ISSUEKEY>-checklist.md`, `<ISSUEKEY>-test-cases.md`,
+`<ISSUEKEY>-test-cases.md` (with its Structural checks section;
+`<ISSUEKEY>-checklist.md` only on tickets run before 0.40.0),
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
 `<ISSUEKEY>-web-evidence.md` (the FAIL evidence sections § 5 checks),
@@ -52,7 +53,7 @@ line names an earlier run is a stale artefact (EP-56197 r4 open-items
 current.
 
 Detect the phase from what is present:
-- Docs phase = context/requirements/checklist/test-cases.
+- Docs phase = context/requirements/test-cases.
 - Code phase = pr-summary/code-review/api-testing/web-testing.
 Analyze whatever is there; do not require files from the other phase.
 
@@ -67,9 +68,9 @@ Group every issue under one of three buckets so the fix is obvious:
 Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 
 ### 1. Run / coverage health (Pipeline)
-- Every REQ-N in the requirements file has >=1 checklist item; every
-  behavioural requirement has >=1 test case. List orphans (REQ with no
-  checks / no test cases).
+- Every REQ-N in the requirements file has >=1 test case or >=1
+  Structural checks line; every behavioural requirement has >=1 test
+  case. List orphans (REQ with neither).
 - Recon usage: when open questions reached the ticket, flag 🟡 any
   BEHAVIOUR-class question posted while env access existed and no
   `<KEY>-recon.md` was produced — an observable fact was asked of a
@@ -82,8 +83,8 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   order of appearance, so this is a count + ordering comparison). An
   AC item with no REQ is 🔴 — the whole downstream coverage guarantee
   is anchored on this seam.
-- REQ-ID traceability is intact across requirements -> checklist ->
-  test-cases -> code-review -> web-testing. Flag IDs that appear in one
+- REQ-ID traceability is intact across requirements -> test-cases
+  (cases and structural lines) -> code-review -> web-testing. Flag IDs that appear in one
   file but vanish in the next.
 - Core marker integrity: every behavioural requirement has exactly ONE
   test case marked `[core]` on its heading — 🔴 on zero or multiple
@@ -114,10 +115,12 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   routing by arithmetic alone — if a case's hazard (from code-review
   findings) lives on a surface its channel never touched, flag it 🔴
   even when the counts balance.
-- Structural checklist items (`[UI]` presence/type/label checks with
-  no test case) appear in web-testing's "Structural checks" section —
-  as executed or explicitly "not visited". Flag structural checks
-  that are neither there nor explained by a Notes line.
+- Structural checks (the test-cases file's `- [ ] REQ-N/struct-k [UI]`
+  lines) appear in web-testing's "Structural checks" section — as
+  executed or `NOT EXECUTED — page not visited`. Flag structural
+  checks that are neither there nor explained by a Notes line.
+  `reconcile_counts.py` prints their count (`struct=`) and the
+  channel-tag histogram; the file's Statistics block must match both.
 - BLOCKED test cases (web-testing / api-testing) and any
   empty/placeholder sections.
 - Completeness integrity: 🔴 when a report whose `Completeness:`
@@ -147,7 +150,8 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 - A stage produced no output or a malformed file (missing the sections
   its template defines).
 - Channel tags (`[UI]`/`[API]`/`[mobile]`/`[export/email]`) missing on
-  checklist or test cases.
+  test cases or structural lines (`reconcile_counts.py` reports
+  `untagged=`).
 - A stage that clearly errored or was skipped in the chain.
 
 ### 4. QA Service sync (Pipeline) — only when the connector is present
@@ -167,10 +171,10 @@ suite:` line in the QA sub-task description) and report ONE of:
   those; account for deliberately skipped duplicates listed in the
   publish preview). Pre-0.34 suites carry no markers: fall back to the
   legacy tracker-line ids. **`-STRUCT-` cases are expected extras**
-  (0.33.0): their count must equal the checklist's structural `[UI]`
-  checks, not appear in the test-cases file — S structural cases
-  beyond N test cases is in sync; S ≠ the checklist's count is the
-  mismatch below.
+  (0.33.0): their count must equal the Structural checks lines in the
+  test-cases file (`reconcile_counts.py` → `struct=`) — S structural
+  cases beyond N test cases is in sync; S ≠ that count is the mismatch
+  below.
 - 🟡 **archive posted** — any fenced `File: <name>` block found in a
   comment written by this round on any ticket. Archives were retired
   in 0.33.0; name the comment so it can be deleted.
@@ -229,7 +233,12 @@ suite:` line in the QA sub-task description) and report ONE of:
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh
 instructions in a later stage/chat, so a silently skipped or partial
-publish surfaces here.
+publish surfaces here. **When it actually runs:** in the orchestrated
+docs flow the analyzer is step 5 and the publish is step 6, so at that
+point there is nothing to sync against — report `🟢 not published yet`
+and stop; the real check happens at the code phase's step 0 (which
+reads the suite) and on any on-demand run after the publish. Do not
+present a step-5 run as having verified the publish.
 
 ### 5. Evidence quality (Pipeline) — can the verdicts be believed?
 
