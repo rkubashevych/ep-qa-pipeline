@@ -5,6 +5,53 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.34.0 — 2026-09-10 — the run is the tracker
+
+**The checkbox-tracker comment on the QA sub-task is retired.** It was
+one `- [ ] TC-REQ-N.M — <name> [channel] · <stableId>` line per case,
+meant to be ticked by hand. Nobody ticked it: the connector cannot, the
+human's verdicts go to the QA Service run (0.30.0), and the orchestrator
+carried a standing reminder that "checkboxes are manual-only" — the
+sign of a mechanism kept alive by instruction rather than use. Third of
+the five "old beside new" clean-ups agreed on 2026-09-10.
+
+The tracker did carry two things the code phase needed, and both now
+live on the items themselves in QA Service (verified against the
+connector's schema: `detail` is free-form on cases and requirements,
+and requirements have a native `sources[]` with `kind: jira`):
+
+- **Per-ticket scope inside a per-feature suite** — every case
+  published for a ticket gets `detail.ticket = <KEY>`; every
+  requirement gets `sources: [{kind: jira, label: <KEY>, url}]` (plus
+  its Confluence source with `anchorUrl`). Step 0 executes the cases
+  whose `detail.ticket` is this run's key, plus team-added cases
+  tracing to this run's requirements. Feature tags were considered and
+  rejected for this: the tag catalogue is the platform-feature
+  vocabulary and each tag needs approval.
+- **The REQ-N / TC-REQ-N.M ↔ stableId map** — `detail.pipelineId` on
+  every requirement (`REQ-3`), case (`TC-REQ-3.2`) and STRUCT case
+  (`REQ-3/struct-1`). The map lives on the item it belongs to and
+  cannot go stale on its own; the publish reference's rule against a
+  standalone map block stands.
+
+Wiring: `qa-pipeline-docs` step 6 (tracker comment removed; the count
+gate is kept and attached to the publish preview; the "How to use this
+ticket" note now says there is nothing to tick — the suite and its runs
+are the record, the ticket gets one status line and one summary);
+`qa-service-publish.md` mapping tables and "Code phase — suite as the
+case source" (scope by `detail.ticket`, join by `detail.pipelineId`,
+legacy fallbacks named); `qa-pipeline-code` step 0 scope + REQ-N
+rebuild, the "Tracker note" bullet and the final-response reminder
+removed, description now says the cases come from the suite (986
+chars); `test-runs.md` roster definition; `data-locations.md` Jira
+row; the analyzer's sync check compares only this ticket's marked
+items. Pre-0.34 suites carry neither marker: step 0 falls back to the
+legacy tracker-line ids, then to title match.
+
+Also fixed on the way: two sheet-era leftovers from 0.31 ("Reference-tab
+coverage map" in the analyzer, "delegated … (Reference tab)" in stage
+10) now name the walk plan's Coverage section.
+
 ## 0.33.0 — 2026-09-10 — one record
 
 **Jira archive comments are retired. The QA Service suite + run and the

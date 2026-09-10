@@ -2,8 +2,8 @@
 name: qa-pipeline-code
 description: >
   Orchestrator for the code + UI half of the QA pipeline (stages
-  5-10). Given a Story key, reads the test cases from the story's QA
-  sub-task and derives the dev branches, then runs pr-summary, then
+  5-10). Given a Story key, reads the test cases from the QA Service
+  suite and derives the dev branches, then runs pr-summary, then
   code-review, then api-testing, then web-testing, then run-analyzer,
   records machine verdicts on a QA Service test run (human summary
   follows at stage 10), builds the manual walk plan so a human can walk what
@@ -147,13 +147,15 @@ Otherwise, using the Atlassian connector and the Story key:
      goal/preconditions/steps/testData/assertions/notes). This is the
      authoritative copy.
      - **Scope it to THIS run.** A suite is per FEATURE and also holds
-       earlier stories' cases. Execute only the ids on the sub-task's
-       checkbox tracker (each line carries its case id), plus any
-       suite case that traces to this run's requirements with no
-       tracker line (team-added — flag it in the reconciliation
-       list). Never execute the whole suite because it was in the
-       response. Report: "suite holds N cases; M in scope for
-       <STORY>".
+       earlier stories' cases. Execute only the cases whose
+       `detail.ticket` is `<STORY>`, plus any suite case that traces
+       to one of this run's requirements (`sources` with `kind: jira,
+       label: <STORY>`) without the marker (team-added — flag it in
+       the reconciliation list). Pre-0.34 suites carry neither: use
+       the case ids on the sub-task's legacy checkbox-tracker lines.
+       Never execute the whole suite because it was in the response.
+       Report: "suite holds N cases; M in scope for <STORY>".
+       Local ids (`TC-REQ-N.M`) come from `detail.pipelineId`.
      - Rebuild `<STORY>-checklist.md` from the suite's requirements
        PLUS its `-STRUCT-` cases — the `[UI]` presence/label/field-type
        checks stage 8 executes, one `[UI]` check per case under its REQ
@@ -164,7 +166,7 @@ Otherwise, using the Atlassian connector and the Story key:
        and skip structural checks.
      - **Rebuild `<STORY>-requirements.md`** from the suite's
        requirements (title, kind, risk, stableId → REQ-N mapping from
-       the tracker lines) — without it the analyzer's traceability
+       `detail.pipelineId`) — without it the analyzer's traceability
        check silently cannot run in any fresh-chat code phase. No
        suite → `runs/<STORY>/docs/<STORY>-requirements.md` on this
        machine; neither → say once that upstream traceability cannot
@@ -516,10 +518,6 @@ story does not exhaust the orchestrator's context:
    - No QA sub-task (Bugs, Defects, small Stories) → the status
      comment goes on the MAIN issue, same confirm pause. That status
      line is the ONLY thing a human-facing ticket receives in wave 1.
-   - **Tracker note:** the connector cannot tick the docs-phase
-     checkbox tracker. The human summary is the source of truth for
-     automated results; the tracker holds the human's manual
-     verification. Remind the user in the final response.
 
 7. **Bug filing — after the manual round, not before.** A bug drafted
    from an automated verdict waits for the human to walk that case:
@@ -723,8 +721,7 @@ human (or "no run — connector not enabled" / "no run — no suite for
 this ticket") and any step-0 reconciliation changes; the open-items
 ledger's open-row count; which bugs (if any)
 passed the narrow exception and were filed, or that filing waits for
-stage 10; which handoff was performed or deferred; the tracker
-reminder (checkboxes are manual-only). Reuse the human-summary content
+stage 10; which handoff was performed or deferred. Reuse the human-summary content
 rather than inventing a third format.
 
 Then, from step 9: the walk-plan path, how many cards the tester will

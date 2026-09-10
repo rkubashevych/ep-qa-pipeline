@@ -184,40 +184,34 @@ directory; pass each output file to the next automatically.
        `(N requirements / M cases, prefix <PREFIX>)`. Format:
        `qa-service-publish.md` → "Writing the suite link into Jira".
        Omit if the QA Service publish was skipped.
-     - A "How to use this ticket" note: the checkbox tracker comment
-       is the single source of truth for **manual** testing status —
-       tick as you verify by hand; full steps live in the QA Service
-       suite; automated results arrive later as two code-phase
-       comments; the connector cannot tick checkboxes, so transfer
-       automated PASS/FAIL by hand if you want one combined view.
+     - A "How to use this ticket" note: the cases and their status
+       live in the QA Service suite (link above) and its test runs —
+       there is nothing to tick here; this ticket receives one status
+       line when the automated pass finishes and one human-readable
+       summary when the manual round is written back.
      - The `⚠ SPECIAL ATTENTION` list and a short run-report summary.
      - An "Open questions from grooming" list — the same open items as
        the story comment, so a manual tester sees them without opening
        the story. Omit if none.
-     - Do NOT paste the checklist here. One tracker only.
-   - **Test cases → a follow-up comment (`addCommentToJiraIssue`), as
-     an interactive checkbox tracker.** **One line per case — no
-     Pre/Steps/Exp** (inlining them duplicated the machine archive
-     99.3% and cost ~15,000 chars/ticket; the steps live in the suite
-     and the local file):
-     - `- [ ] TC-REQ-N.M — <name>  [<channel>][ core] · <PREFIX>-<SEG>-NN`
-       (id, short name, channel tag, ` [core]` marker where the case
-       is the REQ's core case, QA Service case id).
-     - Group by `### REQ-N — <label>  [channels]` headings mirroring
-       the test-cases file; end with the statistics block from that
-       file.
-     - **Count gate — do not post a number you did not derive.**
-       Mechanically recount the `### TC-REQ` headings and channel tags
-       first (shell available:
-       `python3 <plugin>/skills/qa-run-analyzer/scripts/reconcile_counts.py <KEY>`;
-       otherwise count the headings directly). If the statistics block
-       disagrees, FIX the test-cases file first — never post the
-       mismatched number or use it for suite levels. The recount
-       includes the `[core]` markers: the core count must equal the
-       number of behavioural requirements — fix before posting.
-     - Nothing else goes in this comment. If one case genuinely needs
-       its steps visible in Jira (a blocker reproduced without QA
-       Service access), add them to that ONE case.
+     - Do NOT paste the checklist or the cases here.
+   - **No checkbox tracker comment — retired in 0.34.0.** Until then a
+     follow-up comment listed one `- [ ] TC-REQ-N.M …` line per case.
+     Nobody ticked it (the connector cannot; the human's verdicts go to
+     the run), and the two things it actually carried now live in the
+     suite itself: the per-ticket **scope** (`detail.ticket` on every
+     case, `sources: [{kind: jira, label: <KEY>}]` on every requirement)
+     and the **REQ-N / TC-REQ-N.M ↔ stableId map** (`detail.pipelineId`
+     on both) — `qa-service-publish.md` → "Mapping". The QA Service run
+     is the tracker.
+   - **Count gate — do not publish a number you did not derive.**
+     Before the preview, mechanically recount the `### TC-REQ` headings
+     and channel tags (shell available:
+     `python3 <plugin>/skills/qa-run-analyzer/scripts/reconcile_counts.py <KEY>`;
+     otherwise count the headings directly). If the statistics block
+     disagrees, FIX the test-cases file first — never publish the
+     mismatched number or use it for suite levels. The recount includes
+     the `[core]` markers: the core count must equal the number of
+     behavioural requirements — fix before publishing.
    - **No machine-readable archive — retired in 0.33.0.** Nothing that
      is a file is pasted into Jira any more: not the requirements, not
      the checklist, not the test cases, not the "structural checks
@@ -247,8 +241,8 @@ directory; pass each output file to the next automatically.
 After publishing, report:
 - The paths of the four stage files + the run report
   (`runs/<ISSUEKEY>/docs/`).
-- The QA sub-task key + URL and what was posted (description + tracker
-  comment — no archive).
+- The QA sub-task key + URL and what was posted (the description only
+  — no tracker comment, no archive).
 - The QA Service suite path + requirement/case counts and the
   count-verification result (or "QA Service publish skipped —
   connector not enabled").

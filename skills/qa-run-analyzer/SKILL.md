@@ -86,10 +86,10 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 - Core marker integrity: every behavioural requirement has exactly ONE
   test case marked `[core]` on its heading — 🔴 on zero or multiple
   (structural requirements have none; `reconcile_counts.py` prints the
-  core count). When a run sheet exists for the ticket, every
-  behavioural REQ maps to a walked row on its Reference-tab coverage
-  map — a behavioural REQ line reading machine-only is 🔴 (coverage
-  gate regression).
+  core count). When a walk plan exists for the ticket, every
+  behavioural REQ maps to a card in its Coverage section — a
+  behavioural REQ line reading machine-only is 🔴 (coverage gate
+  regression).
 - Depth conformance (advisory): a High-risk REQ group whose `Applied
   techniques:` line names no extended technique (3-value BVA, Decision
   Table, invalid transitions, Pairwise) and gives no reason is 🟡.
@@ -157,10 +157,14 @@ outcome, never a gap or a 🔴. Otherwise, locate the
 ticket's suite (`list_suites` match on the story / the `QA Service
 suite:` line in the QA sub-task description) and report ONE of:
 
-- 🟢 **in sync** — suite exists; its requirement stableIds and case
-  count match the requirements/test-cases files (compare via
-  `get_suite`; account for deliberately skipped duplicates listed in
-  the publish preview). **`-STRUCT-` cases are expected extras**
+- 🟢 **in sync** — suite exists; **this ticket's** requirements
+  (`sources` with `kind: jira, label: <KEY>`) and cases
+  (`detail.ticket = <KEY>`) match the requirements/test-cases files by
+  count and by `detail.pipelineId` (compare via `get_suite`; a
+  per-feature suite also holds other tickets' items — never count
+  those; account for deliberately skipped duplicates listed in the
+  publish preview). Pre-0.34 suites carry no markers: fall back to the
+  legacy tracker-line ids. **`-STRUCT-` cases are expected extras**
   (0.33.0): their count must equal the checklist's structural `[UI]`
   checks, not appear in the test-cases file — S structural cases
   beyond N test cases is in sync; S ≠ the checklist's count is the

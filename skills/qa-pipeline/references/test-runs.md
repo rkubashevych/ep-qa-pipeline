@@ -52,9 +52,9 @@ closed at stage 10.
   (stage 10): the tester's e-mail, taken from the run sheet / the user
   — never the agent's label on a human result.
 - **Roster = the scope.** Pass the suite case ids (stable ids are
-  accepted) of exactly the cases step 0 put in scope — the sub-task's
-  tracker lines, or the confirmed retest scope, or the bug-fix mini
-  cases where they exist in a suite. **The roster is fixed at creation**
+  accepted) of exactly the cases step 0 put in scope — the suite cases
+  marked `detail.ticket = <KEY>`, or the confirmed retest scope, or the
+  bug-fix mini cases. **The roster is fixed at creation**
   and that is the point: a case authored after the pass began is not
   silently in it. Scope learned mid-run → `add_run_cases`, and the scope
   file says so. `RISK-CR-*` rows are not suite cases and cannot be on

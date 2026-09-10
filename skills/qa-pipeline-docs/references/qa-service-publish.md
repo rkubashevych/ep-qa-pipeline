@@ -81,7 +81,8 @@ follow-up `edit_requirement` is needed on a fresh publish.
 | `[risk: High/Medium/Low]` | `priority`: High → `P0`, Medium → `P1`, Low → `P2`. Keep the ` [risk: High]` suffix on `summary` too — it is what the checklist/test-case files carry. |
 | requirement `detail` (ALWAYS populate — this is what makes it more than a line of text) | `type` (short classifier: Constraint / Data integrity / Security / State machine / Referential…), `statement`, `rationale`, `scope`, `source` — the document containing the WHOLE statement; if more than one document is involved, attribute per clause and mark the spec of record, e.g. `spec of record: Confluence AC page item 4. Clause "no larger than other result cards": design sub-task EP-55708 item 2 ONLY — not in the AC page`. A bare list of documents joined by "and" is not acceptable: it asserts that all of them support all of the statement. Per kind: `actor` / `trigger` / `outcome` for `fr`; `metric` / `target` for `nfr`; `impact` / `likelihood` / `mitigation` for `risk` (vocab `low`/`medium`/`high`). |
 | cross-references between requirements | `detail.related` / `enforces` / `threatens` / `implements` / `constrainedBy` — arrays of stableIds. All but `related` become trace-graph edges on write, so a rule that enforces an invariant, or a risk that threatens one, must say so here. |
-| REQ-N → stableId map | record it; the checklist/test-case files still use REQ-N |
+| REQ-N → stableId map | `detail.pipelineId` = `REQ-N` on the requirement (since 0.34.0 — the map lives on the item, nowhere else); the checklist/test-case files still use REQ-N |
+| the ticket the requirement came from | `sources` = `[{kind: "jira", label: "<ISSUEKEY>", url: "<ticket URL>"}]` plus one entry per governing document (`confluence` for the AC page, `anchorUrl` to the exact heading when there is one). This is the per-ticket **scope marker** inside a per-feature suite — the code phase selects this run's requirements by it |
 
 ### Test cases → `create_test_case` (one call each — it takes everything)
 
@@ -112,6 +113,8 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 | "needs clarification" markers | `detail.notes` |
 | tags applied in step 4 | `detail.tagPlan` = one line naming the tags attached and why (mirrors the reference suites) |
 | ` [core]` heading marker | `detail.core` = `yes` on the REQ's core case (the human-tier representative that stage 9 always walks); omit on all other cases. Also propose a `core` tag in step 4 where the tag catalogue allows — pending approval is fine. |
+| `TC-REQ-N.M` id | `detail.pipelineId` = `TC-REQ-N.M` (since 0.34.0). The code phase rebuilds the local file's ids from this; never from a Jira comment |
+| the ticket | `detail.ticket` = `<ISSUEKEY>` (since 0.34.0). The per-ticket scope marker: step 0 executes the suite cases whose `detail.ticket` is this run's key (plus team-added cases tracing to this run's requirements). Feature tags are NOT used for this — the tag catalogue is the platform-feature vocabulary and needs approval |
 
 ### Structural checks → `create_test_case` (STRUCT cases) — since 0.33.0
 
@@ -129,7 +132,7 @@ Publish each structural check as a case:
 | REQ | `folderName` = `<REQ area> — structure`; `traceability` = the REQ's stableId |
 | — | `levels: ["E2E"]`, `levelText: "E2E (UI)"`, `techniques: ["UI-CONF"]`, `type: positive`, `status: planned`, `priority` from the REQ's risk |
 | the check text | `detail.goal` = the check verbatim; `detail.steps` = "1. Open <surface>. 2. Locate <element>."; `detail.assertions` = the check; `detail.testData` = "None — uses default event fixtures" |
-| — | `detail.notes` = `Structural check from <ISSUEKEY>-checklist.md — no TC in the test-cases file by design (stage 4 rule).` |
+| — | `detail.notes` = `Structural check from <ISSUEKEY>-checklist.md — no TC in the test-cases file by design (stage 4 rule).`; `detail.ticket` = `<ISSUEKEY>`; `detail.pipelineId` = `REQ-N/struct-k` (k = the check's position under its REQ) |
 
 STRUCT cases are **not** counted in the test-cases statistics block and
 never get a `[core]` marker; the publish preview reports them on their
@@ -333,10 +336,10 @@ preview so the user can redirect:
 > assume the key you send replaces that key's value.
 6. Add to the Jira QA sub-task description (step 6 already writes it)
    the bare suite URL + `(N requirements / M cases, prefix <PREFIX>)`.
-   **Do not publish a separate TC-REQ-N.M → stableId map**: carry the
-   QA Service case id on each tracker line instead
-   (`- [ ] TC-REQ-1.2 — <name>  [UI] · PRIVFAV-PRIV-03`), so the mapping
-   lives next to the case it belongs to and cannot go stale on its own.
+   **Do not publish a separate TC-REQ-N.M → stableId map anywhere**:
+   the mapping is `detail.pipelineId` on each case and requirement
+   (0.34.0), so it lives on the item it belongs to and cannot go stale
+   on its own. (Until 0.33 it rode on the checkbox-tracker lines.)
    A standalone map block was measured at ~2,000 characters and went
    stale the first time stableIds were corrected.
 
@@ -348,8 +351,12 @@ CONTENT (the team may have fixed cases in the web UI between phases):
 
 1. Locate the suite: the `QA Service suite:` line in the QA sub-task
    description; fall back to a `list_suites` match on the story.
-2. `get_suite`; using the QA Service case id carried on each tracker
-   line (older runs: a standalone id map, or match by title), reconcile
+2. `get_suite`; **scope = the cases whose `detail.ticket` is this run's
+   key**, plus any case tracing to one of this run's requirements
+   (`sources` with `kind: jira, label: <KEY>`) that lacks the marker
+   (team-added — flag it). Join local ↔ suite by `detail.pipelineId`
+   (pre-0.34 suites: the case id on the sub-task's tracker lines; older
+   still: match by title). Then reconcile
    the extracted `<STORY>-test-cases.md` against the suite cases:
    - a suite case's content differs (steps/assertions/priority edited
      in the UI) → the suite version wins; update the local file.

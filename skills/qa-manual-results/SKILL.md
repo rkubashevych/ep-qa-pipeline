@@ -86,8 +86,9 @@ first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 - **Expand `Covers` lists.** A row carrying `Covers: TC-x, TC-y` applies
   its Result to every listed case, unless the tester's Notes single a
   case out — then the note's verdict wins for that case. Cases the
-  sheet delegated to machine verdicts (Reference tab) are recorded as
-  machine-only, never as human-confirmed.
+  plan settled without a card (its Coverage section; an exported
+  sheet's Reference tab) are recorded as machine-only, never as
+  human-confirmed.
 - Empty Result = not run. Report it as such; it is not SKIPPED and not
   PASS.
 - **Honour the `source` column of a walk-results file.** A row marked

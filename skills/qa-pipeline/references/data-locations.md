@@ -10,7 +10,7 @@ this file disagree, this file wins.
 |---|---|---|
 | **The run folder** (`runs/<ISSUEKEY>/…`, below) | every `<ISSUEKEY>-*.md` stage file, the open-items ledger, the manual round's files — `-walk-plan.md`, `-walk-state.json`, `-walk-results.md`, `-testdata.json`, the optional runsheet `.xlsx` — evidence screenshots | the stage reports — and, where no archive was posted, the ONLY copy |
 | **QA Service suite + test runs** | requirements, test cases; per-case verdicts as **test runs** (`list_test_runs` / `get_test_run` / `case_execution_history` — one run per pass, `test-runs.md`); `notes` hold only `discrepancy:` lines and pre-0.30 history | test cases and requirements whenever a suite exists; per-case verdicts always |
-| **Jira** | the QA sub-task (description + checkbox tracker), the wave-1 status line, the wave-2 human summary, retractions. **No archives since 0.33.0** — pre-0.33 tickets still carry legacy fenced dumps | nothing the pipeline generates; it is a publication surface, not a source |
+| **Jira** | the QA sub-task (description only), the wave-1 status line, the wave-2 human summary, retractions. **No archives since 0.33.0** — pre-0.33 tickets still carry legacy fenced dumps | nothing the pipeline generates; it is a publication surface, not a source |
 
 ## The run folder — `runs/<ISSUEKEY>/`
 
