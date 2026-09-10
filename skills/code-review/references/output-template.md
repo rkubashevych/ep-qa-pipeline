@@ -23,8 +23,17 @@ PR column = which sub-task PR the test case was checked against
 ### FAIL: TC-REQ-1.2 — <scenario name>
 
 - **File:** <path>, line <N>
+- **Source:** <register row #> — <document>, <section>
+- **Clause:** "<the sentence the code contradicts, quoted verbatim>"
 - **Expected:** <expected result from the test case>
 - **Actual:** <what the code does>
+
+### SPEC-DEFECT: TC-REQ-1.4 — <scenario name>
+
+- **Case says:** <the premise the case or requirement asserts>
+- **Source says:** <register row #> — <document>, <section>: "<verbatim>"
+  (or: no source carries the clause — name which documents were checked)
+- **Code implements:** <which version, file + line>
 
 ### N/A: TC-REQ-2.1 — <scenario name>
 
@@ -55,14 +64,21 @@ PR column = which sub-task PR the test case was checked against
 > propose them as permanent suite cases. Omit if none.
 
 - **RISK-CR-1:** <file+line — what could go wrong, on which surface> — no covering case
+  Source: <register row #> — <document>, <section> · Clause: "<verbatim>"
 - **RISK-CR-2:** <…> — no covering case
+  Source: … · Clause: …  (no clause in any source → label the row
+  `OBSERVATION (no source checked)` instead of RISK)
 
 ---
 
 Section rules:
 - Results — a table of all test cases in the order from the test-cases file.
 - Findings — only for FAIL, N/A, RE-ROUTE and SPEC-DEFECT. PASS and QA need no explanation.
-- Every FAIL has a file, a line, and expected/actual.
+- Every FAIL has a file, a line, expected/actual, and its `Source:` +
+  `Clause:` lines (`../../qa-pipeline/references/sources-of-record.md`);
+  every RISK-CR row carries the same two. No clause anywhere →
+  `OBSERVATION (no source checked)`, not FAIL.
+- Every SPEC-DEFECT names which document does and does not carry the clause.
 - Every N/A has a reason why the item does not apply to the PR.
 - Every RE-ROUTE has the overridden tag + the client-side file/line.
 - If there are no FAIL, N/A or RE-ROUTE — the Findings section is not created.
@@ -75,5 +91,10 @@ Section rules:
 | FAIL   | <N>   |
 | QA     | <N>   |
 | RE-ROUTE | <N> |
+| SPEC-DEFECT | <N> |
 | N/A    | <N>   |
 | Total  | <N>   |
+
+Rows with a zero count may be omitted; a status that occurs anywhere in
+Results must have its row — the analyzer's count check
+(`reconcile_counts.py`) compares the two.

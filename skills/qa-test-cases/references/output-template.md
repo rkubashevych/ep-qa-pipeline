@@ -67,7 +67,7 @@ Close the file with:
 
 - Requirements covered: <N> (<REQ-1, REQ-2, ...>)
 - Requirements needing clarification: <N>
-- Channel breakdown: [UI] <N> · [API] <N> · [mobile] <N> ·
-  [export/email] <N>
+- Channel breakdown: [UI] <N> · [API] <N> · [API][UI] <N> (dual-tagged,
+  counted once, here) · [mobile] <N> · [export/email] <N>
 - Core cases: <N> (= behavioural requirements)
 - Total number of test cases: <N>

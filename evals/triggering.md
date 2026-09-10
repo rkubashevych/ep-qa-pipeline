@@ -11,8 +11,9 @@ names who should handle it instead).
 
 ## task-context (stage 1)
 - ✅ "pull task context for EP-55123"
-- ✅ "process the ticket EP-54990 for the pipeline"
 - ✅ "prepare task context" (with a Jira key/URL)
+- ❌ "process the ticket EP-54990" → qa-pipeline (dispatcher) — it reads
+  the ticket's state and picks the route
 - ❌ "what does ticket EP-55123 say?" → plain chat answer, no skill
 - ❌ "summarise this Jira ticket for my standup" → plain chat
 
@@ -33,7 +34,8 @@ names who should handle it instead).
 - ✅ "write test cases from the checklist"
 - ✅ "generate test cases for the requirements"
 - ❌ "write unit tests for this function" → coding task, no skill
-- ❌ "add these cases to QA Service" → qa-pipeline-docs publish step
+- ❌ "add these cases to QA Service" → qa-pipeline-docs, publish-only
+  mode (steps 5–6 on the files already in `runs/<KEY>/docs/`)
 
 ## pr-summary (stage 5)
 - ✅ "read the PR and map the changes"
@@ -56,7 +58,9 @@ names who should handle it instead).
 - ❌ "run the API tests in the e2e repo" → that repo's own tooling
 
 ## web-testing (stage 8)
-- ✅ "web testing", "test in the browser", "run the QA checks"
+- ✅ "web testing", "test in the browser"
+- ❌ "run the QA checks" → qa-pipeline-code (the whole code phase, not
+  one stage)
 - ✅ "browser testing for EP-55123"
 - ❌ "manual testing" / "I'll test by hand, prepare it" →
   qa-manual-runsheet (9)
@@ -81,8 +85,7 @@ names who should handle it instead).
 - ✅ "I want to hand-test this with you instead of the spreadsheet"
 - ❌ "prepare the manual tests" / "build the walk plan" →
   qa-manual-runsheet (9) — the walk presents a plan, it does not build one
-- ❌ "test in the browser" / "run the QA checks" → web-testing (8),
-  unattended machine run
+- ❌ "test in the browser" → web-testing (8), unattended machine run
 - ❌ "here's my filled sheet" / "ingest the results" → qa-manual-results
 - ❌ "walk me through the PR" / "walk me through the code" → not a test
   session; pr-summary, code-review, or chat
@@ -114,11 +117,13 @@ names who should handle it instead).
 ## qa-pipeline-docs (orchestrator)
 - ✅ "run the QA docs pipeline for EP-55123"
 - ✅ "build the test cases for a ticket" (full flow implied)
+- ✅ "add these cases to QA Service" / "publish the test cases for
+  EP-55123" (publish-only mode — stages 1–4 skipped when their files exist)
 - ❌ "publish this page to Confluence" → confluence-sync
 - ❌ "just groom the requirements" → requirements-grooming alone
 
 ## qa-pipeline-code (orchestrator)
-- ✅ "run the QA code pipeline"
+- ✅ "run the QA code pipeline", "run the QA checks"
 - ✅ "review the PRs and test in the browser for EP-55123"
 - ✅ "the fix landed, retest EP-55123" (retest mode)
 - ✅ "test the bugfix EP-56133" (bug-fix mode — Bug ticket, no docs

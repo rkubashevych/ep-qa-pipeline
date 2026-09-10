@@ -37,9 +37,11 @@ run, a retest round, a bug-fix check), machine stages and the human
 round together. One run per pass, created at step 6 (wave 1) and
 closed at stage 10.
 
-- **Title:** `<KEY> <mode> <YYYY-MM-DD> — <env label>` — e.g.
-  `EP-56133 retest 3 2026-09-07 — alpha2`. Retest rounds are numbered
-  in the title; the ledger (`open-items-ledger.md`) carries the round.
+- **Title:** `<KEY> <mode> <YYYY-MM-DD> — <env label>`. `<mode>` is one
+  of `first run` (r1), `retest <k>` (r<k+1>), `bug-fix` — e.g.
+  `EP-56133 first run 2026-08-20 — alpha2`, `EP-56133 retest 3
+  2026-09-07 — alpha2`. Retest rounds are numbered in the title; the
+  ledger (`open-items-ledger.md`) carries the round.
 - **`env`:** the target host label as the run used it (`alpha2`, `rc`,
   `alphanext-<n>`). Never a credential, never a full URL with a token.
 - **`releaseId`:** when the ticket's `fixVersion` or the suite names a

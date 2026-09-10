@@ -17,8 +17,9 @@ evidence capture (screenshots, console, traces).
 ## Contract stays identical
 
 Everything in SKILL.md except the executor is unchanged: same inputs
-(code-review + test-cases + checklist), same scope rule (only `[UI]`
-QA/FAIL), same classification (PASS / FAIL / FAIL CONFIRMED / FAIL
+(code-review + test-cases + checklist), same scope rule (SKILL.md →
+Scope: the routing invariant — routed-in, dual-tag and RE-ROUTE cases
+included), same classification (PASS / FAIL / FAIL CONFIRMED / FAIL
 REJECTED / BLOCKED / OBSERVATION), same escalation rule, same output
 template. Only the "how a step is executed" changes.
 

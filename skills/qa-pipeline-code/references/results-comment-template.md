@@ -123,7 +123,9 @@ settings, reproduced in both UI and API.">
 Status: VERIFIED — manual round ingested <date>; <N> machine verdicts
 confirmed, <N> retracted. (If rows were not walked:
 `PARTIALLY VERIFIED — <N> rows not walked; those verdicts remain
-machine-only.`)
+machine-only.`) The file qa-pipeline-code step 6 writes carries
+`Status: DRAFT — awaiting stage 10` instead; qa-manual-results replaces
+the line when it ingests the human round and posts the comment.
 
 **Carried forward** *(omit if the ledger has no open rows)*
 
@@ -187,13 +189,13 @@ earlier comments — newest wins.
 - Numbers in the stage table must match the report files' Statistics
   blocks exactly.
 
-## Story note — QA passed (posted by qa-manual-results step 4, NOT step 8)
+## Story note — QA passed (posted by qa-manual-results step 4b, NOT by qa-pipeline-code step 8)
 
 Posted to the **PARENT story** (not the QA sub-task) when the overall
 verdict is ✅ PASS **after the manual results are ingested** — managers
 and devs read the story, not the sub-task. ≤10 lines, plain words, no
-pipeline jargon. Step 8 must not post this on automated verdicts
-alone; if the user insists on a story note at step 8, use the title
+pipeline jargon. qa-pipeline-code step 8 must not post this on automated
+verdicts alone; if the user insists on a story note at step 8, use the title
 "✅ Automated QA passed — manual verification pending", include the
 `Status: PROVISIONAL` line, and apply no workflow transition.
 
@@ -206,7 +208,7 @@ alone; if the user insists on a story note at step 8, use the title
 **Result:** all passed<, N non-blocking notes: <one line each>>.
 **Not covered here:** <N [mobile]/[export] cases → manual check> *(omit if none)*
 **Test docs:** https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path> *(bare URL, never a markdown link; omit if no suite)*
-**Details:** full reports on QA sub-task <KEY>
+**Details:** per-case verdicts on QA Service run <run id>; full reports held by QA (run folder, <KEY> r<N>)
 **Status:** ready for <merge / release / next step>
 ```
 
@@ -219,12 +221,14 @@ Rules:
 - Omit any line that would be empty (notes, Not covered).
 - Only for ✅ PASS. For FAIL / PASS WITH GAPS use the variant below.
 
-## Story note — QA failed (step 8)
+## Story note — QA failed (posted by qa-manual-results step 4b)
 
 Also posted to the **PARENT story**, for the same reason: managers and
 devs read the story, not the sub-task — and that matters *more* when a
 run produced defects, not less. Post it **in addition to** the
-reassignment path, not instead of it.
+reassignment path, not instead of it. Wave 2, like the PASS note: the
+human verdicts are in; qa-pipeline-code step 8 posts it only under its
+narrow wave-1 exception (a runtime-confirmed, evidenced, blocking fault).
 
 Group the defects by what a reader has to decide about them, not by the
 order they were filed. A flat list of thirteen keys tells a manager
@@ -256,7 +260,7 @@ know how much of the feature is sound, not only that it failed>
 
 **Not covered:** <N> blocked by environment/access, <N> awaiting a manual run
 **Test docs:** https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path> *(bare URL)*
-**Details:** full reports and per-case verdicts on QA sub-task <KEY>
+**Details:** per-case verdicts on QA Service run <run id>; full reports held by QA (run folder, <KEY> r<N>)
 ```
 
 Rules:

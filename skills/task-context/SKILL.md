@@ -6,8 +6,9 @@ description: >
   criteria, etc.), and produces a single enriched Markdown context —
   the source of truth for the next skills in the chain. Use it when the
   user provides a task URL or key and wants processed context, or when
-  they say "pull task context", "prepare task context", "process the
-  ticket". Do NOT use to merely read or summarise a ticket in chat —
+  they say "pull task context" or "prepare task context". Do NOT use
+  to merely read or summarise a ticket in chat, and not for "process
+  the ticket" / "qa this ticket" — that is the dispatcher's route —
   use it only when the enriched context FILE is needed as pipeline
   input (stage 1 of the QA pipeline).
 ---

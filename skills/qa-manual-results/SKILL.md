@@ -253,12 +253,12 @@ manual results are in:
   to FAIL, no new FAILs): offer the "Story note — QA passed" to the
   PARENT story (template:
   `../qa-pipeline-code/references/results-comment-template.md`) and
-  the "QA done" transition from publish-config, exactly as step 8
-  would have — same confirm rules.
+  the "QA done" transition from publish-config — this step is the
+  one that posts and transitions; same confirm rules as any Jira write.
 - Verdict flipped to ❌ (retractions/new FAILs): offer the reassign +
-  "Story note — QA failed" path from `qa-pipeline-code` step 8
-  instead, and make sure any earlier provisional story note is
-  superseded by a comment stating the corrected outcome.
+  "Story note — QA failed" (same template file) instead, and make sure
+  any earlier provisional story note is superseded by a comment stating
+  the corrected outcome.
 
 ### Step 5 — Offer to file unfiled bugs
 

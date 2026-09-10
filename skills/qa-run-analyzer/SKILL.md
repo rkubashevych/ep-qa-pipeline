@@ -35,6 +35,8 @@ asking the user is the last resort):
 `<ISSUEKEY>-checklist.md`, `<ISSUEKEY>-test-cases.md`,
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
+`<ISSUEKEY>-web-evidence.md` (the FAIL evidence sections § 5 checks),
+`<ISSUEKEY>-sources.md` (the source register § 7 checks against),
 `<ISSUEKEY>-recon.md`,
 `<ISSUEKEY>-walk-plan.md` (stage 9's plan — for the voice check and
 the coverage map), `<ISSUEKEY>-walk-results.md` (the walk's verdicts),

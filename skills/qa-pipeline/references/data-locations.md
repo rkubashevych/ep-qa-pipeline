@@ -8,7 +8,7 @@ this file disagree, this file wins.
 
 | Store | Holds | Authoritative for |
 |---|---|---|
-| **The run folder** (`runs/<ISSUEKEY>/…`, below) | every `<ISSUEKEY>-*.md` stage file, the open-items ledger, the manual round's files — `-walk-plan.md`, `-walk-state.json`, `-walk-results.md`, `-testdata.json`, the optional runsheet `.xlsx` — evidence screenshots | the stage reports — and, where no archive was posted, the ONLY copy |
+| **The run folder** (`runs/<ISSUEKEY>/…`, below) | every `<ISSUEKEY>-*.md` stage file, the open-items ledger, the manual round's files — `-walk-plan.md`, `-walk-state.json`, `-walk-results.md`, `-testdata.json`, the optional runsheet `.xlsx` — evidence screenshots | the stage reports — and their ONLY copy (no archive is posted since 0.33.0) |
 | **QA Service suite + test runs** | requirements, test cases; per-case verdicts as **test runs** (`list_test_runs` / `get_test_run` / `case_execution_history` — one run per pass, `test-runs.md`); `notes` hold only `discrepancy:` lines and pre-0.30 history | test cases and requirements whenever a suite exists; per-case verdicts always |
 | **Jira** | the QA sub-task (description only), the wave-1 status line, the wave-2 human summary, retractions. **No archives since 0.33.0** — pre-0.33 tickets still carry legacy fenced dumps | nothing the pipeline generates; it is a publication surface, not a source |
 
@@ -111,7 +111,7 @@ Statistics disagree, gets its stage re-dispatched for the missing cases.
 ## Which ticket receives what
 
 The rule lives in `qa-pipeline-code/SKILL.md` step 6 and
-`../qa-pipeline-code/references/results-comment-template.md`. In short:
+`../../qa-pipeline-code/references/results-comment-template.md`. In short:
 every ticket — QA
 sub-task, Story face, Bug or Defect — gets the wave-1 status line and
 the wave-2 human summary, and nothing else; **no fenced file dumps

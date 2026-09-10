@@ -102,8 +102,8 @@ through the git CLI or the Bitbucket Cloud REST API.
   (`https://api.bitbucket.org/2.0/...`) for PR metadata and diffs.
 
 > **Default to branch mode** — the branch name is the issue key (e.g.
-> `EP-54610`). Token scopes, auth setup, repo names, and why PR-URL /
-> REST mode usually 403s: see
+> `EP-54610`). Token scopes, auth setup, repo names and when to use
+> PR-URL / REST mode: see
 > **`../pr-summary/references/bitbucket-access.md`** (the shared source
 > of truth for Bitbucket access — edit it there, not inline here).
 
@@ -358,8 +358,8 @@ as "None".
 
 ## Output file
 
-Create the file `<ISSUEKEY>-code-review.md` in the working
-directory and hand it to the user for download.
+Create the file `<ISSUEKEY>-code-review.md` in the run folder
+(`runs/<ISSUEKEY>/r<N>/`) and report its path.
 
 The file stays in the run folder — the next skill
 in the same chat picks it up automatically.

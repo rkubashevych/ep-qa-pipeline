@@ -83,8 +83,8 @@ Two mistakes this prevents:
   an assertion is observable by hand, say so in **Expect** and name which
   half the automated stage owns. Half-verified is not verified.
 
-Keep A–H dim (9pt grey is enough) — they are reference, not instruction.
-I–K carry the work. L–M are the tester's.
+Keep A–G dim (9pt grey is enough) — they are reference, not instruction.
+H–J carry the work. K–L are the tester's.
 
 **TC** — the case id, e.g. `TC-REQ-12.2`. Frozen column.
 
@@ -122,7 +122,8 @@ scrolling, without reading.
 
 ### Colour — reuse the existing palette, do not invent one
 
-**Use the hex values already in `build_data_pack.py`.** They were chosen
+**Use the hex values below — the same ones every `build_runsheet_<ISSUEKEY>.py`
+has shipped with.** They were chosen
 for this workbook, testers are used to them, and — crucially — they are
 saturated enough to tell apart at a glance.
 
@@ -166,8 +167,8 @@ workbook and asserting each rule's `dxf.fill.bgColor.rgb` is not
 
 ### Tinting rule (live)
 
-- Tint columns A–K for row state and leave **Result** untinted, so the
-  conditional-format colour reads cleanly instead of fighting the row.
+- Tint columns A–J for row state and leave **Result** (K) untinted, so
+  the conditional-format colour reads cleanly instead of fighting the row.
 
 ### REJECTED — muted palette. Do not implement.
 
@@ -224,7 +225,8 @@ Every non-account fixture: id, name, type, owner, and — for anything used
 in a counter case — its **verified zero baseline**, with a note that the
 baseline was read twice.
 
-**Covers column (K+1, after Result/Notes when present):** when one row
+**Covers column (M — after Notes; the one sanctioned thirteenth column,
+present only when a row carries several cases):** when one row
 carries several cases, list them — `Covers: TC-REQ-3.1, TC-REQ-3.2`.
 The tester's Result applies to all of them; a Note naming one case
 overrides for that case only. Rows with no Covers entry carry just

@@ -270,13 +270,14 @@ An example of the level of detail is in references/test-cases-example.md.
 The rules for techniques and coverage are in
 references/test-case-design-rules.md.
 
-## Formatting (Jira-friendly)
+## Formatting (scan-friendly)
 
-The test-cases file is published into a Jira comment and read both by a
-human and by the code phase. Format for easy human scanning:
+The test-cases file is read by the code phase (which maps each block to
+a QA Service case) and rendered card by card in the manual walk. Format
+for easy scanning in both:
 
-- Do NOT use wide markdown tables (`| # | Step | ... |`). Wide rows force
-  horizontal scrolling inside Jira code blocks.
+- Do NOT use wide markdown tables (`| # | Step | ... |`). Wide rows do
+  not survive the mapping to a case's `detail.steps` or a chat card.
 - Use a vertical block layout per test case (the exact shape is in
   references/output-template.md): a `### TC-REQ-N.M — <name>` heading,
   then `Pre:` / `Steps:` / `Exp:` / `Post:` lines.

@@ -12,6 +12,7 @@ Generated: <YYYY-MM-DD>
 | Input quality | 🟢 / 🟡 / 🔴 |
 | Skill / process | 🟢 / 🟡 / 🔴 |
 | Evidence quality | 🟢 / 🟡 / 🔴 (code phase; "—" on docs-only runs) |
+| Source fidelity | 🟢 every FAIL / RISK carries Source + Clause / 🔴 <N> without / — no register |
 | QA Service sync | 🟢 in sync / 🟢 not published yet / 🔴 no run / 🔴 partition mismatch / 🟡 stale run / 🔴 mismatch / — connector absent |
 | Carried items | 🟢 none open ≥2 rounds / 🔴 <N> carried items / — first round |
 

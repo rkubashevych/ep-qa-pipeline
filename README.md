@@ -1,6 +1,6 @@
 # ExpoPlatform QA Pipeline — Claude Skills
 
-An end-to-end QA pipeline built from chained Claude skills, adapted from the DOU Live "AI pipeline for testing tasks" templates (Anna Kurkotova, iSpeedtoLead). Each skill takes the previous skill's output file as its input, so a task flows from a Jira ticket all the way through to a browser-verified test report. A human reviews and confirms the output of each stage before it feeds the next (human-in-the-loop).
+An end-to-end QA pipeline built from chained Claude skills, adapted from the DOU Live "AI pipeline for testing tasks" templates (Anna Kurkotova, iSpeedtoLead). Each skill takes the previous skill's output file as its input, so a task flows from a Jira ticket all the way through to a browser-verified test report. The orchestrators auto-advance with default decisions and pause for a human at the points that write outside the run folder — the publish to QA Service and Jira, a login or event-auth step, filing a bug — while the human round (stages 9–10) is where a person walks the cases and settles the verdicts.
 
 ## Configuration applied
 
@@ -76,7 +76,7 @@ ExpoPlatform features span more than one surface and one repo, so the pipeline a
 - **Multi-PR review** — stages 5–6 accept several sub-task PRs (one backend + one or more frontend) for a single Story and produce a combined review keyed by REQ-ID, with a PR column showing which PR each result came from.
 - **Per-task host** — web-testing accepts a task-specific test host (e.g. an alpha host named in the QA sub-task), overriding the default site in `login-config.md`.
 - **Blast radius** — stage 5 flags changed **shared** files ("Shared / high blast-radius files" in the pr-summary) and the run-analyzer surfaces them as a 🟡 regression-risk note, since the pipeline itself is strictly ticket-scoped.
-- **Bug filing** — after the code phase, `qa-pipeline-code` offers to file confirmed bugs: via the `/knowledge-base` skill when installed (dedup + routed Jira bugs), otherwise directly per `references/bug-report-template.md` (dedup search → draft → user confirms → `createJiraIssue`). Never silently. Step 8 then offers the handoff — reassign to dev on FAIL / "QA done" transition on PASS (configurable in publish-config.md).
+- **Bug filing** — after the code phase, `qa-pipeline-code` offers to file confirmed bugs: via the `/knowledge-base` skill when installed (dedup + routed Jira bugs), otherwise directly per `references/bug-report-template.md` (dedup search → draft → user confirms → `createJiraIssue`). Never silently. The handoff — reassign to dev on FAIL / "QA done" transition on PASS (configurable in publish-config.md) — is offered by `qa-manual-results` after the walk, once the verdicts are human-confirmed; `qa-pipeline-code` step 8 escalates early only for a runtime-confirmed, evidenced, blocking fault.
 
 Mobile (Android/iOS) and non-HTTP outputs (exports, emails, integrations) are generated and tracked as test cases but are **not** auto-executed — they surface as routed work for the right tool or owner. (`[API]` cases are auto-executed by stage 7, `api-testing`.)
 

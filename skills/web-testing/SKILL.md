@@ -6,7 +6,7 @@ description: >
   drives itself — Playwright MCP by default, the Claude in Chrome
   extension as the fallback — checks the expected results, and builds
   a detailed report. Use when the user says "web testing",
-  "test in the browser", "run the QA checks", "browser testing",
+  "test in the browser", "browser testing",
   "run the cases yourself in the browser", or after code review is
   finished. NOT for hand-testing by the user: fixtures and the walk
   plan are qa-manual-runsheet (stage 9), the guided hand-test session
@@ -238,8 +238,13 @@ For each test case in the scope:
    checked against the per-step expectation or the case's `Exp:`
    block).
 3. **Classify** per the "Classification" section.
-4. **If FAIL or FAIL CONFIRMED** — take a screenshot as evidence. No
-   screenshots for PASS, BLOCKED, FAIL REJECTED.
+4. **If FAIL or FAIL CONFIRMED** — capture evidence and write it as
+   the next `§<n>` of `<ISSUEKEY>-web-evidence.md` (screenshot path,
+   the step, what the page showed; format in
+   references/playwright-executor.md → Evidence — the same file for
+   both backends). The finding's `Evidence:` line names that section;
+   step 6 of qa-pipeline-code and the analyzer refuse a FAIL without
+   one. No screenshots for PASS, BLOCKED, FAIL REJECTED.
 5. **Continue to the next case** without stopping.
 6. **Structural checks for the page:** after a page group's cases,
    run the checklist's `[UI]` structural checks belonging to that
@@ -257,9 +262,11 @@ memory") without overwriting existing entries.
 ### Step 8 — Build the report
 
 Create `<ISSUEKEY>-web-testing.md` per references/output-template.md:
-a results table for every case; the "Structural checks" section (or
-the Notes-line explanation); for each FAIL / FAIL CONFIRMED — which
-step, expected, actually seen; for each FAIL REJECTED — the
+the header names the backend used (`Backend:`) and the evidence file
+(`Evidence:`); a results table for every case; the "Structural checks"
+section (or the Notes-line explanation); for each FAIL / FAIL
+CONFIRMED — which step, expected, actually seen, `Source:` + `Clause:`,
+and the `<ISSUEKEY>-web-evidence.md §<n>` it rests on; for each FAIL REJECTED — the
 code-review finding and why the UI works; for each BLOCKED — the
 reason and what was seen; for each OBSERVATION — what was noticed;
 summary statistics.

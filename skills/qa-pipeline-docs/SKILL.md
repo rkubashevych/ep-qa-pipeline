@@ -11,9 +11,10 @@ description: >
   decisions, pausing only to confirm the publish (say "interactive
   mode" to get the grooming pause back). Use it
   when the user says "run the QA docs pipeline", "build the test cases
-  for a ticket", "groom and write test cases", or gives a ticket and
-  wants the full checklist/test-case set without invoking each stage by
-  hand.
+  for a ticket", "groom and write test cases", "publish the test cases
+  / add these cases to QA Service" (publish-only on existing files), or
+  gives a ticket and wants the full checklist/test-case set without
+  invoking each stage by hand.
 ---
 
 # QA Pipeline -- Docs (stages 1-4 + publish)
@@ -44,6 +45,14 @@ first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 stage 1 and print it once (`Run folder: runs/EP-1234/docs`). Every
 stage 1–4 file and this phase's run report go there; a re-run
 overwrites in place. Nothing is written to the repo root.
+
+**Publish-only mode.** When the user asks only to publish ("add these
+cases to QA Service", "publish the test cases for EP-1234") and
+`runs/<ISSUEKEY>/docs/<ISSUEKEY>-test-cases.md` already exists, skip
+stages 1–4: run step 5 (the analyzer and its count gate) and step 6
+(publish) on the files that are there. A missing stage file → name it
+and offer the full run; never publish a file the analyzer has not
+counted.
 
 - A Jira ticket key or URL (e.g. `EP-44730`). If the key is itself a
   sub-task, use its parent Story as the story for publishing.
@@ -81,8 +90,8 @@ time from elapsed — waiting is not pace. No shell available → skip
 the clock silently.
 
 Execute each stage by reading its `SKILL.md` and following it **in
-full** — do not summarise or shortcut it. Stages share the working
-directory; pass each output file to the next automatically.
+full** — do not summarise or shortcut it. Stages share the run folder
+(`runs/<KEY>/docs/`); pass each output file to the next automatically.
 
 1. **task-context** — pause only if it needs you (attachments to
    upload, a Confluence access / missing-AC issue). Produces

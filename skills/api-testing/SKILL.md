@@ -6,7 +6,7 @@ description: >
   directly against the ExpoPlatform REST API (curl / HTTP — no browser),
   checks the expected results, and builds a detailed report. Use when
   the user says "api testing", "test the API", "run the API checks",
-  "hit the endpoints", or after code review / alongside web testing.
+  "hit the endpoints", or after code review and before web testing.
   Covers admin REST, legacy admin-panel, and exhibitor/visitor-token
   (frontend) cases. Credentials come from .env — never hardcoded.
 ---

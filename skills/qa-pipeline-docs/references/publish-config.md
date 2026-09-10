@@ -27,9 +27,10 @@ Rules:
 - The issue-type id is instance-specific. If `createJiraIssue` rejects
   id `10107`, list the project's issue types via
   `getJiraProjectIssueTypesMetadata` and update this table.
-- The transition rows are used by `qa-pipeline-code` step 8 (hand the
-  story back). `<not configured>` means: skip transitions, do only the
-  reassignment + comment. Transition names are workflow-specific —
+- The transition rows are used by `qa-manual-results` step 4b (hand the
+  story back after the human round; `qa-pipeline-code` step 8 only under
+  its narrow wave-1 exception). `<not configured>` means: skip
+  transitions, do only the reassignment + comment. Transition names are workflow-specific —
   verify with `getTransitionsForJiraIssue` before relying on them.
 - The label must stay in sync with `qa-pipeline-code` Step 0, which
   searches `parent = <STORY> AND issuetype = "QA sub-task"` and prefers

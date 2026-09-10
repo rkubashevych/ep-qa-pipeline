@@ -105,7 +105,7 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 | — | `stableId` = `<PREFIX>-<SEG>-NN`, where `<SEG>` is a 2–5 char aspect code shared by the cases of one behaviour area (`AUTH`, `VAL`, `DATA`, `READ`, `REG`, `CTR`, `BVA`, `PRIV`…), numbered per segment from 01. Fall back to the channel code (`UI`/`API`/`MOB`/`EXP`) only when no aspect is meaningful. **Never a flat `<PREFIX>-01…89`** — IDs must carry meaning. |
 | requirement group `REQ-N` | `folderName` = a functionality label derived from the REQ group's behaviour area (e.g. "Opted-out favourite is invisible to the other party"). **Target ~5–8 cases per folder:** split a large REQ group into sub-aspect folders ("<area> — validation", "<area> — permissions"), merge adjacent tiny groups under one functional label. **Never dump everything into "General"** — a publish where any case lands in General, or one folder holds >10 cases, is a mapping failure; fix the folder plan before writing. State the folder plan (folder → case count) in the publish preview. |
 | parent `REQ-N` (+ any seam requirements the case also covers) | `traceability` = the requirement stableIds, kind-correct (`["<PREFIX>-RULE-02","<PREFIX>-INV-01"]`) — list every requirement the case verifies, not just the parent |
-| channel tag → level | Pass **`levels`** (the code array — this is what the Coverage-by-level table counts and the implement workflow selects on) AND `levelText`: `[API]` → `levels: ["AE"]`, `API-E2E` · `[UI]` → `["E2E"]`, `E2E (UI)` · `[mobile]` → `["M"]`, `Manual` · `[export/email]` → `["M"]`, `Manual`. Other codes when they genuinely apply: `U` Unit, `I` Integration, `C` Contract, `CFE` Component-FE, `Perf` Performance, `worker` Worker-home. A case with no `levels` is counted nowhere and can never be picked up for automation. **Never invent labels** — `API`, `E2E (mobile)`, `E2E (export/email)` are not canonical. |
+| channel tag → level | Pass **`levels`** (the code array — this is what the Coverage-by-level table counts and the implement workflow selects on) AND `levelText`: `[API]` → `levels: ["AE"]`, `API-E2E` · `[UI]` → `["E2E"]`, `E2E (UI)` · `[mobile]` → `["M"]`, `Manual` · `[export/email]` → `["M"]`, `Manual` · dual-tagged `[API][UI]` → `["AE", "E2E"]`, `API-E2E + E2E (UI)` (one case, two levels — never two cases). Other codes when they genuinely apply: `U` Unit, `I` Integration, `C` Contract, `CFE` Component-FE, `Perf` Performance, `worker` Worker-home. A case with no `levels` is counted nowhere and can never be picked up for automation. **Never invent labels** — `API`, `E2E (mobile)`, `E2E (export/email)` are not canonical. |
 | — | `status` = `planned` (vocabulary: `planned` / `implemented` / `partial` / `deferred` / `na`). **`draft` is NOT in the vocabulary** — it renders as 0 in every readiness bucket. Use `deferred` for a case knowingly not executable yet, `na` for one routed out. |
 | `Applied techniques` (per REQ group) | `techniques`, uppercase tokens (`BVA`, `EP`, `STATE`, `DT`, `UC`, `CONTRACT`, `INVARIANT`, `UI-CONF`) |
 | requirement risk | `priority`: High → `P0`, Medium → `P1`, Low → `P2` |
@@ -358,7 +358,7 @@ preview so the user can redirect:
    **Do not publish a separate TC-REQ-N.M → stableId map anywhere**:
    the mapping is `detail.pipelineId` on each case and requirement
    (0.34.0), so it lives on the item it belongs to and cannot go stale
-   on its own. (Until 0.33 it rode on the checkbox-tracker lines.)
+   on its own. (Until 0.34 it rode on the checkbox-tracker lines.)
    A standalone map block was measured at ~2,000 characters and went
    stale the first time stableIds were corrected.
 
@@ -374,8 +374,8 @@ CONTENT (the team may have fixed cases in the web UI between phases):
    key**, plus any case tracing to one of this run's requirements
    (`sources` with `kind: jira, label: <KEY>`) that lacks the marker
    (team-added — flag it). Join local ↔ suite by `detail.pipelineId`
-   (pre-0.34 suites: the case id on the sub-task's tracker lines; older
-   still: match by title). Then reconcile
+   (pre-0.34 suites: the case id on the sub-task's tracker lines — shape
+   in "Legacy formats" below; older still: match by title). Then reconcile
    the extracted `<STORY>-test-cases.md` against the suite cases:
    - a suite case's content differs (steps/assertions/priority edited
      in the UI) → the suite version wins; update the local file.
@@ -516,6 +516,26 @@ verdict as current:
   case, since recording it files the bug) and report the recorded
   counts and the run id in the final response. Connector absent → skip
   silently-but-visibly, as always.
+
+## Legacy formats (read-only — for tickets published before 0.34)
+
+Nothing below is written any more. It is here so step 0 can read an
+old ticket without guessing.
+
+- **Checkbox tracker (0.26 – 0.33), one comment on the QA sub-task,
+  one line per case:** `- [ ] TC-REQ-N.M — <name> [channel] · <stableId>`.
+  The `<stableId>` is the suite case id — the join key that
+  `detail.pipelineId` replaced. Checkboxes were manual-only and are not
+  verdicts; the run is.
+- **Structural checks (0.26 – 0.34):** a fenced block on the sub-task
+  labelled `(structural checks only)` — the checklist's `[UI]`
+  structural section verbatim (`- [ ] REQ-N.M [UI] <check>` lines), no
+  case ids, because they had no suite case until STRUCT cases (0.35).
+  Execute them from that block; promote them to `<PREFIX>-STRUCT-NN`
+  cases only if the ticket is re-published.
+- **Machine archive (pre-0.33):** comments made of `File: <name>` labels
+  each followed by a fenced block (split files labelled `(part i/N)`).
+  `skills/qa-pipeline-code/scripts/extract_archive.py` re-joins them.
 
 ## Publish preview additions (same single pause)
 

@@ -43,7 +43,10 @@ h3. Steps to reproduce
 from its [data: ...] annotations, not generalised>
 
 h3. Expected result
-<the Exp: block of the test case — verbatim>
+<the register clause — the sentence from the source of record the build
+contradicts, quoted verbatim, with the document and section (the FAIL's
+`Source:` / `Clause:` lines). Not the test case's Exp: block: a test
+case is not a source of record (`../../qa-pipeline/references/sources-of-record.md`)>
 
 h3. Actual result
 <what the run observed: api-testing endpoint + observed field, or
@@ -51,8 +54,10 @@ web-testing step + what the agent saw; attach the FAIL screenshot
 if one was taken>
 
 h3. Source
-TC-REQ-N.M (<STORY>-test-cases.md) · REQ-N
+Register row <#> — <document>, <section> · REQ-N
+TC-REQ-N.M (<STORY>-test-cases.md) · its Exp: block: <verbatim>
 Stage: api-testing | web-testing · Status: FAIL / FAIL CONFIRMED
+Evidence: <STORY>-web-evidence.md §<n> (web) / the request + response in <STORY>-api-testing.md (api)
 Code-review finding (if any): <file, line, one-line finding>
 ```
 
@@ -63,5 +68,8 @@ Code-review finding (if any): <file, line, one-line finding>
 - One bug per root symptom: several TCs failing for the same cause →
   one bug listing all affected TC-IDs.
 - Redact every token/credential; screenshots must not show secrets.
-- After creation, add the new bug key(s) to the QA sub-task as a short
-  comment so the handoff step (step 8) can link them.
+- After creation, the new bug keys go into the human summary's
+  **Confirmed bugs** (and the run's `fail` rows link them on the QA
+  Service side). No extra "bugs filed" comment on the sub-task — the
+  status line and the human summary are the only two comments a ticket
+  gets (`results-comment-template.md`).

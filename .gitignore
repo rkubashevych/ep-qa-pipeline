@@ -66,9 +66,6 @@ navigation_paths.json
 # packaging
 *.plugin
 
-# fixtures are committed even though they match the patterns above
-!fixtures/EP-*
-!fixtures/*.md
 *.bak
 
 # stage-9 scratch: provisioning helpers, cached tokens, fixture ledgers (carry live credentials)

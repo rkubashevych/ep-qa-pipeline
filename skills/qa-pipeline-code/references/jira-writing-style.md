@@ -3,8 +3,8 @@
 Applies to EVERY human-facing text this pipeline writes into Jira:
 bug descriptions, the human summary comment, story notes (QA passed /
 QA failed), the grooming open-questions comment, stage-10 manual-result
-write-backs, and any status line. Machine archives (fenced file dumps
-for agents) are exempt — they are verbatim by design.
+write-backs, and any status line. (Nothing machine-only is written to
+Jira since 0.33.0 — there is no exempt text.)
 
 Templates own their SHAPE (which sections, which order — see
 `bug-report-template.md` and `results-comment-template.md`). This file

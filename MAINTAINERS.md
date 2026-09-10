@@ -155,10 +155,12 @@ carried between them; the QA Service run carries the verdicts anyway.
      — the input file list, the counts-reconcile check, and the
      findings-summary line.
    - `README.md` — the stage table + the "How the flow works" list.
-4. **Smoke-test the docs stages** if you touched them: run
-   `fixtures/EP-0000-context.md` through grooming → checklist →
-   test-cases (skip the Jira publish) and check the expectations listed
-   at the bottom of the fixture still hold. If you touched
+4. **Smoke-test the docs stages** if you touched them: take a recent
+   ticket's `runs/<KEY>/docs/<KEY>-context.md` and run it through
+   grooming → checklist → test-cases (skip the publish), then
+   `reconcile_counts.py` on the result — the counts must reconcile and
+   every behavioural REQ must have exactly one `[core]`. (There is no
+   committed fixture: any context file carries live ticket text.) If you touched
    `reconcile_counts.py`, run `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`.
    If you touched ANY skill's frontmatter `description`, walk
    `evals/triggering.md` — every ✅ query must still route to that
@@ -215,7 +217,7 @@ carried between them; the QA Service run carries the verdicts anyway.
 | Structural checks in the suite (`-STRUCT-` cases), bug-fix mini suite | `skills/qa-pipeline-docs/references/qa-service-publish.md` |
 | Per-case verdicts in QA Service (test run per pass, status → verdict mapping, what stays `not_run`, retractions, retraction target rule) | `skills/qa-pipeline/references/test-runs.md` |
 | What earlier rounds left open (carried risk rows, in/out rulings, `[core]` nominations) | `skills/qa-pipeline/references/open-items-ledger.md` → `<KEY>-open-items.md` |
-| Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (see the recipe) |
+| Regression after a skill edit | run a recent `runs/<KEY>/docs/<KEY>-context.md` through the docs stages (step 4 of the recipe) |
 | Anything structural before a commit (versions, descriptions, line endings, wiring, references, vocabulary, staged artefacts) | `python3 scripts/verify_plugin.py` |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 

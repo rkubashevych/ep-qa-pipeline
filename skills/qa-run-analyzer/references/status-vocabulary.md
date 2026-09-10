@@ -33,10 +33,12 @@ Legend for "Emitted by": CR = code-review (stage 6), API = api-testing
 | `OBSERVATION (no source checked)` | CR, API, WEB | A real thing seen or measured, with NO clause in any source of record saying it is wrong. Honest output and often worth fixing — but never a FAIL, never a bug candidate, never listed among defects, and phrased as a question not a verdict. Converts to a defect only by finding the clause, or to a product question by being raised with the docs-phase owner. | What was seen + which sources were checked and came back empty. |
 | `SKIPPED` | MR (human) | Human chose not to run the row. | — |
 
-Source markers (not statuses — never counted as verdicts):
-- `PASS(code)` — Source column value in api-testing for deliberately
-  executed code-review-PASS cases. The script tallies it separately.
-- `code-review risk <n>` — Source of a `RISK-CR-<n>` risk-chasing row.
+Arrival markers (the "Arrived as" column — "Source" before 0.38; not
+statuses, never counted as verdicts; a finding's `Source:` line is the
+register row, a different thing):
+- `PASS(code)` — api-testing's marker for deliberately executed
+  code-review-PASS cases. The script tallies it separately.
+- `code-review risk <n>` — arrival marker of a `RISK-CR-<n>` risk-chasing row.
 
 Row identifiers: `TC-REQ-N.M` (regular cases), `TC-N` (bug-fix mode and
 standalone-Bug runs, which derive flat-numbered cases because they have
@@ -104,7 +106,7 @@ Cross-stage rules that live with the vocabulary:
   that settles "is this deliberate?" — a behaviour it records as
   intended is not a defect however wrong it looks. No clause anywhere →
   `OBSERVATION (no source checked)`. Register and precedence:
-  `../qa-pipeline/references/sources-of-record.md`.
+  `../../qa-pipeline/references/sources-of-record.md`.
 - **Presentation carries the label.** A status is part of the finding,
   not decoration on it. An unsourced observation listed alongside
   verified failures — in a report, a summary, or a chat message — has

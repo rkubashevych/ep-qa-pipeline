@@ -5,6 +5,117 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.38.0 — 2026-09-10 — the seams
+
+The rest of the same-day cold review of 0.36.0: the 🟡 items that do
+not change what is recorded but where two files disagreed, or a
+template contradicted the rule its SKILL states. None of these is a
+new mechanism; each is one document brought in line with the one that
+was already right.
+
+**Templates now say what the SKILLs require.**
+
+- **`Source:` meant two things.** In the code-review, api-testing and
+  web-testing FAIL skeletons `Source: QA` was the *arrival* status,
+  while the SKILLs, `sources-of-record.md` and the analyzer's § 7 gate
+  require `Source: <register row>` + `Clause:` on every FAIL and
+  `RISK-CR-*` row — an agent following the template failed the gate
+  every run. The arrival field is now **`Arrived as:`** (the Results
+  column too, in api- and web-testing; `reconcile_counts.py` reads
+  statuses by token, not by header, so nothing parses differently),
+  and every FAIL / FAIL CONFIRMED / RISK skeleton carries `Source:` and
+  `Clause:`. `status-vocabulary.md` calls `PASS(code)` and
+  `code-review risk <n>` *arrival markers*.
+- **Statistics tables carry every status the SKILLs emit** — added
+  SPEC-DEFECT (all three), BLOCKED (unverified), NOT EXECUTED,
+  NOT-TESTABLE (instrumentation), OBSERVATION (no source checked); a
+  zero row may be omitted, a status present in Results may not.
+- **web-testing evidence is in the contract, not only in the
+  executor note.** Step 6.4 writes `<KEY>-web-evidence.md §<n>` for
+  each FAIL / FAIL CONFIRMED (both backends), step 8 puts it in the
+  report, and the template gained `Backend:` and `Evidence:` header
+  lines plus an `Evidence:` line per FAIL — what qa-pipeline-code step
+  6 and the analyzer have required since 0.35.
+- **Bug report `Expected result` = the register clause**, not the test
+  case's `Exp:` block (a test case is not a source of record); the
+  `Exp:` moves to the Source section beside the register row, and the
+  bug carries its evidence pointer. The "add the bug keys to the
+  sub-task as a short comment" rule is gone — it contradicted the
+  two-comment rule; keys go in the human summary's Confirmed bugs.
+- **Story notes:** "full reports on QA sub-task <KEY>" pointed readers
+  at a place that has held nothing since 0.33; both notes now name the
+  QA Service run and the run folder. Both are labelled as posted by
+  `qa-manual-results` step 4b; `publish-config.md` and the orchestrator
+  say the same instead of "step 8" / "step 4". `jira-writing-style.md`
+  no longer exempts "machine archives".
+- **`-human-summary.md` written at step 6 carries `Status: DRAFT —
+  awaiting stage 10`** — the template's `VERIFIED` line cannot be true
+  before the human round; stage 10 rewrites it.
+- **Step 6 post-yes order is numbered:** create run → record → write
+  the draft summary → post the status comment (which quotes the run id
+  — it cannot go first).
+
+**Run and suite mechanics.**
+
+- `test-runs.md`: `<mode>` in the run title is `first run` / `retest
+  <k>` / `bug-fix` — the first run's title was a guess.
+- `qa-pipeline-code` step 0: if `get_suite` returns summaries without
+  `detail`, `get_test_case` each in-scope id. A retraction is "a
+  re-record (test-runs.md → Retractions)", not "the supersede
+  convention" (retired 0.30).
+- `qa-service-publish.md` gained **Legacy formats** — the pre-0.34
+  tracker line, the structural-checks comment and the pre-0.33 archive
+  shape in five lines — so step 0's fallbacks name a documented shape
+  instead of "the tracker lines". "Until 0.33" → "Until 0.34".
+- Dual-tagged `[API][UI]` cases: the test-cases Statistics block has
+  its row (the SKILL already demanded one) and publish maps it to
+  `levels: ["AE", "E2E"]` — one case, two levels.
+- `walk-plan-format.md`: sessions run in product-role order (admin →
+  organiser → exhibitor → visitor — set-up before its effect); the
+  `machine:` example uses the vocabulary it claims to use
+  (`CR PASS · API — · WEB NOT EXECUTED`).
+- `runsheet-format.md`: the export spec's column letters agree with
+  its own twelve-column table (A–G dim, H–J work, K–L tester's, tint
+  A–J, Covers = M); the palette is "the one every
+  `build_runsheet_<KEY>.py` ships" — `build_data_pack.py` never existed.
+
+**Routing and docs.**
+
+- `qa-pipeline-docs` **publish-only mode**: "add these cases to QA
+  Service" / "publish the test cases" with the docs files already in
+  `runs/<KEY>/docs/` runs steps 5–6 only. The eval arrow that pointed
+  at a route which could not fire now can.
+- Triggers: "process the ticket" is the dispatcher's, not
+  task-context's; "run the QA checks" is the code orchestrator's, not
+  web-testing's. Descriptions and `evals/triggering.md` agree.
+- `playwright-executor.md` defers to SKILL → Scope (the routing
+  invariant) instead of restating a narrower rule.
+- Analyzer Input lists `<KEY>-web-evidence.md` and `<KEY>-sources.md`
+  (§ 5 and § 7 audit them); the report gains a **Source fidelity**
+  health row.
+- Leftovers: "working directory" (code-review, pr-summary,
+  qa-pipeline-docs) → run folder; qa-test-cases "published into a Jira
+  comment" → read by the code phase and rendered on cards; the stale
+  "why PR-URL / REST mode usually 403s" clause dropped (the reference
+  says the opposite); api-testing "alongside web testing" → before;
+  `data-locations.md` "where no archive was posted" → the only copy,
+  full stop; README no longer claims a human confirms every stage —
+  it names the pauses; the README handoff sentence and the
+  orchestrator heading say stages 5–9 hand off to stage 10 (10a walk,
+  10b results). MAINTAINERS' smoke test no longer names
+  `fixtures/EP-0000-context.md` (never committed; `.gitignore`
+  un-ignore lines removed) — use a recent ticket's context file. Two
+  relative paths that pointed one directory too shallow
+  (`data-locations.md` → results-comment-template, `status-vocabulary.md`
+  → sources-of-record) now resolve; the api-testing Statistics row
+  `NOT-TESTABLE (mapping)` uses the vocabulary's bare `NOT-TESTABLE`.
+
+**Deliberately not in this release** (next two): the security layout
+(`EP_QA_HOME`, allowed hosts, `.env` outside the tree, a verify check
+for it) and the docs-phase diet (fold stage 3 into 4, drop the
+setup-guides, ExpoPlatform calibration example, orchestrator < 500
+lines).
+
 ## 0.37.0 — 2026-09-10 — the record cannot lie
 
 Implements the record-affecting findings of the same-day cold review

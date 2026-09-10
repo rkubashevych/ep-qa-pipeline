@@ -48,8 +48,12 @@ Fixtures: EP-56998-testdata.json (verified 2026-09-08 12:0x UTC, 3 logins proven
 
 Cards are grouped into **sessions**, one per login account, ordered the
 way a tester moves: log in once, do everything that account does,
-surfaces in the order the product presents them. Within a session,
-destructive cards come last. A session opens with its account line:
+surfaces in the order the product presents them. Sessions run in
+product-role order — admin → organiser → exhibitor → visitor — so the
+set-up a higher role performs is in place before the role that sees its
+effect logs in; a plan that needs another order says why in the
+header. Within a session, destructive cards come last. A session opens
+with its account line:
 
 ```
 ## Session 1 — as Anna, an opted-out viewer
@@ -72,7 +76,7 @@ Do: Open Marketplace → Brands and click the star on the "Northwind" card.
 You should see: the star stays empty and nothing is added to your Favourites.
 Backstage:
   kind: WALK
-  machine: CR PASS (structural) · API — · WEB not executed
+  machine: CR PASS · API — · WEB NOT EXECUTED
   why-walked: [core] of REQ-3; High risk; code-reading-only PASS
   source: REQ-3 clause "a viewer without consent cannot favourite" (Confluence AC §2.1)
   positive-control: Anna's existing favourite "Contoso" must still show in Favourites
@@ -107,7 +111,7 @@ the tester sees none unless they ask or a rule says to volunteer one.
 | Key | Holds |
 |---|---|
 | `kind` | WALK · SPOT-CHECK · AGENT-RUNS · BLOCKED · DEVICE (below) |
-| `machine` | the stage 6 / 7 / 8 verdicts with their source, verbatim status names |
+| `machine` | the stage 6 / 7 / 8 verdicts, one per stage, verbatim status names from `status-vocabulary.md` — e.g. `CR PASS · API — · WEB NOT EXECUTED`; `—` for a stage that did not hold the case |
 | `why-walked` | the selection reason from step 2a: must-walk / `[core]` / VERIFY (High-risk or code-reading-only PASS) / risk extra / SPECIAL ATTENTION |
 | `source` | the register row and verbatim clause the expectation rests on (`sources-of-record.md`) — or `OBSERVATION (no source checked)` |
 | `positive-control` | for absence checks: the visible fact that proves the state existed |

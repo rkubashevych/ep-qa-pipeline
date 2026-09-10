@@ -2,24 +2,24 @@
 name: qa-pipeline-code
 description: >
   Orchestrator for the code + UI half of the QA pipeline (stages
-  5-10). Given a Story key, reads the test cases from the QA Service
+  5-9, handing off to stage 10). Given a Story key, reads the test cases from the QA Service
   suite and derives the dev branches, then runs pr-summary, then
   code-review, then api-testing, then web-testing, then run-analyzer,
-  records machine verdicts on a QA Service test run (human summary
-  follows at stage 10), builds the manual walk plan so a human can walk what
-  the machine could not settle, verifies the published state, and
-  defers the final handback to qa-manual-results (stage 10). Also:
+  records machine verdicts on a QA Service test run, builds the manual
+  walk plan for what the machine could not settle, verifies the
+  published state, and defers the human summary and the handback to
+  qa-manual-results (stage 10). Also:
   retest mode ("retest <KEY>", "the fix landed") and bug-fix mode
   ("test the bugfix EP-1234" — Bug ticket, no docs phase needed).
   Auto-advances, pausing for the browser login, the Jira
   write confirmation, and the test-event authorisation before any
   fixture is provisioned. Use it when the user says "run the QA code
-  pipeline", "review the PRs and test in the browser", "do code review
-  and UI testing for a ticket". Run in a FRESH chat after
-  qa-pipeline-docs.
+  pipeline", "run the QA checks", "review the PRs and test in the
+  browser", "do code review and UI testing for a ticket". Run in a
+  FRESH chat after qa-pipeline-docs.
 ---
 
-# QA Pipeline -- Code & UI (stages 5-10)
+# QA Pipeline -- Code & UI (stages 5-9, then hands off to stage 10)
 
 > **Tool names:** bare names like `searchJiraIssuesUsingJql` /
 > `addCommentToJiraIssue` / `getTransitionsForJiraIssue` (here and in
@@ -145,15 +145,18 @@ Otherwise, using the Atlassian connector and the Story key:
    - Sub-task names a **QA Service suite** + connector present →
      `get_suite` and rebuild `<STORY>-test-cases.md` from the suite's
      cases (id, title, levels → channel tag, traceability, `detail`
-     goal/preconditions/steps/testData/assertions/notes). This is the
-     authoritative copy.
+     goal/preconditions/steps/testData/assertions/notes). If the
+     `get_suite` response carries summaries without `detail`, call
+     `get_test_case` for each in-scope id — the rebuild needs the
+     steps, not the titles. This is the authoritative copy.
      - **Scope it to THIS run.** A suite is per FEATURE and also holds
        earlier stories' cases. Execute only the cases whose
        `detail.ticket` is `<STORY>`, plus any suite case that traces
        to one of this run's requirements (`sources` with `kind: jira,
        label: <STORY>`) without the marker (team-added — flag it in
        the reconciliation list). Pre-0.34 suites carry neither: use
-       the case ids on the sub-task's legacy checkbox-tracker lines.
+       the case ids on the sub-task's legacy checkbox-tracker lines
+       (shape: `qa-service-publish.md` → "Legacy formats").
        Never execute the whole suite because it was in the response.
        Report: "suite holds N cases; M + S in scope for <STORY>"
        (M behavioural, S structural — both go on the roster).
@@ -505,6 +508,12 @@ story does not exhaust the orchestrator's context:
      defect there and then.
      Post only after an explicit yes; the one confirmation covers Jira
      and QA Service, and the per-case `fail` list is the per-bug yes.
+     **After the yes, in this order:** (1) `create_test_run` — the run
+     id now exists; (2) `record_case_result` per mapped row; (3) write
+     `<STORY>-human-summary.md` with `Status: DRAFT — awaiting stage
+     10`; (4) post the status comment, which quotes the run id from
+     (1). The comment cannot go first: it names a run that does not
+     exist yet.
    - **QA Service result write-back — the run:** `create_test_run` on
      the in-scope suite case ids, then `record_case_result` per case,
      `source: machine`, exactly per the mapping table in
@@ -524,7 +533,9 @@ story does not exhaust the orchestrator's context:
      Write `<STORY>-human-summary.md` now (per the template: overall
      verdict, stage-verdict table, confirmed bugs, needs a human, not
      tested, run-health line, ≤30 lines) so stage 10 has the machine's
-     picture to reconcile against — but do NOT post it.
+     picture to reconcile against — but do NOT post it. Its `Status:`
+     line reads `DRAFT — awaiting stage 10`; the template's `VERIFIED`
+     wording is stage 10's to write, once the human round is in.
    - Use comments (`addCommentToJiraIssue`), never a description
      overwrite.
    - No QA sub-task (Bugs, Defects, small Stories) → the status
@@ -547,8 +558,9 @@ story does not exhaust the orchestrator's context:
      `groups` as its own example of a type the front end does not
      render. It reached the drafting step.) If the sentence is in no
      source of record, the finding is a SPEC-DEFECT, a product question
-     or an `OBSERVATION (no source checked)` — retract the FAIL per the
-     supersede convention and raise it to the docs-phase owner instead
+     or an `OBSERVATION (no source checked)` — retract the FAIL (a
+     re-record: `../qa-pipeline/references/test-runs.md` → Retractions)
+     and raise it to the docs-phase owner instead
      of filing a Bug against a dev. Drafting a "you may get pushed
      back on this" caveat into a bug IS this gate firing — stop.
    - **A closed ticket is not a source.** Citing a precedent
@@ -588,7 +600,7 @@ story does not exhaust the orchestrator's context:
      configured.
    - **✅ PASS: the handback WAITS for the human.** Do NOT post the
      "QA passed" story note or apply the "QA done" transition here —
-     both move to `qa-manual-results` step 4. If the user explicitly
+     both move to `qa-manual-results` step 4b. If the user explicitly
      wants a story note now, post the provisional variant — "✅
      Automated QA passed — manual verification pending"
      (results-comment-template.md) — with no transition. A

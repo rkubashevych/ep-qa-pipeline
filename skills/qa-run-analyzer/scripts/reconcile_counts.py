@@ -223,7 +223,7 @@ def report(key, d=None):
 SELFTEST_DOC = """
 ## Results
 
-| TC | Name | Source | Status | Call | Evidence |
+| TC | Name | Arrived as | Status | Call | Evidence |
 |----|------|--------|--------|------|----------|
 | TC-REQ-1.4 | Non-GDPR event | PASS(code) | NOT EXECUTED | — | no env |
 | TC-REQ-6.1 | Re-opt-in | PASS(code) | PASS | POST /x | ok, see TC-REQ-7.2. |
@@ -275,7 +275,7 @@ SELFTEST_EXPECT = {
 SELFTEST_BUGFIX_DOC = """
 ## Results
 
-| TC | Name | Source | Status | Comment |
+| TC | Name | Arrived as | Status | Comment |
 |----|------|--------|--------|---------|
 | TC-1 | reported defect, 1-result search | QA | PASS | guest only |
 | TC-2 | negative sibling, unfiltered listing | QA | PASS | — |
