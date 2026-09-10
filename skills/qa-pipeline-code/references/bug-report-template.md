@@ -26,7 +26,7 @@ link the existing ticket in the QA sub-task comment.
 |---|---|
 | Project | `EP` |
 | Issue type | `Bug` |
-| Summary | `[<area>] <symptom in one line — what breaks, where>` |
+| Summary | `[<area>] <symptom in one line — what breaks, where>` — the AC id goes in the description, not the summary |
 | Priority | propose from impact (blocker flow → High); user confirms |
 | Labels | `qa-pipeline` |
 | Links | "relates to" the Story; mention the QA sub-task key |
@@ -43,10 +43,13 @@ h3. Steps to reproduce
 from its [data: ...] annotations, not generalised>
 
 h3. Expected result
-<the register clause — the sentence from the source of record the build
-contradicts, quoted verbatim, with the document and section (the FAIL's
-`Source:` / `Clause:` lines). Not the test case's Exp: block: a test
-case is not a source of record (`../../qa-pipeline/references/sources-of-record.md`)>
+AC-<n>: "<the register clause — the acceptance criterion the build
+contradicts, quoted verbatim>" (<document>, <section>)
+<the FAIL's `Source:` / `Clause:` lines are the source of these two
+lines. The ledger id first, so the reader knows WHICH criterion fails
+before reading the sentence; a clause from a non-AC document carries the
+document name instead of an id. Never the test case's Exp: block — a
+test case is not a source of record (`../../qa-pipeline/references/sources-of-record.md`)>
 
 h3. Actual result
 <what the run observed: api-testing endpoint + observed field, or
@@ -54,7 +57,7 @@ web-testing step + what the agent saw; attach the FAIL screenshot
 if one was taken>
 
 h3. Source
-Register row <#> — <document>, <section> · REQ-N
+AC-<n> · Register row <#> — <document>, <section> · REQ-N
 TC-REQ-N.M (<STORY>-test-cases.md) · its Exp: block: <verbatim>
 Stage: api-testing | web-testing · Status: FAIL / FAIL CONFIRMED
 Evidence: <STORY>-web-evidence.md §<n> (web) / the request + response in <STORY>-api-testing.md (api)

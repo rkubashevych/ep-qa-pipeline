@@ -59,7 +59,9 @@ sort above non-featured ones.
    OFF as Structural checks lines, not cases; REQ-ID traceability
    intact end to end; exactly ONE `[core]`-marked case per behavioural
    REQ, with a matching `Core cases:` line in the test-cases statistics
-   block — compare with
+   block; the five requirement bullets numbered `AC-1…AC-5` and the
+   comment `CM-1` by stage 1, every REQ carrying a `source:` id, every
+   group a `Covers:` line, `AC coverage: 5/5` — compare with
    `skills/qa-test-cases/references/test-cases-example.md`, which is
    this fixture's expected output, and run `reconcile_counts.py
    EP-0000` on the result.

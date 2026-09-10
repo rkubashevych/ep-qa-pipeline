@@ -90,6 +90,24 @@ These IDs are permanent — they do not change across all the next skills
 in the chain. REQ-5 in the grooming file is the same REQ-5 in the
 test cases (and their structural lines), in the code review, and onward.
 
+**Every REQ names the ledger items it comes from — mandatory (0.42.0).**
+The context file's bullets carry `AC-n` / `JD-n` / `CM-n` ids (the AC
+ledger — task-context SKILL.md). Each `REQ-N` gets a `source:` line
+listing the ids it is built from — usually one (`source: AC-3`),
+sometimes several when grooming merged a criterion with the Description
+clause that completes it (`source: AC-3, JD-1`), and a split REQ-5a /
+REQ-5b both carry the same `AC-n`. Then the rule: **every `AC-n` in the
+context file appears on at least one `source:` line.** Grooming may
+judge a criterion untestable or out of scope — that is a finding, and
+the REQ is still written (marked "(needs clarification)" or with the
+scope ruling) so the id is carried, never dropped. Close the
+Requirements section with the coverage line:
+`AC coverage: <n>/<N> AC items mapped · JD <n>/<N> · CM <n>/<N>` — the
+numbers come from counting the ids, and any AC item missing from every
+`source:` line is named there (`uncovered: AC-5 — <reason>`) and
+repeated in the Notes. `reconcile_counts.py <KEY>` computes the same
+sets for the analyzer; a mismatch is a 🔴.
+
 ## Grooming method
 
 For each requirement from the context file go through four questions:

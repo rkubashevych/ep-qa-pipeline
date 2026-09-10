@@ -236,9 +236,73 @@ def locate(key, stage, d, docs):
     return None
 
 
+# --- AC ledger (0.42.0) -------------------------------------------------
+# task-context writes one `AC-n (Confluence §…)` / `JD-n` / `CM-n` bullet per
+# acceptance criterion; grooming maps each REQ to them on a `source:` line;
+# qa-test-cases carries them on each group's `Covers:` line. The ledger check
+# is the set difference across the three files — "every criterion reaches a
+# test case" as arithmetic, not judgement.
+LEDGER_ID = re.compile(r"\b(AC|JD|CM)-\d+\b")
+CONTEXT_BULLET = re.compile(r"^- ((?:AC|JD|CM)-\d+) \(", re.M)
+PAGE_COUNT = re.compile(r"^AC items on the page:\s*(\d+)\s*·\s*captured:\s*(\d+)", re.M)
+SOURCE_LINE = re.compile(r"^\s*-\s*source:\s*(.+)$", re.M)
+COVERS_LINE = re.compile(r"^Covers:\s*(.+)$", re.M)
+
+
+def ledger_ids(text, line_re):
+    """Ids named on the lines a regex selects (or, for the context file,
+    the bullet ids themselves)."""
+    out = set()
+    for m in line_re.finditer(text):
+        out.update(x.group(0) for x in LEDGER_ID.finditer(m.group(1)))
+    return out
+
+
+def ledger_report(context, requirements, test_cases):
+    """Return the printable ledger lines for whatever files are present."""
+    lines = []
+    ctx = ledger_ids(context, CONTEXT_BULLET) if context else None
+    req = ledger_ids(requirements, SOURCE_LINE) if requirements else None
+    tcs = ledger_ids(test_cases, COVERS_LINE) if test_cases else None
+    if ctx is not None:
+        by = {k: sorted(i for i in ctx if i.startswith(k)) for k in ("AC", "JD", "CM")}
+        pc = PAGE_COUNT.search(context)
+        page = f" · page {pc.group(1)}/captured {pc.group(2)}" if pc else " · no page-count line"
+        lines.append("AC ledger (context): " + " ".join(f"{k}={len(v)}" for k, v in by.items()) + page)
+        if pc and pc.group(1) != pc.group(2):
+            lines.append("AC ledger: page count != captured — the ledger is INCOMPLETE")
+    base = ctx if ctx is not None else (req if req is not None else set())
+    if req is not None:
+        miss = sorted(base - req) if ctx is not None else []
+        lines.append(f"AC ledger (requirements): {len(req & base) if ctx is not None else len(req)} of "
+                     f"{len(base)} mapped on source: lines"
+                     + (f" · MISSING: {', '.join(miss)}" if miss else ""))
+    if tcs is not None:
+        miss = sorted(base - tcs)
+        lines.append(f"AC ledger (test-cases): {len(tcs & base)} of {len(base)} covered on Covers: lines"
+                     + (f" · MISSING: {', '.join(miss)}" if miss else ""))
+        if not base:
+            lines.append("AC ledger: no ids anywhere — a pre-0.42 ticket, or task-context did not write the ledger")
+    return lines
+
+
+def read_docs_file(key, stage, d, docs):
+    """context / requirements live in docs/ (or the legacy cwd)."""
+    for path in (os.path.join(docs, f"{key}-{stage}.md"), f"{key}-{stage}.md"):
+        if os.path.exists(path):
+            return open(path, encoding="utf-8").read()
+    return None
+
+
 def report(key, d=None):
     d, docs = resolve_run_dir(key, d)
     print(f"run folder: {d}")
+    ctx = read_docs_file(key, "context", d, docs)
+    reqf = read_docs_file(key, "requirements", d, docs)
+    tcp = locate(key, "test-cases", d, docs)
+    tct = open(tcp, encoding="utf-8").read() if tcp else None
+    for line in ledger_report(ctx, reqf, tct):
+        print(line)
     ids = {}
     for stage in STAGES:
         path = locate(key, stage, d, docs)
@@ -461,11 +525,68 @@ def check_run_folder(errs):
                     os.environ[k] = v
 
 
+LEDGER_CTX = """## Requirements
+- AC-1 (Confluence §2.1): The toggle exists
+- AC-2 (Confluence §2.1): The badge shows
+- AC-3 (Confluence §2.2): Sorting
+- JD-1 (Jira Description): API field
+
+AC items on the page: 3 · captured: 3
+
+## Additional requirements (from comments)
+- CM-1 (comment 2026-07-01): badge in search
+"""
+LEDGER_REQ = """- REQ-1: [risk: Medium] toggle
+  - source: AC-1
+- REQ-2: [risk: High] badge
+  - source: AC-2, JD-1 — Confluence AC page
+- REQ-3: [risk: Low] sorting (needs clarification)
+  - source: AC-3
+- REQ-4: comment item
+  - source: CM-1
+"""
+LEDGER_TC = """## REQ-1 — toggle  [UI]
+
+Covers: AC-1
+### TC-REQ-1.1 — x  [UI] [core]
+
+## REQ-2 — badge  [UI]
+
+Covers: AC-2, JD-1
+### TC-REQ-2.1 — y  [UI] [core]
+
+## REQ-4 — comment item  [UI]
+
+Covers: CM-1
+### TC-REQ-4.1 — z  [UI] [core]
+"""
+
+
+def check_ledger(errs):
+    ctx = ledger_ids(LEDGER_CTX, CONTEXT_BULLET)
+    if ctx != {"AC-1", "AC-2", "AC-3", "JD-1", "CM-1"}:
+        errs.append(f"ledger: context ids {sorted(ctx)}")
+    req = ledger_ids(LEDGER_REQ, SOURCE_LINE)
+    if req != ctx:
+        errs.append(f"ledger: requirements ids {sorted(req)} (should map all five)")
+    tcs = ledger_ids(LEDGER_TC, COVERS_LINE)
+    if sorted(ctx - tcs) != ["AC-3"]:
+        errs.append(f"ledger: test-cases should miss exactly AC-3, got {sorted(ctx - tcs)}")
+    out = "\n".join(ledger_report(LEDGER_CTX, LEDGER_REQ, LEDGER_TC))
+    if "MISSING: AC-3" not in out or "page 3/captured 3" not in out:
+        errs.append(f"ledger: report text wrong:\n{out}")
+    # pre-0.42 files: no ids anywhere → say so, never crash
+    out2 = "\n".join(ledger_report("## Requirements\n- plain bullet\n", "- REQ-1: x\n", "## REQ-1 — x\n"))
+    if "pre-0.42" not in out2:
+        errs.append(f"ledger: legacy files not recognised:\n{out2}")
+
+
 def selftest():
     errs = []
     check(SELFTEST_DOC, SELFTEST_EXPECT, "docs-phase", errs)
     check(SELFTEST_BUGFIX_DOC, SELFTEST_BUGFIX_EXPECT, "bug-fix", errs)
     check_run_folder(errs)
+    check_ledger(errs)
     if errs:
         print("SELFTEST FAIL")
         for e in errs:
@@ -475,6 +596,7 @@ def selftest():
           "PASS(code) separation, trailing-period ids, bold/qualified "
           "statuses, RE-ROUTE [UI], range expansion, [core] heading "
           "counting, channel-tag histogram + structural-line count, "
+          "the AC ledger (context → source: → Covers: set difference), "
           "bug-fix-mode flat ids (TC-<n>, flat spans, "
           "`## ` headings), and runs/<KEY>/r<N> folder resolution "
           "(EP_QA_HOME first, newest round, docs/ case-file fallback, "
@@ -483,6 +605,10 @@ def selftest():
 
 
 def main():
+    try:  # Windows consoles and pipes default to cp1252; the output carries → and ·
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     if sys.argv[1] == "--selftest":

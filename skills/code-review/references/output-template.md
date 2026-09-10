@@ -23,7 +23,7 @@ PR column = which sub-task PR the test case was checked against
 ### FAIL: TC-REQ-1.2 — <scenario name>
 
 - **File:** <path>, line <N>
-- **Source:** <register row #> — <document>, <section>
+- **Source:** <register row #> — <document>, <section> · AC-<n>
 - **Clause:** "<the sentence the code contradicts, quoted verbatim>"
 - **Expected:** <expected result from the test case>
 - **Actual:** <what the code does>
@@ -64,7 +64,7 @@ PR column = which sub-task PR the test case was checked against
 > propose them as permanent suite cases. Omit if none.
 
 - **RISK-CR-1:** <file+line — what could go wrong, on which surface> — no covering case
-  Source: <register row #> — <document>, <section> · Clause: "<verbatim>"
+  Source: <register row #> — <document>, <section> · AC-<n> · Clause: "<verbatim>"
 - **RISK-CR-2:** <…> — no covering case
   Source: … · Clause: …  (no clause in any source → label the row
   `OBSERVATION (no source checked)` instead of RISK)

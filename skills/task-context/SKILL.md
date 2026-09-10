@@ -183,15 +183,46 @@ ticket — not in a Jira field. Always fetch them:
 3. Treat the Confluence acceptance criteria as the primary requirements
    for the task. The Jira Description is supporting context.
 
+**The AC ledger — every item keeps its identity (0.42.0).** Nothing
+downstream can prove "the acceptance criteria are 100% covered" unless
+each criterion is still recognisable after this stage. So the
+Requirements section is not a merged paraphrase; it is a ledger:
+
+- **One bullet per criterion, in page order, with an id and its
+  origin:** `AC-1 (Confluence §2.1): <the criterion, verbatim>`,
+  `AC-2 (Confluence §2.1): …`. A numbered list, a bulleted list, a table
+  row, a "Given/When/Then" block — each is one `AC-n`. Do not merge two
+  page items into one bullet and do not split one into two; if a page
+  item genuinely holds two independent rules, keep it as ONE `AC-n`
+  and let grooming split it into REQ-Na / REQ-Nb (the ledger id stays
+  the page's unit).
+- Items only the Jira Description states: `JD-1 (Jira Description): …`.
+  Items only a comment states go to "Additional requirements (from
+  comments)" as `CM-1 (comment <date>): …`.
+- **Close the section with the count line:** `AC items on the page: N ·
+  captured: N`. Count the criteria on the page yourself (every list
+  item / table row / scenario block under the acceptance-criteria
+  heading(s)) and compare with the `AC-n` bullets you wrote. The two
+  numbers must match; if they cannot — a table you could not read, an
+  expand macro that did not render, a child page you could not fetch —
+  say exactly what was not readable on that line, so grooming and the
+  analyzer treat the ledger as incomplete rather than complete.
+- The ids are permanent. Grooming maps each `REQ-N` to them, the test
+  cases and the suite carry them, and a bug names the `AC-n` it fails.
+
 Merge and flag conflicts:
 - Combine the Confluence acceptance criteria with the Jira Description
-  into the Requirements section.
+  into the Requirements section — as separate `AC-n` / `JD-n` bullets,
+  never as one rewritten sentence.
 - If the two disagree — a value, rule, state, or condition stated one
   way on Confluence and another way in the Description — do NOT silently
   pick one. Keep both and flag the conflict in the
   "⚠️ Conflicts to resolve" section of the output so a human decides.
 - Apply the same anti-loss prohibitions (below) to the Confluence
   content: keep exact values, names, conditions, and branches verbatim.
+- Conflicting versions of one criterion are still ONE `AC-n` — the
+  bullet carries the Confluence wording, and the "⚠️ Conflicts to
+  resolve" entry names the `AC-n` it concerns.
 
 If no Confluence page is linked on the ticket:
 - Do not stop. Ask the user once for the Confluence URL (or page).

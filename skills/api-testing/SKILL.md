@@ -210,8 +210,9 @@ Rules: prefer BLOCKED/NOT-TESTABLE over a false PASS; never PASS with
 doubt; every FAIL/PARTIAL needs endpoint + observed vs expected;
 arrived-as-FAIL cases exit only as FAIL CONFIRMED / FAIL REJECTED.
 **Every FAIL and every `RISK-CR-*` row carries its `Source:` and
-`Clause:`** — the register row and the verbatim sentence the build
-contradicts. Check the as-built document as well as the brief: a
+`Clause:`** — the register row, the verbatim sentence the build
+contradicts, and the criterion's ledger id (`· AC-<n>`, from the case's
+`Covers:` line) when the clause is an acceptance criterion. Check the as-built document as well as the brief: a
 behaviour the as-built page records as deliberate is not a defect,
 however wrong the measurement looks. No clause in any source →
 `OBSERVATION (no source checked)`.

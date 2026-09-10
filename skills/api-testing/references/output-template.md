@@ -55,7 +55,7 @@ Date: <YYYY-MM-DD>
 
 ### FAIL: TC-REQ-24.2 — <scenario name>
 - **Arrived as:** QA
-- **Source:** <register row #> — <document>, <section>
+- **Source:** <register row #> — <document>, <section> · AC-<n>
 - **Clause:** "<the sentence the response contradicts, quoted verbatim>"
 - **Endpoint:** <method + path + auth context>
 - **Request:** <params / body — tokens redacted>
@@ -64,7 +64,7 @@ Date: <YYYY-MM-DD>
 
 ### FAIL CONFIRMED: RISK-CR-2 — <risk name>
 - **Arrived as:** code-review risk 2
-- **Source:** <register row #> — <document>, <section>
+- **Source:** <register row #> — <document>, <section> · AC-<n>
 - **Clause:** "<verbatim>"
 - **Endpoint / Request / Expected / Actual:** as for FAIL
 

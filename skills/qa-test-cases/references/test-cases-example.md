@@ -15,7 +15,8 @@ it. It uses the vertical block layout from `output-template.md` — no
 wide tables.
 
 Requirements for the example (as groomed — what stage 2 produced from
-the fixture):
+the fixture; the fixture's five AC bullets are AC-1…AC-5, the comment is
+CM-1, so each REQ's `source:` is the same id):
 
 - REQ-1 `[risk: Medium]`: The exhibitor settings page in the admin
   panel shows a "Featured" toggle, default OFF, visible only to users
@@ -48,6 +49,7 @@ Generated: 2026-09-10
 
 ## REQ-1 — "Featured" toggle on the exhibitor settings page  [risk: Medium] [UI]
 
+Covers: AC-1
 Applied techniques: Use Case, Decision Table (permission × visibility)
 
 ### TC-REQ-1.1 — Toggle switches ON and persists  [UI] [core]
@@ -80,6 +82,7 @@ Exp:
 
 ## REQ-2 — "Featured" badge on the public exhibitor card  [risk: High] [UI]
 
+Covers: AC-2
 Applied techniques: Use Case, State Transition (OFF → ON → OFF);
   extended: both versions of the unresolved badge text are asserted
 
@@ -112,6 +115,7 @@ Post: Northwind is not featured
 
 ## REQ-3 — Featured exhibitors sort above the rest  [risk: Medium] [UI]
 
+Covers: AC-3
 Applied techniques: Use Case, EP (featured / non-featured partition)
 
 ### TC-REQ-3.1 — Featured group first, alphabetical inside each group  [UI] [core]
@@ -129,6 +133,7 @@ Exp:
 
 ## REQ-4 — `featured` field in the exhibitor list API  [risk: Medium] [API]
 
+Covers: AC-4
 Applied techniques: Use Case, EP (featured true / false)
 
 ### TC-REQ-4.1 — Every exhibitor carries a boolean `featured`  [API] [core]
@@ -148,6 +153,7 @@ Exp:
 
 ## REQ-5 — Limit of 10 featured exhibitors per event  [risk: High] [UI]
 
+Covers: AC-5
 Applied techniques: 3-value BVA on the count (9 / 10 / 11),
   Use Case (the validation message)
 
@@ -188,6 +194,7 @@ Exp:
 
 ## REQ-6 — Badge in exhibitor search results  [risk: Low] [UI]
 
+Covers: CM-1
 Applied techniques: Use Case
 
 ### TC-REQ-6.1 — Search result card carries the badge  [UI] [core]
@@ -223,6 +230,7 @@ Exp:
   [export/email] 0
 - Core cases: 6 (= behavioural requirements)
 - Structural checks: 3 (not in the total)
+- AC coverage: 5/5 AC items covered · JD 0/0 · CM 1/1
 - Total number of test cases: 10
 
 ---

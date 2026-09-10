@@ -157,7 +157,16 @@ full** — do not summarise or shortcut it. Stages share the run folder
    ambiguity as "needs clarification"; the grounding rule handles the
    rest. Produces `<ISSUEKEY>-test-cases.md` — the test cases AND the
    Structural checks section (the former checklist's `[UI]` presence /
-   label / type lines, id `REQ-N/struct-k`).
+   label / type lines, id `REQ-N/struct-k`), each group with its
+   `Covers: AC-n` line.
+
+   **The AC ledger runs through all three stages (0.42.0):** stage 1
+   writes one `AC-n` bullet per criterion and the page/captured count,
+   stage 2 maps every REQ to its ids, stage 4 carries them on `Covers:`.
+   Before the publish, run `reconcile_counts.py <ISSUEKEY>` and read its
+   "AC ledger" lines: an uncovered `AC-n` or a page/captured mismatch is
+   fixed before anything is published — a suite that misses a criterion
+   is the one thing this phase exists to prevent.
 
 5. **qa-run-analyzer** — run automatically; writes
    `<ISSUEKEY>-run-report.md`.

@@ -5,6 +5,63 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.42.0 — 2026-09-10 — the AC ledger
+
+The acceptance criteria are the source of truth a ticket is tested
+against, and until now the pipeline could not *prove* it covered them:
+stage 1 merged the Confluence AC page and the Jira Description into one
+paraphrased bullet list, every later check compared against that list,
+and nothing carried a criterion's identity into a test case or a bug.
+"100% covered" was checked against stage 1's rendering, not the page.
+
+**One id per criterion, carried end to end.**
+
+- **Stage 1 (task-context)** writes the Requirements section as a
+  ledger: one bullet per criterion, page order, verbatim, with its id
+  and origin — `AC-1 (Confluence §2.1): …`; Description-only items are
+  `JD-n`, comment items `CM-n`. A conflict between sources is still one
+  `AC-n`. The section closes with `AC items on the page: N · captured:
+  N` — stage 1 counts the page's list items / table rows / scenario
+  blocks itself and says what it could not read when the numbers
+  differ, so an unreadable table shows up as an *incomplete ledger*
+  rather than a complete one.
+- **Stage 2 (requirements-grooming):** every REQ carries a mandatory
+  `source:` line with its ids (`AC-3`; `AC-3, JD-1`; a split REQ-5a/5b
+  both keep the id). A criterion judged untestable or out of scope is
+  still written as a REQ with the ruling — an id is never dropped. The
+  section closes with `AC coverage: n/N …`.
+- **Stage 4 (qa-test-cases):** every `## REQ-N` group opens with
+  `Covers: AC-n[, JD-n, CM-n]`; the Statistics block gains
+  `AC coverage: n/N`.
+- **`reconcile_counts.py`** parses the three files (`AC-n` bullets →
+  `source:` lines → `Covers:` lines) and prints the sets and their
+  differences as "AC ledger" lines — MISSING ids named, page/captured
+  mismatch called INCOMPLETE, pre-0.42 files recognised and said so.
+  Self-tested. The analyzer's seam check now reads those lines: an
+  uncovered `AC-n` or an incomplete ledger is 🔴, a `JD`/`CM` gap 🟡.
+  The docs orchestrator runs the script before the publish.
+- **Publish:** each requirement gets `detail.ac` = its `source:` string,
+  so the suite can answer "which criterion does this case verify".
+
+**When something fails, the criterion is named.**
+
+- The `Source:` line every FAIL and RISK row carries becomes
+  `Source: <row #> — <document>, <section> · AC-<n>`
+  (`sources-of-record.md` § 3; the three stage SKILLs and templates).
+- A bug's Expected result opens with `AC-<n>: "<clause>"`; its Source
+  section leads with the id.
+- The human summary's Confirmed bugs lines read `fails AC-<n>: …`; a
+  walk card's backstage `source:` key starts with the id, so "which AC
+  is this?" has a one-token answer.
+
+Fixture expectations, the calibration example (`Covers:` on every
+group, `AC coverage: 5/5`) and README updated.
+
+**What this does not do:** it cannot make stage 1 *see* a criterion the
+page hides in an image, an un-rendered macro or a child page — it makes
+that visible as `page N · captured M` with the reason, which is the
+honest version of "100%".
+
 ## 0.41.0 — 2026-09-10 — the orchestrator reads as a contract
 
 `qa-pipeline-code/SKILL.md` was 763 lines — the one WARN the verify gate

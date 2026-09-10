@@ -46,6 +46,11 @@ first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 From the requirements file, the skill takes:
 - The numbered requirements — the only source of behaviour. Each
   `REQ-N` (or `REQ-Na` sub-item) becomes a group in the output.
+- Each requirement's `source:` line — the AC-ledger ids (`AC-n` /
+  `JD-n` / `CM-n`) it was built from. Copy them onto the group's
+  `Covers:` line, so every test case and structural line is traceable
+  to the acceptance criterion it verifies, and the Statistics block can
+  state `AC coverage` mechanically.
 - The `[risk: High|Medium|Low]` marker on each requirement — copy it
   unchanged onto the `## REQ-N` group heading; it scales coverage
   depth here and the executing stages run High-risk cases first.
@@ -139,7 +144,11 @@ later stages do with the tags, is the routing invariant in
 
 ### Numbering
 
-Test cases inherit the requirement IDs. A single requirement can
+Test cases inherit the requirement IDs. Each `## REQ-N` group opens
+with a `Covers:` line naming the ledger ids from the requirement's
+`source:` line (`Covers: AC-2` / `Covers: AC-3, JD-1`); a requirement
+with a structural line and no case still gets its `Covers:` in the
+Structural checks section (the line's REQ id resolves it). A single requirement can
 produce several test cases: TC-REQ-3.1, TC-REQ-3.2. The main REQ-*
 number does not change — it is the same as in the requirements file
 and onward in code review and the suite. A requirement with sub-items
@@ -264,6 +273,13 @@ After generating and before saving the file:
   on its heading — zero or two is an error. Structural requirements
   have none. The core count equals the number of behavioural
   requirements.
+- **AC coverage is complete:** every `AC-n` in the requirements file's
+  `source:` lines appears on a `Covers:` line of a group that has at
+  least one test case or structural line. `reconcile_counts.py` prints
+  the ledger sets; the Statistics `AC coverage:` line states
+  `<n>/<N>` and names any uncovered id with the reason grooming gave.
+  An AC item with no case and no structural line is a 🔴 for the
+  analyzer — the whole point of the ledger.
 - Every High-risk REQ group's `Applied techniques:` line names at
   least one extended technique (3-value BVA, Decision Table, invalid
   transitions, Pairwise) OR carries a one-line reason none applies

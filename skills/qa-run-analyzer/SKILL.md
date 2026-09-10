@@ -76,13 +76,21 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   `<KEY>-recon.md` was produced — an observable fact was asked of a
   human. A recon answer that changed a case's premise without the
   requirement being updated is 🔴 (same discipline as any source).
-- **The AC→REQ seam** (the only unguarded end of the chain): when
-  `<KEY>-context.md` is present, every numbered/bulleted item in its
-  Requirements and "Additional requirements (from comments)" sections
-  maps to a REQ-N in the requirements file (grooming numbers them in
-  order of appearance, so this is a count + ordering comparison). An
-  AC item with no REQ is 🔴 — the whole downstream coverage guarantee
-  is anchored on this seam.
+- **The AC ledger — the acceptance criteria are covered 100% or the
+  run says which one is not.** Since 0.42.0 every criterion carries an
+  id from stage 1 (`AC-n` on the context bullets, `JD-n` / `CM-n` for
+  Description- and comment-only items), every REQ names its ids on a
+  `source:` line, every test-case group on a `Covers:` line.
+  `reconcile_counts.py <KEY>` prints the three sets and their
+  differences ("AC ledger" lines). 🔴 when: the context file's
+  `AC items on the page … captured …` numbers differ (stage 1 could not
+  read part of the page — the ledger is incomplete, say what was not
+  readable); an `AC-n` is on no `source:` line (grooming dropped a
+  criterion); an `AC-n` is on no `Covers:` line of a group with a case
+  or structural line (a criterion reached no test). A `JD-n` / `CM-n`
+  gap is 🟡. Name the id and the criterion text in the finding. Files
+  from before 0.42.0 carry no ids — say so once and fall back to the
+  count + ordering comparison of context bullets vs REQ-N.
 - REQ-ID traceability is intact across requirements -> test-cases
   (cases and structural lines) -> code-review -> web-testing. Flag IDs that appear in one
   file but vanish in the next.

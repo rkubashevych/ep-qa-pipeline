@@ -341,8 +341,10 @@ Rules:
   measured ingestion lag. A single immediate clean read is not a PASS.
 - BLOCKED is not a FAIL; OBSERVATION never replaces FAIL.
 - **Every FAIL and every `RISK-CR-*` row carries its `Source:` and
-  `Clause:`** — the register row and the verbatim sentence the build
-  contradicts (`../qa-pipeline/references/sources-of-record.md`). Check
+  `Clause:`** — the register row, the verbatim sentence the build
+  contradicts and, for an acceptance criterion, its ledger id
+  (`· AC-<n>` from the case's `Covers:` line)
+  (`../qa-pipeline/references/sources-of-record.md`). Check
   the as-built document as well as the brief: a behaviour the as-built
   page records as deliberate is not a defect, however wrong it looks.
   No clause in any source → `OBSERVATION (no source checked)`.

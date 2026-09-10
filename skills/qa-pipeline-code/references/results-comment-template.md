@@ -89,7 +89,7 @@ settings, reproduced in both UI and API.">
 
 **Confirmed bugs**
 
-1. **TC-REQ-N.M — <short name>** — expected <X>, got <Y>
+1. **TC-REQ-N.M — <short name>** — fails AC-<n>: expected <X>, got <Y>
    (<where: page / endpoint>). <Filed as EP-XXXXX | not filed yet>
    (evidence: reproduced-with-control | observed-once | code-read)
 

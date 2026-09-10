@@ -108,10 +108,13 @@ discover this at extraction time.
 table format: `../qa-pipeline/references/sources-of-record.md`. Fetch
 each governing document once and write `<KEY>-sources.md`:
 
-1. The **product brief / acceptance criteria** — the Confluence page
-   linked from the story (`getJiraIssueRemoteIssueLinks`, then
-   `getConfluencePage`). In bug-fix and retest mode fetch the page that
-   governs the *feature*, reached via the parent story or the suite.
+1. The **acceptance criteria** — the Confluence page linked from the
+   story (`getJiraIssueRemoteIssueLinks`, then `getConfluencePage`),
+   which the docs phase already itemised as the AC ledger (`AC-n` on
+   the context bullets, `source:` on each REQ, `Covers:` on each case
+   group). Every `Source:` line a stage writes for an AC clause carries
+   that id. In bug-fix and retest mode fetch the page that governs the
+   *feature*, reached via the parent story or the suite.
 2. The **as-built documentation** — the page written from merged code
    (ExpoPlatform: space `FRON` for the front end, `DS` for the search
    service). It is rarely linked from the ticket; the reference file

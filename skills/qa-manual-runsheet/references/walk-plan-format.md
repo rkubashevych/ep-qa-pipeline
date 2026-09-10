@@ -78,7 +78,7 @@ Backstage:
   kind: WALK
   machine: CR PASS · API — · WEB NOT EXECUTED
   why-walked: [core] of REQ-3; High risk; code-reading-only PASS
-  source: REQ-3 clause "a viewer without consent cannot favourite" (Confluence AC §2.1)
+  source: AC-4 · REQ-3 clause "a viewer without consent cannot favourite" (Confluence AC §2.1)
   positive-control: Anna's existing favourite "Contoso" must still show in Favourites
   half-observable: no
   covers: TC-REQ-3.3 (same surface, same fixture — a second star)
@@ -113,7 +113,7 @@ the tester sees none unless they ask or a rule says to volunteer one.
 | `kind` | WALK · SPOT-CHECK · AGENT-RUNS · BLOCKED · DEVICE (below) |
 | `machine` | the stage 6 / 7 / 8 verdicts, one per stage, verbatim status names from `status-vocabulary.md` — e.g. `CR PASS · API — · WEB NOT EXECUTED`; `—` for a stage that did not hold the case |
 | `why-walked` | the selection reason from step 2a: must-walk / `[core]` / VERIFY (High-risk or code-reading-only PASS) / risk extra / SPECIAL ATTENTION |
-| `source` | the register row and verbatim clause the expectation rests on (`sources-of-record.md`) — or `OBSERVATION (no source checked)` |
+| `source` | the ledger id, register row and verbatim clause the expectation rests on (`AC-<n> · REQ-N clause "…" (<document §>)`; `sources-of-record.md`) — or `OBSERVATION (no source checked)`. A tester who asks "which AC is this?" gets the id. |
 | `positive-control` | for absence checks: the visible fact that proves the state existed |
 | `half-observable` | `no`, or which half the tester sees and which machine verdict owns the rest |
 | `covers` | other case ids this card settles, with the one-clause reason |

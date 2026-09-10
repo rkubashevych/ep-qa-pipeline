@@ -48,7 +48,7 @@ one row per source, with its id, what it governs, and the fetch date.
 ```markdown
 | # | Source | Id / key | Governs | Fetched |
 |---|--------|----------|---------|---------|
-| 1 | Product brief — "Global Search. Top results" | Confluence P2 1846673419 | the Top strip's presence, ordering, cap | 2026-09-07 |
+| 1 | Acceptance criteria — "Global Search. Top results" (the AC ledger: AC-1…AC-9) | Confluence P2 1846673419 | the Top strip's presence, ordering, cap | 2026-09-07 |
 | 2 | As-built FE — "Global Search" | Confluence FRON 1885732888 | which entities render, states, contract | 2026-09-07 |
 | 3 | AI Search API V2 documentation | Confluence DS 2061074452 | the search service's own contract | 2026-09-07 |
 | 4 | Ticket under test | EP-56133 | the reproduction and its expected result | 2026-09-07 |
@@ -87,9 +87,18 @@ chat was where the unsourced claims did their damage.
 For each candidate defect, record two lines:
 
 ```
-Source: <register row #> — <document>, <section>
+Source: <register row #> — <document>, <section> · AC-<n>
 Clause: "<the sentence, quoted verbatim>"
 ```
+
+The trailing `· AC-<n>` is the ledger id of the acceptance criterion the
+clause belongs to (task-context SKILL.md → "The AC ledger"); it is what
+lets a reader of a bug, a walk card or the human summary say *which*
+criterion is failing without re-reading the page. Omit it only when the
+clause comes from a document that is not the AC page (the as-built doc,
+a design sub-task) — then the row number alone identifies the source.
+The id is on the REQ (`source:` line) and the test-case group
+(`Covers:`) the finding belongs to; copy it from there.
 
 Then one of three outcomes:
 

@@ -61,7 +61,7 @@ Date: <YYYY-MM-DD>
 ### FAIL: TC-REQ-1.2 — <scenario name>
 
 - **Arrived as:** QA
-- **Source:** <register row #> — <document>, <section>
+- **Source:** <register row #> — <document>, <section> · AC-<n>
 - **Clause:** "<the sentence the page contradicts, quoted verbatim>"
 - **Step:** #3 — <step description from the test case>
 - **Test data:** <what was entered>
@@ -72,7 +72,7 @@ Date: <YYYY-MM-DD>
 ### FAIL CONFIRMED: TC-REQ-2.1 — <scenario name>
 
 - **Arrived as:** FAIL (code review)
-- **Source:** <register row #> — <document>, <section>
+- **Source:** <register row #> — <document>, <section> · AC-<n>
 - **Clause:** "<verbatim>"
 - **Code-review finding:** <file, line, problem description from code review>
 - **Step:** #<N> — <step description>

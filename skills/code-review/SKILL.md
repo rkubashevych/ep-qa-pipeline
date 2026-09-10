@@ -207,9 +207,12 @@ present in only one of several cited sources:
 Every FAIL and every `RISK-CR-*` row carries two lines in the report:
 
 ```
-Source: <register row #> — <document>, <section>
+Source: <register row #> — <document>, <section> · AC-<n>
 Clause: "<the sentence, quoted verbatim>"
 ```
+
+`AC-<n>` is the criterion's ledger id — from the case's REQ group
+(`Covers:` line); omitted only when the clause is not from the AC page.
 
 A finding with no clause in any source is
 `OBSERVATION (no source checked)`, never FAIL, and never a bug

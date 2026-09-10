@@ -15,19 +15,23 @@ Generated: <YYYY-MM-DD>
 - Out of scope: <what is not included, or "Not specified">
 
 ## Requirements
-> Primary source: the linked Confluence acceptance-criteria page,
-> merged with the Jira Description.
-- <requirement>
-- <requirement>
-- <requirement>
+> Primary source: the linked Confluence acceptance-criteria page (one
+> `AC-n` bullet per criterion, page order, verbatim), then the Jira
+> Description's own items (`JD-n`). Never a merged paraphrase.
+- AC-1 (Confluence §<section>): <criterion, verbatim>
+- AC-2 (Confluence §<section>): <criterion, verbatim>
+- AC-3 (Confluence §<section>): <criterion, verbatim>
+- JD-1 (Jira Description): <requirement stated only in the Description>
+
+AC items on the page: <N> · captured: <N><; not readable: <what and why — omit when equal>>
 
 ## ⚠️ Conflicts to resolve
 > Only when the Confluence acceptance criteria and the Jira Description
 > disagree. List each conflict with both versions so a human decides.
-- <topic>: Confluence says "<X>"; Jira Description says "<Y>".
+- AC-<n> <topic>: Confluence says "<X>"; Jira Description says "<Y>".
 
 ## Additional requirements (from comments)
-- <requirement found in comments that is not in the main requirements>
+- CM-1 (comment <YYYY-MM-DD>): <requirement found in comments that is not in the main requirements>
 
 ## Sub-tasks
 > Only when the input is a parent Story with sub-tasks. Lists the
@@ -71,6 +75,7 @@ Generated: <YYYY-MM-DD>
 
 Section rules:
 - Goal, Scope, Requirements — always present. If there is no data — "Not specified in the tracker".
+- Requirements — every bullet carries an `AC-n` / `JD-n` id with its origin; the section ends with the `AC items on the page … captured …` count line (both numbers, and what was not readable when they differ). With no Confluence page: no `AC-n` bullets, only `JD-n`, and the ⚠️ no-page warning.
 - ⚠️ Conflicts to resolve — only when the Confluence acceptance criteria and the Jira Description actually disagree. Omit the section entirely if there are no conflicts.
 - Sub-tasks — only when the input is a parent Story that has sub-tasks. Omit otherwise.
 - Additional requirements (from comments) — only when there are relevant comments with new requirements.
