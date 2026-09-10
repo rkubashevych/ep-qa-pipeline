@@ -49,8 +49,10 @@ listbox portals; date pickers need keyboard entry).
 ## Login — scripted, no pause
 
 1. Read `references/login-config.md` for the URL/field shape and
-   credentials from `.env.qa-agents` (search order per SKILL.md
-   Step 4). Never print the values.
+   credentials from `$EP_QA_HOME/.env.qa-agents`
+   (`../../qa-pipeline/references/environment.md`). Never print the
+   values. The host was already checked against `ALLOWED_HOSTS` in
+   the Scope step; do not navigate anywhere else.
 2. Perform the login with Playwright (fill username/password, submit,
    wait for the post-login page). This REPLACES the extension path's
    "PAUSE for browser login" — do not ask the user unless the login

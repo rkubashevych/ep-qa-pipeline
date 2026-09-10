@@ -40,8 +40,13 @@ skills/
   qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
   qa-pipeline-docs/            # orchestrator: stages 1-4 + Jira publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
-runs/                          # git-ignored RUN WORKSPACE (0.32.0): runs/<KEY>/docs/, runs/<KEY>/r<N>/
-                               # — every artefact a stage writes; nothing goes in the repo root any more
+fixtures/EP-0000-context.md    # synthetic docs-phase smoke-test input (the one EP-* file that is tracked)
+docs/                          # reviews, retrospectives, specs, design prompts — history, not contract
+
+~/.ep-qa/                      # EP_QA_HOME — OUTSIDE the checkout (0.39.0), environment.md
+  .env.qa-agents               #   the credentials file (ALLOWED_HOSTS, QA_OPERATOR_EMAIL, API + Bitbucket creds)
+  runs/<KEY>/docs/ r<N>/       #   every artefact a stage writes — the run folder (data-locations.md)
+  cache/navigation_paths.json  #   web-testing's navigation memory
 ```
 
 Each stage folder is the same shape:
@@ -57,9 +62,12 @@ Data flows between stages as files in the run folder —
 code-phase pass — named `<ISSUEKEY>-<stage>.md` (e.g.
 `EP-44730-code-review.md`). Each stage reads the previous stage's file.
 The layout, the round rule and the resolution order live in ONE place:
-`skills/qa-pipeline/references/data-locations.md`. `runs/` is
-git-ignored as a whole. Files from before 0.32.0 sit in the repo root
-and stay readable; nothing new is written there.
+`skills/qa-pipeline/references/data-locations.md`; where `runs/` itself
+is — `$EP_QA_HOME`, default `~/.ep-qa`, never the checkout — in
+`skills/qa-pipeline/references/environment.md`. Files from before
+0.39.0 (the checkout's `runs/`, pre-0.32 root files) stay readable;
+nothing new is written into the checkout, and `verify_plugin.py`
+check 9 fails while a `.env*` or `runs/` is inside it.
 
 ## Pipeline order & channel routing
 
@@ -83,43 +91,48 @@ The stages need different things, so they run in different places:
 | 1–4 docs (`task-context` … `qa-test-cases`) + `qa-pipeline-docs` | Jira/Confluence only (+ QA Service connector for the suite publish) | **Cowork** (or Claude Code) |
 | code-phase step 0 (case rebuild) | the **QA Service connector** — the suite is the record of the cases (no Jira archive is posted since 0.33.0); without it only this machine's `runs/<KEY>/docs/` can supply them, and no run can be written | wherever `qa-pipeline-code` starts |
 | 5–6 `pr-summary`, `code-review` | the code: a **backend/portal-ui repo clone** OR a Bitbucket **API token** (`BB_EMAIL`+`BB_API_TOKEN`) | **Claude Code** |
-| 7 `api-testing` | the e2e **`.env`** (API creds) + a per-event frontend host | **Claude Code** |
+| 7 `api-testing` | `~/.ep-qa/.env.qa-agents` (API creds, `ALLOWED_HOSTS`) + a per-event frontend host | **Claude Code** |
 | 8 `web-testing` | the **Playwright MCP** tools + `.env.qa-agents` for the scripted login (default); else a connected Chrome + logged-in test env (extension fallback) | **either** with Playwright; **Cowork** for the extension |
-| 9–10 `qa-manual-runsheet`, `qa-manual-walk`, `qa-manual-results` | QA Service connector (suite read/write-back) + `.env` for provisioning and for the walk's AGENT-RUNS cards | either, connector present (the walk needs `.env` only if the plan has AGENT-RUNS cards) |
+| 9–10 `qa-manual-runsheet`, `qa-manual-walk`, `qa-manual-results` | QA Service connector (suite read/write-back) + `.env.qa-agents` for provisioning and for the walk's AGENT-RUNS cards | either, connector present (the walk needs the file only if the plan has AGENT-RUNS cards) |
 
-**Why:** Cowork has no repo clone, no `BB_API_TOKEN`, and no `.env`, so
-5–7 can't authenticate there — `api-testing` will pause ("no .env"),
-and `code-review`/`pr-summary` can't reach a private Bitbucket PR. Those
+**Why:** Cowork has no repo clone and no `BB_API_TOKEN`, so 5–6 can't
+reach a private Bitbucket PR there, and 7 needs a shell for curl. Those
 three are **Claude Code** stages. Run `qa-pipeline-code` from Claude Code
-in the repo that has the `.env`; with the Playwright MCP present, stage 8
-runs there too and the whole code phase is one environment. Keep Cowork
-for the docs half and for the Chrome-extension fallback.
+with `~/.ep-qa` in place (or `EP_QA_HOME` set); with the Playwright MCP
+present, stage 8 runs there too and the whole code phase is one
+environment. Keep Cowork for the docs half and for the Chrome-extension
+fallback — and mount `~/.ep-qa` there, not this checkout, whenever a
+stage needs to write.
 
 **Split runs are supported:** run 5–7 in Claude Code, post the step-6
 status line marked PARTIAL, then resume in Cowork with the same Story
 key — `qa-pipeline-code` Step 0 restores the finished stage reports
-from the run folder `runs/<KEY>/r<N>/` (see "Split runs" in its
-SKILL.md). Both environments mount this repo, so no files need to be
+from the run folder `~/.ep-qa/runs/<KEY>/r<N>/` (see "Split runs" in
+its SKILL.md). Both environments see `~/.ep-qa`, so no files need to be
 carried between them; the QA Service run carries the verdicts anyway.
 
 ## Where things live
 
-- **Credentials (`.env`)** — in the **`e2e-testing` repo** (git-ignored).
-  Holds `ADMIN_BASE_URL`, `ADMIN_USERNAME`/`ADMIN_PASSWORD`,
-  `ORGANIZER_API_KEY`, `EVENT_ID`, `BASE_URL`. `api-testing` reads it at
-  runtime — never paste these into chat. Point it at the target env
-  before running (e.g. `ADMIN_BASE_URL=https://api-alpha2.expoplatform.net`).
-- **Bitbucket auth** — `BB_EMAIL` + `BB_API_TOKEN` env vars (repository
-  read; add `read:pullrequest` for PR-URL mode). Branch mode uses the
-  branch = issue key.
+- **Credentials** — `~/.ep-qa/.env.qa-agents`, the only file
+  (`skills/qa-pipeline/references/environment.md`): `ADMIN_BASE_URL`,
+  `ADMIN_USERNAME`/`ADMIN_PASSWORD`, `ORGANIZER_API_KEY`, `EVENT_ID`,
+  `BASE_URL`, `BB_EMAIL`/`BB_API_TOKEN`, **`ALLOWED_HOSTS`** (the hosts a
+  stage may call — without it no run starts), `QA_OPERATOR_EMAIL`.
+  Stages read it at runtime — never paste these into chat. Point it at
+  the target env before running. The e2e repo's `.env` is no longer
+  read.
+- **Bitbucket auth** — `BB_EMAIL` + `BB_API_TOKEN` in the same file
+  (repository read; add `read:pullrequest` for PR-URL mode). Branch
+  mode uses the branch = issue key.
 - **Code repos** — Bitbucket `expoplatform` workspace: backend monolith
   = `expoplatform-main-ira`, frontend = `portal-ui`, admin = `admin-ui`.
 - **Per-event frontend host** — not discoverable; supply it per event
   (see `skills/api-testing/references/api-testing-reference.md` §11.1).
 - **Pipeline output files** (`<KEY>-context.md` … `<KEY>-run-report.md`)
-  — written to the **run folder** `runs/<KEY>/…` inside the mounted
-  repo (`data-locations.md`); the next stage reads them from there,
-  in this session or the next. They are git-ignored, not committed.
+  — written to the **run folder** `~/.ep-qa/runs/<KEY>/…`
+  (`data-locations.md`), outside this checkout; the next stage reads
+  them from there, in this session or the next. Nothing a run writes is
+  in the repo.
 - **Hand-off between docs and code** — docs publishes requirements,
   test cases and structural checks to the **QA Service suite**;
   `qa-pipeline-code` reads them back from there (or from
@@ -155,12 +168,12 @@ carried between them; the QA Service run carries the verdicts anyway.
      — the input file list, the counts-reconcile check, and the
      findings-summary line.
    - `README.md` — the stage table + the "How the flow works" list.
-4. **Smoke-test the docs stages** if you touched them: take a recent
-   ticket's `runs/<KEY>/docs/<KEY>-context.md` and run it through
-   grooming → checklist → test-cases (skip the publish), then
-   `reconcile_counts.py` on the result — the counts must reconcile and
-   every behavioural REQ must have exactly one `[core]`. (There is no
-   committed fixture: any context file carries live ticket text.) If you touched
+4. **Smoke-test the docs stages** if you touched them: run
+   `fixtures/EP-0000-context.md` (synthetic — the one `EP-*` file that
+   is tracked, via the `.gitignore` negation) through grooming →
+   checklist → test-cases (skip the publish) and check the expectations
+   listed at the bottom of the fixture still hold; then
+   `reconcile_counts.py` on the result. If you touched
    `reconcile_counts.py`, run `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`.
    If you touched ANY skill's frontmatter `description`, walk
    `evals/triggering.md` — every ✅ query must still route to that
@@ -173,9 +186,10 @@ carried between them; the QA Service run carries the verdicts anyway.
    reinstalls keep serving the old version. Add a `CHANGELOG.md` entry.
 6. **Secret-scan, then commit — explicit paths only** (run git locally —
    see gotcha below). **Never `git add -A` or `git add .` in this repo**:
-   the working tree doubles as a run workspace holding live-credential
-   artifacts (`.env.qa-agents`, testdata packs, runsheets), and the
-   ignore list is a backstop, not a guarantee. The steps are:
+   the working tree used to double as the run workspace and may still
+   hold legacy live-credential artifacts (pre-0.39 `runs/`, root
+   `EP-*` files), and the ignore list is a backstop, not a guarantee.
+   The steps are:
    1. `git status --short` — every untracked file must be either in your
       change set or a run artifact you can explain. An untracked run
       artifact that is not ignored means the `.gitignore` broad rules
@@ -217,7 +231,7 @@ carried between them; the QA Service run carries the verdicts anyway.
 | Structural checks in the suite (`-STRUCT-` cases), bug-fix mini suite | `skills/qa-pipeline-docs/references/qa-service-publish.md` |
 | Per-case verdicts in QA Service (test run per pass, status → verdict mapping, what stays `not_run`, retractions, retraction target rule) | `skills/qa-pipeline/references/test-runs.md` |
 | What earlier rounds left open (carried risk rows, in/out rulings, `[core]` nominations) | `skills/qa-pipeline/references/open-items-ledger.md` → `<KEY>-open-items.md` |
-| Regression after a skill edit | run a recent `runs/<KEY>/docs/<KEY>-context.md` through the docs stages (step 4 of the recipe) |
+| Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (step 4 of the recipe) |
 | Anything structural before a commit (versions, descriptions, line endings, wiring, references, vocabulary, staged artefacts) | `python3 scripts/verify_plugin.py` |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 
@@ -244,14 +258,20 @@ carried between them; the QA Service run carries the verdicts anyway.
   pattern — do not add one filename. And commit explicit paths only;
   `git add -A` is banned in this repo (recipe step 6). On one run, 84
   live account passwords were one `git add -A` away from being committed.
-- **`.env.qa-agents` lives in this repo root by design** (the skills
-  read it from the mounted plugin folder). That co-locates live
-  credentials with the distributable: if you ever publish this folder by
-  copy (loose `.plugin` bundle, zip, local-path marketplace that copies
-  rather than clones), verify the env file is not inside the artifact —
-  `git archive` respects the index (safe), raw folder copies do not.
-- **api-testing pauses** if `.env` or a per-event frontend host is
-  missing (the frontend host is per-event and not discoverable).
+- **`.env.qa-agents` and `runs/` live in `~/.ep-qa`, not here (0.39.0).**
+  Until then they sat in this root, co-locating live credentials with
+  the distributable and with every folder Cowork mounts.
+  `verify_plugin.py` check 9 fails while either is inside the checkout;
+  move them once (`Move-Item .env.qa-agents, runs ~\.ep-qa\`) and the
+  raw-copy publishing worry is moot. Legacy root `EP-*` files are a
+  WARN with a count — move them to `~/.ep-qa/runs/legacy/` when
+  convenient.
+- **api-testing pauses** if `.env.qa-agents` is unreachable, a host is
+  not in `ALLOWED_HOSTS`, or a per-event frontend host is missing (the
+  frontend host is per-event and not discoverable).
+- **Hooks are Claude Code only.** `hooks/hooks.json` + `scripts/notify.py`
+  never fire in Cowork; `QA_PIPELINE_NOTIFY=1` is opt-in and global to
+  that Claude Code profile.
 
 ## Publishing / updating — the no-drag way (marketplace)
 

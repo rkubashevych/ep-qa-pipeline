@@ -6,13 +6,15 @@
     python3 reconcile_counts.py --selftest
 
 Reads whichever of <KEY>-test-cases/code-review/api-testing/web-testing
-.md exist. Where to look (data-locations.md → "The run folder"): when
-no dir is given, the newest pass folder `runs/<KEY>/r<N>/` under the
-cwd, falling back to the cwd itself for legacy tickets. The test-cases
-file is looked up in the pass folder first, then `runs/<KEY>/docs/`
-(where the docs phase writes it), then the given dir — so a retest
-round reconciles against its case list without being told twice.
-Pass an explicit dir (e.g. `runs/EP-1234/r2`) to pin an older round.
+.md exist. Where to look (data-locations.md → "The run folder",
+environment.md → EP_QA_HOME): when no dir is given, `runs/<KEY>/` is
+resolved under `$EP_QA_HOME`, else `~/.ep-qa`, else (legacy) the cwd;
+inside it the newest pass folder `r<N>/` wins, falling back to the cwd
+itself for pre-0.32 tickets. The test-cases file is looked up in the
+pass folder first, then `runs/<KEY>/docs/` (where the docs phase writes
+it), then the given dir — so a retest round reconciles against its case
+list without being told twice. Pass an explicit dir (e.g.
+`~/.ep-qa/runs/EP-1234/r2`) to pin an older round.
 Prints, per file: the set size of case
 ids, status counts from RESULT ROWS ONLY, and the TC ids that are in
 the test-cases file but missing from each downstream file. The analyzer
@@ -155,18 +157,32 @@ def count_statuses(text):
     return counts, sources
 
 
+def ep_qa_home():
+    """environment.md → Resolution order: $EP_QA_HOME, then ~/.ep-qa when
+    it exists, else the cwd (legacy layout — runs/ beside skills/)."""
+    env = os.environ.get("EP_QA_HOME")
+    if env:
+        return env
+    home = os.path.join(os.path.expanduser("~"), ".ep-qa")
+    if os.path.isdir(home):
+        return home
+    return "."
+
+
 def resolve_run_dir(key, d=None):
     """Return the folder to read stage reports from.
 
     Explicit dir → as given. Otherwise the newest `runs/<key>/r<N>` under
-    the cwd; when none exists, the cwd (legacy layout: files beside the
-    repo root). Also returns the docs folder used as the test-cases
+    ep_qa_home(); when none exists, the cwd (legacy layout: files beside
+    the repo root). Also returns the docs folder used as the test-cases
     fallback (may not exist).
     """
-    docs = os.path.join("runs", key, "docs")
+    root = ep_qa_home()
+    runs = "runs" if root == "." else os.path.join(root, "runs")
+    docs = os.path.join(runs, key, "docs")
     if d is not None:
         return d, docs
-    base = os.path.join("runs", key)
+    base = os.path.join(runs, key)
     rounds = []
     if os.path.isdir(base):
         for name in os.listdir(base):
@@ -340,14 +356,25 @@ def check(doc, expect, label, errs):
 
 def check_run_folder(errs):
     """runs/<KEY>/r<N> resolution: newest round wins, docs/ supplies the
-    case file, legacy cwd is the fallback (data-locations.md 0.32.0)."""
+    case file, legacy cwd is the fallback (data-locations.md 0.32.0);
+    EP_QA_HOME wins over the cwd (environment.md 0.39.0)."""
     import tempfile
     key = "EP-0"
     cwd = os.getcwd()
+    saved = {k: os.environ.pop(k, None) for k in ("EP_QA_HOME", "HOME", "USERPROFILE")}
     with tempfile.TemporaryDirectory() as tmp:
         os.chdir(tmp)
+        # a real ~/.ep-qa must not leak into the test: point ~ at the tmp dir
+        os.environ["HOME"] = os.environ["USERPROFILE"] = tmp
         try:
-            # legacy: nothing under runs/ → cwd
+            # EP_QA_HOME set → runs/ is looked up there, not in the cwd
+            os.makedirs(os.path.join(tmp, "elsewhere", "runs", key, "r3"))
+            os.environ["EP_QA_HOME"] = os.path.join(tmp, "elsewhere")
+            d, _ = resolve_run_dir(key)
+            if d != os.path.join(tmp, "elsewhere", "runs", key, "r3"):
+                errs.append(f"run-folder: EP_QA_HOME ignored, gave {d!r}")
+            del os.environ["EP_QA_HOME"]
+            # legacy: no EP_QA_HOME, nothing under runs/ → cwd
             d, _ = resolve_run_dir(key)
             if d != ".":
                 errs.append(f"run-folder: legacy fallback gave {d!r}, want '.'")
@@ -377,6 +404,11 @@ def check_run_folder(errs):
                 errs.append("run-folder: code-review must not fall back to cwd")
         finally:
             os.chdir(cwd)
+            for k, v in saved.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
 
 
 def selftest():
@@ -394,7 +426,8 @@ def selftest():
           "statuses, RE-ROUTE [UI], range expansion, [core] heading "
           "counting, bug-fix-mode flat ids (TC-<n>, flat spans, "
           "`## ` headings), and runs/<KEY>/r<N> folder resolution "
-          "(newest round, docs/ case-file fallback, legacy cwd) all "
+          "(EP_QA_HOME first, newest round, docs/ case-file fallback, "
+          "legacy cwd) all "
           "verified")
 
 

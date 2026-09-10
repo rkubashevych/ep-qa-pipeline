@@ -41,8 +41,10 @@ reimplement them.
 upload; then the suite; asking the user is the last resort, not the
 first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
-**Where this phase writes:** `runs/<ISSUEKEY>/docs/` — create it before
-stage 1 and print it once (`Run folder: runs/EP-1234/docs`). Every
+**Where this phase writes:** `runs/<ISSUEKEY>/docs/` under
+`$EP_QA_HOME` (`../qa-pipeline/references/environment.md`; nothing
+reachable → PAUSE, never the plugin checkout) — create it before
+stage 1 and print it once (`Run folder: ~/.ep-qa/runs/EP-1234/docs`). Every
 stage 1–4 file and this phase's run report go there; a re-run
 overwrites in place. Nothing is written to the repo root.
 

@@ -21,18 +21,19 @@ The file has two kinds of content — treat them differently:
   ids WILL go stale — re-resolve them on the target event (§7) instead
   of trusting them; keep the lessons, not the numbers.
 
-> **No secrets in this file.** All credentials are read at runtime from the project `.env`
-> (the same variables `env.ts` validates). Never hardcode username / password / API keys
-> into a skill or test file — `.env` is git-ignored for this reason.
+> **No secrets in this file.** All credentials are read at runtime from
+> `$EP_QA_HOME/.env.qa-agents` (`../../qa-pipeline/references/environment.md`).
+> Never hardcode username / password / API keys into a skill or test file.
 
 ---
 
-## 0. Config & credentials (read from `.env`)
+## 0. Config & credentials (read from `.env.qa-agents`)
 
-The agent must load these from an env file — search order:
-`.env.qa-agents` in the mounted qa-pipeline-skill repo, then the e2e
-project's `.env` (see its `.env.example` for the full list), then
-plain environment variables:
+The agent loads these from **one** file — `$EP_QA_HOME/.env.qa-agents`,
+resolved per `environment.md` (`EP_QA_HOME` → `~/.ep-qa` → the legacy
+checkout copy, read-only). `scripts/load-env.sh --env-file` prints the
+path; the e2e project's `.env` is no longer a fallback. Missing file →
+PAUSE, never guess.
 
 | Variable | Meaning |
 |---|---|
@@ -41,6 +42,7 @@ plain environment variables:
 | `ORGANIZER_API_KEY` | Sent as HTTP Basic auth on every REST call (`Authorization: Basic <key>`). Org/event-scoped. |
 | `EVENT_ID` | The event to select (sent as `x-sel-exhibition` on admin REST calls). |
 | `BASE_URL` / `BASE_PATH` | Visitor / exhibitor frontend host + path (for exhibitor-token calls). |
+| `ALLOWED_HOSTS` | Comma-separated hosts this stage may call; `*.suffix` allowed. Every host above and every per-event frontend host must match, checked **before the first request** (`load-env.sh --host-allowed HOST`); production (`*.expoplatform.com`) is refused even when listed — `environment.md` → `ALLOWED_HOSTS`. |
 
 **Shell-safety (passwords with `;` `?` `!` `$`…):** credentials may contain
 shell metacharacters — `ADMIN_PASSWORD` does. Mishandled, a `;` silently
@@ -56,21 +58,22 @@ truncates the value (the rest runs as a command) and login fails with
   getenvvar() {  # getenvvar NAME FILE
     grep -m1 "^$1=" "$2" | cut -d= -f2- | sed "s/^'//; s/'\$//; s/^\"//; s/\"\$//"
   }
-  ADMIN_PASSWORD=$(getenvvar ADMIN_PASSWORD .env)
+  ENVFILE=$(ep_qa_env_file)                 # resolves $EP_QA_HOME/.env.qa-agents
+  ADMIN_PASSWORD=$(getenvvar ADMIN_PASSWORD "$ENVFILE")
   ```
-  This function ships as **`scripts/load-env.sh`** in the skill folder —
-  source it (or run `load-env.sh NAME FILE`) instead of retyping it.
+  Both functions ship in **`scripts/load-env.sh`** in the skill folder —
+  source it (or run `load-env.sh NAME`) instead of retyping them.
 - Always expand as `"$ADMIN_PASSWORD"` (double-quoted). For JSON login
   bodies prefer building the payload with `python3`/`jq --arg` so quotes
   and backslashes in values cannot break the JSON.
 - The same applies to any exhibitor/visitor password taken from test
   data.
 
-**Per-environment caveat:** `.env` must hold the values for the environment under test.
-The committed `.env` may point at a different alpha (e.g. `ep51796alphaalpha`, event 459),
-while alpha2 (`api-alpha2.expoplatform.net`) is in `.env.example`. Before running, confirm
-`ADMIN_BASE_URL`, `ORGANIZER_API_KEY` and `EVENT_ID` match the target env. Example target:
-alpha2, event `3551`.
+**Per-environment caveat:** `.env.qa-agents` must hold the values for the environment
+under test — one file, one alpha at a time. Before running, confirm `ADMIN_BASE_URL`,
+`ORGANIZER_API_KEY` and `EVENT_ID` match the ticket's target env and that the host is in
+`ALLOWED_HOSTS`; if they point elsewhere, PAUSE and say which alpha the file names. Example
+target: alpha2, event `3551`.
 
 ---
 
@@ -88,9 +91,13 @@ alpha2, event `3551`.
 
 ```bash
 API="$ADMIN_BASE_URL"; ORG="$ORGANIZER_API_KEY"; EV="$EVENT_ID"
+# body built by python3 from the environment — a quote or backslash in the
+# password cannot break the JSON, and `bash -x` never prints the value (§0)
+BODY=$(ADMIN_USERNAME="$ADMIN_USERNAME" ADMIN_PASSWORD="$ADMIN_PASSWORD" \
+  python3 -c 'import json,os;print(json.dumps({"username":os.environ["ADMIN_USERNAME"],"password":os.environ["ADMIN_PASSWORD"]}))')
 TOKEN=$(curl -s -X POST "$API/api/v1/login" \
   -H "Authorization: Basic $ORG" -H "Content-Type: application/json" \
-  -d "{\"username\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}" \
+  -d "$BODY" \
   | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['token'])")
 ```
 
@@ -210,6 +217,8 @@ Interpretation for the logo feature:
 ## 9. Read-only vs write safety (shared environments)
 
 Alpha envs are shared. Default to **read-only** unless the case requires a write.
+**No request — read or write — goes to a host that is not in `ALLOWED_HOSTS`**
+(§0; `environment.md`). Check once, before the login call.
 
 For mutating cases (`saveSettings`, `set`, `photoSave`, create/delete):
 1. **Snapshot** the current value first (GET), or create a throwaway entity for the test.
@@ -244,9 +253,10 @@ The `[API]` cases that hit `/profile/...` (upload logo, `isLogoEditable`, etc.) 
 ### 11.1 Finding the frontend host (must be supplied)
 
 The frontend domain is **per-event** and is **not** exposed by the API, the admin panel, or the
-events list (`GET /api/v1/exhibitions/list` returns events but **no domain field**). The alpha DB
-(`alpha-db-rw.epdev.it:5432`) is firewalled from CI/sandboxes. So the agent must be **given** the
-portal URL per event. Example: event `3551` → `https://ennies-alpha2.expoplatform.net`.
+events list (`GET /api/v1/exhibitions/list` returns events but **no domain field**), and the
+database is not reachable from where the agent runs. So the agent must be **given** the
+portal URL per event — and that host must be in `ALLOWED_HOSTS` before it is used. Example:
+event `3551` → `https://ennies-alpha2.expoplatform.net`.
 
 > Wrong host symptom: exhibitor login returns `400 "Incorrect login and/or password"` even with
 > correct credentials — the account isn't on the event that host serves.
@@ -298,14 +308,17 @@ curl -s "${authj[@]}" -X POST "$API/api/v1/exhibitorSettings/set/$EX" \
 
 ## 12. Creating & cleaning up throwaway test entities
 
-Prefer a disposable exhibitor over mutating real data.
+Prefer a disposable exhibitor over mutating real data. A throwaway entity
+gets a **random password per entity** (below) and is recorded in
+`<KEY>-testdata.json` so stage 10 can retire it — never a fixed password
+shared by every run on a shared environment.
 
 ```bash
 # CREATE (organizer key + admin token). Does NOT accept category fields —
 # 'exhibitor_category_id' / 'category' / 'category_id' are rejected.
 EX=$(curl -s "${auth[@]}" -X POST "$API/api/v2/exhibitor/set" \
   -F "event_id=$EV" -F "name=ZZ Test $RANDOM" -F "email=zz+$RANDOM@expoplatform.test" \
-  -F "username=zz_$RANDOM" -F "password=Test12345!" \
+  -F "username=zz_$RANDOM" -F "password=$(python3 -c 'import secrets;print("Zz"+secrets.token_urlsafe(12)+"!")')" \
   | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['id'])")
 
 # DELETE (teardown) — from_event=true removes it from the event

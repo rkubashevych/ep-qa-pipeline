@@ -206,12 +206,16 @@ No behavioural REQ may read machine-only — that is step 2a's floor.
 
 ## Credentials
 
-The plan carries throwaway account passwords in the session lines —
-that is what makes it usable — so it is git-ignored (`EP-*`,
-`*-walk-plan.md`), never attached to Jira, never pasted into a suite
-note. Examples in this file use `example.test` addresses and obviously
-synthetic passwords. Everything in `runsheet-format.md` → Credentials
-applies unchanged.
+The plan carries **throwaway** account passwords in the session lines —
+accounts stage 9 created for this run, random password each, retired
+at stage 10 — and that is what makes it usable. It lives under
+`$EP_QA_HOME/runs/`, never attached to Jira, never pasted into a suite
+note. A `.env.qa-agents` account (admin, organiser) is **never**
+written into a plan: its session line reads `Log in as: the admin
+account from your .env.qa-agents` (`../../qa-pipeline/references/environment.md`
+→ Secrets in chat). Examples in this file use `example.test` addresses
+and obviously synthetic passwords. Everything in `runsheet-format.md`
+→ Credentials applies unchanged.
 
 ## What must not happen
 

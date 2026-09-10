@@ -33,11 +33,11 @@ notifications / dashboards, and on every absence check.
 1. `<ISSUEKEY>-code-review.md` — which cases to run (`[API]` items
    with status QA / FAIL).
 2. `<ISSUEKEY>-test-cases.md` — steps, test data, expected results.
-3. **Environment config** — read at runtime from an env file, searched
-   in the order defined in the reference §0 (`.env.qa-agents` in the
-   mounted qa-pipeline-skill repo, then the e2e `.env`, then env
-   vars): `ADMIN_BASE_URL`, `ADMIN_USERNAME` / `ADMIN_PASSWORD`,
-   `ORGANIZER_API_KEY`, `EVENT_ID`, `BASE_URL` / `BASE_PATH`.
+3. **Environment config** — read at runtime from
+   `$EP_QA_HOME/.env.qa-agents` (resolution and variables:
+   `../qa-pipeline/references/environment.md`; `scripts/load-env.sh`): `ADMIN_BASE_URL`,
+   `ADMIN_USERNAME` / `ADMIN_PASSWORD`, `ORGANIZER_API_KEY`,
+   `EVENT_ID`, `BASE_URL` / `BASE_PATH`, **`ALLOWED_HOSTS`**.
 4. For any frontend / exhibitor-token case: the **per-event frontend
    host** and an **exhibitor login**. The frontend host is per-event
    and **not discoverable** — it must be supplied (reference §11.1).
@@ -51,7 +51,7 @@ Optional: `<ISSUEKEY>-checklist.md` for `[API]` structural checks that
 did not become test cases.
 
 Missing code-review or test-cases file — ask before starting. Missing
-`.env` values — **pause and ask**; never guess, never proceed
+`.env.qa-agents` values — **pause and ask**; never guess, never proceed
 unauthenticated. Missing frontend host / exhibitor login for a
 frontend case — pause and ask (reference §11.1).
 
@@ -62,7 +62,7 @@ web-testing) and do not inspect code (that is code-review).
 
 - All communication and the entire output file are in English. Keep
   chat messages short.
-- **Secrets:** read every credential from `.env` at runtime. Never
+- **Secrets:** read every credential from `.env.qa-agents` at runtime. Never
   hardcode, never echo a token/password/API key into chat, the report,
   or a file. Redact tokens in any pasted response.
 - **Scope:** run only `[API]` test cases (and `[API]`-verifiable
@@ -125,9 +125,15 @@ Env: <ADMIN_BASE_URL> event <EVENT_ID>. Starting.
 ```
 
 ### Step 2 — Load config & authenticate
-Read `.env` (reference §0). Confirm `ADMIN_BASE_URL`,
+Read `.env.qa-agents` (reference §0). Confirm `ADMIN_BASE_URL`,
 `ORGANIZER_API_KEY` and `EVENT_ID` match the target environment — if
-they point at a different alpha, pause and confirm. Get an admin token
+they point at a different alpha, pause and confirm. **Allow-list
+check, before the first request:** every host this run will call
+(`ADMIN_BASE_URL`, `BASE_URL`, the per-event frontend host) must
+match `ALLOWED_HOSTS` (`load-env.sh --host-allowed HOST`; rule in
+`../qa-pipeline/references/environment.md`). Not listed, list missing, or a production host →
+**PAUSE** naming the host; never add it yourself, never "just read".
+Say the checked hosts once in the run's first line. Get an admin token
 (§2); an admin-panel session only if a `/admin/...` case needs it
 (§3); an exhibitor token only for frontend cases (§4 / §11.2), which
 also need the supplied per-event frontend host.

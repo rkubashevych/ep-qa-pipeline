@@ -260,6 +260,28 @@ manual results are in:
   any earlier provisional story note is superseded by a comment stating
   the corrected outcome.
 
+### Step 4c — Retire the throwaway fixtures
+
+Stage 9 created accounts and entities for this round and recorded them
+in `<ISSUEKEY>-testdata.json` (`"throwaway": true`, one random password
+each). Once the round is ingested nothing needs them, and an alpha
+account nobody deactivates is a live credential nobody rotates
+(`../qa-pipeline/references/environment.md` → Secrets in chat). So:
+
+- List every throwaway account and entity from the testdata file, with
+  the case ids that used them.
+- Offer to deactivate / delete them through the API the provisioning
+  used (`../qa-manual-runsheet/references/provisioning-rules.md`;
+  exhibitors via `DELETE /api/v2/exhibitor/delete … from_event=true`),
+  one confirmation for the whole list — the hosts were allow-listed at
+  stage 9 and are not re-checked here.
+- Where the environment has no deactivation path, write the list into
+  the human summary's **Needs a human** as "retire N test accounts on
+  <env>" so the environment owner sees it.
+- Skip when the user says the fixtures are still needed (a retest is
+  coming); say so in the final response — the next round's stage 9
+  provisions fresh ones regardless.
+
 ### Step 5 — Offer to file unfiled bugs
 
 A human `fail` on a **roster case** already filed (or linked) its
@@ -279,4 +301,5 @@ non-standard / unmatched / not run); every RETRACTION on its own line
 to); bugs linked and bugs filed (run-filed keys from `run_defects` and
 template-filed keys, separately); the run id and its final status
 (`closed`, or why not); the ledger rows closed and the rows carried
-forward; and what is still untested.
+forward; the throwaway fixtures retired (or why not); and what is
+still untested.

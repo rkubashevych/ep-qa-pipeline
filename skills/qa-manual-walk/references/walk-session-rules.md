@@ -125,9 +125,12 @@ tester's language. Typical:
 - *"Where is that?"* — the navigation path, or offer to say what the
   screen looks like. If the agent does not know, say so; do not guess a
   menu name.
-- *"Which account again?"* — the session's account line, with the
-  password (the plan holds it; chat is where it may be said, the
-  results file is not).
+- *"Which account again?"* — the session's account line. A throwaway
+  account's password may be said (the plan holds it; the results file
+  never does). A `.env.qa-agents` account's password is never said,
+  printed or hinted at — "the admin account from your `.env.qa-agents`"
+  is the whole answer (`../../qa-pipeline/references/environment.md` →
+  Secrets in chat).
 - *"Why does this matter?"* — the source clause and the risk, one or
   two sentences. "The ticket's own acceptance criterion; a fail here
   is the bug it reports."

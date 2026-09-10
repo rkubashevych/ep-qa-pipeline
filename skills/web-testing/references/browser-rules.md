@@ -215,8 +215,8 @@ The login sequence:
 8. `find` the element that confirms a successful login
    (dashboard, welcome message, user avatar).
 
-Credentials are taken from the source specified
-in login-config.md (environment variables, a .env file, etc.).
+Credentials are taken from `$EP_QA_HOME/.env.qa-agents` under the
+variable names login-config.md lists — never from chat.
 
 ## Registration
 

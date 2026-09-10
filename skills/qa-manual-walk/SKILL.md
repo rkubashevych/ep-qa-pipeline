@@ -66,10 +66,12 @@ cell.
    and the machine verdicts the cards were built against; used
    read-only here.
 5. `<ISSUEKEY>-open-items.md` — the ledger; retest history for cards.
-6. `.env.qa-agents` (or the e2e `.env`) — only for AGENT-RUNS cards.
+6. `$EP_QA_HOME/.env.qa-agents` (`../qa-pipeline/references/environment.md`)
+   — only for AGENT-RUNS cards; their hosts must match its `ALLOWED_HOSTS`.
 7. **The tester's identity** — their e-mail, which becomes the
-   `principal` on every human verdict at write-back. Ask once at the
-   start if it is not obvious from the session.
+   `principal` on every human verdict at write-back. Default:
+   `QA_OPERATOR_EMAIL` from `.env.qa-agents` when reachable — confirm
+   it in the pre-flight line; otherwise ask once at the start.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first; asking the user is the last resort).
@@ -85,10 +87,10 @@ cell.
   `qa-manual-results` ingests. Format:
   `references/walk-results-format.md`.
 
-Both files sit beside the plan, carry no credentials, and are
-git-ignored by the `EP-*` / `*-walk-*` rules. The plan itself carries
-live passwords — it stays out of version control and Jira like the
-run sheet before it.
+Both files sit beside the plan under `$EP_QA_HOME/runs/` and carry no
+credentials. The plan itself carries the throwaway accounts' passwords
+— it stays out of version control and Jira like the run sheet before
+it, and never holds a `.env` value.
 
 ## The session — how it runs
 
@@ -100,10 +102,12 @@ The shape:
 
 Confirm you are on the environment and event the plan was built for
 (the plan header names them); confirm the tester's e-mail; **if the
-plan has AGENT-RUNS cards, check `.env.qa-agents` (or the e2e `.env`)
-is reachable** — absent → every AGENT-RUNS card is BLOCKED (`no
-credentials in this session`), said once here, not discovered at card
-7; state the size — "N cards in M sessions, roughly T minutes; the
+plan has AGENT-RUNS cards, check `$EP_QA_HOME/.env.qa-agents` is
+reachable and that every host those cards call is in its
+`ALLOWED_HOSTS`** — file absent → every AGENT-RUNS card is BLOCKED (`no
+credentials in this session`); a host not listed or production →
+those cards BLOCKED (`host not allowed`) — said once here, not
+discovered at card 7; state the size — "N cards in M sessions, roughly T minutes; the
 machine settled K cases without a card" — and where a previous walk
 stopped, if resuming. Then start. Do not re-explain the pipeline.
 
@@ -208,8 +212,10 @@ written to any record before that yes.
 - **Do not rush, do not pad.** The one-line-per-stage brevity rule of
   the orchestrators does not apply inside the walk — but every turn is
   still short: the card, or the answer, and one question.
-- **Never touch production.** The plan names the event; if the tester
-  is somewhere else, stop and say so.
+- **Never touch production.** The plan names the event and the host;
+  AGENT-RUNS cards call only hosts in `ALLOWED_HOSTS`
+  (`../qa-pipeline/references/environment.md`). If the tester is
+  somewhere else, stop and say so.
 
 ## Resume
 

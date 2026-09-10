@@ -141,7 +141,9 @@ When it is a retest:
    `-api-testing.md`, `-web-testing.md` — and the pass's QA Service
    test run when one exists. Optional; used to decide which cases are
    settled without a card and to fill each card's `machine:` key.
-4. `.env.qa-agents` (or the e2e project `.env`) for host and credentials.
+4. `$EP_QA_HOME/.env.qa-agents` for host and credentials
+   (`../qa-pipeline/references/environment.md`) — and its
+   `ALLOWED_HOSTS`, which the provisioning host must match.
 5. **Whether this is a first run or a retest** — see "Retest runs"
    above. Detect it; ask when the evidence is ambiguous.
 6. **A throwaway test event id, and explicit authorisation from the user
@@ -331,10 +333,17 @@ accepting it (rule 5).
 
 ### Step 3 — Provision
 
-Create the accounts and entities. Per rule 6 and the fresh-per-
-destructive-case rule in the references: any case that mutates state a
-later case depends on gets its own account, so cases can be run in any
-order and re-run individually.
+**First, the host:** the API host (and the event's frontend host, when
+one is used) must match `ALLOWED_HOSTS` — `load-env.sh --host-allowed
+HOST` — or this step PAUSES naming it. Production is refused even when
+listed (`environment.md`). Then, with the event authorisation from the
+orchestrator's pause in hand, create the accounts and entities. Per
+rule 6 and the fresh-per-destructive-case rule in the references: any
+case that mutates state a later case depends on gets its own account,
+so cases can be run in any order and re-run individually. **Every
+account gets its own random password** (`secrets.token_urlsafe`, never
+a fixed string) and is recorded in `-testdata.json` with
+`"throwaway": true` so stage 10 can retire it.
 
 Set every attribute the cases depend on **explicitly** — consent flags,
 names, categories, roles. Defaults are not neutral: a fixture that
@@ -406,11 +415,11 @@ person knows the two agree.
 - **Secret scan before handover.** The emitted artifacts carry live
   credentials by design (`-testdata.json`, the walk plan, any exported
   runsheet, the generator script). Confirm every emitted file matches a
-  `.gitignore` broad rule (`git status --short` shows none of them as
-  untracked-unignored), and run a secret scan over the working tree
-  (the `secret-leak-scan` skill or `gitleaks`). If any emitted artifact
-  escapes the ignore rules, widen the pattern in `.gitignore` before
-  handing over — never leave it for the commit step to catch.
+  `.gitignore` broad rule **and lives under `$EP_QA_HOME/runs/`, not in
+  the plugin checkout** (`environment.md`); run a secret scan over the
+  run folder (the `secret-leak-scan` skill or `gitleaks`). If any
+  emitted artifact landed in the checkout, move it and say so — never
+  leave it for the commit step to catch.
 
 State the counts (cards by kind / settled without a card) and the
 verification results in the final response.
@@ -419,7 +428,9 @@ verification results in the final response.
 
 - All output in English.
 - Keep chat output short: one line per stage.
-- **Never touch production.** Confirm the target event before writing.
+- **Never touch production.** The host passed `ALLOWED_HOSTS`
+  (`../qa-pipeline/references/environment.md`); confirm the target
+  event before writing — two gates, both required.
 - Any write outside the provisioning plan must be disclosed in the notes
   file, with what was changed and whether it was reverted.
 - Do not favourite, connect, book or otherwise perform the actions the

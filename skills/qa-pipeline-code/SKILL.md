@@ -42,10 +42,10 @@ in a fresh chat (separate from the docs phase) for context health.
 - A Story key (e.g. `EP-44730`). Everything else is pulled from Jira.
 - Optional: a per-task test host (alpha host) for the UI stage — use
   it if the QA sub-task names one.
-- For stage 7: the e2e `.env` variables and, for exhibitor-token
+- For stage 7: the `.env.qa-agents` variables and, for exhibitor-token
   cases, the per-event frontend host + an exhibitor login (per-event,
-  not discoverable — must be supplied). api-testing pauses and asks if
-  missing.
+  not discoverable — must be supplied; must be in `ALLOWED_HOSTS`).
+  api-testing pauses and asks if missing.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 (run folder first — a new chat is not a reason to ask for an
@@ -72,27 +72,32 @@ written by the analyzer and stage 9, closed only by stage 10.
 the chat title). One short reminder, then move on.
 
 **Establish the run folder — before any other read or write**
-(`../qa-pipeline/references/data-locations.md` → "The run folder").
-List `runs/<STORY>/r*`. **An explicit retest / "the fix landed" /
+(`../qa-pipeline/references/data-locations.md` → "The run folder";
+`runs/` is `$EP_QA_HOME/runs/`, resolved per
+`../qa-pipeline/references/environment.md` — nothing reachable →
+PAUSE, never write into the plugin checkout). List `runs/<STORY>/r*`. **An explicit retest / "the fix landed" /
 bug-fix request always creates `runs/<STORY>/r<max+1>/`** — the
 signals below never override what the user asked for. Otherwise a
 **resume** (newest folder's run report is `partial`, or its QA Service
 run is `running` with `not_run` rows and no `-manual-results.md`)
-continues in that folder; anything else is a first run in `r1`. Print one line: `Run folder: runs/EP-1234/r2
+continues in that folder; anything else is a first run in `r1`. Print one line: `Run folder: ~/.ep-qa/runs/EP-1234/r2
 (retest 1)`. Every stage this orchestrator dispatches writes there and
 nowhere else; the ledger is `runs/<STORY>/<STORY>-open-items.md`, the
 docs-phase files are `runs/<STORY>/docs/`. Nothing is written to the
-repo root — a `<STORY>-*` file appearing there is a ❌ in the
-post-publish check.
+plugin checkout — a `<STORY>-*` file or a `runs/` folder appearing
+there is a ❌ in the post-publish check (and fails `verify_plugin.py`).
 
 **Environment check first.** Stages 5–7 need things Cowork usually
 lacks: a repo clone or `BB_EMAIL`+`BB_API_TOKEN` (5–6) and API
-credentials (7). All can come from ONE file: `.env.qa-agents` in the
-mounted qa-pipeline-skill repo (preferred), falling back to the e2e
-`.env` / env vars. Before running anything, check they are reachable.
-If not, say so NOW and ask the user to mount the folder or run this
-phase from Claude Code (MAINTAINERS "Where to run each stage") — do
-not discover this mid-run at stage 5.
+credentials (7). All come from ONE file: `$EP_QA_HOME/.env.qa-agents`
+(`../qa-pipeline/references/environment.md`). Before running anything,
+check it is reachable and that `ALLOWED_HOSTS` is set; then take every
+host this run will touch — the API host, the frontend host, the
+ticket's alpha host — and check each against the list. Not reachable,
+list missing, host not listed or production → say so NOW and PAUSE
+(mount `~/.ep-qa`, or run this phase from Claude Code — MAINTAINERS
+"Where to run each stage"); do not discover this mid-run at stage 5.
+State the checked hosts in the same line as the run folder.
 
 **QA Service connector is part of this check.** The suite is the only
 copy of the cases outside this machine's run folder (no Jira archive is
@@ -376,8 +381,8 @@ run folder, and the last environment posts the final status line +
 edited.
 
 **What bridges the two environments is the run folder (0.33.0).** Both
-must see `runs/<STORY>/r<N>/` — in this setup Cowork and Claude Code
-mount the same qa-pipeline-skill repo, so they do. The QA Service run
+must see `$EP_QA_HOME/runs/<STORY>/r<N>/` — Cowork mounts `~/.ep-qa`,
+Claude Code has it on disk, so they do. The QA Service run
 carries the verdicts across regardless; the reports' prose does not
 travel any other way (no archive is posted). If the two environments
 cannot share the folder, that run cannot be split: say so before
@@ -417,9 +422,9 @@ story does not exhaust the orchestrator's context:
    Produces `<STORY>-code-review.md`.
 
 3. **api-testing (stage 7)** — on the code-review + test-cases.
-   Executes the `[API]` QA/FAIL cases via curl with `.env`
-   credentials. **PAUSE** if `.env` values or a per-event frontend
-   host are missing. Produces `<STORY>-api-testing.md`.
+   Executes the `[API]` QA/FAIL cases via curl with `.env.qa-agents`
+   credentials. **PAUSE** if values are missing or a host is not in
+   `ALLOWED_HOSTS`. Produces `<STORY>-api-testing.md`.
 
 4. **web-testing (stage 8)** — on the code-review + test-cases +
    checklist (the checklist supplies the `[UI]` structural checks).
@@ -622,7 +627,9 @@ story does not exhaust the orchestrator's context:
    - **REQUIRED PAUSE.** This stage creates accounts and entities on a
      live event. Ask for the throwaway test event id and explicit
      authorisation before provisioning anything. Never target an event
-     with real client data; never guess an event.
+     with real client data; never guess an event. The host it
+     provisions on passed the `ALLOWED_HOSTS` check at step 0; the
+     event authorisation is the second, separate gate.
    - Feed it this run's verdict files (`-code-review.md`,
      `-api-testing.md`, `-web-testing.md`) and the step-6 run id.
    - Outputs `<STORY>-walk-plan.md`, `<STORY>-testdata.json`,

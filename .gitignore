@@ -1,14 +1,18 @@
 # ────────────────────────────────────────────────────────────────
-# RUN WORKSPACE — this repo doubles as the run working directory.
-# Every per-ticket artifact is ignored by BROAD rule, not by filename:
-# a new artifact name must never be one `git add -A` from a commit.
-# (That recipe is banned in MAINTAINERS.md; commit explicit paths only.)
+# Since 0.39.0 nothing a run writes belongs in this tree: runs/ and
+# .env.qa-agents live in $EP_QA_HOME (~/.ep-qa) — see
+# skills/qa-pipeline/references/environment.md. The rules below stay as
+# the second line of defence for legacy files and for a run that was
+# pointed at the checkout by mistake: every per-ticket artifact is
+# ignored by BROAD rule, not by filename, so a new artifact name is never
+# one `git add -A` from a commit. (That recipe is banned in MAINTAINERS.md;
+# commit explicit paths only; scripts/verify_plugin.py check 9 fails the
+# gate while a .env* or runs/ is inside the checkout.)
 # ────────────────────────────────────────────────────────────────
 
-# THE run workspace since 0.32.0: runs/<KEY>/docs/ and runs/<KEY>/r<N>/
-# (skills/qa-pipeline/references/data-locations.md). Everything a stage
-# writes lands here — plans with passwords included — so the whole tree
-# is ignored.
+# the pre-0.39 run workspace: runs/<KEY>/docs/ and runs/<KEY>/r<N>/
+# (skills/qa-pipeline/references/data-locations.md) — plans with
+# passwords included — so the whole tree is ignored.
 runs/
 # Legacy (pre-0.32.0) per-ticket artifacts still sitting in the repo
 # root, any stage, any extension (EP-12345-*.*). Read-only from now on.
@@ -75,5 +79,11 @@ __pycache__/
 # quarantine folder for files a session could not delete
 _to_delete/
 
-# any underscore-prefixed scratch file or folder (stage-9 helpers, cached tokens, login scripts)
-_*
+# any underscore-prefixed scratch file or folder (stage-9 helpers, cached
+# tokens, login scripts) — but not `__init__.py` / `__pycache__`-style
+# double-underscore names, which a package needs shipped
+_[!_]*
+
+# fixtures are committed even though they match the patterns above
+!fixtures/EP-*
+!fixtures/*.md

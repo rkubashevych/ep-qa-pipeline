@@ -269,8 +269,12 @@ that is what makes it usable. Two rules follow, and neither is optional:
   synthetic passwords. A password pasted into documentation outlives
   every environment it was valid for.
 
-Report in the notes file which accounts were created, so they can be
-deactivated when the story closes.
+Record every created account in `-testdata.json` with
+`"throwaway": true` and its random password; `qa-manual-results` step
+4c retires them when the round is ingested (deactivate via the API
+where the environment allows it, otherwise list them for the
+environment owner). An account that outlives its run is a credential
+nobody rotates.
 
 ## What must not happen
 

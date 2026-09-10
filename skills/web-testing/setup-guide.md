@@ -31,7 +31,8 @@ For the ExpoPlatform event / admin site:
 - What appears after a successful login
 
 The shipped login-config.md is already filled in for the ExpoPlatform
-e2e alpha and reads credentials from env vars / the e2e `.env`. When
+e2e alpha and reads credentials from `~/.ep-qa/.env.qa-agents`
+(`environment.md`); the host under test must be in its `ALLOWED_HOSTS`. When
 adapting to ANOTHER product, use clearly-labelled placeholders
 (`<LOGIN_URL>`, `<TEST_USER>`, `<TEST_PASSWORD>`) until the real
 values are supplied. Never commit real credentials.
@@ -59,11 +60,11 @@ and the Default data section.
 
 ### Step 2: navigation_paths.json — the navigation memory
 
-The file is git-ignored (it accumulates environment-specific paths),
-so a fresh clone does not have it. Nothing to configure — the skill
-creates it on first run and fills it in as it learns paths. In Cowork,
-keep it in a mounted persistent folder (see the persistence note in
-SKILL.md Step 3) so the memory survives across sessions.
+It lives at `~/.ep-qa/cache/navigation_paths.json` (it accumulates
+environment-specific paths, so it is never in the repo). Nothing to
+configure — the skill creates it on first run and fills it in as it
+learns paths. In Cowork, mount `~/.ep-qa` so the memory survives across
+sessions (persistence note in SKILL.md Step 3).
 
 ### Step 3 (optional): SKILL.md — the previous skill's name
 

@@ -48,7 +48,11 @@ on a task-specific alpha host (e.g. an `*alphanext*.expoplatform.net`
 host named in the QA sub-task or a dev-QA-guide comment). If the
 files or the user name one, use it for all navigation and login,
 overriding the `login-config.md` default; otherwise use the default
-and tell the user which host you are testing against.
+and tell the user which host you are testing against. **Whichever host
+it is, check it against `ALLOWED_HOSTS` in `.env.qa-agents` before the
+first navigation** (`../qa-pipeline/references/environment.md` → `ALLOWED_HOSTS`): not listed
+or production → PAUSE naming the host; the user adds it or names
+another. Never navigate first "to see if it loads".
 
 If the code-review or test-cases file is not provided — ask before
 starting. If any file is empty or corrupted — stop and notify the
@@ -102,7 +106,7 @@ used in the report's header and in chat:
 
 1. **Playwright MCP — the default.** Used whenever its tools are in the
    session. Own headless browser (no focus/interference breakage),
-   scripted login from `.env.qa-agents` (no login pause), console
+   scripted login from `$EP_QA_HOME/.env.qa-agents` (no login pause), console
    errors captured on every FAIL. Rules:
    **references/playwright-executor.md** — including where evidence can
    actually be written.
@@ -168,11 +172,12 @@ entry, use its `url` / `login_required` / `navigation_steps`
 (`PATH_EXISTS = true`); otherwise `PATH_EXISTS = false`.
 
 > **Persistence note.** `navigation_paths.json` is cross-ticket memory, not a run
-> artefact, so it does NOT live in the run folder. If a persistent folder is mounted (the `qa-pipeline-skill`
-> repo keeps a git-ignored copy under `skills/web-testing/`, or the
-> e2e project folder), read and write `navigation_paths.json` THERE so
-> the memory survives across sessions; fall back to the session's
-> scratch folder only when nothing persistent is mounted.
+> artefact, so it does NOT live in a ticket's run folder. It lives at
+> `$EP_QA_HOME/cache/navigation_paths.json` (`../qa-pipeline/references/environment.md`); a
+> copy under the checkout's `skills/web-testing/` is the pre-0.39
+> location — read it once, write the new one, never write the old.
+> Fall back to the session's scratch folder only when `$EP_QA_HOME` is
+> not reachable, and say so.
 
 ### Step 4 — Login (if needed)
 
@@ -180,14 +185,12 @@ entry, use its `url` / `login_required` / `navigation_steps`
 references/playwright-executor.md ("Login") — ask the user only if the
 login fails. The rest of this step is the extension path.
 
-Read `references/login-config.md`. It reads credentials from
-environment variables, which a Cowork session usually lacks — get them
-from a mounted env file instead (search order:
-`../api-testing/references/api-testing-reference.md` §0 —
-`.env.qa-agents` in the qa-pipeline-skill repo, then the e2e `.env`).
-Never ask the user to paste passwords into chat, and never print the
-values. If no mounted file provides them, ask the user to log in
-manually in the browser tab and continue from the logged-in state.
+Read `references/login-config.md`. It names the variables; the values
+come from `$EP_QA_HOME/.env.qa-agents` (`../qa-pipeline/references/environment.md` — in Cowork
+that means `~/.ep-qa` is mounted). Never ask the user to paste
+passwords into chat, and never print the values. If the file is not
+reachable, ask the user to log in manually in the browser tab and
+continue from the logged-in state.
 
 If login-config.md is filled in, perform the login per its
 instructions (rules: browser-rules.md → "Login"). If it still has

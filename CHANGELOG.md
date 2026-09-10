@@ -5,6 +5,109 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.39.0 — 2026-09-10 — the tree is clean
+
+The security half of the same-day cold review of 0.36.0. One idea:
+**the plugin checkout holds skills and nothing else.** Secrets and runs
+move out; every host a stage may touch is named in advance; a password
+from the credentials file is never spoken.
+
+**Layout — `EP_QA_HOME` (new: `skills/qa-pipeline/references/environment.md`).**
+
+- `.env.qa-agents`, `runs/` and web-testing's `navigation_paths.json`
+  live in `$EP_QA_HOME`, default `~/.ep-qa/` (`%USERPROFILE%\.ep-qa\`
+  on Windows). Resolution, the same for every stage and for the two
+  scripts: `EP_QA_HOME` → `~/.ep-qa` → the checkout's own copies
+  (legacy, **read-only**) → PAUSE. Nothing is ever written into the
+  checkout again; a run that cannot reach a home asks, it does not
+  fall back. Every `runs/<KEY>/…` path in the plugin is now relative
+  to `$EP_QA_HOME`; the file names and the round layout are unchanged
+  (`data-locations.md`), so `Move-Item runs\* ~\.ep-qa\runs\` is the
+  whole migration. Why: `.gitignore` protected git and nothing else —
+  the folder every Cowork session mounts, every installed skill can
+  read and the marketplace serves from held ~700 credential-bearing
+  files and an API key.
+- The e2e project's `.env` is no longer a fallback anywhere — two files
+  with the same variables gave two answers on which alpha was under
+  test (api-testing-reference §0, login-config, MAINTAINERS, the walk,
+  stage 9, both orchestrators now name one file).
+- `scripts/load-env.sh` gained `ep_qa_home`, `ep_qa_env_file` and
+  `host_allowed` (and `--home` / `--env-file` / `--host-allowed HOST`
+  modes); `reconcile_counts.py` resolves `runs/` under the same home
+  (self-test covers `EP_QA_HOME` winning over the cwd, with `~`
+  isolated so a real `~/.ep-qa` cannot leak into the test).
+- `verify_plugin.py` **check 9 — tree**: FAIL while a `.env*` file or a
+  `runs/` folder is inside the checkout; WARN with a count for legacy
+  root artefacts (`EP-*`, `GS-*`, `build_*`, `_*`). Check 3 now walks
+  `git ls-files` (so `hooks/`, `fixtures/`, `docs/` are covered and an
+  untracked runtime file is not), check 4 requires the backtick form
+  (`qa-pipeline` is a substring of `qa-pipeline-docs`), and the
+  frontmatter parser accepts `>-` / `|` block scalars.
+- `.gitignore`: `_*` → `_[!_]*` so a package's `__init__.py` can ship;
+  the `fixtures/` negation is back (below); the header says what the
+  rules are now — a second line of defence, not the workspace.
+
+**`ALLOWED_HOSTS` — "never target production" is now a check.**
+
+- `ALLOWED_HOSTS=` in `.env.qa-agents`: comma-separated hostnames,
+  `*.suffix` wildcards. Before its first request, api-testing (login),
+  web-testing (first navigation), stage 9 (provisioning), the walk
+  (AGENT-RUNS pre-flight) and the code orchestrator's step 0 take every
+  host they are about to use and check each against the list. Not
+  listed → PAUSE naming the host; the stage never adds it and never
+  "just reads". List missing → the run does not start. **Hosts ending
+  in `expoplatform.com` are refused even when listed** — production is
+  never a target (the QA Service and Jira are connectors, not targets).
+  The test-event authorisation stays as the second, separate gate:
+  that one asks *which event*, this one asks *which machine*.
+
+**Secrets in chat.**
+
+- A `.env.qa-agents` value is never spoken, printed or hinted at — the
+  walk's "Which account again?" answer and the plan's session line for
+  an admin/organiser account read "the admin account from your
+  `.env.qa-agents`". Only stage-9 **throwaway** accounts may have their
+  password in the plan and in chat: they exist for one run, get a
+  **random password each** (`secrets.token_urlsafe`; the reference §12
+  example no longer uses a fixed `Test12345!`), are recorded in
+  `-testdata.json` with `"throwaway": true`, and are **retired at
+  stage 10** — new `qa-manual-results` step 4c lists them and offers
+  the deactivation in one confirmation (or writes "retire N test
+  accounts" into Needs a human where the environment has no path).
+  Until now nobody owned teardown; alpha accounts from every run were
+  live credentials nobody rotated.
+- The admin-token example in the api-testing reference §2 builds its
+  JSON body with `python3` from the environment instead of
+  interpolating `$ADMIN_PASSWORD` into a string — a quote in the
+  password no longer breaks the body, and `bash -x` no longer echoes it
+  (§0 already said so; §2 contradicted it).
+- Identities out of documentation: `publish-config.md` no longer
+  carries the operator's e-mail and Atlassian accountId — the assignee
+  is `QA_OPERATOR_EMAIL` from `.env.qa-agents`, resolved at run time
+  (the walk uses the same variable as the default tester principal).
+  The internal database host named in the reference §11.1 is gone.
+
+**Repo hygiene.**
+
+- **0.38 was wrong about `fixtures/`:** `fixtures/EP-0000-context.md`
+  exists and is tracked — the review snapshot simply did not include
+  it. The `.gitignore` negation lines are restored, MAINTAINERS' smoke
+  test names the fixture again, and `verify_plugin.py --selftest`
+  already listed it as allowed.
+- `docs/` is the home for the review, retrospective, spec and prompt
+  files that sat in the root (MAINTAINERS layout tree); the move is a
+  `git mv`, tracked history intact. README and MAINTAINERS say hooks
+  are Claude Code only.
+
+**Migration (once, by hand):** create `~/.ep-qa`, move `.env.qa-agents`
+and `runs/` into it, add `ALLOWED_HOSTS=` and `QA_OPERATOR_EMAIL=` to
+the file, mount `~/.ep-qa` in Cowork sessions that need to write.
+`verify_plugin.py` tells you what is still in the tree.
+
+**Deliberately not in this release:** `TEST_EVENT_IDS` (the event
+authorisation pause covers it for now — revisit if a wrong event is
+ever named); the docs-phase diet (next).
+
 ## 0.38.0 — 2026-09-10 — the seams
 
 The rest of the same-day cold review of 0.36.0: the 🟡 items that do

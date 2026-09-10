@@ -8,7 +8,7 @@ this file disagree, this file wins.
 
 | Store | Holds | Authoritative for |
 |---|---|---|
-| **The run folder** (`runs/<ISSUEKEY>/…`, below) | every `<ISSUEKEY>-*.md` stage file, the open-items ledger, the manual round's files — `-walk-plan.md`, `-walk-state.json`, `-walk-results.md`, `-testdata.json`, the optional runsheet `.xlsx` — evidence screenshots | the stage reports — and their ONLY copy (no archive is posted since 0.33.0) |
+| **The run folder** (`$EP_QA_HOME/runs/<ISSUEKEY>/…`, below) | every `<ISSUEKEY>-*.md` stage file, the open-items ledger, the manual round's files — `-walk-plan.md`, `-walk-state.json`, `-walk-results.md`, `-testdata.json`, the optional runsheet `.xlsx` — evidence screenshots | the stage reports — and their ONLY copy (no archive is posted since 0.33.0) |
 | **QA Service suite + test runs** | requirements, test cases; per-case verdicts as **test runs** (`list_test_runs` / `get_test_run` / `case_execution_history` — one run per pass, `test-runs.md`); `notes` hold only `discrepancy:` lines and pre-0.30 history | test cases and requirements whenever a suite exists; per-case verdicts always |
 | **Jira** | the QA sub-task (description only), the wave-1 status line, the wave-2 human summary, retractions. **No archives since 0.33.0** — pre-0.33 tickets still carry legacy fenced dumps | nothing the pipeline generates; it is a publication surface, not a source |
 
@@ -17,8 +17,13 @@ this file disagree, this file wins.
 Since 0.32.0 every artefact a stage writes goes under `runs/`, never
 into the repo root. The root held 688 `EP-*` files and 17 generator
 scripts with live credentials when this rule was written; every
-MAINTAINERS gotcha about `git add -A` exists because of that. `runs/`
-is git-ignored as a whole.
+MAINTAINERS gotcha about `git add -A` exists because of that. Since
+0.39.0 `runs/` is not inside the plugin checkout at all: **every
+`runs/…` path in this plugin is relative to `$EP_QA_HOME`** (default
+`~/.ep-qa/`) — `environment.md` defines the variable, the resolution
+order and the pause when nothing is reachable. The checkout's own
+`runs/` is a legacy, read-only location; `.gitignore` still covers it
+as the second line of defence.
 
 ```
 runs/<ISSUEKEY>/
@@ -62,25 +67,30 @@ and breaks the scripts; the stale-artefact trap (EP-56197 r4 open-items
 #24 — a round-3 results file read as round 4's) is exactly what the
 folder prevents.
 
-**Legacy.** Artefacts written before 0.32.0 sit in the repo root as
-`<ISSUEKEY>-*`. They stay readable (resolution step 2 below) and are
-never written to again. Optional tidy-up, by hand: move a ticket's root
-files into `runs/<ISSUEKEY>/legacy/`.
+**Legacy.** Artefacts written before 0.32.0 sit in the plugin
+checkout's root as `<ISSUEKEY>-*`; those written between 0.32.0 and
+0.39.0 sit in the checkout's own `runs/`. Both stay readable
+(resolution step 2 below) and are never written to again. Tidy-up, by
+hand: move them into `$EP_QA_HOME/runs/<ISSUEKEY>/legacy/` (root files)
+or straight into `$EP_QA_HOME/runs/` (the old `runs/` tree —
+`Move-Item runs\* ~\.ep-qa\runs\` keeps every round folder as it is).
 
 ## Resolution order for an input file
 
 Look in this order and stop at the first hit:
 
-1. **The run folder.** The current pass's `r<N>/` for stage reports,
-   `docs/` for docs-phase files, `runs/<ISSUEKEY>/` for the ledger.
-   For a *prior* round's file (a retest scope, a resume across rounds)
-   look in the earlier `r*` folder by number — never in the current
-   one. Files persist between chats on the same machine — in this
-   setup the qa-pipeline-skill folder is mounted, and every previous
-   run's files are still in it. **A new chat is not a reason to ask
-   for an upload.** Look first.
-2. **The repo root** — legacy artefacts of tickets run before 0.32.0
-   (`<ISSUEKEY>-*` beside `runs/`). Read-only.
+1. **The run folder** under `$EP_QA_HOME` (`environment.md`). The
+   current pass's `r<N>/` for stage reports, `docs/` for docs-phase
+   files, `runs/<ISSUEKEY>/` for the ledger. For a *prior* round's file
+   (a retest scope, a resume across rounds) look in the earlier `r*`
+   folder by number — never in the current one. Files persist between
+   chats on the same machine — `~/.ep-qa` is mounted in Cowork and on
+   the path in Claude Code, and every previous run's files are still in
+   it. **A new chat is not a reason to ask for an upload.** Look first.
+2. **The plugin checkout** — legacy artefacts: the checkout's own
+   `runs/<ISSUEKEY>/` (0.32–0.38) and `<ISSUEKEY>-*` files in its root
+   (pre-0.32). Read-only; a stage that reads from here says so once and
+   points at the tidy-up above.
 3. **The QA Service suite** — for `<ISSUEKEY>-test-cases.md` and
    `-requirements.md`, rebuild from `get_suite`. The suite is the system
    of record and moves between runs: a PM ruling, a QA-added case or a
@@ -122,9 +132,10 @@ retracted verdict was published, whatever ticket that is
 
 ## Credentials
 
-Never in a committed file, never in Jira, never in a suite note.
-`.env.qa-agents` in the mounted qa-pipeline-skill repo, then the e2e
-`.env`, then env vars. The walk plan, the runsheet `.xlsx`,
-`-testdata.json` and `build_runsheet_*.py` carry live credentials — they
-live under `runs/` (git-ignored) and are never attached to Jira.
+`$EP_QA_HOME/.env.qa-agents` — the only place; resolution, the
+variable list, `ALLOWED_HOSTS` and the secrets-in-chat rule are in
+`environment.md`. Never in a committed file, never in Jira, never in a
+suite note. The walk plan, the runsheet `.xlsx`, `-testdata.json` and
+`build_runsheet_*.py` carry live throwaway-account credentials — they
+live under `$EP_QA_HOME/runs/` and are never attached to Jira.
 `-walk-state.json` and `-walk-results.md` carry none by rule.

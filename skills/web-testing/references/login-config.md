@@ -4,9 +4,9 @@ Login configuration for the ExpoPlatform **alpha2 e2e-testing** site
 under test, derived from the `e2e-testing` Playwright repo. This is a
 staging environment — never production.
 
-Do not hardcode real credentials in this file. Keep them in environment
-variables (or the `e2e-testing` repo's `.env`) and reference them by
-name, as below.
+Do not hardcode real credentials in this file. Keep them in
+`$EP_QA_HOME/.env.qa-agents` (`../../qa-pipeline/references/environment.md`)
+and reference them by name, as below.
 
 ## Login
 
@@ -21,7 +21,7 @@ The portal login is a **modal dialog**, not a separate page.
 - **Email field:** input with placeholder **"Your email or user name"**.
 - **Password field:** input with placeholder **"Your password"**.
 - **Login button:** the **"Log in"** button inside the dialog.
-- **Credentials (from `.env.qa-agents` / env vars — do not inline):**
+- **Credentials (from `$EP_QA_HOME/.env.qa-agents` — do not inline):**
   - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — superadmin. This is the
     single credential set for web testing: it covers the admin panel
     directly, and any visitor/exhibitor role via **impersonation**
@@ -83,5 +83,5 @@ a new user, ask the user for the email/values to use.
   UI) — see the MUI interaction notes in `browser-rules.md`.
 - OAuth / SSO login flows are out of scope for the agent; use the
   email+password (or OTP) flow above.
-- Credential values live in the `e2e-testing` repo's `.env`
-  (git-ignored). This config only references the variable names.
+- Credential values live in `$EP_QA_HOME/.env.qa-agents` — one file
+  (`environment.md`). This config only references the variable names.
