@@ -182,7 +182,16 @@ carried between them; the QA Service run carries the verdicts anyway.
       skill, or `gitleaks protect --staged` after staging).
    3. `git add <the specific files you changed>` — e.g.
       `git add skills/ README.md MAINTAINERS.md CHANGELOG.md .claude-plugin/ .gitignore`
-   4. `git commit -m "…"` then push.
+   4. **`python3 scripts/verify_plugin.py`** — the gate (0.36.0). It
+      checks the three versions agree, every description is ≤ 1024
+      chars and every name matches its folder, every tracked text file
+      is LF with a trailing newline, every skill is wired into README
+      and the evals, every `references/*.md` link resolves, every
+      status in the vocabulary is in `reconcile_counts.py`, the
+      self-test passes, and **nothing staged is a run artefact**. A
+      FAIL means do not commit. Each check exists because its defect
+      class has shipped at least once.
+   5. `git commit -m "…"` then push.
 7. **Publish / update the installed plugin** (see below), and remove any
    duplicate standalone install of the changed skill.
 
@@ -207,6 +216,7 @@ carried between them; the QA Service run carries the verdicts anyway.
 | Per-case verdicts in QA Service (test run per pass, status → verdict mapping, what stays `not_run`, retractions, retraction target rule) | `skills/qa-pipeline/references/test-runs.md` |
 | What earlier rounds left open (carried risk rows, in/out rulings, `[core]` nominations) | `skills/qa-pipeline/references/open-items-ledger.md` → `<KEY>-open-items.md` |
 | Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (see the recipe) |
+| Anything structural before a commit (versions, descriptions, line endings, wiring, references, vocabulary, staged artefacts) | `python3 scripts/verify_plugin.py` |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 
 ## Gotchas

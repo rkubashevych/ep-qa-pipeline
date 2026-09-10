@@ -9,8 +9,9 @@ assert something does NOT appear, or that read counters / analytics /
 leads / statistics / notifications / dashboards. Binding on
 **api-testing (stage 7)**, **web-testing (stage 8)**, and audited by
 **qa-run-analyzer** (Evidence quality bucket). `qa-manual-runsheet`
-already enforces the same rules for human runs via its
-`references/provisioning-rules.md`; this file makes them binding on the
+already enforces the same rules for human runs via
+`../../qa-manual-runsheet/references/provisioning-rules.md`; this file
+makes them binding on the
 automated verdict-producing stages too.
 
 Why this exists: on a real run, the story's central privacy claim

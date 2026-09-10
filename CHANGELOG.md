@@ -5,6 +5,40 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.36.0 — 2026-09-10 — the gate
+
+**`scripts/verify_plugin.py` ships** — parked since 0.18.2 (review
+§4.9), written today after two days in which every defect class it
+catches actually happened: two skill descriptions over the 1024-char
+discovery ceiling (caught by hand, after the fact), the 0.27 fix
+"written and never committed" for two rounds, CRLF churn on five files,
+two files without a trailing newline. Fifth and last of the "old beside
+new" clean-ups agreed on 2026-09-10 — the one that keeps the other four
+from regressing.
+
+Eight checks, a few seconds, non-zero exit on any FAIL:
+versions (plugin.json = marketplace.json = CHANGELOG top heading);
+skills (frontmatter `name` = folder, description ≤ 1024, > 500 lines
+WARN); text (LF, no NUL, trailing newline on every tracked text file);
+wiring (every skill named in README and has a `## <name>` eval
+section); references (every `references/*.md` a skill names exists —
+same-skill, `<skill>/references/` and `../<skill>/references/` forms);
+vocabulary (every status in `status-vocabulary.md` has its base token
+in `reconcile_counts.py` STATUSES); selftest (`reconcile_counts.py
+--selftest`); staged (`git diff --cached` contains no run artefact —
+the `git add -A` guard, verified to fire on `runs/…`, `EP-*` and `_*`
+paths and clear on a clean stage). `--root X` checks another checkout,
+`--no-git` skips the staged check.
+
+Its first run against the real tree found three broken cross-references
+(an "its `references/…`" in `absence-check-protocol.md` and
+`data-locations.md`, a `skill/references/…` form in the analyzer):
+fixed, and the checker accepts the last form. Wired into MAINTAINERS
+recipe step 6.4 and the where-to-look table, and into CLAUDE.md's verify
+commands as "before every commit". Known WARN left standing:
+`qa-pipeline-code/SKILL.md` at 735 lines — the orchestrator diet is the
+review's §4.10, a separate release.
+
 ## 0.35.0 — 2026-09-10 — one browser
 
 **web-testing has one default backend — Playwright MCP — and one

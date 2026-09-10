@@ -22,6 +22,9 @@ from message one.
 
 ## Verify commands
 
+- **Before every commit:** `python3 scripts/verify_plugin.py` — versions,
+  descriptions ≤ 1024, LF/newline, wiring, references, vocabulary,
+  self-test, and no run artefact staged. FAIL = do not commit.
 - Counting script: `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`
 - Docs-stage smoke test: run `fixtures/EP-0000-context.md` through
   grooming → checklist → test-cases (expectations at the fixture's foot)

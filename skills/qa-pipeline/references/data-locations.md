@@ -110,8 +110,9 @@ Statistics disagree, gets its stage re-dispatched for the missing cases.
 
 ## Which ticket receives what
 
-The rule lives in `qa-pipeline-code/SKILL.md` step 6 and its
-`references/results-comment-template.md`. In short: every ticket — QA
+The rule lives in `qa-pipeline-code/SKILL.md` step 6 and
+`../qa-pipeline-code/references/results-comment-template.md`. In short:
+every ticket — QA
 sub-task, Story face, Bug or Defect — gets the wave-1 status line and
 the wave-2 human summary, and nothing else; **no fenced file dumps
 anywhere** since 0.33.0. The one cross-ticket comment is a
