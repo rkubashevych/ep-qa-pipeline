@@ -5,6 +5,41 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.35.0 — 2026-09-10 — one browser
+
+**web-testing has one default backend — Playwright MCP — and one
+fallback — the Claude in Chrome extension.** The description said
+"via a Chrome extension" while the body said "Playwright MCP
+(preferred)" (the September review's description↔body drift), and a
+third browser (Claude's built-in pane) had appeared with no rules at
+all. Fourth of the five "old beside new" clean-ups agreed on
+2026-09-10; also closes the Playwright evidence-path item carried since
+EP-56197 r2 (open-items #12, review §4.5).
+
+- **Backend rule** (`web-testing` "Execution backends"): Playwright
+  whenever its tools are in the session; the extension only when they
+  are absent; neither → PAUSE. The built-in browser is named and
+  explicitly *not* a backend until rules exist (no scripted login; a
+  persistent profile changes what a fresh session means). The report
+  header and chat say which backend ran. Description rewritten (683
+  chars); "browser testing" / "test in the browser" / "run the QA
+  checks" still route — no eval change needed.
+- **Evidence a Playwright FAIL can actually produce**
+  (`playwright-executor.md` → Evidence): the MCP backend writes only
+  inside its sandbox root and refused the documented "save in the
+  working directory" path — every Playwright-backed FAIL was
+  non-compliant with its own skill for two rounds. Now: screenshot into
+  the sandbox and copy to `runs/<KEY>/r<N>/evidence/` when host-side
+  file tools exist; **always** write `<KEY>-web-evidence.md §n` (URL,
+  quoted DOM/text reading, console lines captured before navigating
+  away) and cite `§n` from the report row and the run's roster note.
+  `status-vocabulary.md` FAIL row and a new analyzer 🔴 ("neither
+  reading nor screenshot = a claim") accept either form.
+- **Wiring:** `qa-pipeline-code` stage-8 dispatch and the split-runs
+  note (Playwright makes the code phase a single-environment run);
+  README flow item 8; MAINTAINERS channel routing and environment
+  matrix (stage 8 now "either" with Playwright).
+
 ## 0.34.0 — 2026-09-10 — the run is the tracker
 
 **The checkbox-tracker comment on the QA sub-task is retired.** It was

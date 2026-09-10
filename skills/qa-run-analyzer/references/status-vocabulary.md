@@ -16,7 +16,7 @@ Legend for "Emitted by": CR = code-review (stage 6), API = api-testing
 | Status | Emitted by | Meaning | Evidence required |
 |---|---|---|---|
 | `PASS` | CR, API, WEB | Expected result confirmed. CR: only when fully determined by the code TEXT — runtime observables are QA. API/WEB: subject to the absence-check protocol on instrumented surfaces. | CR: file+behaviour. API: endpoint + observed value. WEB: steps executed. |
-| `FAIL` | CR, API, WEB | Concrete expected-vs-actual discrepancy, for a case that arrived as QA. | Always: where, expected, actual. CR adds file+line; WEB adds screenshot. |
+| `FAIL` | CR, API, WEB | Concrete expected-vs-actual discrepancy, for a case that arrived as QA. | Always: where, expected, actual. CR adds file+line; WEB adds a `web-evidence.md §n` reading (URL, quoted DOM/text, console lines) and a screenshot where the backend can write one (`playwright-executor.md` → Evidence). |
 | `FAIL CONFIRMED` | API, WEB, MR | A code-review FAIL confirmed at runtime (or by the human). Never plain PASS/FAIL for arrived-as-FAIL cases. | The CR finding + what was observed. |
 | `FAIL REJECTED` | API, WEB | A code-review FAIL that runtime disproves — compensated elsewhere or CR was wrong. Counted as a pass in human summaries. | The CR finding + the correct observed behaviour. |
 | `QA` | CR only | Cannot be verified against code text; needs runtime. INPUT status for stages 7/8 — never an output of theirs. | — |

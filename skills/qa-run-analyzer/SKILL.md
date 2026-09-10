@@ -244,6 +244,12 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
   "No data to show" read — those cannot both be right).
 - 🟡 any absence verdict from a single immediate read with no second
   read after the measured ingestion lag.
+- 🔴 a web-testing FAIL / FAIL CONFIRMED with neither a
+  `<KEY>-web-evidence.md §n` reading nor a screenshot in
+  `runs/<KEY>/r<N>/evidence/` — a claim, not a verdict. A `§n` reading
+  alone is compliant (the Playwright backend cannot always write the
+  file — `playwright-executor.md` → Evidence); a screenshot alone is
+  compliant on the extension backend.
 - 🟡 routing integrity: every case in api-testing's "Route to
   web-testing" section and every code-review `RE-ROUTE [UI]` case
   appears in web-testing's Results (or its Not-executed-here with a

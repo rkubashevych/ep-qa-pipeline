@@ -69,7 +69,7 @@ and stay readable; nothing new is written there.
 
 Every checklist item / test case carries a channel tag that decides who
 runs it:
-- `[UI]` → **web-testing** (browser, Chrome extension)
+- `[UI]` → **web-testing** (browser — Playwright MCP by default, Chrome extension fallback)
 - `[API]` → **api-testing** (REST/curl, creds from `.env`)
 - `[mobile]` / `[export/email]` → routed to "Not executed here" (manual
   / device / export tooling)
@@ -84,15 +84,16 @@ The stages need different things, so they run in different places:
 | code-phase step 0 (case rebuild) | the **QA Service connector** — the suite is the record of the cases (no Jira archive is posted since 0.33.0); without it only this machine's `runs/<KEY>/docs/` can supply them, and no run can be written | wherever `qa-pipeline-code` starts |
 | 5–6 `pr-summary`, `code-review` | the code: a **backend/portal-ui repo clone** OR a Bitbucket **API token** (`BB_EMAIL`+`BB_API_TOKEN`) | **Claude Code** |
 | 7 `api-testing` | the e2e **`.env`** (API creds) + a per-event frontend host | **Claude Code** |
-| 8 `web-testing` | a connected Chrome + logged-in test env | **Cowork** (Chrome extension) |
+| 8 `web-testing` | the **Playwright MCP** tools + `.env.qa-agents` for the scripted login (default); else a connected Chrome + logged-in test env (extension fallback) | **either** with Playwright; **Cowork** for the extension |
 | 9–10 `qa-manual-runsheet`, `qa-manual-walk`, `qa-manual-results` | QA Service connector (suite read/write-back) + `.env` for provisioning and for the walk's AGENT-RUNS cards | either, connector present (the walk needs `.env` only if the plan has AGENT-RUNS cards) |
 
 **Why:** Cowork has no repo clone, no `BB_API_TOKEN`, and no `.env`, so
 5–7 can't authenticate there — `api-testing` will pause ("no .env"),
 and `code-review`/`pr-summary` can't reach a private Bitbucket PR. Those
 three are **Claude Code** stages. Run `qa-pipeline-code` from Claude Code
-in the repo that has the `.env`; keep Cowork for the docs half and, when
-Chrome cooperates, `[UI]` web-testing.
+in the repo that has the `.env`; with the Playwright MCP present, stage 8
+runs there too and the whole code phase is one environment. Keep Cowork
+for the docs half and for the Chrome-extension fallback.
 
 **Split runs are supported:** run 5–7 in Claude Code, post the step-6
 status line marked PARTIAL, then resume in Cowork with the same Story

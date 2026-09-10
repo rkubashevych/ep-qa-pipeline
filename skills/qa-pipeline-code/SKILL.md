@@ -353,8 +353,9 @@ Otherwise, using the Atlassian connector and the Story key:
 ## Split runs (Claude Code ↔ Cowork)
 
 Stages 5–7 need repo/API creds (Claude Code); stage 8 needs a browser
-backend — Playwright MCP (works in Claude Code too, enabling a
-single-environment run) or the Chrome extension (Cowork). When the
+backend — Playwright MCP by default (works in Claude Code too, enabling
+a single-environment run), the Chrome extension as the fallback
+(Cowork). When the
 current environment cannot run everything: run what it can, post the
 step-6 comments marked **PARTIAL** (per the template — name the pending
 stages), then start a fresh chat in the other environment with the same
@@ -413,9 +414,12 @@ story does not exhaust the orchestrator's context:
    checklist (the checklist supplies the `[UI]` structural checks).
    Scope per the routing invariant
    (`../qa-run-analyzer/references/status-vocabulary.md`). Backend:
-   Playwright MCP when available, Chrome extension otherwise.
-   **PAUSE** (extension backend only) for browser login and any
-   unknown navigation path. Produces `<STORY>-web-testing.md`.
+   Playwright MCP by default, Chrome extension only when its tools are
+   absent (web-testing "Execution backends"); the report header names
+   the one used. **PAUSE** (extension backend only) for browser login
+   and any unknown navigation path. Produces `<STORY>-web-testing.md`
+   and, for every FAIL, `<STORY>-web-evidence.md` §n (+ screenshots in
+   `evidence/` where the backend can write them).
 
 5. **qa-run-analyzer** — run automatically; writes
    `<STORY>-run-report.md`.

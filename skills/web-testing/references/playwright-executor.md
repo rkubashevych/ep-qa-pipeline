@@ -1,12 +1,12 @@
-# Playwright executor (preferred backend)
+# Playwright executor (the default backend)
 
-Status: **active — preferred when the Playwright MCP tools are
-available in the session.** The Claude in Chrome extension remains
-the fallback executor (see SKILL.md "Execution backends"). First run
-on a real ticket: compare a few results against expectations before
-trusting a full unattended run.
+Status: **the default since 0.35.0 — used whenever the Playwright MCP
+tools are in the session.** The Claude in Chrome extension is the one
+fallback (SKILL.md "Execution backends"). First run on a real ticket:
+compare a few results against expectations before trusting a full
+unattended run.
 
-## Why it is preferred
+## Why it is the default
 
 The extension drives the user's real Chrome — it needs the window
 active and breaks when the user touches the browser. Playwright runs
@@ -59,18 +59,31 @@ listbox portals; date pickers need keyboard entry).
 4. Persist auth state per host when the MCP supports it, so one login
    covers the run.
 
-## Evidence (FAIL only)
+## Evidence (FAIL only) — what the backend can actually write
 
-On every FAIL / FAIL CONFIRMED:
+On every FAIL / FAIL CONFIRMED record, in this order of preference:
 
-- Take a screenshot of the failing state; save as
-  `<ISSUEKEY>-<TC-ID>-fail.png` in the run folder and
-  reference it from the report row.
-- Capture browser console errors for the failing page and quote the
-  relevant line(s) in the finding.
+1. **The screenshot, where it can land.** The Playwright MCP backend
+   writes only inside its own sandbox root and refuses any other path
+   — EP-56197 open-items #12: every Playwright-backed FAIL was
+   non-compliant with the old "save in the working directory" rule, for
+   two rounds. So: screenshot into the sandbox root under the name
+   `<ISSUEKEY>-<TC-ID>-fail.png`, then **copy it into
+   `runs/<ISSUEKEY>/r<N>/evidence/`** with the host-side file tools
+   when they are available in the session. When they are not, say so
+   in the report row and fall to 2.
+2. **The documented equivalent — always written:**
+   `<ISSUEKEY>-web-evidence.md` in the run folder, one numbered section
+   per FAIL: the URL, the exact DOM / text reading that contradicts the
+   expectation (aria snapshot or `inner_text` excerpt, quoted), the
+   console lines captured **before** navigating away, the timestamp.
+   The report row cites `web-evidence.md §n` — that reference is what
+   the run's roster note carries (`test-runs.md` → evidence), because
+   an on-disk screenshot cannot be uploaded there anyway.
 
-Nothing is captured for PASS — evidence noise costs tokens and
-review time.
+A FAIL with a `§n` reading and no screenshot is compliant; a FAIL with
+neither is not a FAIL, it is a claim. Nothing is captured for PASS —
+evidence noise costs tokens and review time.
 
 ## Known risks
 
@@ -78,5 +91,8 @@ review time.
   login fallback (above).
 - `navigation_paths.json` memory is less critical (deep-linking
   works), but keep writing it — the extension fallback still uses it.
+- The sandbox root is per session: a screenshot left there and not
+  copied is gone with the session. Copy or describe, in the same
+  turn.
 - Headless rendering can rarely differ from real Chrome — the headed
   retry rule above covers it.

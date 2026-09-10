@@ -49,7 +49,7 @@ These skills were adapted for ExpoPlatform's stack:
 5. **pr-summary** — reads the Bitbucket PR (or branch) and builds a navigation map of the changes for the reviewer.
 6. **code-review** — verifies each test case against the PR code and produces a compact pass/fail table with findings for failures.
 7. **api-testing** — executes the `[API]` cases (code-review QA/FAIL items) against the running REST API via curl using `.env` credentials; covers admin REST, legacy admin-panel, and exhibitor-token (frontend) cases. Read-only by default; any write snapshots-and-reverts or uses a throwaway entity. Pauses if `.env` / a per-event frontend host is missing.
-8. **web-testing** — executes the `[UI]` QA items and any failed code-review items in a real browser (Chrome extension), confirming bugs in the UI, and writes a detailed report.
+8. **web-testing** — executes the `[UI]` QA items and any failed code-review items in a browser it drives itself (Playwright MCP by default, the Chrome extension as fallback), confirming bugs in the UI, and writes a detailed report.
 9. **qa-manual-runsheet** — provisions fixture data on a throwaway event and builds the walk plan — plain-language cards grouped by login, rigour kept backstage — so the human tests only what is left, in words a person can act on.
 10. **qa-manual-walk** → **qa-manual-results** — the agent walks the tester through the plan one card at a time, running the API cards itself and collecting verdicts in the tester's own words; then the write-back joins by TC id and corrects the published record with explicit retractions where the human proved a verdict wrong.
 

@@ -2,9 +2,10 @@
 name: web-testing
 description: >
   Eighth stage of task processing. Takes the QA items and FAIL items
-  from code review and the test cases, executes them in the browser
-  via a Chrome extension, checks the expected results, and builds a
-  detailed report. Use when the user says "web testing",
+  from code review and the test cases, executes them in a browser it
+  drives itself — Playwright MCP by default, the Claude in Chrome
+  extension as the fallback — checks the expected results, and builds
+  a detailed report. Use when the user says "web testing",
   "test in the browser", "run the QA checks", "browser testing",
   "run the cases yourself in the browser", or after code review is
   finished. NOT for hand-testing by the user: fixtures and the walk
@@ -91,18 +92,29 @@ to the tracker, do not use external tools, do not inspect code.
   `[test data]` examples are used as given. Do not invent test data.
 - After saving the file — stop. Do not continue into later skills.
 
-## Execution backends
+## Execution backends — default and one fallback (0.35.0)
 
-Pick the backend at the start of the run and say which one is used:
+Decide at the start of the run, by tool presence, and say which one is
+used in the report's header and in chat:
 
-1. **Playwright MCP (preferred)** — when its tools are in the session.
-   Own headless browser (no focus/interference breakage), scripted
-   login from `.env.qa-agents` (no login pause), screenshot + console
-   errors on every FAIL. Rules: **references/playwright-executor.md**.
-2. **Claude in Chrome extension (fallback)** — the interactive path.
-   Tools, the see→locate→act→verify pattern, waiting, element finding,
-   data entry, and MUI notes: **references/browser-rules.md** — read
-   it before executing any test case.
+1. **Playwright MCP — the default.** Used whenever its tools are in the
+   session. Own headless browser (no focus/interference breakage),
+   scripted login from `.env.qa-agents` (no login pause), console
+   errors captured on every FAIL. Rules:
+   **references/playwright-executor.md** — including where evidence can
+   actually be written.
+2. **Claude in Chrome extension — the fallback.** Only when the
+   Playwright tools are absent. Drives the user's real Chrome: needs
+   the login PAUSE and a window nobody touches. Tools, the
+   see→locate→act→verify pattern, waiting, element finding, data entry,
+   and MUI notes: **references/browser-rules.md** — read it before
+   executing any test case.
+
+Neither present → PAUSE and say so; never improvise a third backend.
+(Claude's built-in browser pane exists in some sessions; it is not a
+web-testing backend until rules for it are written — it has no
+scripted-login path and its profile persists logins across sessions,
+which changes what "fresh session" means for a test.)
 
 The workflow below is backend-neutral — "PAUSE for login" applies to
 the extension path only. Screenshots on both backends: only as
@@ -326,7 +338,7 @@ Rules:
 ## Browser error handling
 
 Follow browser-rules.md → "Error handling" (page failures, expired
-sessions, missing elements, blocking dialogs, unresponsive extension —
+sessions, missing elements, blocking dialogs, unresponsive backend —
 when to retry, re-login, or mark BLOCKED).
 
 Escalation rule: after 3 failed attempts at the same goal (a login, a
