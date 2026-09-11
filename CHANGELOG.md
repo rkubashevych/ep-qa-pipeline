@@ -5,6 +5,44 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.43.1 — 2026-09-11 — three currency items
+
+The first three adoptions from the coherence review's Part 3 (currency
+table §8a, §8c). Each fixes something wrong today; the rest of Parts 3
+and 5 stay parked until a run shows the failure they prevent.
+
+- **Git guard hook** (`hooks/hooks.json` → `scripts/git_guard.py`,
+  PreToolUse on Bash). Refuses `git add -A` / `--all` / `git add .` and
+  wildcard pathspecs with the CLAUDE.md reason; explicit paths, `-u`,
+  `-p` and everything else pass. Exit 2 blocks; an unreadable payload
+  never blocks. This replaces the notification hook removed in 0.43.0
+  with the one hook that guards an incident-born rule (the working tree
+  may still hold legacy live-credential artefacts). Claude Code only —
+  Cowork has no hooks. Thirteen-command test in MAINTAINERS.
+- **Licence.** `LICENSE` (MIT, © 2026 Roman Kubashevych — the author's,
+  not the company's) and `plugin.json` `license` + `repository`. The
+  plugin declared no licence anywhere; the review's field survey lifts
+  wording from MIT/Apache repos, so ours had to be stated.
+- **Playwright screenshots land in `$EP_QA_HOME/evidence/`.**
+  `playwright-executor.md` said the server "writes only inside its own
+  sandbox root and refuses any other path" and required a copy step
+  with host-side tools — the step that left every Playwright FAIL
+  without its screenshot for two rounds (EP-56197 #12). Playwright MCP
+  has `--output-dir`; the server is started with it pointing at
+  `$EP_QA_HOME/evidence/` (README → "Before you run", exact `claude mcp
+  add` line), screenshots are named `<KEY>-r<N>-<TC>-fail.png` (the
+  store is flat, so the round is in the name), reports cite
+  `evidence/<name>`. `environment.md` and `data-locations.md` layouts
+  updated. An unconfigured server still falls to the `§n` reading.
+
+Not adopted yet from Parts 3/5 (no run has shown the need): the QA
+Service tool swaps (`search`, `get_suite_tree`, `coverage_report`,
+`discover_tests`), `disable-model-invocation` / `when_to_use`
+frontmatter, the network-request evidence bundle, and the field-survey
+items (grep self-lint, confidence filter, recommended answers,
+revert-to-verify, near-miss evals, fixture prefixes). Each is a named
+candidate for the release after the first 0.43 run.
+
 ## 0.43.0 — 2026-09-11 — coherence pass
 
 No new mechanism. This release makes the rules that exist agree with

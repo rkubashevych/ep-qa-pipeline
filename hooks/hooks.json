@@ -1,0 +1,16 @@
+{
+  "description": "Git guard: a PreToolUse hook on Bash that refuses `git add -A`, `git add --all`, `git add .` and wildcard pathspecs — the staging commands CLAUDE.md forbids because the working tree may hold legacy live-credential run artefacts. Blocks with the reason; everything else passes.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "p=\"${CLAUDE_PLUGIN_ROOT}/scripts/git_guard.py\"; python3 \"$p\"; rc=$?; if [ $rc -eq 127 ]; then python \"$p\"; rc=$?; fi; exit $rc"
+          }
+        ]
+      }
+    ]
+  }
+}

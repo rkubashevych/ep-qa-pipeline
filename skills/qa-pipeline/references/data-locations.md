@@ -38,7 +38,9 @@ runs/<ISSUEKEY>/
     -run-report.md · -retest-scope.md · -human-summary.md ·
     -walk-plan.md · -walk-state.json · -walk-results.md ·
     -manual-results.md · -testdata.json · -testdata-notes.md ·
-    -runsheet.xlsx · build_runsheet_<ISSUEKEY>.py · evidence/*.png
+    -runsheet.xlsx · build_runsheet_<ISSUEKEY>.py
+  (FAIL screenshots: $EP_QA_HOME/evidence/<ISSUEKEY>-r<N>-<TC>-fail.png —
+   Playwright's --output-dir is one flat folder, so they sit beside runs/)
 ```
 
 **File names do not change** — they keep the `<ISSUEKEY>-<stage>.md`

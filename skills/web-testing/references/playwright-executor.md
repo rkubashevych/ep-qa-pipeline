@@ -66,15 +66,19 @@ listbox portals; date pickers need keyboard entry).
 
 On every FAIL / FAIL CONFIRMED record, in this order of preference:
 
-1. **The screenshot, where it can land.** The Playwright MCP backend
-   writes only inside its own sandbox root and refuses any other path
-   — EP-56197 open-items #12: every Playwright-backed FAIL was
-   non-compliant with the old "save in the working directory" rule, for
-   two rounds. So: screenshot into the sandbox root under the name
-   `<ISSUEKEY>-<TC-ID>-fail.png`, then **copy it into
-   `runs/<ISSUEKEY>/r<N>/evidence/`** with the host-side file tools
-   when they are available in the session. When they are not, say so
-   in the report row and fall to 2.
+1. **The screenshot, straight into `$EP_QA_HOME/evidence/`.** The
+   Playwright MCP server writes only inside its output directory, so the
+   server is started with `--output-dir` pointing at
+   `$EP_QA_HOME/evidence/` (README → "Before you run"; `environment.md`
+   layout). Take the screenshot with `filename:
+   <ISSUEKEY>-r<N>-<TC-ID>-fail.png` — the round is in the name because
+   the store is flat — and the report row cites
+   `evidence/<ISSUEKEY>-r<N>-<TC-ID>-fail.png`. No copying step.
+   (EP-56197 open-items #12: the earlier "screenshot into the sandbox,
+   then copy with host tools" rule left every Playwright FAIL without
+   its screenshot for two rounds.) Output directory not configured —
+   the tool reports a path outside `$EP_QA_HOME` — say so once in the
+   report and fall to 2.
 2. **The documented equivalent — always written:**
    `<ISSUEKEY>-web-evidence.md` in the run folder, one numbered section
    per FAIL: the URL, the exact DOM / text reading that contradicts the
@@ -94,8 +98,9 @@ evidence noise costs tokens and review time.
   login fallback (above).
 - `navigation_paths.json` memory is less critical (deep-linking
   works), but keep writing it — the extension fallback still uses it.
-- The sandbox root is per session: a screenshot left there and not
-  copied is gone with the session. Copy or describe, in the same
-  turn.
+- A server started without `--output-dir` writes to a per-session temp
+  folder that is gone with the session. The report row shows it (a
+  path outside `$EP_QA_HOME`): fall to the `§n` reading, and tell the
+  user the one-line reconfiguration.
 - Headless rendering can rarely differ from real Chrome — the headed
   retry rule above covers it.

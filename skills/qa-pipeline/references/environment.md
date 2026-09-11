@@ -30,6 +30,8 @@ $EP_QA_HOME/                    default: ~/.ep-qa/   (Windows: %USERPROFILE%\.ep
   .env.qa-agents                the credentials file (below)
   runs/<KEY>/…                  the run folder — layout in data-locations.md
   cache/navigation_paths.json   web-testing's navigation memory
+  evidence/                     Playwright MCP --output-dir: FAIL screenshots,
+                                <KEY>-r<N>-<TC>-fail.png (flat; round in the name)
 ```
 
 Every `runs/<KEY>/…` path written anywhere in this plugin is relative

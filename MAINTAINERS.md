@@ -275,10 +275,12 @@ carried between them; the QA Service run carries the verdicts anyway.
 - **api-testing pauses** if `.env.qa-agents` is unreachable, a host is
   not in `ALLOWED_HOSTS`, or a per-event frontend host is missing (the
   frontend host is per-event and not discoverable).
-- **No hooks.** The opt-in desktop-notification hook
-  (`hooks/hooks.json` + `scripts/notify.py`) was removed in 0.43.0 —
-  it never fired in Cowork and no run reported it working in Claude
-  Code. Hooks that add a gate (PreToolUse) are a separate, future item.
+- **One hook, and it is a gate, not a bell.** `hooks/hooks.json` runs
+  `scripts/git_guard.py` before every Bash call in Claude Code and
+  refuses `git add -A` / `--all` / `.` / wildcard pathspecs (exit 2 +
+  reason). Test it: `echo '{"tool_input":{"command":"git add ."}}' |
+  python3 scripts/git_guard.py` → exit 2. Hooks never fire in Cowork.
+  The 0.7.0 desktop-notification hook was removed in 0.43.0.
 
 ## Publishing / updating — the no-drag way (marketplace)
 

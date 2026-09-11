@@ -10,7 +10,9 @@ from message one.
 
 - **Never `git add -A` or `git add .`** — the working tree may still
   hold legacy live-credential run artifacts. Explicit paths only,
-  secret-scan first. Recipe: MAINTAINERS.md step 6.
+  secret-scan first. Recipe: MAINTAINERS.md step 6. Enforced in Claude
+  Code by `hooks/hooks.json` → `scripts/git_guard.py` (PreToolUse on
+  Bash); Cowork has no hooks, so the rule still has to be read.
 - **Never write skill files via a shell through the Cowork mount**
   (sed/python/redirects) — writes get silently truncated. Host-side
   file tools or a local editor only.
