@@ -32,7 +32,7 @@ cross-round memory it closes rows in:
 `../qa-pipeline/references/open-items-ledger.md`.
 
 The pipeline publishes automated verdicts at code-phase step 6 — before
-the human walks the run sheet. This stage exists so what the human
+the human round. This stage exists so what the human
 found actually reaches the record. Without it, the truest verdicts of
 the run live in a spreadsheet nothing reads, and the system of record
 keeps asserting PASSes everyone knows are wrong.

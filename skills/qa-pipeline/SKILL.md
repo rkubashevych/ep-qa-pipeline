@@ -50,14 +50,18 @@ first — Jira archive comments are legacy, read only on pre-0.33 tickets).
 
 ## Step 2 — Propose the route
 
-| State observed | Proposed route |
+Rows are keyed in the order the evidence is trusted: run folder, then
+the QA Service suite/run, then Jira (a Jira comment alone never decides).
+
+| State observed (run folder → QA Service → Jira) | Proposed route |
 |---|---|
-| Story/Task (or Bug with real scope), no QA sub-task, no suite | **Docs phase** — `qa-pipeline-docs` now; code phase afterwards in a FRESH chat (hand the user the exact command) |
-| Bug, no QA sub-task, no suite | **Bug-fix mode** — `qa-pipeline-code`, cases derived from the ticket |
-| QA sub-task/suite exists, no code-phase results | **Code phase** — `qa-pipeline-code` (fresh chat recommended if this one already ran the docs phase) |
-| Code-phase results exist, newest summary ❌ or user says the fix landed | **Retest mode** — `qa-pipeline-code` retest |
-| Walk plan emitted, no walk results yet (or a `-walk-state.json` in progress) | **Guided walk** — `qa-manual-walk` (resume when state exists) |
-| Filled sheet / TC-Result-Notes table in hand, or a complete `-walk-results.md` not yet written back | **Ingestion** — `qa-manual-results` |
+| No run folder, no suite, no QA sub-task; ticket is a Story/Task (or Bug with real scope) | **Docs phase** — `qa-pipeline-docs` now; code phase afterwards in a FRESH chat (hand the user the exact command) |
+| No run folder, no suite, no QA sub-task; ticket is a Bug | **Bug-fix mode** — `qa-pipeline-code`, cases derived from the ticket |
+| Suite exists (or a QA sub-task carries its suite line); no `r<N>/` reports, no test run | **Code phase** — `qa-pipeline-code` (fresh chat recommended if this one already ran the docs phase) |
+| `r<N>/` reports or a test run exist; newest summary ❌ or the user says the fix landed | **Retest mode** — `qa-pipeline-code` retest |
+| `-walk-plan.md` present, no `-walk-results.md` (or a `-walk-state.json` in progress) | **Guided walk** — `qa-manual-walk` (resume when state exists) |
+| Complete `-walk-results.md` not yet written back, or a filled sheet / TC-Result-Notes table in hand | **Ingestion** — `qa-manual-results` |
+| A phase stopped mid-way — e.g. stage reports written but no test run recorded, or a run left `running` with no results comment | **Resume** — re-enter the same skill at the step that never ran; it records into the existing run, never a new one |
 | Signals conflict or several apply | Present the observed state and the 2–3 plausible routes; the user picks |
 
 Always show the evidence with the proposal, one line each ("QA sub-task

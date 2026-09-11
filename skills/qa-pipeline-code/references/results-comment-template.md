@@ -197,7 +197,7 @@ and devs read the story, not the sub-task. ≤10 lines, plain words, no
 pipeline jargon. qa-pipeline-code step 8 must not post this on automated
 verdicts alone; if the user insists on a story note at step 8, use the title
 "✅ Automated QA passed — manual verification pending", include the
-`Status: PROVISIONAL` line, and apply no workflow transition.
+`Status: DRAFT — awaiting stage 10` line, and apply no workflow transition.
 
 ```markdown
 ✅ QA passed — <STORY>: <feature in plain words>

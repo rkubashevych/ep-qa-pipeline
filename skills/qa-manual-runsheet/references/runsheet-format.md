@@ -1,8 +1,8 @@
 # Run sheet format — the optional export
 
-**Contents:** Status since 0.31.0 · Sheet 1 — Case index (columns, row
-states incl. VERIFY spot-check, colour spec + REJECTED muted palette,
-formatting) · Sheet 2 — Accounts · Sheet 3 — Entities · Sheet 4 —
+**Contents:** Status since 0.31.0 · Sheet 1 — Case index (columns,
+REJECTED harness text in Do cells, row states incl. VERIFY spot-check,
+colour spec + REJECTED muted palette, formatting) · Sheet 2 — Accounts · Sheet 3 — Entities · Sheet 4 —
 Reference · Sheet 5 — Environment · Credentials · What must not happen
 
 ## Status since 0.31.0 — rendered from the walk plan, on request
@@ -55,33 +55,32 @@ the pass condition instead of sitting two columns away from it.
 
 - **UI verdict** — one automated-verdict column is enough context. A
   stage-8 result goes in Notes when there is one.
-- **How the case is run** — that belongs at the top of **Do**, not in its
-  own column (see below).
+- **How the case is run** — not a column either. A case that *is* a
+  request is an AGENT-RUNS card in the plan; the export prints its
+  `run:` line after **Expect**, prefixed *"(agent-run in a walk; by
+  hand:)"* (see "Status since 0.31.0"). **Do** stays the card's Do.
 
-### Can a human even run it? Put it in Do, not a column
+### REJECTED — harness text in Do cells. Do not implement.
 
-The channel tag says **who runs the case in the automated pipeline**. It
-does not say whether a person can run it by hand. Where they differ, open
-the **Do** cell with a one-line marker:
+Until 0.31.0 this section told the generator to open the **Do** cell with
+a one-line marker — *"This click IS the case — the card sends POST
+/profile/connect …"*, *"Trigger it, then DevTools → Network → Copy as
+fetch → re-run"*, or the raw request when no UI path existed. That is
+the EP-56998 cell the walk plan was written to abolish: nine of eleven
+rows handed the tester a harness line. It contradicts
+`walk-plan-format.md` → Voice rules (rule 5: no HTTP verb, endpoint,
+status code, curl line or DevTools recipe in a human card) and the
+rendering rule above (**Do** = the card's Do). Kept here so it is not
+reinvented. The two lessons it carried survive as backstage keys:
 
-- a click produces exactly that request → say so: *"This click IS the
-  case — the card sends POST /profile/connect {type:visitor, id:…}"*
-- the UI cannot produce the payload → *"⚠ Clicking twice will NOT work,
-  the star toggles. Trigger it, then DevTools → Network → Copy as fetch →
-  re-run."*
-- no UI path exists → give the request, and point at the token recipe on
-  the Environment sheet
-- not manually observable → say why, and who could obtain it
-
-Two mistakes this prevents:
-
-- **Assuming a toggle can duplicate.** A favourite star toggles, so
-  clicking twice *unfavourites* — it can never produce the duplicate a
-  400-on-duplicate case needs.
-- **Overstating what a click proves.** Clicking a star shows the star lit;
-  it does not show the stored row is typed `exhibitor`. Where only part of
-  an assertion is observable by hand, say so in **Expect** and name which
-  half the automated stage owns. Half-verified is not verified.
+- **A toggle cannot duplicate.** A favourite star toggles, so clicking
+  twice *unfavourites* — it can never produce the duplicate a
+  400-on-duplicate case needs. Such a case is AGENT-RUNS (`run:` key),
+  never a click instruction.
+- **A click proves only the visible half.** The star lights; it does not
+  show the stored row is typed `exhibitor`. The card's `half-observable`
+  key names the machine verdict that owns the rest, and **Expect** says
+  so in one clause. Half-verified is not verified.
 
 Keep A–G dim (9pt grey is enough) — they are reference, not instruction.
 H–J carry the work. K–L are the tester's.

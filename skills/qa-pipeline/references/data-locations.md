@@ -71,10 +71,12 @@ folder prevents.
 **Legacy.** Artefacts written before 0.32.0 sit in the plugin
 checkout's root as `<ISSUEKEY>-*`; those written between 0.32.0 and
 0.39.0 sit in the checkout's own `runs/`. Both stay readable
-(resolution step 2 below) and are never written to again. Tidy-up, by
-hand: move them into `$EP_QA_HOME/runs/<ISSUEKEY>/legacy/` (root files)
-or straight into `$EP_QA_HOME/runs/` (the old `runs/` tree —
-`Move-Item runs\* ~\.ep-qa\runs\` keeps every round folder as it is).
+(resolution steps 2–3 below) and are never written to again. Tidy-up,
+by hand: root files go into **`$EP_QA_HOME/runs/legacy/`** — one flat
+folder for every pre-0.32 root file, any ticket, no per-ticket sorting
+(this is the layout MAINTAINERS names and `reconcile_counts.py`
+resolves); the old `runs/` tree goes straight into `$EP_QA_HOME/runs/`
+(`Move-Item runs\* ~\.ep-qa\runs\` keeps every round folder as it is).
 
 ## Resolution order for an input file
 
@@ -88,11 +90,15 @@ Look in this order and stop at the first hit:
    chats on the same machine — `~/.ep-qa` is mounted in Cowork and on
    the path in Claude Code, and every previous run's files are still in
    it. **A new chat is not a reason to ask for an upload.** Look first.
-2. **The plugin checkout** — legacy artefacts: the checkout's own
-   `runs/<ISSUEKEY>/` (0.32–0.38) and `<ISSUEKEY>-*` files in its root
-   (pre-0.32). Read-only; a stage that reads from here says so once and
-   points at the tidy-up above.
-3. **The QA Service suite** — for `<ISSUEKEY>-test-cases.md` and
+2. **`$EP_QA_HOME/runs/legacy/`** — the flat folder the tidy-up above
+   fills: `<ISSUEKEY>-<stage>.md` files of every pre-0.32 ticket side by
+   side, round suffixes and all. Read-only; a stage that reads from here
+   says so once (`Run folder: ~/.ep-qa/runs/legacy (legacy flat layout)`).
+3. **The plugin checkout** — legacy artefacts not yet moved: the
+   checkout's own `runs/<ISSUEKEY>/` (0.32–0.38) and `<ISSUEKEY>-*`
+   files in its root (pre-0.32). Read-only; a stage that reads from here
+   says so once and points at the tidy-up above.
+4. **The QA Service suite** — for `<ISSUEKEY>-test-cases.md` and
    `-requirements.md`, rebuild from `get_suite`. The suite is the system
    of record and moves between runs: a PM ruling, a QA-added case or a
    corrected expectation lands there, not in the file the docs phase
@@ -100,12 +106,12 @@ Look in this order and stop at the first hit:
    scope, a resume, stage 10's reconciliation) the previous pass's test
    run is the record — `get_test_run`, not the markdown reports and not
    the case notes.
-4. **Legacy only — the archive comment on the QA sub-task** of a
+5. **Legacy only — the archive comment on the QA sub-task** of a
    ticket run before 0.33.0 (fenced docs-phase files and results
    reports). Parse with
    `<plugin>/skills/qa-pipeline-code/scripts/extract_archive.py -o
    runs/<ISSUEKEY>/<folder>`. Never post a new one.
-5. **Ask the user to attach it.** Last resort, not first.
+6. **Ask the user to attach it.** Last resort, not first.
 
 ## Two mistakes this file exists to prevent
 

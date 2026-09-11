@@ -52,7 +52,7 @@ If none: "No issues found — run is clean."
 
 ## Findings summary
 
-<docs: requirement/check/test-case counts + channel breakdown + needing-clarification>
+<docs: requirement / test-case / structural-check counts + channel breakdown + needing-clarification>
 <code: code-review counters; api-testing counters + endpoint-mapping corrections; web-testing counters; confirmed bugs; routed-to-non-UI (mobile/export-email); verdict>
 
 ## Recommended next actions
@@ -73,7 +73,7 @@ Top issues (max 3):
 1. 🔴 [Input] <one line> — fix: <one line>
 2. 🟡 [Pipeline] <one line> — fix: <one line>
 
-<docs: "N requirements → N checks → N test cases (N [UI] · N [API] · N routed); N need clarification.">
+<docs: "N requirements → N test cases + S structural checks (N [UI] · N [API] · N routed); N need clarification.">
 <code: "Code review N/N pass · API N/N · Web N/N — N confirmed bugs.">
 
 Report: <ISSUEKEY>-run-report.md

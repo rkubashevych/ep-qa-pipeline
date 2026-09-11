@@ -26,9 +26,6 @@ description: >
 > **QA Service MCP connector**. The install-specific server prefix
 > varies — match by tool name on the server that provides it.
 
-> Recommended settings for the whole run: **Opus . Effort: High .
-> Extended thinking: On**. Grooming (stage 2) benefits most.
-
 Runs the first four pipeline stages end to end, health-checks the run,
 then publishes to a QA sub-task on the story. Each stage is a real
 skill in this repo — this orchestrator sequences them, it does not
@@ -71,25 +68,8 @@ findings are in time to act on; never block the run on status.
 
 ## How it runs
 
-**Session name first:** as soon as the ticket key is known, suggest
-renaming the session to `QA-pipeline <KEY> — docs` (Claude Code:
-`/rename …`; Cowork: click the chat title). One short reminder, then
-move on.
-
-**Run clock (progress + time left):** stamp the wall clock (`date
-+%H:%M`) at run start and after every stage below completes, then post
-exactly ONE progress line per boundary — nothing more:
-
-`⏱ Stage <n>/6 done — <stage name> · elapsed <E> min · ~<R> min left`
-
-Initial per-stage budgets (minutes): task-context 8 · grooming 12
-(+10 when recon runs) · test-cases 15 (it decomposes first, then
-writes) · analyzer 5 · publish 12. Compute `<R>` as the unfinished stages' budgets scaled by
-the run's own pace (elapsed ÷ sum of finished budgets, clamped to
-0.5–3); round to 5 minutes and keep the `~`. Stamp both ends of any
-user-waiting pause (the publish confirmation) and subtract the waited
-time from elapsed — waiting is not pace. No shell available → skip
-the clock silently.
+Post one short line per stage boundary (`Stage <n>/5 done — <stage
+name>`) and nothing more between stages.
 
 Execute each stage by reading its `SKILL.md` and following it **in
 full** — do not summarise or shortcut it. Stages share the run folder
@@ -140,7 +120,7 @@ full** — do not summarise or shortcut it. Stages share the run folder
      no pipeline jargon; voice rules:
      `../qa-pipeline-code/references/jira-writing-style.md`
      — show it, and ask ONE quick yes/no: "post these
-     open questions to <KEY> now?". On yes, post before stage 3; the
+     open questions to <KEY> now?". On yes, post before stage 4; the
      run continues either way. (An answer arriving while stages 3–4
      run can still fix the cases this run; a question first seen at
      the publish preview has already cost the whole phase — on a real
@@ -261,7 +241,8 @@ full** — do not summarise or shortcut it. Stages share the run folder
 ## Final response
 
 After publishing, report:
-- The paths of the four stage files + the run report
+- The paths of the three stage files (context, requirements,
+  test-cases; plus recon when it ran) + the run report
   (`runs/<ISSUEKEY>/docs/`).
 - The QA sub-task key + URL and what was posted (the description only
   — no tracker comment, no archive).
@@ -271,5 +252,5 @@ After publishing, report:
 - The run-analyzer health verdict (🟢/🟡/🔴 per category) and any
   ⚠ SPECIAL ATTENTION items for the code phase.
 - The next step: run `qa-pipeline-code` on the Story key in a fresh
-  chat. Do NOT run `qa-manual-runsheet` here — the run sheet needs the
+  chat. Do NOT run `qa-manual-runsheet` here — the walk plan needs the
   automated verdicts to know what is left for the human.

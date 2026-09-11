@@ -183,7 +183,7 @@ requirement is only used if the user explicitly asks.
 For every behavioural requirement, mark exactly one case as the core
 case — ` [core]` on its heading, after the channel tag — per the "Core
 selection rule" in `references/test-case-design-rules.md`. The core
-case is the card the manual walk (stage 9) always presents, so the
+case is the card the manual walk (stage 10a) always presents, so the
 human touches every requirement even when the machine settled it.
 
 **Combinatorial requirements (3+ interacting parameters).** If a

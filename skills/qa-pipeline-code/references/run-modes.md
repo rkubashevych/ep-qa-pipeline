@@ -165,11 +165,11 @@ are presumed contaminated for any counter/analytics assertion (one
 run left a phantom like and a counter stuck at 15). Reuse a prior
 account only for stateless checks, after re-verifying its login and
 baseline.
-Post results as a normal comment pair with the verdict line
-prefixed `RETEST:`. The retest is a NEW run on the same suite (one
+Wave 1 posts the one status line, prefixed `RETEST:`; the human
+summary follows at stage 10. The retest is a NEW run on the same suite (one
 run per pass); a FAIL that now passes is simply recorded `pass` in
 it, and the retraction comment goes to wherever the old FAIL was
 published (`test-runs.md` → "Retraction target rule"); verified
 bugs get a closing comment offered on their tickets. Everything else
 keeps its verdicts — say so in the summary. Stage 10 ingests the
-retest sheet like a first run.
+retest walk results (or an exported sheet) like a first run.

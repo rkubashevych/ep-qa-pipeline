@@ -86,11 +86,13 @@ shell metacharacters).
 ## `ALLOWED_HOSTS` — the only hosts a stage may touch
 
 ```
-ALLOWED_HOSTS=api-alpha2.expoplatform.net,ennies-alpha2.expoplatform.net,*.rc.expoplatform.net
+ALLOWED_HOSTS=api-alpha2.expoplatform.net,ennies-alpha2.expoplatform.net,canyon2026-rc.expoplatform.net,*.alphanext14prod.expoplatform.net
 ```
 
-Comma-separated hostnames; a leading `*.` matches one or more labels.
-No scheme, no path, no port.
+Comma-separated hostnames; a leading `*.` matches one or more whole
+labels — `*.rc.expoplatform.net` does NOT match
+`canyon2026-rc.expoplatform.net`, so list such hosts by name. No
+scheme, no path, no port.
 
 **The rule.** Before the first request of a run — the api-testing
 login, web-testing's first navigation, stage 9's first provisioning

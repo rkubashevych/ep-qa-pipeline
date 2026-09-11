@@ -203,9 +203,11 @@ def resolve_run_dir(key, d=None):
     """Return the folder to read stage reports from.
 
     Explicit dir → as given. Otherwise the newest `runs/<key>/r<N>` under
-    ep_qa_home(); when none exists, the cwd (legacy layout: files beside
-    the repo root). Also returns the docs folder used as the test-cases
-    fallback (may not exist).
+    ep_qa_home(); when none exists, `runs/legacy/` if it holds the key's
+    test-cases file (the flat pre-0.32 tidy-up folder — data-locations.md
+    resolution step 2); else the cwd (legacy layout: files beside the repo
+    root). Also returns the docs folder used as the test-cases fallback
+    (may not exist).
     """
     root = ep_qa_home()
     runs = "runs" if root == "." else os.path.join(root, "runs")
@@ -221,6 +223,9 @@ def resolve_run_dir(key, d=None):
                 rounds.append(int(name[1:]))
     if rounds:
         return os.path.join(base, f"r{max(rounds)}"), docs
+    legacy = os.path.join(runs, "legacy")
+    if os.path.exists(os.path.join(legacy, f"{key}-test-cases.md")):
+        return legacy, docs
     return ".", docs
 
 
@@ -287,8 +292,11 @@ def ledger_report(context, requirements, test_cases):
 
 
 def read_docs_file(key, stage, d, docs):
-    """context / requirements live in docs/ (or the legacy cwd)."""
-    for path in (os.path.join(docs, f"{key}-{stage}.md"), f"{key}-{stage}.md"):
+    """context / requirements: the pass folder first (qa-pipeline-code
+    step 0 rebuilds requirements there in retest / bug-fix mode), then
+    docs/ (where the docs phase writes them), then the legacy cwd."""
+    for path in (os.path.join(d, f"{key}-{stage}.md"),
+                 os.path.join(docs, f"{key}-{stage}.md"), f"{key}-{stage}.md"):
         if os.path.exists(path):
             return open(path, encoding="utf-8").read()
     return None
@@ -296,7 +304,8 @@ def read_docs_file(key, stage, d, docs):
 
 def report(key, d=None):
     d, docs = resolve_run_dir(key, d)
-    print(f"run folder: {d}")
+    tag = " (legacy flat layout)" if os.path.basename(d) == "legacy" else ""
+    print(f"run folder: {d}{tag}")
     ctx = read_docs_file(key, "context", d, docs)
     reqf = read_docs_file(key, "requirements", d, docs)
     tcp = locate(key, "test-cases", d, docs)
@@ -492,6 +501,12 @@ def check_run_folder(errs):
             d, _ = resolve_run_dir(key)
             if d != ".":
                 errs.append(f"run-folder: legacy fallback gave {d!r}, want '.'")
+            # flat runs/legacy/ holding the key's case file wins over the cwd
+            os.makedirs(os.path.join("runs", "legacy"))
+            open(os.path.join("runs", "legacy", f"{key}-test-cases.md"), "w").write("x")
+            d, _ = resolve_run_dir(key)
+            if d != os.path.join("runs", "legacy"):
+                errs.append(f"run-folder: runs/legacy not resolved, gave {d!r}")
             # rounds: r1, r2, r10 → r10 (numeric, not lexical)
             for r in ("r1", "r2", "r10"):
                 os.makedirs(os.path.join("runs", key, r))
@@ -516,6 +531,14 @@ def check_run_folder(errs):
             open(f"{key}-code-review.md", "w").write("x")
             if locate(key, "code-review", d, docs) is not None:
                 errs.append("run-folder: code-review must not fall back to cwd")
+            # requirements: docs/ copy is read; a rebuilt copy in the pass
+            # folder (retest / bug-fix step 0) wins over it
+            open(os.path.join(docs, f"{key}-requirements.md"), "w").write("docs")
+            if read_docs_file(key, "requirements", d, docs) != "docs":
+                errs.append("run-folder: requirements not read from docs/")
+            open(os.path.join(d, f"{key}-requirements.md"), "w").write("pass")
+            if read_docs_file(key, "requirements", d, docs) != "pass":
+                errs.append("run-folder: rebuilt requirements in the pass folder must win")
         finally:
             os.chdir(cwd)
             for k, v in saved.items():

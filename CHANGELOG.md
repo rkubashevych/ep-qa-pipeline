@@ -5,6 +5,138 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.43.0 — 2026-09-11 — coherence pass
+
+No new mechanism. This release makes the rules that exist agree with
+each other and with what the runs actually do. Source: the 2026-09-10
+coherence review (`COHERENCE-REVIEW-2026-09-10.md`, findings F1–F29);
+evidence base: the five newest complete runs (EP-56197 r4, EP-48506,
+EP-56998, EP-56268 r3, EP-56740 r2). Nothing shipped since 0.30 had
+been exercised by a run with the 0.39 layout — see "What this does not
+do".
+
+**Contradictions repaired (🔴 F1–F8).**
+
+- **Bug template vs writing style** (`jira-writing-style.md`): the
+  style file wins on tone and length, the template wins on content;
+  a bug's Expected result is the AC clause, never the test case's
+  `Exp:` block (a case is not a source of record).
+- **Branch mode diffed against the wrong base** (`bitbucket-access.md`):
+  the copyable command now takes the repo's default branch (monolith
+  `alpha`, portal/admin `master`) and diffs three-dot from the
+  merge-base. `EP-48506` ledger row 15 was this trap.
+- **Fixture had no AC ledger** (`fixtures/EP-0000-context.md`): the
+  Requirements section is a 0.42 ledger (`AC-1 (Confluence §1)` …,
+  `AC items on the page: 5 · captured: 5`, one conflict, one `CM-1`).
+- **The AC ledger did not survive the fresh chat**: `qa-pipeline-code`
+  step 0 rebuilds `<STORY>-requirements.md` with each REQ's `source:`
+  and each group's `Covers:` from the suite's `detail.ac` (absent =
+  pre-0.42 suite, said once); `qa-service-publish.md` states the
+  round-trip; `reconcile_counts.py` reads the docs-phase files from
+  `runs/<KEY>/docs/` when the pass folder lacks them (self-tested).
+- **The machine's real run folder was undocumented**:
+  `~/.ep-qa/runs/legacy/` (flat, 1,047 files, every ticket) is now the
+  documented legacy location — `data-locations.md` resolution step 2,
+  read-only, printed as `Run folder: … (legacy flat layout)`;
+  `reconcile_counts.py` resolves it; MAINTAINERS gotcha expanded.
+- **Runsheet format said two things about who runs a case**
+  (`runsheet-format.md`): the walk plan's AGENT-RUNS card is the rule;
+  the sheet export prints `run:` after Expect; the alternative
+  ("harness text in Do cells") is recorded as REJECTED in the file so
+  it is not re-proposed.
+- **Stale cross-references, 24 edits in 16 files**: stage numbers
+  (`/5`, "stage 10a", "before stage 4"), the retired checklist stage in
+  both manifests and four skills, the wave-1 wording in `run-modes.md`,
+  the two-backend opening of `browser-rules.md`, admin impersonation in
+  `login-config.md` and README, the analyzer's input list in its
+  description (trigger phrases intact — `evals/triggering.md`
+  unchanged), `ALLOWED_HOSTS` example now matches the hosts runs use
+  (`canyon2026-rc…`, `*.alphanext14prod…`) with the wildcard rule
+  stated, `.gitignore` shorn of three dead patterns.
+- **`code-review` broke its own contract on every good run**
+  (09-07 §4.6): "never read the base branch / unchanged code / anything
+  but the cases" is replaced by a bounded section — reads outside the
+  diff serve two purposes only: callers and dependencies via the local
+  clone (→ `RISK-CR-<n>` / Unmapped, labelled `(outside the diff:
+  <file:line>)`), and the release-line check in retest / bug-fix mode
+  (fix absent on the release branch → 🔴 [Product], never a case
+  verdict). Grading against base, unrelated bugs and other tickets'
+  branches stay forbidden. Classification and the final-answer
+  counters now include `OBSERVATION (no source checked)` and
+  SPEC-DEFECT; the output template's Statistics table has the row, so
+  the count gate can see the 6–14 observations real reports carry.
+
+**Rules narrowed to what the runs showed (🟡, five).**
+
+- **Same-session shortcut** (`qa-pipeline-code` step 0) skips only the
+  Jira sub-task lookup; `get_suite` + reconcile always run, the suite
+  wins.
+- **Wave 1 is two questions**, not one: "record the run?" then "post
+  the status line?". Five of five recent runs answered the single
+  question "no" and thereby withheld the durable record 0.30.0 exists
+  for; the record no longer depends on the comment.
+- **Dispatcher state table** (`qa-pipeline` Step 2) re-keyed to the
+  trust order run folder → QA Service → Jira, plus a **Resume** row for
+  a phase that stopped mid-way (records into the existing run, never a
+  new one).
+- **`qa-manual-results` report** gains `## Case corrections applied`
+  (TC · what changed · tool) — the suite edits stage 10 makes were
+  listed nowhere.
+
+**Removed (never fired, or nothing read them).**
+
+- The `⏱` run clock and its per-stage budgets in both orchestrators —
+  replaced by one plain line per stage boundary.
+- The session-rename reminder in both orchestrators.
+- The "Recommended settings: Opus · High" banner in both orchestrators
+  and README — model names go stale and the plugin cannot enforce it.
+- `hooks/hooks.json` + `scripts/notify.py` (opt-in desktop
+  notification): never fired in Cowork, no run reported it working in
+  Claude Code. A gating hook (PreToolUse on `git commit`) is a
+  separate, future item.
+- `skills/web-testing/navigation_paths.json.bak` — a stray local
+  backup; the live file lives in `$EP_QA_HOME/cache/` since 0.39.
+
+**Dispositions — items promised earlier and never closed**
+(`CLAUDE.md`: implemented or explicitly rejected, never dropped).
+
+- 09-07 §4.6 (code-review bounded reads, incl. the OBSERVATION /
+  SPEC-DEFECT vocabulary gap) — **IMPLEMENTED** above.
+- 09-07 §4.7 (rename `OBSERVATION (no source checked)` → `(no clause
+  found)`) — **REJECTED.** The label is now in four tickets' reports,
+  ledgers and Jira comments (14 uses in EP-48506 alone); renaming
+  splits the record. Its meaning — every register source was checked
+  and none carries a clause — is what `status-vocabulary.md` already
+  says.
+- EP-56197 #17 (`NOT-A-DEFECT (stated exclusion…)` as a status token)
+  — **REJECTED** as a new status, deferred with §4.7 in 0.31.0 and
+  settled with it: a stated exclusion is `N/A` with the exclusion
+  quoted as its reason, an existing status the count gate knows.
+- 09-07 §4.4 (`reconcile_counts.py` harvests statuses only from
+  `## Results`; `--cases` override; carried-forward fixture) —
+  **DEFERRED to 0.44**, named. A script change with fixtures, out of
+  scope for a documentation-coherence release; still open.
+- 09-07 §4.8 (the post-publish check is the publisher checking itself;
+  make it an analyzer re-run `--post-publish`) — **DEFERRED to 0.44**,
+  named, same reason.
+- EP-48506 ledger row 30 (2026-09-08: a failed `git clone` at step 0
+  echoed the clone URL with `BB_API_TOKEN` into the transcript; the
+  ledger's action was to rotate the token) — **RECORDED**; the
+  proposed fix (a `bb-git.sh` wrapper with a `git ls-remote --probe`
+  in step 0's environment check, so no URL is ever constructed) is
+  **DEFERRED to 0.44**, named. Confirm the rotation happened before
+  0.44 ships.
+
+**What this does not do.** It adopts none of the review's currency /
+field-survey items (PreToolUse hooks, `context: fork`, Playwright
+`--output-dir`, a grep self-lint) — a later pass. And it still has no
+run behind it: every 0.30+ mechanism, this release included, waits for
+the first ticket run on the 0.39 layout (`runs/<KEY>/docs/`, `r<N>/`)
+to prove it in the field.
+
+`verify_plugin.py --no-git`: 8 ok · 0 warn · 0 fail. `qa-pipeline-code/SKILL.md`
+484 lines (was 500).
+
 ## 0.42.0 — 2026-09-10 — the AC ledger
 
 The acceptance criteria are the source of truth a ticket is tested

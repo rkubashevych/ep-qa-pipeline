@@ -113,15 +113,16 @@ curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
 ```
 
 **Branch mode (branch name, no PR):** ask for workspace/repo if not
-clear from context; base branch is `master` unless the user says
-otherwise.
+clear from context. The base is the repo's default branch — monolith
+`alpha`, `portal-ui` / `admin-ui` `master` (see "Branch mode vs PR
+mode"); confirm with `git remote show origin | grep HEAD` when unsure.
 
 ```bash
-# List of changed files (base vs branch)
-git fetch origin {branch} && git diff --name-only origin/master...origin/{branch}
+# List of changed files (base vs branch — three-dot = from the merge-base)
+git fetch origin {base} {branch} && git diff --name-only origin/{base}...origin/{branch}
 
 # Diff of one file
-git diff origin/master...origin/{branch} -- {path}
+git diff origin/{base}...origin/{branch} -- {path}
 
 # Full content of a file from the branch
 git show origin/{branch}:{path}

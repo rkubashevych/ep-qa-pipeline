@@ -64,7 +64,7 @@ shown.
 ## Registration
 
 Registration is normally **not needed** for manual web testing — use
-the shared manual visitor account above. The automated suite creates
+admin impersonation (above) for any non-admin role. The automated suite creates
 fresh visitors per run via the API/admin, but the web-testing skill
 should not create accounts unless a test case explicitly requires a
 brand-new user. If it does, ask the user how to provision one.

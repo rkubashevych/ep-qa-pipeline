@@ -73,7 +73,8 @@ PR column = which sub-task PR the test case was checked against
 
 Section rules:
 - Results — a table of all test cases in the order from the test-cases file.
-- Findings — only for FAIL, N/A, RE-ROUTE and SPEC-DEFECT. PASS and QA need no explanation.
+- Findings — only for FAIL, N/A, RE-ROUTE, SPEC-DEFECT and OBSERVATION (no source checked). PASS and QA need no explanation.
+- A Risks entry read outside the diff (a caller, an unchanged dependency, a release-line check) carries `(outside the diff: <file:line>)` — it is never a case verdict.
 - Every FAIL has a file, a line, expected/actual, and its `Source:` +
   `Clause:` lines (`../../qa-pipeline/references/sources-of-record.md`);
   every RISK-CR row carries the same two. No clause anywhere →
@@ -92,6 +93,7 @@ Section rules:
 | QA     | <N>   |
 | RE-ROUTE | <N> |
 | SPEC-DEFECT | <N> |
+| OBSERVATION (no source checked) | <N> |
 | N/A    | <N>   |
 | Total  | <N>   |
 

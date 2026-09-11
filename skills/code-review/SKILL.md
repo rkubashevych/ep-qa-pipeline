@@ -79,16 +79,20 @@ do not search the internet, do not use the browser.
 - Keep chat messages short.
 - Read-only: do not change code, do not create commits, do not push,
   do not create PR comments, reviews, labels or statuses.
-- Work only within the PR branch or the specified branch.
-  Do not take code from main, the base branch, other branches
-  or the general repository context.
+- A test case is graded against the PR branch (or the specified
+  branch) only. Code from main, the base branch, other branches or the
+  wider repository never decides a case's PASS / FAIL — the two bounded
+  reads outside the diff ("Reads outside the diff", below) produce
+  risk rows, never case verdicts.
 - Check only the test cases from the file. Do not invent
   or interpret requirements yourself.
 - Do not assess code quality, style, architecture, naming,
   tests, CI or refactoring — unless it is described
   in a test case.
 - Do not look for bugs unrelated to the test cases.
-- Do not analyze pre-existing code that was not changed in the PR.
+- Do not analyze pre-existing code that was not changed in the PR,
+  except as a caller / dependency of the change ("Reads outside the
+  diff").
 - If a test case cannot be checked against the code —
   mark it QA, do not invent a result.
 
@@ -116,8 +120,9 @@ or branch mode (`git diff` / `git show`). In both modes, use the PR
 summary to determine where to look and read the diff or full file
 only for the files relevant to the test case at hand.
 
-Read files only from the head branch of the PR.
-Do not read files from the base branch, master or other branches.
+Grade every case from the head branch of the PR. The base branch,
+master and the wider tree are read only for the two purposes in
+"Reads outside the diff" (below), and never decide a case.
 
 ### The PR summary as navigation
 
@@ -281,6 +286,32 @@ FAIL only when there is concrete evidence:
 - the code does something other than what the test case expects
 - the code removes or breaks something that should work
 
+### Reads outside the diff — two purposes only
+
+The head branch is the only source for a **verdict on a test case**.
+Two bounded reads outside it are allowed; each is labelled in the
+finding and can only produce a Risks / Unmapped entry, never a PASS or
+FAIL on a case:
+
+1. **Callers and dependencies.** When a changed method has callers, or
+   the fix rests on a file the PR does not change, read them via the
+   local clone (`../pr-summary/references/bitbucket-access.md` → Local
+   clone: `git grep` for callers, the shared helpers). Output: a
+   `RISK-CR-<n>` row or an Unmapped entry, labelled
+   `(outside the diff: <file:line>)`. This is where `RISK-CR-3`-class
+   findings ("the fix rests on two lines in an unchanged file") come
+   from.
+2. **Release-line check** (retest and bug-fix mode). Confirm the fix
+   hunk is present on every release line the ticket's `fixVersion` or
+   the repo's default branch names (`git branch -r --contains <fix
+   commit>`, or `git log origin/<line> -S'<hunk text>'`). Absent → a
+   🔴 [Product] Risks entry "fix not on `<branch>`" with the commit ids,
+   never a case verdict. This is the `RISK-5018-2` finding ("`master`
+   still unfixed") made a sanctioned check.
+
+Still forbidden: grading a case against base-branch code; hunting for
+unrelated bugs; reading another ticket's branch.
+
 ## Classification
 
 Canonical definitions for ALL stages:
@@ -323,6 +354,12 @@ Each test case gets one status:
   in this codebase). The defect is in the CASE, not the code — record
   file+line showing the deliberate behaviour and what the case should
   say. Feeds the human summary's "Requirements to correct" section.
+- `OBSERVATION (no source checked)` — a real thing seen in the code
+  with no clause in any register source saying it is wrong (Source
+  fidelity, above). A question, never a verdict; kept out of every
+  defect list; not a bug candidate. Used for a case only when the case
+  itself passed or is QA and the observation is beside it — a risk with
+  no clause is a Risks entry with this label, not a `RISK-CR-<n>`.
 
 Rules:
 - Do not mark PASS if there is any doubt — prefer QA.
@@ -392,5 +429,6 @@ Before saving, check:
 
 After saving the file, report:
 - The path to the saved file
-- PASS / FAIL / QA / RE-ROUTE / N/A counters
+- PASS / FAIL / QA / RE-ROUTE / SPEC-DEFECT / OBSERVATION / N/A
+  counters, and the number of `RISK-CR-*` rows
 - If any RE-ROUTE: one line each — which case, from which tag, why

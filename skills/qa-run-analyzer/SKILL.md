@@ -2,8 +2,9 @@
 name: qa-run-analyzer
 description: >
   Post-run health check for the QA pipeline. Reads whatever pipeline
-  output files are present (context, requirements, test-cases,
-  pr-summary, code-review, api-testing, web-testing) and reports how the
+  output files are present (the docs-phase files, the stage reports,
+  the source register, the evidence file, the walk plan and results,
+  the manual results and the open-items ledger) and reports how the
   run went: coverage/traceability gaps, weak inputs, signs a stage
   misbehaved, and a findings digest. Writes a short run report and a
   chat summary. Auto-called at the end of qa-pipeline-docs and

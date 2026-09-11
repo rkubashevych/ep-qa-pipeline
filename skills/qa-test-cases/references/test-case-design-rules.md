@@ -59,8 +59,8 @@ enumerated exhaustively; every anti-pattern below.
 
 Mark exactly ONE test case per behavioural requirement as the core
 case: append ` [core]` to its `### TC-REQ-N.M` heading, after the
-channel tag. The core case is the row a human always walks in the
-stage-9 run sheet — even when the machine settled the requirement —
+channel tag. The core case is the card the walk (stage 10a) always
+presents — even when the machine settled the requirement —
 so the manual run touches every AC. Pick the case whose failure would
 hurt most, in this preference order:
 

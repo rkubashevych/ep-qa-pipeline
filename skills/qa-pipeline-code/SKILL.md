@@ -26,9 +26,6 @@ description: >
 > `record_case_result` etc. are the **QA Service MCP connector**. The
 > install-specific prefix varies — match by tool name.
 
-> Recommended settings for the whole run: **Opus . Effort: High .
-> Extended thinking: On**. Code review (stage 6) benefits most.
-
 Runs the code-review and UI-testing half end to end. Each stage is a
 real skill in this repo — this orchestrator sequences them. Start it
 in a fresh chat (separate from the docs phase) for context health.
@@ -64,10 +61,6 @@ what stays `not_run` until the human round, retractions as re-records).
 written by the analyzer and stage 9, closed only by stage 10.
 
 ## Step 0 — Gather inputs
-
-**Session name:** suggest renaming this session to
-`QA-pipeline <STORY> — code` (Claude Code: `/rename …`; Cowork: click
-the chat title). One short reminder, then move on.
 
 **Establish the run folder — before any other read or write**
 (`../qa-pipeline/references/data-locations.md` → "The run folder";
@@ -133,8 +126,8 @@ for the docs phase, but stage 1 does **not** run in retest or bug-fix
 mode — which is why this step lives here and runs unconditionally.
 
 **Same-session shortcut:** if `<STORY>-test-cases.md` is already in
-the run folder, use it and skip the Jira read-back below. The source
-register is still built — test cases never substitute for it.
+the run folder, skip only the Jira sub-task lookup below — still
+`get_suite` and reconcile; the suite wins. The register is still built.
 
 Otherwise, using the Atlassian connector and the Story key:
 
@@ -165,10 +158,12 @@ Otherwise, using the Atlassian connector and the Story key:
      cases (pre-0.33) → the legacy `(structural checks only)` block if
      present, else say so and skip them.
    - Rebuild **`<STORY>-requirements.md`** from the suite's
-     requirements (`detail.pipelineId` → REQ-N) — without it the
-     analyzer's traceability check cannot run in a fresh chat. No suite
-     → the docs-phase copy in `runs/<STORY>/docs/`; neither → say once
-     that upstream traceability cannot be re-verified.
+     requirements (`detail.pipelineId` → REQ-N; each REQ's `source:` and
+     each case group's `Covers:` line from `detail.ac` — absent =
+     pre-0.42 suite, say so once) — without them the analyzer's
+     traceability and AC-ledger checks cannot run in a fresh chat. No
+     suite → the docs-phase copy in `runs/<STORY>/docs/`; neither → say
+     once that upstream traceability cannot be re-verified.
    - No suite or no connector → **`runs/<STORY>/docs/`** on this
      machine (pre-0.33: legacy archive comments via
      `scripts/extract_archive.py`). Neither → offer: re-run
@@ -334,14 +329,15 @@ story does not exhaust the orchestrator's context:
      by another ticket names that key. Right numbers with wrong labels is
      the failure this gate exists for (EP-56197, the `"True matches"`
      column).
-   - **REQUIRED PAUSE / CONFIRM.** Show the status comment verbatim and
-     its ticket, and — connector present — the run preview: title
+   - **REQUIRED PAUSE / CONFIRM — two questions, in order.** (a) "Record
+     the run?" — connector present, show the run preview: title
      (`test-runs.md` modes), `env`, release (or `none`), roster count
      (= the step-0 scope count, or say why not), rows per verdict, rows
      left `not_run` for the human round, and — narrow exception only —
      each `fail` **by case** (recording a `fail` files the Jira defect
-     there and then). One explicit yes covers Jira and QA Service.
-   - **After the yes, in this order:** (1) `create_test_run` on the
+     there and then). (b) "Post the status line?" — show the comment
+     verbatim and its ticket. A yes to (a) never implies (b).
+   - **After the yes to (a), in this order:** (1) `create_test_run` on the
      in-scope suite case ids; (2) `record_case_result` per row, `source:
      machine`, exactly per the `test-runs.md` mapping — FAIL / PARTIAL
      rows stay `not_run`, the run stays `running` for stage 10, a run
@@ -349,11 +345,10 @@ story does not exhaust the orchestrator's context:
      duplicated, lifecycle `status` never overwritten, no run lines in
      notes; (3) write `<STORY>-human-summary.md` per the template with
      `Status: DRAFT — awaiting stage 10` — stage 10's picture to
-     reconcile against, NOT posted; (4) post the status comment
-     (`addCommentToJiraIssue`), which quotes the run id from (1).
-   - Connector absent → no run; say so in the final response. The
-     final response names the report paths (`runs/<STORY>/r<N>/`) — the
-     only copy of the evidence.
+     reconcile against, NOT posted; (4) yes to (b) only: post the status
+     comment (`addCommentToJiraIssue`), quoting the run id from (1).
+   - Connector absent → no run; say so in the final response, which names
+     the report paths (`runs/<STORY>/r<N>/`) — the only copy of the evidence.
 
 7. **Bug filing — after the manual round, not before.** A bug drafted
    from an automated verdict waits for the human to walk that case: it
@@ -455,18 +450,9 @@ story does not exhaust the orchestrator's context:
 
 ## Between stages
 
-- Keep chat output short: one line per hand-off. Each stage's own
-  rules and templates apply unchanged.
-- **Run clock:** stamp the wall clock at step 0 and after every
-  stage/step; post exactly ONE line per boundary:
-  `⏱ Stage <n>/<total> done — <name> · elapsed <E> min · ~<R> min left`.
-  Budgets (minutes): step 0 8 · pr-summary 15 · code-review 30 ·
-  api-testing 25 · web-testing 45 · analyzer 8 · run + publish 10 ·
-  walk plan 30. `<R>` = unfinished budgets × the run's own pace
-  (elapsed ÷ finished budgets, clamped 0.5–3), rounded to 5, with the
-  `~`. Subtract user-waiting pauses (login, confirmations, event
-  authorisation) — waiting is not pace. Retest / bug-fix: halve the
-  scoped-down stages. No shell → skip the clock silently.
+- Keep chat output short: one line per hand-off
+  (`Stage <n>/<total> done — <name>`). Each stage's own rules and
+  templates apply unchanged.
 - **The orchestrator never asserts a product claim from its own
   observation.** A defect, a reclassification, a "this is actually
   fine" — every such statement comes from a stage skill under that

@@ -34,7 +34,6 @@ GS-*
 *-api-testing.md
 *-web-testing.md
 *-run-report.md
-*-run-analyzer.md
 
 # local investigation / review working files
 *-alpha-repro.md
@@ -72,9 +71,6 @@ navigation_paths.json
 
 *.bak
 
-# stage-9 scratch: provisioning helpers, cached tokens, fixture ledgers (carry live credentials)
-_s9_*
-_ep53978_*
 __pycache__/
 # quarantine folder for files a session could not delete
 _to_delete/

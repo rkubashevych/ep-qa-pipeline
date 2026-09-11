@@ -9,7 +9,8 @@ Jira since 0.33.0 — there is no exempt text.)
 Templates own their SHAPE (which sections, which order — see
 `bug-report-template.md` and `results-comment-template.md`). This file
 owns the WORDS and the LIMITS. When a template and this file disagree
-on tone or length, this file wins.
+on tone or length, this file wins; on CONTENT (which sections exist and
+what goes in them) the template wins.
 
 ## Voice
 
@@ -40,8 +41,10 @@ on tone or length, this file wins.
 - **Steps to reproduce:** ≤ 8 numbered steps, one action each. Concrete
   data inline as `[data: …]`. More than 8 means the precondition
   belongs in Environment, not the steps.
-- **Expected result:** the test case's `Exp:` block, verbatim. Nothing
-  added.
+- **Expected result:** the register clause the build violates, quoted
+  verbatim and led by its `AC-<n>` (`bug-report-template.md`). Never
+  the test case's `Exp:` block — a test case is not a source of record;
+  its `Exp:` goes in the Source section.
 - **Actual result:** ≤ 5 lines of what was OBSERVED (surface, value,
   screenshot reference). Code paths, file:line render chains and
   PR archaeology go in `Source` (≤ 2 lines) — a dev opens the code

@@ -268,14 +268,17 @@ carried between them; the QA Service run carries the verdicts anyway.
   `verify_plugin.py` check 9 fails while either is inside the checkout;
   move them once (`Move-Item .env.qa-agents, runs ~\.ep-qa\`) and the
   raw-copy publishing worry is moot. Legacy root `EP-*` files are a
-  WARN with a count — move them to `~/.ep-qa/runs/legacy/` when
-  convenient.
+  WARN with a count — move them to `~/.ep-qa/runs/legacy/` (one flat
+  folder, any ticket — the documented legacy location,
+  `data-locations.md` resolution step 2; `reconcile_counts.py` reads it
+  when a ticket has no `r<N>/` folder) when convenient.
 - **api-testing pauses** if `.env.qa-agents` is unreachable, a host is
   not in `ALLOWED_HOSTS`, or a per-event frontend host is missing (the
   frontend host is per-event and not discoverable).
-- **Hooks are Claude Code only.** `hooks/hooks.json` + `scripts/notify.py`
-  never fire in Cowork; `QA_PIPELINE_NOTIFY=1` is opt-in and global to
-  that Claude Code profile.
+- **No hooks.** The opt-in desktop-notification hook
+  (`hooks/hooks.json` + `scripts/notify.py`) was removed in 0.43.0 —
+  it never fired in Cowork and no run reported it working in Claude
+  Code. Hooks that add a gate (PreToolUse) are a separate, future item.
 
 ## Publishing / updating — the no-drag way (marketplace)
 

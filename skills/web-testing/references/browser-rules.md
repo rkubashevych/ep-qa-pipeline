@@ -6,9 +6,11 @@ Entering data · ExpoPlatform UI notes (React + MUI) · Interpreting
 test-case steps · Error handling · Verifying expected results ·
 Screenshots · Login · Registration · New tabs · Navigation memory
 
-The skill uses the Claude in Chrome extension for all
-browser actions. These rules are mandatory for every
-interaction with the page.
+These rules are written for the Chrome-extension fallback. On the
+Playwright backend (the default since 0.35.0) the tool names differ —
+`playwright-executor.md` → Tool mapping — but the see → locate → act →
+verify pattern, the waiting rules, the MUI notes and the error handling
+apply unchanged. They are mandatory for every interaction with the page.
 
 ## General principle
 

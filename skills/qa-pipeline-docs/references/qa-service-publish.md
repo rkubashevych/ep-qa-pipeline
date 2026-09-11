@@ -1,10 +1,13 @@
 # QA Service publish — suite creation from pipeline output
 
 **Contents:** Preconditions · Config · Mapping — pipeline files → QA
-Service · Suite selection — append by default · Procedure (inside the
-step-6 confirmed publish) · Code phase — suite as the case source ·
-Result write-back (incl. Improvised coverage becomes permanent + the
-Retraction convention) · Publish preview additions
+Service (requirements, test cases, Structural checks → STRUCT cases,
+suite header, correcting a suite, never `summarize_requirement`) ·
+Suite selection — append by default · Procedure (inside the step-6
+confirmed publish) · Code phase — suite as the case source · Bug-fix
+mode — the regression mini suite · Result write-back (incl. Improvised
+coverage becomes permanent + the Retraction convention) · Legacy
+formats · Publish preview additions
 
 How `qa-pipeline-docs` step 6 publishes the groomed requirements and
 test cases into **QA Service** (the team's test-suite system of record)
@@ -119,7 +122,7 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 | `Post:` | append to `detail.notes` as `Post: …` |
 | "needs clarification" markers | `detail.notes` |
 | tags applied in step 4 | `detail.tagPlan` = one line naming the tags attached and why (mirrors the reference suites) |
-| ` [core]` heading marker | `detail.core` = `yes` on the REQ's core case (the human-tier representative that stage 9 always walks); omit on all other cases. Also propose a `core` tag in step 4 where the tag catalogue allows — pending approval is fine. |
+| ` [core]` heading marker | `detail.core` = `yes` on the REQ's core case (the human-tier representative the walk, stage 10a, always presents); omit on all other cases. Also propose a `core` tag in step 4 where the tag catalogue allows — pending approval is fine. |
 | `TC-REQ-N.M` id | `detail.pipelineId` = `TC-REQ-N.M` (since 0.34.0). The code phase rebuilds the local file's ids from this; never from a Jira comment |
 | the ticket | `detail.ticket` = `<ISSUEKEY>` (since 0.34.0). The per-ticket scope marker: step 0 executes the suite cases whose `detail.ticket` is this run's key (plus team-added cases tracing to this run's requirements). Feature tags are NOT used for this — the tag catalogue is the platform-feature vocabulary and needs approval |
 
@@ -191,8 +194,8 @@ mistake surfaces:
   traceability and other requirements' cross-link lists) — no orphans.
 - thin requirement (no `detail`, no `priority`) → fill it in place
   rather than creating a superseding entry.
-- a requirement that no longer applies → `status: "retired"` (there is
-  still no delete).
+- a requirement that no longer applies → `status: "retired"` (the
+  pipeline never deletes — Preconditions).
 - case missing `levels`, or with a stale status/traceability → edit it.
 - **cases piled into "General" (or one oversized folder)** — a legacy
   publish from before the folder rule: reorganize in place with
@@ -243,7 +246,7 @@ requirements" / "Import docs" (`start_collect_requirements`,
 `start_import_docs`) as UNVERIFIED on an already-populated suite: they
 merge a fresh extraction into the register by stableId, and since the
 extractor mints its own ids they may duplicate rather than enrich —
-and there is no delete. Test on a throwaway suite before ever pointing
+and the pipeline never deletes (Preconditions). Test on a throwaway suite before ever pointing
 them at a real one.
 
 ## Suite selection — append by default
@@ -272,7 +275,7 @@ preview so the user can redirect:
    - *Re-run of the same ticket*: append only what is new or changed.
    In every case use the suite's existing prefix and continue its
    stableId numbering (`get_suite` → highest used id). Apply the
-   requirement-immutability and case-dedup rules below.
+   case-dedup rule below.
 3. **No match → create a new suite**, named after the FEATURE (never
    after the ticket key), path/prefix per Config. This is the genuinely
    new-feature case only.
@@ -293,8 +296,8 @@ preview so the user can redirect:
    default: feature-extension story, bug, or re-run)** → do NOT create
    a duplicate; append
    only requirements/cases that are new or changed (compare stableIds
-   via `get_suite`), and say so in the publish preview. There are no
-   delete tools — never try to remove superseded items; retire them
+   via `get_suite`), and say so in the publish preview. The pipeline
+   never deletes (Preconditions) — never try to remove superseded items; retire them
    instead (requirement → `edit_requirement` `status: "retired"`; case →
    `edit_test_case` `status: "na"` plus a `detail.notes` line saying
    what superseded it). **`deprecated` is not a valid case status** —
@@ -393,6 +396,12 @@ CONTENT (the team may have fixed cases in the web UI between phases):
    `-STRUCT-` cases rebuild the Structural checks section of
    `<STORY>-test-cases.md` (one `[UI]` line per case, under its REQ,
    the stableId on the line).
+   - **The AC ledger travels back too:** each rebuilt REQ gets its
+     `source:` line from the requirement's `detail.ac`, and each case
+     group its `Covers:` line from its requirement's `detail.ac` — the
+     analyzer's AC-ledger check and `reconcile_counts.py` read those
+     lines, not the suite. No `detail.ac` (published before 0.42) → say
+     so once; the ledger check then reports the pass as pre-0.42.
 3. Connector absent or suite not found → `runs/<STORY>/docs/` on this
    machine is the only source (pre-0.33 tickets: the legacy archive
    comment via `extract_archive.py`). Neither reachable → PAUSE; never
@@ -527,7 +536,7 @@ verdict as current:
 Nothing below is written any more. It is here so step 0 can read an
 old ticket without guessing.
 
-- **Checkbox tracker (0.26 – 0.33), one comment on the QA sub-task,
+- **Checkbox tracker (0.7 – 0.33), one comment on the QA sub-task,
   one line per case:** `- [ ] TC-REQ-N.M — <name> [channel] · <stableId>`.
   The `<stableId>` is the suite case id — the join key that
   `detail.pipelineId` replaced. Checkboxes were manual-only and are not
@@ -536,7 +545,7 @@ old ticket without guessing.
   labelled `(structural checks only)` — the then-separate checklist
   file's `[UI]` structural section verbatim (`- [ ] REQ-N.M [UI]
   <check>` lines), no case ids, because they had no suite case until
-  STRUCT cases (0.35).
+  STRUCT cases (0.33).
   Execute them from that block; promote them to `<PREFIX>-STRUCT-NN`
   cases only if the ticket is re-published.
 - **Machine archive (pre-0.33):** comments made of `File: <name>` labels

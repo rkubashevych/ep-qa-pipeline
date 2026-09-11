@@ -3,7 +3,7 @@
 Source: <walk-results.md (walk <start>→<end>, tester <e-mail>) / runsheet.xlsx / TSV paste / triage file — list all used>
 Automated record read from: <QA Service run <id> / verdict files in runs/<KEY>/r<N>/ / legacy archive comment (pre-0.33 ticket)>
 QA Service run: <id> — <status after this stage: closed / running (why)> · recorded <N> manual verdicts + <N> agent-run witnessed verdicts (<N> supersede a machine verdict)
-Case corrections applied to the suite: <N> (listed under Ledger) · Observations carried as questions: <N>
+Case corrections applied to the suite: <N> (table below) · Observations carried as questions: <N>
 Date: <YYYY-MM-DD>
 
 ## Summary
@@ -64,6 +64,15 @@ Date: <YYYY-MM-DD>
 | EP-55691 | TC-REQ-1.1 | linked from Notes |
 | EP-56912 | TC-REQ-4.2 | filed by the run (`fail` recorded, `created: true`) |
 | <new> | RISK-CR-2 | filed this session via template / offered, declined |
+
+## Case corrections applied
+> Every edit this stage made to the suite (a wrong step, a stale expected
+> result, a retitle) — one row per case, or "none". The Ledger tracks
+> open items; this table tracks what was changed in the suite itself.
+
+| TC | What changed | Tool |
+|----|--------------|------|
+| TC-REQ-12.2 | Expected result: badge text "Opted out" → "Opted-out" (per AC-4) | `edit_test_case` |
 
 ## Ledger
 
