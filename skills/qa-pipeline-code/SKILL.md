@@ -331,7 +331,10 @@ story does not exhaust the orchestrator's context:
      column).
    - **REQUIRED PAUSE / CONFIRM — two questions, in order.** (a) "Record
      the run?" — connector present, show the run preview: title
-     (`test-runs.md` modes), `env`, release (or `none`), roster count
+     (`test-runs.md` modes), `env`, release (or `none`; when the
+     ticket has a `fixVersion` with no matching release, say so and
+     name the release owner to ask — `test-runs.md` → `releaseId`),
+     evidence links per verdict where a URL exists, roster count
      (= the step-0 scope count, or say why not), rows per verdict, rows
      left `not_run` for the human round, and — narrow exception only —
      each `fail` **by case** (recording a `fail` files the Jira defect

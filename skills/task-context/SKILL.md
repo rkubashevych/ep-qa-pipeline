@@ -127,10 +127,14 @@ If the QA Service MCP connector is present in the session, pull the
 feature's established requirements so grooming can check the ticket
 against them instead of re-deriving from scratch:
 
-1. `list_suites` (product `expoplatform`); match the suite whose
-   role/feature path corresponds to what the ticket touches (use the
-   same keywords as the impact scan). No match → write "No existing
-   QA Service suite found" in the section and continue.
+1. `search {query: "<feature words>", kinds: ["suite"], productId:
+   "expoplatform"}` with the same keywords as the impact scan (two or
+   three calls with different word sets are fine — each answer is ~1 KB;
+   `search` matches suite titles and prefixes, not summaries). Match the
+   suite whose role/feature path corresponds to what the ticket touches.
+   Nothing found → `list_suites` once, as the fallback only (it returns
+   the whole product, ~190 KB). Still no match → write "No existing QA
+   Service suite found" in the section and continue.
 2. On a match, `get_suite` and write the "Existing QA Service suite"
    section of the output file:
    - suite path, title, requirement/case counts, one-line summary;

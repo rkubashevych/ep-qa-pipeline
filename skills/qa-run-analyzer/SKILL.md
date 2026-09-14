@@ -15,8 +15,9 @@ description: >
 
 # QA Run Analyzer
 
-> **Tool names:** `list_suites` / `get_suite` / `list_test_runs` /
-> `get_test_run` / `executed_coverage` / `case_execution_history` are
+> **Tool names:** `search` / `get_suite` / `coverage_report` /
+> `list_test_runs` / `get_test_run` / `executed_coverage` /
+> `case_execution_history` are
 > tools of the **QA Service MCP connector** (install-specific server
 > prefix varies — match by tool name).
 
@@ -169,8 +170,10 @@ Skip this section entirely (and say so in one line) when the QA
 Service MCP tools are not in the session, or when the user declined
 publishing for this run — record the reason and treat it as a normal
 outcome, never a gap or a 🔴. Otherwise, locate the
-ticket's suite (`list_suites` match on the story / the `QA Service
-suite:` line in the QA sub-task description) and report ONE of:
+ticket's suite (the `QA Service suite:` line in the QA sub-task
+description; else `search {query, kinds: ["suite"]}` on the feature
+words or prefix; `list_suites` only when `search` finds nothing — it is
+the whole product, ~190 KB) and report ONE of:
 
 - 🟢 **in sync** — suite exists; **this ticket's** requirements
   (`sources` with `kind: jira, label: <KEY>`) and cases
@@ -217,10 +220,30 @@ suite:` line in the QA sub-task description) and report ONE of:
     `not_run` rows and no `<KEY>-manual-results.md`: the manual round
     was never ingested; the ticket's verdicts are still provisional.
     Same finding as §5's "manual results never ingested", seen from the
-    service side.
+    service side. `completed` and `closed` are both "done"
+    (`test-runs.md` → "Run lifecycle"): a `completed` run after stage
+    10 is correct, not a missed close.
+  - 🟡 **[Environment] no release for the fixVersion** — the ticket
+    carries a `fixVersion` and `list_releases` has no release for it, so
+    the run was created without `releaseId` and its verdicts cannot be
+    scoped by release. Name the fixVersion; the fix is upstream (a
+    release owner creates it), not in the pipeline.
+  - 🟡 **evidence links missing** — a `fail` / `blocked` /
+    `known_defect` row whose note names a Jira key or comment while its
+    `evidence[]` is empty (`test-runs.md` → evidence).
   - `executed_coverage(suiteId[, releaseId])` is reported in the
     findings summary as two numbers — machine and manual — never one
     percentage.
+- **Requirement gaps — `coverage_report {suiteId}`, one call.** Its
+  `gaps` list is the requirements no case proves, worst first
+  (`uncovered` = no case at all, then `stale`, then `planned`), each
+  with the cases that plan it; `orphans` are cases naming no
+  requirement; `merges` are discovered duplicates. Report the
+  `uncovered` rows by stableId and kind under §1 instead of deriving
+  them from the files; an `oq` / `risk` row uncovered is expected and
+  said in one clause, an `fr` / `rule` / `invariant` uncovered is 🟡.
+  The call also returns the executed tier, so it replaces a separate
+  `executed_coverage` read when both are wanted.
 - 🔴 **zeroed status buckets** — every case-status bucket reads 0
   against a non-zero total: the cases were written with a `status`
   outside `planned/implemented/partial/deferred/na` (e.g. `draft`).
@@ -237,7 +260,8 @@ suite:` line in the QA sub-task description) and report ONE of:
   `traceability`: the links never materialized; re-sending
   `traceability` on a case rebuilds the suite's edges.
 - 🟡 **bare suite header** — no `summary` / `owner` / `status` /
-  `lastReviewed` on the suite. Fixable with `edit_suite`.
+  `lastReviewed` on the suite, or `teams: []` (the web UI flags it "No
+  team"). Fixable with `edit_suite` / `assign_suite_teams`.
 
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh

@@ -23,7 +23,7 @@ testing logic — it reads state, proposes, confirms, and hands off. The
 invoked orchestrator's own rules then apply in full.
 
 > **Tool names:** `getJiraIssue` / `searchJiraIssuesUsingJql` are
-> Atlassian MCP connector tools; `list_suites` belongs to the QA
+> Atlassian MCP connector tools; `search` / `list_test_runs` belong to the QA
 > Service connector (prefixes vary per install — match by tool name).
 
 ## Step 1 — Read the state
@@ -37,7 +37,11 @@ From the ticket key/URL (ask if the paste has none):
    code-phase status comment? a human summary? (The stage reports are
    local-only — Jira carries no archive since 0.33.0, so their absence
    on the ticket says nothing about whether the code phase ran; check
-   the run folder and `list_test_runs` on the suite.)
+   the run folder and `list_test_runs` on the suite. Find the suite with
+   `search {query: <feature words or prefix>, kinds: ["suite"]}` — never
+   `list_suites` first: it returns the whole product, ~190 KB. A run in
+   status `completed` or `closed` is done; `running` with `stale: true`
+   is a pass whose manual results were never ingested.)
 4. Run folder: `<KEY>-walk-plan.md`, `<KEY>-walk-state.json`
    (a walk in progress), `<KEY>-walk-results.md`, `<KEY>-runsheet.xlsx`,
    `<KEY>-testdata.json`, stage reports, `<KEY>-recon.md` — local

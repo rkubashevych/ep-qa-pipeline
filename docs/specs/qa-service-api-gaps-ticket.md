@@ -2,6 +2,15 @@
 
 **Type:** Task · **Component:** QA Service (MCP connector / write API)
 **Reporter:** Roman Kubashevych · **Raised:** 2026-07-28
+**Status: CLOSED 2026-09-14 — all five gaps resolved on the service
+side** (verified against the connector's tool schemas and the live
+suites: `levels` writable and derived from `levelText`;
+`edit_requirement` exists with kind / stableId rename; `traceLinks` are
+built on write; `create_suite` takes `summary` / `status` / `owner` /
+`lastReviewed` / `teams`; `status` / `priority` / `type` / `kind` are
+schema enums, so an out-of-vocabulary value is rejected instead of
+zeroing the dashboards). Kept as history. Follow-up review:
+`docs/reviews/QA-SERVICE-INTEGRATION-REVIEW-2026-09-14.md`.
 
 ## Context
 

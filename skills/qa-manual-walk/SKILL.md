@@ -174,7 +174,8 @@ When the last card is answered (or the tester stops): write
 FAILs first with the tester's words), then invoke **`qa-manual-results`
 with that file as its input** — it reconciles against the run, shows
 every `fail` about to be recorded case by case, and on the tester's
-explicit yes records, closes the run, posts the first human-facing
+explicit yes records, finishes the run (`test-runs.md` → "Run
+lifecycle"), posts the first human-facing
 summary, closes ledger rows, and offers the bug filings. Nothing is
 written to any record before that yes.
 
@@ -222,7 +223,7 @@ written to any record before that yes.
 "Continue the walk for EP-1234" → read `<ISSUEKEY>-walk-state.json`,
 show one progress line, re-confirm the environment in one clause, and
 present the next card. If the state file's run id no longer matches an
-open run (`get_test_run` → `closed`), say so and stop: the round was
+open run (`get_test_run` → `completed` or `closed`), say so and stop: the round was
 already written back, and a second walk on the same run needs
 `reopen_test_run` by stage 10, not a silent continuation.
 

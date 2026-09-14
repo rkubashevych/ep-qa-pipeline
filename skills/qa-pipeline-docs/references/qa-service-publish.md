@@ -23,7 +23,7 @@ still decline at the step-6 confirmation, or say "no QA Service" when
 invoking the pipeline; honour that for the run without arguing.
 
 - The QA Service MCP connector must be enabled in the session. Detect it
-  by the presence of its tools (`list_products`, `create_suite`,
+  by the presence of its tools (`search`, `create_suite`,
   `create_requirement`, `create_test_case`, `edit_requirement`,
   `edit_test_case`, `edit_suite`, `apply_auto_tags`, …).
 - **If the connector is absent, skip this publish silently-but-visibly:**
@@ -48,7 +48,8 @@ invoking the pipeline; honour that for the run without arguing.
 | Suite path convention | `<role>/<feature-area>/<ticket-feature-slug>` — role is one of `admin`, `organizer`, `exhibitor`, `visitor`, `common` |
 | Suite title | the story summary, cleaned (no ticket key, no "[QA-PIPELINE]") |
 | Suite prefix | short UPPERCASE mnemonic of the feature (2–8 chars, e.g. `ZTB`, `PSRCH`). Propose one; the user can override at the pause. |
-| Folder | reuse the `folderId` of an existing sibling suite with the same role/feature-area (find it via `list_suites`); omit if none fits |
+| Folder | `get_suite_tree` (product `expoplatform`) is where a `folderId` comes from — the organizer tree is `<role>` → feature folders (`common/…`, `organizer/payments/…`). File the suite under the folder whose name is the feature area; omit `folderId` only when no folder fits and say so in the preview |
+| Teams | `teams` on `create_suite` — one or more of `Organizer` / `Exhibitor` / `Visitor` / `Mobile` / `Data Science` / `Integration` / `Designers` / `Staff` / `Hyve`. Map from the role: `exhibitor` → Exhibitor, `visitor` → Visitor, `organizer` / `admin` → Organizer, `common` → the team the story's dev sub-tasks belong to (ask at the pause when unclear). A suite created without `teams` is flagged "No team" in the web UI (`common/meeting-export` landed that way); `assign_suite_teams` repairs an existing one |
 | Web UI base URL | `https://qa-service.expoplatform.com` — suite detail page: `<base>/<productId>/test-suites/<suite path>` (verified, e.g. `/expoplatform/test-suites/exhibitor/exhibitor-favorites`). |
 
 **Writing the suite link into Jira — bare URL only.** The Atlassian
@@ -93,6 +94,7 @@ follow-up `edit_requirement` is needed on a fresh publish.
 | REQ-N → stableId map | `detail.pipelineId` = `REQ-N` on the requirement (since 0.34.0 — the map lives on the item, nowhere else); the test-cases file still uses REQ-N |
 | the requirement's `source:` line (`AC-2, JD-1`) | `detail.ac` = the same string, verbatim (0.42.0) — the acceptance-criterion ids this requirement covers, so QA Service can answer "which criterion does this case verify" and a failed case names its AC without the ticket |
 | the ticket the requirement came from | `sources` = `[{kind: "jira", label: "<ISSUEKEY>", url: "<ticket URL>"}]` plus one entry per governing document (`confluence` for the AC page, `anchorUrl` to the exact heading when there is one). This is the per-ticket **scope marker** inside a per-feature suite — the code phase selects this run's requirements by it |
+| the clause the requirement rests on | `sources[].quote` = the sentence quoted **verbatim** from that document (the same text the register's `Clause:` line carries — `sources-of-record.md` § 3), and `locator` = the section / AC id (`§ Response fields · AC-4`). Grooming already has the quote; storing it is what makes `list_sources` `verifiedCount` non-zero and lets a reader check the claim without opening the page. `edit_requirement` ADDS sources, never replaces — send a source once |
 
 ### Test cases → `create_test_case` (one call each — it takes everything)
 
@@ -173,10 +175,11 @@ the roster row:
 `create_suite` accepts the header fields directly: `summary` (a
 paragraph saying what the feature is and what this suite covers — model
 it on an importer-built suite), `status` (`Draft`), `owner` (the
-pipeline operator + team), `lastReviewed` (today, YYYY-MM-DD), on top
-of `title` / `productId` / `prefix` / `folderId`. Pass them at
-creation — a suite that lands with a bare title is an incomplete
-publish, and it is a missed parameter, not a limitation.
+pipeline operator + team), `lastReviewed` (today, YYYY-MM-DD) and
+`teams` (Config → Teams), on top of `title` / `productId` / `prefix` /
+`folderId`. Pass them at creation — a suite that lands with a bare title
+or no team is an incomplete publish, and it is a missed parameter, not a
+limitation.
 
 Use `edit_suite` only to fix or refresh the header of a suite that
 already exists (e.g. bump `lastReviewed` when appending to it).
@@ -260,10 +263,14 @@ introduces a feature that has no suite yet.
 Always resolve the target BEFORE writing, and name it in the publish
 preview so the user can redirect:
 
-1. `list_suites`; find the suite whose role + feature area matches what
-   the ticket touches (the context file's "Existing QA Service suite"
-   section usually already names it). Ignore ticket-key naming — match
-   on the FEATURE.
+1. `search {query: "<feature words>", kinds: ["suite"]}` (the context
+   file's "Existing QA Service suite" section usually already names the
+   suite — then search its prefix). `search` matches titles and prefixes,
+   not summaries, and answers in ~1 KB; `list_suites` is the whole
+   product (~190 KB) — call it only when `search` finds nothing, to
+   confirm the feature has no suite. Find the suite whose role + feature
+   area matches what the ticket touches. Ignore ticket-key naming —
+   match on the FEATURE.
 2. **Match found → append there**, whatever the issue type:
    - *Feature-extension story* (adds/changes behavior of an existing
      feature): append its requirements and cases; the feature's suite
@@ -288,9 +295,10 @@ preview so the user can redirect:
 
 ## Procedure (inside the step-6 confirmed publish)
 
-1. `list_suites` for the product; pick the target suite per "Suite
-   selection" above — append to the feature's existing suite by
-   default; a new suite only when the feature has none.
+1. `search` for the feature's suite (fallback `list_suites`); pick the
+   target per "Suite selection" above — append to the feature's existing
+   suite by default; a new suite only when the feature has none. New
+   suite → `get_suite_tree` for the `folderId` (Config → Folder).
 2. **New suite needed** → `create_suite` (title, productId, prefix,
    folderId if a sibling folder was found). **Existing suite (the
    default: feature-extension story, bug, or re-run)** → do NOT create
@@ -343,12 +351,21 @@ preview so the user can redirect:
    - **`traceLinks` is non-empty** — it should hold one `satisfies` link
      per case (plus requirement↔requirement edges from `detail`
      cross-links). Empty means `traceability` never landed.
+   - **`coverage_report {suiteId}` — the gap list, one call.** Every
+     requirement this publish wrote should appear in `gaps` as `planned`
+     with its cases in `plannedBy`; an `uncovered` row is a requirement
+     no case traces to. `oq` / `risk` rows uncovered are expected (a
+     question is not a behaviour) — say so in one clause; an `fr` /
+     `rule` / `invariant` / `nfr` uncovered is a mapping miss: fix the
+     case's `traceability` before finishing. `orphans` (cases naming no
+     requirement) must be empty for a pipeline publish.
    - no requirement kind is suspiciously absent (0 rules AND 0
      invariants AND 0 risks = mis-classification). Fixable in place with
      `edit_requirement` (`kind` + corrected `stableId`) — do it rather
      than reporting it.
    - the suite header is filled (`summary`, `status`, `owner`,
-     `lastReviewed`) — otherwise call `edit_suite`.
+     `lastReviewed`, `teams` non-empty) — otherwise call `edit_suite` /
+     `assign_suite_teams`.
    - **folder distribution matches the plan** — no case in "General",
      no folder over ~10 cases. Fixable in place:
      `create_test_case_folder` + `move_test_case`.
@@ -376,7 +393,9 @@ suite — not any local file — is the source of truth for case
 CONTENT (the team may have fixed cases in the web UI between phases):
 
 1. Locate the suite: the `QA Service suite:` line in the QA sub-task
-   description; fall back to a `list_suites` match on the story.
+   description; fall back to `search {query, kinds: ["suite"]}` on the
+   feature words / prefix, and to `list_suites` only when that finds
+   nothing.
 2. `get_suite`; **scope = the cases whose `detail.ticket` is this run's
    key**, plus any case tracing to one of this run's requirements
    (`sources` with `kind: jira, label: <KEY>`) that lacks the marker
@@ -426,7 +445,7 @@ the ticket sentence it quotes), each case (stableId, title, channel),
 and the `Regression for <KEY>` note. Nothing is written before the yes.
 
 1. **Target suite = the FEATURE's suite**, per "Suite selection" above:
-   `list_suites`, match on the feature the bug touches (the parent
+   `search` (fallback `list_suites`), match on the feature the bug touches (the parent
    story's suite when the Bug is linked to one). Found → append.
    Not found → create the feature's suite (path / prefix per Config,
    named after the feature, never after the bug key). Ambiguous →

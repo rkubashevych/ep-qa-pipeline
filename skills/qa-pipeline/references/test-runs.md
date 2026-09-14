@@ -48,7 +48,14 @@ closed at stage 10.
   release that `list_releases` returns — a verdict is resolved per
   (case, release), so this is what makes `executed_coverage` scopable.
   None known → omit, and say `release: none` in the preview; do not
-  invent one.
+  invent one. **When the ticket HAS a `fixVersion` and no release
+  matches it** (EP-55950: `Prod 2026-09-23`, newest release `Prod
+  2026-08-26`), the preview line is `release: none — fixVersion <X> has
+  no QA Service release yet; ask the release owner to create it before
+  the retest so the next run attaches`, and the analyzer records it as a
+  🟡 [Environment] row. A run's `releaseId` cannot be set after
+  creation and there is no `create_release` over MCP, so the gap is
+  upstream, never a pipeline defect.
 - **`principal`** (on the run and on every machine verdict):
   `ep-qa-pipeline agent (<KEY> <mode>, stage <n>)`. On human verdicts
   (stage 10): the tester's e-mail, taken from the run sheet / the user
@@ -96,10 +103,16 @@ that in mind.
 two reads is a `blocked` with both reads in the note, or a defect.
 
 Evidence entries take http(s) URLs on the service's host allowlist —
-the Jira URL of the bug or of the wave-1 status comment, a jam.dev link
-from the tester. A screenshot that exists only on disk is referenced by
-path in the note (`evidence: <KEY>-web-evidence.md §n`); it cannot be
-uploaded here.
+`{kind: screenshot | link | log, url, caption}`. **Attach one whenever a
+URL exists**: the Jira URL of the bug (`link`), of the comment where the
+verdict was published, of the AC-page anchor the `Clause:` came from, a
+jam.dev link from the tester. On the two 2026-09-11 runs every one of
+69 rows had `evidence: []` while its note said `evidence:
+<KEY>-walk-results.md` — a path on one laptop that no colleague can
+open. A screenshot that exists only on disk is still referenced by path
+in the note (`evidence: <KEY>-web-evidence.md §n`, or
+`evidence/<KEY>-r<N>-<TC>-fail.png`); there is no upload tool, so the
+note keeps the path and the `evidence[]` array carries the links.
 
 ## What stays `not_run` in wave 1, and why
 
@@ -121,7 +134,8 @@ is what the run sheet already means by "the human must walk this row",
 and `get_test_run`'s `currentCaseId` is where the tester resumes. The
 run therefore stays `running` after wave 1 whenever any FAIL / PARTIAL
 row exists, and the wave-1 status comment says so
-(`… K for manual — QA Service run <id> open`). Stage 10 closes it.
+(`… K for manual — QA Service run <id> open`). Stage 10 finishes it —
+see "Run lifecycle" below for what "finished" means.
 
 The machine's evidence for those rows is not lost: it is in the stage
 report (in the run folder — the only copy since 0.33.0) and in the
@@ -135,11 +149,29 @@ manual Result: `record_case_result`. A row the machine already recorded
 (a `[core]` spot-check, a retracted PASS) is **re-recorded** — the
 service supersedes and keeps both, each with its own principal and
 timestamp. If the run's status is `completed` (every row had a verdict),
-call `reopen_test_run` first; it edits nothing. When the sheet is fully
-ingested: `close_test_run` with `mode: closed` — `aborted` only when the
-pass was abandoned and the user says so. Never leave a fully-ingested run
-`running`: a stale run is what the analyzer flags as "manual results
-never ingested".
+call `reopen_test_run` first; it edits nothing.
+
+**Run lifecycle — `completed` and `closed` are both terminal.** The
+service marks a run `completed` on its own the moment its last `not_run`
+row receives a verdict; `close_test_run` on such a run is **refused**
+(EP-55950, 2026-09-11: "the service had already auto-completed the run").
+`close_test_run` exists for the other ending — rows still `not_run` when
+ingestion is over: `mode: closed` keeps them unrun (a card the tester
+declared out of scope, a permanently untestable case), `mode: aborted`
+marks a pass that was abandoned, and only when the user says so. So at
+the end of stage 10:
+
+- every roster row has a verdict → the run reads `completed`; call
+  nothing, report `completed`;
+- rows remain `not_run` and the pass is over → `close_test_run`
+  (`closed`), naming the unrun cases in the report;
+- the pass was abandoned → `close_test_run` (`aborted`).
+
+Never leave a fully-ingested run `running`: `running` + `stale: true`
+with `not_run` rows and no `<KEY>-manual-results.md` is what the analyzer
+and the dispatcher flag as "manual results never ingested". Every reader
+(analyzer §4, dispatcher state table, results step 4) treats `completed`
+and `closed` alike as "done".
 
 A human `fail` files the defect (deduplicated per case: an open issue
 already referencing the stable id is linked, not duplicated —
@@ -208,9 +240,11 @@ history and the run is the current truth.
 - `executed_coverage(suiteId[, releaseId])`: `neverExecuted` fell by
   the number of rows recorded; `machine` and `manual` are reported as
   separate numbers, never one percentage.
-- After stage 10: the run is `closed`; `run_defects` lists every human
-  `fail` with a key; every RETRACTS row has a `supersedesId` and a
-  retraction comment on the original ticket.
+- After stage 10: the run is `completed` (every row recorded) or
+  `closed` (rows deliberately left unrun, named in the report) — never
+  `running`; `run_defects` lists every human `fail` with a key; every
+  RETRACTS row has a `supersedesId` and a retraction comment on the
+  original ticket.
 
 ## Connector absent
 

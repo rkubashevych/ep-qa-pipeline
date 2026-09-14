@@ -5,6 +5,122 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.43.2 — 2026-09-14 — QA Service integration: four rules matched to the service, two reads adopted
+
+Source: `docs/reviews/QA-SERVICE-INTEGRATION-REVIEW-2026-09-14.md` — the
+connector's 118 tools against the 39 the plugin names, judged on the two
+real passes that have now run end to end (EP-55950 r1, 61-case roster;
+EP-56739 r1, bug-fix). No new mechanism; every change is a rule brought
+in line with what the service actually does, or a read the analyzer was
+deriving by hand.
+
+**Rules corrected (each cost something on the 09-11 runs).**
+
+- **Run lifecycle** (`test-runs.md` → "Run lifecycle"; results step 4,
+  analyzer §4, dispatcher, README): the service auto-completes a run the
+  moment its last `not_run` row gets a verdict, and `close_test_run` on
+  it is refused (EP-55950 manual-results: "the service had already
+  auto-completed the run"). `completed` and `closed` are both terminal;
+  `close_test_run` is only for rows deliberately left unrun (`closed`)
+  or an abandoned pass (`aborted`). Every reader now treats a
+  `completed` run after stage 10 as correct, not as a missed close.
+- **`search` before `list_suites`** (task-context, dispatcher, publish
+  Suite selection + Procedure + Code phase + Bug-fix mode, analyzer §4):
+  `list_suites` for `expoplatform` is ~190 KB and was the plugin's way
+  to find a suite in four skills; `search {query, kinds: ["suite"]}`
+  answers in ~1 KB, exact-prefix first. `list_suites` stays as the
+  fallback that confirms "no suite".
+- **`teams` on `create_suite`** (publish Config → Teams, Suite header,
+  verify step 5; analyzer bare-header check): the tool's own vocabulary
+  (Organizer / Exhibitor / Visitor / Mobile / Data Science / Integration
+  / Designers / Staff / Hyve), mapped from the suite path's role. A
+  suite created without it is flagged "No team" in the web UI —
+  `common/meeting-export` landed that way. `assign_suite_teams` repairs
+  an existing suite.
+- **Evidence links** (`test-runs.md` evidence paragraph; results step 4;
+  code step 6 preview): all 69 roster rows on the two runs had
+  `evidence: []` while the note said `evidence: <KEY>-walk-results.md`
+  — a laptop path. Every verdict with a URL (bug, comment where it was
+  published, AC anchor, jam link) now carries it as a `link` entry;
+  the note keeps the disk path. Screenshots still cannot be uploaded —
+  there is no tool; asked of the QA Service owners, not worked around.
+- **`releaseId` when the fixVersion has no release** (`test-runs.md`
+  → `releaseId`; code step 6 preview; analyzer 🟡 [Environment] row):
+  EP-55950 carries `Prod 2026-09-23`, the newest QA Service release is
+  `Prod 2026-08-26`, so the run was correctly created without a release
+  — but nobody was told the verdicts are therefore unscopable. The
+  preview now names the fixVersion and the ask; there is no
+  `create_release` over MCP and a run's `releaseId` cannot be set later.
+- **`get_suite_tree` for `folderId`** (publish Config → Folder): the
+  tree is where a folder id comes from; the old rule pointed at
+  `list_suites`.
+
+**Reads adopted.**
+
+- **`coverage_report {suiteId}`** in publish verify step 5 and analyzer
+  §4: the requirements no case proves, worst first, with the planning
+  cases; `orphans`; `merges`; the executed tier. EP-55950's run report
+  spent a paragraph deriving the 11 uncovered requirements from the
+  files — the call returns them by stableId and kind. `oq` / `risk`
+  uncovered is expected and said in a clause; `fr` / `rule` /
+  `invariant` / `nfr` uncovered is a mapping miss to fix before
+  finishing.
+- **`sources[].quote` + `locator`** (publish Requirements mapping): the
+  register's verbatim `Clause:` is stored on the requirement's source
+  entry, so `list_sources` can verify it (today `verifiedCount: 0` on
+  every pipeline requirement) and a reader checks the claim without
+  opening the page. `edit_requirement` adds sources, never replaces —
+  a source is sent once.
+
+**Closed.** `docs/specs/qa-service-api-gaps-ticket.md` (2026-07-28): all
+five write-API gaps are resolved on the service side — `levels`
+writable and derived, `edit_requirement`, trace links on write,
+`create_suite` header + `teams`, schema enums for `status` / `priority`
+/ `type` / `kind`. Marked CLOSED at the top of the file; kept as history.
+
+**Not adopted, with the reason on record** (review §4.2–4.3; MAINTAINERS
+rule 1 — a lesson that never reaches a tracked file was never learned):
+
+- Spike first, one per run, each with a CHANGELOG line when done: the
+  versions gate (`review_requirement` / `review_test_case` /
+  `list_register_impacts` — the propagation mechanism the pipeline
+  lacks when a requirement is edited in place, but minutes of Opus per
+  entry and no team precedent; try it on P0 requirements and `[core]`
+  cases only); `plan_implement_tests` as a read-only offer at the end of
+  stage 10 (pipeline suites read `verifiedPct: 0` on `product_coverage`
+  and always will — verified means an implemented test with a resolving
+  ref; never `start_*` from the pipeline); `get_coverage {tags}` for
+  retest scoping; `discover_tests` preview in code-review (reads the
+  configured `alpha` snapshot, so a PR's own new tests are invisible
+  until merge, and only the monolith is discoverable — regression
+  footprint only, never "did the PR add tests"); `get_release` quoted at
+  stage 10 once the fixVersion has a release.
+- Rejected **on fit, quality unmeasured**: service-side authoring
+  (`start_generate_test_cases`, `start_collect_requirements`,
+  `start_import_docs`, `derive_suite_structure`, `scaffold_tests`).
+  Generated items would carry none of the markers the code phase
+  scopes and routes on (`detail.ticket`, `detail.pipelineId`, `[core]`,
+  channel tags, the AC ledger), `import_docs` replaces content, and the
+  0.10.4 `summarize_requirement` incident stands — but that incident
+  measured the summariser on one requirement, not the generator. Named
+  spike: on a throwaway suite, run `start_generate_test_cases` over the
+  same Confluence page as a finished ticket and compare its cases with
+  stage 4's on the same requirements; record the result here whichever
+  way it goes. UAT (`commission_uat` is not
+  exposed over MCP, `list_uat_runs` is empty, the `uat` agent overlaps
+  stages 8–10); CI reads (`ci_run_status`: 205 observed runs, every one
+  `junit:unit` on `alpha` with `unjoinedCount 3906` — joins to no case);
+  link / code-sync / repo registration (the pipeline writes no test
+  code); `get_help_topic` per run to diff the vocabulary (the schema
+  enums now reject a drift loudly). `delete_*`, `merge_duplicate_case`,
+  `remove_run_cases`, `summarize_requirement` stay forbidden (0.37,
+  0.10.4).
+
+**Unverified.** The version-gate state of any suite:
+`register_review_status` was refused by the Claude Code auto-mode
+classifier as a write (it is a read). Run it once from a normal session
+before the versions spike.
+
 ## 0.43.1 — 2026-09-11 — three currency items
 
 The first three adoptions from the coherence review's Part 3 (currency

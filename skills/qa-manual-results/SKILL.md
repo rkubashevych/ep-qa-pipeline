@@ -187,14 +187,18 @@ that list is the per-bug yes — then on explicit yes:
   `machine (witnessed)` row (an AGENT-RUNS card) → `source: machine`,
   `principal` = `ep-qa-pipeline agent (<KEY> walk, witnessed by
   <tester>)`. The note = the tester's Notes verbatim, plus
-  ` · Half: rests on <machine verdict>` on a `Half` row; the bug key /
-  jam link as evidence. Human
+  ` · Half: rests on <machine verdict>` on a `Half` row; the bug key,
+  the jam link and the Jira comment URL go in `evidence[]` as `link`
+  entries (`test-runs.md` → evidence) — never only in the note. Human
   PASS / FAIL / BLOCKED / SKIPPED → `pass` / `fail` / `blocked` /
   `skipped`; non-standard entries are not recorded. A case the machine
   already recorded is simply re-recorded — the service supersedes and
   keeps both; that IS the retraction. If the run is `completed`, call
-  `reopen_test_run` first. When the sheet is fully ingested,
-  `close_test_run` (`closed`; `aborted` only if the pass was abandoned).
+  `reopen_test_run` first. **Ending the run** (`test-runs.md` → "Run
+  lifecycle"): every row recorded → the service auto-completes it and
+  `close_test_run` is refused — report `completed`, call nothing; rows
+  still `not_run` at the end of ingestion → `close_test_run` (`closed`),
+  naming them; pass abandoned → `aborted`, only on the user's word.
   Never change lifecycle `status`; write no run lines into notes (the
   pre-0.30 `SUPERSEDES` / `⚠ CURRENT VERDICT:` forms are retired).
 - **Retraction comments** — one per ticket that published a now-retracted
