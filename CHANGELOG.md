@@ -5,6 +5,91 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.43.3 — 2026-09-14 — the generator spike is run; the rejection is now measured
+
+No mechanism, no skill change. This entry closes the named spike 0.43.2 opened
+and changes the *reason* recorded against service-side authoring. Evidence:
+`docs/reviews/QA-SERVICE-GENERATOR-SPIKE-2026-09-14.md`.
+
+**The experiment.** Story EP-55944 ("Registrant report: add paid amount, payment
+status columns and completed-payment filter" — Staged for Release, four numbered
+AC, no Confluence page, and the load-bearing product decisions living only in the
+EP-56727 `[BE]` comment thread). Both sides were given the SAME text: the story
+description, the `[BE]` sub-task and its four comments, the rejected `[FE]`
+sub-task. Both were BLINDED from the human QA sub-task EP-56729 and from the
+tester's verification comment of 2026-09-07 — those are the benchmark. A throwaway
+suite was created, generated into, exported locally and **deleted** (verified
+gone). Scoring rubric fixed before either output was read.
+
+**Result: pipeline 24/27, generator 19/27.** 37 cases + 6 structural checks from
+16 requirements, against 23 cases from 22 requirements.
+
+**What the generator does WELL — the 0.43.2 entry underrated it.**
+
+- It caught the buried decision. The one-row-per-payment ruling exists only in a
+  comment thread; it landed as `RULE-03` **and** `INV-02`, the second quoting the
+  developer's own "a registrant with 3 payments shows as 3 rows" sentence.
+- It caught a contradiction **nobody on the ticket wrote down**: AC-2's "that
+  Order's total" against the later ruling "money actually received".
+- It read a sub-task STATUS as a scope gap (`[FE]` closed by reject while AC-1
+  and AC-3 are UI criteria).
+- Correct kind spread (no collapse to `fr`), every source carrying a verbatim
+  `quote` with `quoteVerified: true`, 32 `satisfies` links, 0 orphans, cases
+  auto-tagged for Coverage.
+- Two things worth stealing, now named candidates: **separate `risk`
+  requirements with `impact`/`likelihood`** (it emits 2; grooming emits 0 and
+  carries risk as an attribute instead), and its **partial-payment data design**
+  (one Order, payments of 70 + 50 — a sharper probe of the amount conflict than
+  the pipeline's two-Orders case).
+
+**Why it is still rejected — the measured reason.** It **resolves contradictions
+by assertion.** Having found the AC-2 vs ruling conflict, it wrote
+`TC-15` ("Paid amount = 120 (received), not 200 (billed)") noting *"Resolves
+DISC-02: implementation follows per-payment money received, overriding AC2's
+'Order total'"*, and `TC-16` *"Guards against a regression back to AC2's
+one-Order-per-row interpretation"*. Nothing in the inputs says which way the
+build went. The blinded human comment says the export shows **the order total
+incl. tax** — so on a correct build those two cases fail and file two defects
+against a developer who implemented the published AC. The pipeline kept both
+readings (`REQ-3 (unresolved conflict)`) and wrote `TC-REQ-3.1` / `TC-REQ-3.2`
+with *"Exactly one of TC-REQ-3.1 / TC-REQ-3.2 can pass on one build"*.
+It also failed the anti-invention check three times (a claim about the
+implementation, an unsourced "no new FE endpoint is required", and a citation of
+a "test plan §3" that does not exist).
+
+So the 0.43.2 wording "rejected **on fit, quality unmeasured**" is superseded by:
+**rejected on fit AND on resolution safety — competent at extraction, unsafe at
+resolution.** Anything it produced would need the keep-both-versions discipline
+applied on top, which is most of what stage 2 already does. The prohibition in
+`qa-service-publish.md` stands unchanged.
+
+**What the spike also measured, and is worth keeping in view.**
+
+- **Recon is the pipeline's real edge, and is out of the connector's reach.**
+  Stage 1's source read found five things no reading of the ticket can produce,
+  two of them defect-shaped: the status enum has **six** values in code
+  (`new`, `progress` unmapped by any AC) and the literal is spelled
+  **`canceled`**, one "l", while the ticket writes `cancelled` — a label mapping
+  keyed on the ticket's spelling would never match. The generator's tool takes
+  pasted text and fetches nothing.
+- **Grooming found an ambiguity both the generator and the human QA plan
+  missed:** AC-3 filters at *registrant* level while the ruling makes output
+  *per payment*, so a registrant with one `success` and one `failed` payment has
+  two defensible exports under "Paid only".
+- **Both machines are blind to the running system.** The two findings in the
+  human's verification — a cancel/confirm transition reflected in the export, and
+  a declined checkout producing an account-less payment so no row is created —
+  were predicted by neither. That is what stages 8–10 are for; a docs-phase-only
+  experiment does not exercise them.
+- **Automation beat the human on one row:** `failed` is required by AC-2 and does
+  not appear in the tester's verification; both machines covered it.
+- **Operational notes from the run.** `start_collect_requirements` **renamed the
+  suite prefix** (`ZZSPK` → `PAYRPT`) — the publish reference assumes the prefix
+  it passes is kept, so a future adopter of any service-side authoring must not
+  rely on it. `model: "opus"` resolved to `claude-opus-4-8`. Generated cases land
+  **unfoldered** (all 23 in General) with empty `levelText`, both of which the
+  publish reference treats as mapping failures.
+
 ## 0.43.2 — 2026-09-14 — QA Service integration: four rules matched to the service, two reads adopted
 
 Source: `docs/reviews/QA-SERVICE-INTEGRATION-REVIEW-2026-09-14.md` — the
