@@ -5,6 +5,87 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.43.4 — 2026-09-14 — the two things the generator did better
+
+The adoptions 0.43.3 named. Both are rules, not mechanism, and both were
+measured on the EP-55944 spike rather than assumed
+(`docs/reviews/QA-SERVICE-GENERATOR-SPIKE-2026-09-14.md`).
+
+**1. Grooming writes the hazard, not only the rating**
+(`requirements-grooming/SKILL.md` → "Risk requirements", + its
+output-template).
+
+`[risk: High]` rates a requirement; nothing recorded the **hazard the
+requirement exists to prevent**. The findings pause lists risks in chat
+and the chat scrolls away, so the output file kept only mitigations — and
+the publish then had nothing to write as `kind: risk`, whose
+`detail.impact` / `likelihood` / `mitigation` shape has been specified in
+`qa-service-publish.md` since 0.11 with no producer upstream. A
+publish/consume pair with a missing half, exactly what the coherence
+review's V19 check was drafted to catch.
+
+On EP-55944 the material named two hazards — amounts in different
+currencies silently summed, and a row-per-payment ruling that makes every
+downstream row-count over-count registrants. Grooming captured both
+mitigations as requirements and lost both hazards. The generator, on the
+same text, emitted both as `risk` items with impact and likelihood.
+
+The rule is deliberately narrow: a hazard gets its own `REQ-N` opening
+`Risk:` **only when the ticket's own material names it**, on two triggers
+(a requirement whose material says what it prevents; a decision that
+changes the shape of an existing output or contract). Four restraints are
+stated with it — not one risk per requirement, never invent one, process
+risks stay in the findings pause and the ledger, and a hazard nothing
+mitigates still gets its line with no `mitigated by:` because that
+absence is the finding.
+
+Consumers updated so the new line does not break anything downstream:
+
+- `qa-test-cases/SKILL.md` — a `Risk:` requirement is decomposed **when
+  its consequence is observable** (that is the case that catches the
+  hazard happening); when it is not, it gets no case, is noted on the
+  group heading and counted under "needing clarification".
+- `qa-run-analyzer/SKILL.md` §1 — a `Risk:` REQ with no case is **not an
+  orphan** when stage 4 recorded it as having no observable consequence;
+  reported on its own line, 🟡 only when it carries neither a case nor
+  the note. Plus a new 🟡: **a mitigation with no hazard** — a
+  requirement that says it prevents or avoids something while no `Risk:`
+  REQ names what. That is the EP-55944 failure, detected.
+- `qa-service-publish.md` — the mapping row: `Risk:` → `kind: risk`,
+  `<PREFIX>-R-NN`, rating → `impact`/`likelihood`, `mitigated by:` →
+  `detail.mitigation`, **omitted entirely when the line is absent**, so
+  an invented mitigation cannot erase the finding.
+
+**2. A negative case asserts the absence, not only the refusal**
+(`qa-test-cases/references/test-case-design-rules.md` → Quality rules +
+Anti-patterns).
+
+Nothing required a rejection case to check that the side effect did not
+happen. "Returns 422" passes against a build that returns 422 and writes
+the row anyway; "the registrant is excluded" passes against one that also
+dropped three it should have kept. Measured gap: no case asserted the
+amount cell is empty on a row whose payment is not `success` — the
+generator did assert it. The rule codifies what the reference example
+already demonstrates (`test-cases-example.md` TC-REQ-5.2 asserts the
+message, the toggle reading OFF, *and* the count staying 10), so no
+expected output changed.
+
+**Not adopted from the spike.** The "one Order, several payments" data
+design, floated in 0.43.3 as a candidate. On inspection stage 4 already
+handles conflicts with version-A/version-B cases and the run's own data
+discriminated correctly (150 billed against 120 received); what was
+missing was a single scenario on one ticket, which is a per-run design
+judgement. A rule enumerating cardinality combinations would inflate case
+counts for no measured gain.
+
+**Verification.** `verify_plugin.py` 9 ok · 0 warn · 0 fail;
+`reconcile_counts.py --selftest` PASS. The docs-stage fixture was **not
+re-run**: both new rules are provably inert on it — `EP-0000-context.md`
+contains no hazard language (no prevent / avoid / otherwise / silently),
+so no `Risk:` REQ arises, and the expected output already satisfies the
+absence rule. No frontmatter `description` changed, so `evals/triggering.md`
+did not need walking.
+
 ## 0.43.3 — 2026-09-14 — the generator spike is run; the rejection is now measured
 
 No mechanism, no skill change. This entry closes the named spike 0.43.2 opened

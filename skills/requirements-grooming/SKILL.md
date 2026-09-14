@@ -260,6 +260,52 @@ they can adjust. The rating flows down the chain: test cases inherit
 it, and api-/web-testing execute High first, so a truncated run still
 covers what matters most.
 
+## Risk requirements — the hazard, not only the rating
+
+`[risk: High]` rates a requirement. It does not record the **hazard the
+requirement exists to prevent**, and a hazard that gets no line of its
+own dies with the chat: the findings pause scrolls away, the output file
+keeps only the mitigation, and the publish then has nothing to write as
+`kind: risk` (`detail.impact` / `likelihood` / `mitigation` —
+`../qa-pipeline-docs/references/qa-service-publish.md`). Measured on
+EP-55944 (2026-09-14 spike): the material named two hazards, grooming
+captured both mitigations as requirements and neither hazard.
+
+Write a hazard as its own `REQ-N` when **the ticket's own material names
+it**. Two triggers, both narrow:
+
+1. **A requirement exists to prevent something, and the material says
+   what.** "Show the currency next to the number — that avoids silently
+   adding different currencies together." The mitigation is one
+   requirement; the hazard is another.
+2. **A decision changes the shape of an existing output or contract.**
+   A ruling that makes an export one row per payment, where it was one
+   row per registrant, does not only add behaviour: every consumer that
+   counted rows now over-counts. The hazard is that consequence.
+
+Format — a normal REQ line opening with `Risk:`, plus one extra line:
+
+```
+- REQ-N: [risk: High] Risk: <the consequence, concretely>
+  - source: <the same ids that name it — usually the ids its
+    mitigation also cites, which keeps the AC ledger satisfied>
+  - mitigated by: REQ-M  (omit when nothing mitigates it — the absence
+    IS the finding, and it goes in the findings pause too)
+```
+
+Restraint, in order of how often it is got wrong:
+
+- **Not one risk per requirement.** A run whose material names no
+  hazard correctly produces no risk requirement.
+- **Never invent one.** "Risk: the filter might not work" is a
+  requirement restated as a fear. The anti-invention rule applies here
+  exactly as it does to requirements.
+- **Not a process risk.** "Risk: the acceptance bar is unsettled" is a
+  grooming finding about the ticket, not a property of the product.
+  Those stay in the findings pause and the open-items ledger.
+- A hazard the material names but nothing mitigates still gets its REQ
+  line, with no `mitigated by:`. That is the most valuable one.
+
 ## Order of work
 
 1. Read the context file in full, including the "Additional

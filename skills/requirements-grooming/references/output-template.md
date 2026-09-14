@@ -26,5 +26,11 @@ Generated: <YYYY-MM-DD>
     it.
 - REQ-5: [risk: Low] <comment-derived requirement>
   - source: CM-1
+- REQ-6: [risk: High] Risk: <the consequence the material names, e.g.
+  "amounts in different currencies are silently added into one
+  meaningless total"> — only when the material names the hazard; see
+  SKILL "Risk requirements"
+  - source: CM-5
+  - mitigated by: REQ-4
 
 AC coverage: <n>/<N> AC items mapped · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>

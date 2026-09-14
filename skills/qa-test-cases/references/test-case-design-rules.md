@@ -96,6 +96,18 @@ state, or behaviour.
 **Completeness.** A test case without an expected result is not a
 test case. Do not generate it.
 
+**A negative case asserts the absence, not only the refusal.** When the
+point of a case is that something is rejected, excluded, hidden or not
+counted, the expected result names BOTH halves: the refusal itself (the
+error, the exclusion, the label) **and** the side effect that must not
+have happened (no row written, the cell left empty, the counter
+unchanged, the other rows still present). "Returns 422" alone passes
+against a build that returns 422 and writes the row anyway. "The
+registrant is excluded" alone passes against a build that also dropped
+three registrants it should have kept. Name what must still be true.
+Measured gap (EP-55944 spike, 2026-09-14): no case asserted that the
+amount cell is empty on a row whose payment is not `success`.
+
 **Traceability.** Each test case is tied to a REQ-ID. Each
 behavioural requirement has at least one test case.
 
@@ -153,3 +165,6 @@ focus. Do not combine several independent checks into one test case.
 - Two test cases from the same EP class → remove the duplicate
 - Test case for behaviour not present in the requirement → do not generate
 - Test case without a REQ-ID → do not generate
+- Negative test case asserting only the refusal, with nothing said
+  about the side effect that must not have occurred → incomplete, add
+  the absence assertion before generating

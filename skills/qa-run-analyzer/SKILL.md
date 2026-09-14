@@ -72,7 +72,18 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
 ### 1. Run / coverage health (Pipeline)
 - Every REQ-N in the requirements file has >=1 test case or >=1
   Structural checks line; every behavioural requirement has >=1 test
-  case. List orphans (REQ with neither).
+  case. List orphans (REQ with neither). **Exception:** a REQ whose
+  text opens with `Risk:` (`../requirements-grooming/SKILL.md` → "Risk
+  requirements") is a hazard, not a behaviour — one with no case is
+  expected when stage 4 recorded it as having no observable
+  consequence, and is NOT an orphan. Report those on their own line
+  ("N risk requirements carried without a case") and 🟡 only when such
+  a REQ carries neither a case nor that note.
+- 🟡 **a mitigation with no hazard** — a requirement whose text says it
+  prevents, avoids or guards against something, while no `Risk:` REQ
+  names that hazard. The hazard was read and dropped; name the REQ and
+  the clause. (Measured on the 2026-09-14 EP-55944 spike: two
+  mitigations published, both hazards lost.)
 - Recon usage: when open questions reached the ticket, flag 🟡 any
   BEHAVIOUR-class question posted while env access existed and no
   `<KEY>-recon.md` was produced — an observable fact was asked of a

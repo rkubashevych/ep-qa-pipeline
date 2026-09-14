@@ -63,6 +63,18 @@ From the requirements file, the skill takes:
   ("version A — Confluence" / "version B — Jira"), and count the
   requirement under "needing clarification" in the statistics. Never
   silently pick one side.
+- A requirement whose text opens with `Risk:`
+  (`../requirements-grooming/SKILL.md` → "Risk requirements") — a
+  hazard, not a behaviour. Decompose it **only when its consequence is
+  observable in the product**, and then write the case that would catch
+  the hazard occurring: "export a two-currency event, assert no cell
+  merges the two amounts into one bare number". A hazard whose
+  consequence is not observable — it lands outside the product, or only
+  in a consumer this ticket does not own — gets **no test case**;
+  record it on the group heading as `Risk: <text> — no observable
+  consequence, carried to the ledger` and count it under "needing
+  clarification". It is not an uncovered requirement and the analyzer
+  does not count it as an orphan.
 
 Additional source:
 - The user's answers to questions asked before generation.
