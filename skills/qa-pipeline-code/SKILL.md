@@ -134,8 +134,11 @@ Otherwise, using the Atlassian connector and the Story key:
 1. **Test cases (and their Structural checks section).** Find the
    story's QA sub-task:
    `searchJiraIssuesUsingJql` with
-   `parent = <STORY> AND issuetype = "QA sub-task"` (prefer the newest
-   with label `qa-pipeline` or a `[QA-PIPELINE]` summary).
+   `parent = <STORY> AND labels = "qa-pipeline"` (newest wins; a
+   `[QA-PIPELINE]` summary is the fallback on pre-label runs).
+   **Match on the label, never on the issue type** — the type differs
+   per project and a type filter returns silently empty in the wrong
+   one (CHANGELOG 0.43.5).
 
    **Source order — suite first** (the docs phase posts no fenced copy
    of any file since 0.33.0; the suite is the record). Full rules:
@@ -214,9 +217,13 @@ Otherwise, using the Atlassian connector and the Story key:
 
 2. **Dev branches.** `searchJiraIssuesUsingJql` with
    `parent = <STORY> AND issuetype in ("Backend sub-task","Frontend
-   sub-task")`. Each dev sub-task's **key is its branch name** — use
-   these for branch mode; no PR URLs needed. List them for the user
-   before starting.
+   sub-task","Sub-task") AND (labels IS EMPTY OR labels != "qa-pipeline")`.
+   Both the widened type list and the label exclusion are
+   load-bearing (CHANGELOG 0.43.5): the typed names exist only in HV,
+   EP files dev sub-tasks as plain `Sub-task`. Each dev sub-task's
+   **key is its branch name** — use these for branch mode; no PR URLs
+   needed. List them before starting, and say so plainly when the
+   query returns none.
    - **Fallback — no dev sub-tasks** (Bugs, small Stories/Tasks carry
      the work on the main issue). Look for the PR/branch on the main
      issue, in order: (1) `getJiraIssueRemoteIssueLinks` on `<STORY>`
@@ -228,6 +235,12 @@ Otherwise, using the Atlassian connector and the Story key:
      `git fetch` / the API); (4) still nothing → PAUSE and ask. Do not
      guess further. Whatever is found, list the PRs/branches (and
      where each was found) before starting.
+
+3. **Refresh the local clones** before stage 5, once per run, for every
+   repo the derived branches live in, and report each clone's tip date
+   with the branch list. Why, recipe, failure modes and what a stale
+   clone costs: `../pr-summary/references/bitbucket-access.md` →
+   "Local clone".
 
 ## Split runs (Claude Code ↔ Cowork)
 

@@ -5,6 +5,70 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.43.5 — 2026-09-17 — two lookups that matched nothing, and a clone nobody refreshed
+
+Found while running the docs phase on EP-57221. Both defects share a
+shape: the pipeline described ExpoPlatform's Jira and repos as they are
+in ONE project, and failed silently everywhere else. Nothing errored;
+the runs just quietly knew less.
+
+**1. The issue-type filters were project-specific and returned empty**
+
+`QA sub-task`, `Backend sub-task` and `Frontend sub-task` all exist in
+this Jira — in project **HV (Hyve)** only. Project **EP** has none of
+them (verified 2026-09-17: 129 / 19 issues of those types, every one in
+HV; `project = EP AND issuetype in (…)` returns 0). EP files every
+sub-task as a plain `Sub-task`.
+
+So three lookups were correct for Hyve and dead for Expo Platform:
+
+- the dispatcher's and code phase's QA-sub-task lookups now match
+  `parent = <KEY> AND labels = "qa-pipeline"` and **never** the issue
+  type. The label is the one thing the pipeline sets itself, so it
+  holds in both projects.
+- the code phase's dev-branch query widens to
+  `issuetype in ("Backend sub-task","Frontend sub-task","Sub-task")`
+  and excludes the pipeline's own sub-task by label. Renaming the
+  types instead — the first fix proposed — would have fixed EP by
+  breaking HV. On EP the old query matched nothing and fell through to
+  the guess-the-branch-name fallback on **every** run.
+- `publish-config.md` now resolves the issue type at run time via
+  `getJiraProjectIssueTypesMetadata` (prefer `QA sub-task`, else
+  `Sub-task`) instead of naming one. An earlier hardcode to `Sub-task`
+  during the same session was itself wrong for HV and is replaced.
+
+Symptom worth remembering: creating an issue with a type the project
+does not have comes back as **"You don't have permission to connect
+from this IP address"** and then **"a security policy restricts access
+to it"**, while reads from the same session keep working. Three
+creates were lost to that before the type was checked; the trap is now
+recorded next to the config.
+
+**2. Nothing refreshed the local clone**
+
+Branch mode fetches the two refs it diffs, so the DIFF was always
+fresh. But `bitbucket-access.md` sells the clone on what the REST API
+cannot do — find every CALLER of a changed method, check whether a test
+already exists — and those run over the whole working tree, which
+nothing updated. Measured on this machine: the monolith was checked out
+**2,273 commits / 3,471 files** behind `origin/alpha`, and `portal-ui`
+and `admin-ui` had **empty git indexes**, so `git grep` returned
+nothing and no stage reported that it had found nothing.
+
+- "Local clone" gains a **Refresh it before you trust it** step —
+  fetch, fast-forward, verify the index is non-empty — plus the
+  recovery for a half-done checkout (`git read-tree HEAD`; `git
+  restore` is a no-op against an empty index because it writes the
+  tree FROM the index) and for a stale `.git/index.lock`.
+- The code phase gains step 3: refresh the clones before stage 5 and
+  **report each clone's tip date** with the branch list. A caller
+  search is evidence only about the commit it ran on — the same
+  provenance discipline recon already follows.
+- `portal-ui`'s default branch is corrected: `master` and `alpha` both
+  stopped at 2026-05-06, and the live line is `*-next14`. Diffing
+  against the old default produces an enormous changeset that looks
+  like a real diff.
+
 ## 0.43.4 — 2026-09-14 — the two things the generator did better
 
 The adoptions 0.43.3 named. Both are rules, not mechanism, and both were

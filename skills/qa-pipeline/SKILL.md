@@ -31,8 +31,12 @@ invoked orchestrator's own rules then apply in full.
 From the ticket key/URL (ask if the paste has none):
 1. `getJiraIssue` — issuetype, status, summary.
 2. Pipeline QA sub-task? `searchJiraIssuesUsingJql`:
-   `parent = <KEY> AND issuetype = "QA sub-task"` (newest with the
-   pipeline label wins).
+   `parent = <KEY> AND labels = "qa-pipeline"` (newest wins). **Match
+   on the label, never on the issue type** — the type differs per
+   project and a type filter returns silently empty in the wrong one:
+   HV has a `QA sub-task` type, EP does not (verified 2026-09-17), so
+   every EP pipeline sub-task is a plain `Sub-task`. The label is the
+   one thing the pipeline sets itself, so it holds in both.
 3. On that sub-task, when it exists: a QA Service suite line? a
    code-phase status comment? a human summary? (The stage reports are
    local-only — Jira carries no archive since 0.33.0, so their absence

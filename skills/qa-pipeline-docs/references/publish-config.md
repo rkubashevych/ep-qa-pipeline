@@ -8,7 +8,7 @@ SKILL.md stays generic and reads the values from here.
 | Setting | Value |
 |---|---|
 | Jira project key | `EP` |
-| Issue type | `QA sub-task` (id `10107`) |
+| Issue type | **Resolve at run time — it differs per project.** Call `getJiraProjectIssueTypesMetadata` on the project and take the first available of: `QA sub-task` → `Sub-task`. Verified 2026-09-17: **HV (Hyve)** has `QA sub-task` (plus `Backend sub-task` 10071 / `Frontend sub-task` 10070); **EP** has neither — its only sub-task types are `Sub-task` (10006) and `Defect` (10366), and every EP pipeline sub-task (EP-57429, EP-57391, EP-57363, EP-57095) is a plain `Sub-task`. Never hardcode one name: it breaks the other project. The `qa-pipeline` label below is the discriminator in both. |
 | Assignee | the pipeline operator — `QA_OPERATOR_EMAIL` from `.env.qa-agents` (`../../qa-pipeline/references/environment.md`), resolved via `lookupJiraAccountId` at run time; file not reachable (Cowork without the mount) → ask once and remember for the session |
 | Summary format | `[QA-PIPELINE] <story summary> — test cases` |
 | Label | `qa-pipeline` (the code phase finds the sub-task by this) |
@@ -22,8 +22,13 @@ Rules:
   at run time; never cache an accountId in this file — identities are
   configuration, not documentation.
 - The issue-type id is instance-specific. If `createJiraIssue` rejects
-  id `10107`, list the project's issue types via
-  `getJiraProjectIssueTypesMetadata` and update this table.
+  the type, list the project's issue types via
+  `getJiraProjectIssueTypesMetadata` and update this table. ⚠ The
+  connector does NOT say "unknown issue type" — on 2026-09-17 a request
+  for the non-existent `QA sub-task` came back as "You don't have
+  permission to connect from this IP address" and then "a security
+  policy restricts access to it", while reads from the same session
+  kept working. Check the issue type before believing an access error.
 - The transition rows are used by `qa-manual-results` step 4b (hand the
   story back after the human round; `qa-pipeline-code` step 8 only under
   its narrow wave-1 exception). `<not configured>` means: skip

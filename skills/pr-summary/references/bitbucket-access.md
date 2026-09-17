@@ -114,8 +114,12 @@ curl -s -u "$BB_EMAIL:$BB_API_TOKEN" \
 
 **Branch mode (branch name, no PR):** ask for workspace/repo if not
 clear from context. The base is the repo's default branch — monolith
-`alpha`, `portal-ui` / `admin-ui` `master` (see "Branch mode vs PR
-mode"); confirm with `git remote show origin | grep HEAD` when unsure.
+`alpha`, `admin-ui` `master`, **`portal-ui` the `*-next14` line
+(`alpha-next14` / `master-next14` / `rc-next14`)**; confirm with
+`git remote show origin | grep HEAD` when unsure. ⚠ `portal-ui`'s
+`master` and `alpha` both stopped at 2026-05-06 — diffing against
+either produces a huge, meaningless changeset that looks like a real
+diff. Check the base branch's last commit date before trusting it.
 
 ```bash
 # List of changed files (base vs branch — three-dot = from the merge-base)
@@ -132,6 +136,32 @@ Read files only from the head branch of the PR — never from the base
 branch, master, or the general repository context.
 
 ## Local clone — preferred when present
+
+**Refresh it before you trust it — once per run, before the first
+clone-wide read.** Branch mode already fetches the two refs it
+diffs, so the DIFF is always fresh; nothing refreshes the rest of the
+tree, and that is what the caller and existing-test searches below
+read. A stale clone does not fail — it answers confidently from old
+code. Measured 2026-09-17: the monolith was checked out 2,273 commits
+behind `origin/alpha`, and `portal-ui` / `admin-ui` had empty git
+indexes, so `git grep` returned nothing at all and no stage said so.
+
+```bash
+git -C <clone> fetch --all --prune
+git -C <clone> merge --ff-only origin/$(git -C <clone> rev-parse --abbrev-ref HEAD)
+git -C <clone> ls-files | wc -l      # 0 = the index is empty, see below
+```
+
+An empty index (0 tracked files while the files exist on disk) is a
+half-done checkout: `git restore` is a no-op against it because it
+writes the tree FROM the index. Rebuild the index instead —
+`git -C <clone> read-tree HEAD` — which touches no files on disk. A
+stale `.git/index.lock` from a crashed run blocks it; check its
+mtime and that no git process is running before removing it.
+
+**Record the clone's tip date in the report** next to any claim drawn
+from a clone-wide search, the same way recon states its provenance. A
+caller search is evidence only about the commit it ran on.
 
 When a local clone exists (default location:
 `C:\media-files\Coding\ep-code\<repo>`), branch mode should use it
