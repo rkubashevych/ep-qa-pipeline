@@ -382,11 +382,11 @@ story does not exhaust the orchestrator's context:
      docs-phase owner. A "you may get pushed back on this" caveat in a
      draft IS this gate firing — stop. A closed ticket's precedent is
      context, not a source.
-   - **Roster cases file through the run:** the per-case `fail` list in
-     the step-6 preview IS the draft-and-yes; the note carries where /
-     expected / actual + `Source:` + `Clause:`. The paths below are for
-     findings with **no roster case** (unpromoted `RISK-CR-*` rows,
-     human-confirmed observations).
+   - **Roster cases: create the ticket BEFORE the `fail`** — summary
+     beginning `[<STABLE-ID>]`, so the operator is its reporter and the
+     verdict links it rather than filing a second (`test-runs.md` →
+     "File the ticket FIRST"); the step-6 `fail` list is the per-bug yes
+     and shows the draft. Below is for findings with **no roster case**.
    - **Preferred path (knowledge-base installed):** `/knowledge-base`
      dedup-searches and creates routed Jira bugs. **Default path:**
      draft per **`references/bug-report-template.md`**, search Jira for

@@ -1,8 +1,18 @@
-# Bug report template — default filing path
+# Bug report template — every bug this pipeline files
 
-Used by qa-pipeline-code step 7 when the `/knowledge-base` skill is
-not installed. One Jira bug per confirmed finding. Draft first, show
-the user, create via `createJiraIssue` only after an explicit yes.
+Used by qa-pipeline-code step 7 and by qa-manual-results steps 4–5 when
+the `/knowledge-base` skill is not installed. One Jira bug per confirmed
+finding. Draft first, show the user, create via `createJiraIssue` only
+after an explicit yes.
+
+**This template covers roster bugs too — since 0.43.6.** It used to
+apply only to findings with no covering case, because a roster `fail`
+let qa-service file the ticket. That path produces a case dump reported
+by the service account, and the reporter cannot be corrected afterwards
+(`../../qa-pipeline/references/test-runs.md` → "File the ticket FIRST").
+So a roster bug is drafted here, created through the Atlassian connector
+(which authenticates as the operator), and only then is the `fail`
+recorded — the open ticket dedupes it.
 
 Voice, caps and section discipline: **`jira-writing-style.md`** (same
 folder) — read it before drafting. The parts that bite here: summary
@@ -26,10 +36,49 @@ link the existing ticket in the QA sub-task comment.
 |---|---|
 | Project | `EP` |
 | Issue type | `Bug` |
-| Summary | `[<area>] <symptom in one line — what breaks, where>` — the AC id goes in the description, not the summary |
+| Summary | **roster bug:** `[<STABLE-ID>] <symptom in one line — what breaks, where>`; **no covering case:** `[<area>] <symptom …>`. The AC id goes in the description, not the summary |
 | Priority | propose from impact (blocker flow → High); user confirms |
-| Labels | `qa-pipeline` |
-| Links | "relates to" the Story; mention the QA sub-task key |
+| Labels | `qa-pipeline`, plus the repo when one surface owns it (`admin-ui`, `portal-ui`) |
+| Links | "relates to" the Story / the ticket under test; mention the QA sub-task key |
+
+**The `[<STABLE-ID>]` prefix on a roster bug is the dedupe key** — it is
+how `record_case_result` finds the open ticket and links it instead of
+filing a second. Never omit it, never strip it from an existing ticket.
+EP-57409 was filed without it moments before qa-service auto-filed
+EP-57410 for the same case; the team got two tickets and one was closed
+as a duplicate.
+
+## The tracker's own fields — fill them, they are not optional
+
+The EP project has a **structured bug form**, and a description-only
+ticket leaves it empty. qa-service's auto-filed tickets do exactly that,
+which is most of why they read badly (EP-57509, 2026-09-18). Set these
+alongside `description`:
+
+| Field | Id | Type |
+|---|---|---|
+| Steps to reproduce | `customfield_10377` | **ADF** — a plain string is rejected |
+| Expected result | `customfield_10147` | **ADF** |
+| Actual result | `customfield_10146` | **ADF** |
+| Admin panel URL | `customfield_10259` | string |
+| Frontend URL | `customfield_10260` | string |
+| Environment name | `customfield_10252` | string |
+| Event name | `customfield_10253` | string |
+
+The three ADF fields take
+`{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"…"}]}]}`
+— passing a string returns `Operation value must be an Atlassian
+Document`. The error response lists every settable field for the issue
+type, so when a field id here goes stale, read it back from that list
+rather than guessing.
+
+**`reporter` cannot be set on this project** ("not on the appropriate
+screen") — which is exactly why the ticket is created by the operator's
+own connector rather than corrected afterwards.
+
+**Re-check labels a few minutes after creation.** The AI Bug Analyzer
+bot rewrites `labels` on new tickets and drops ones set at creation
+(observed on EP-57509, 2026-09-18).
 
 ## Description skeleton
 

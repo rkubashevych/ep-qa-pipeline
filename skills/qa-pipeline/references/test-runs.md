@@ -81,7 +81,8 @@ is `pass | fail | blocked | known_defect | skipped | flaky`. This table
 is the only place the mapping lives. **A `fail` files a Jira defect the
 moment it is recorded** (verified: EP-56912 was created by the
 2026-09-02 run's single `fail`, `created: true`) — read the table with
-that in mind.
+that in mind, and file the ticket yourself first so the operator is its
+reporter ("File the ticket FIRST, then record the `fail`", below).
 
 | Pipeline status (stage) | Run verdict | `note` (required on fail/blocked; write it always) |
 |---|---|---|
@@ -175,11 +176,51 @@ and `closed` alike as "done".
 
 A human `fail` files the defect (deduplicated per case: an open issue
 already referencing the stable id is linked, not duplicated —
-`created: false` in `run_defects`). That replaces the draft-per-template
-path for **cases on the roster**: the stage-10 confirmation preview lists
-every `fail` about to be recorded, case by case, and the explicit yes is
-the per-bug yes. Findings with no covering case (RISK rows, observations
-the human confirmed) still go the template route.
+`created: false` in `run_defects`). The stage-10 confirmation preview
+lists every `fail` about to be recorded, case by case, and the explicit
+yes is the per-bug yes. Findings with no covering case (RISK rows,
+observations the human confirmed) go the template route.
+
+### File the ticket FIRST, then record the `fail` — since 0.43.6
+
+**Order matters, and the default order is the wrong one.** If the
+`fail` is recorded first, qa-service files the ticket itself, and what
+it files is not a bug report: the summary is the **case title** (which
+reads like a requirement, not a defect), the description is the case
+record with escaped quotes, the tracker's own bug fields are left
+empty, and — the part no later edit can repair — **the reporter is the
+qa-service account** (`claude-agent-1@expoplatform.com`, "Claude
+Agent"), because that is who authenticated. `reporter` is not on the EP
+project's edit screen, so the API refuses to change it afterwards
+(verified 2026-09-18 on EP-57509: `Field 'reporter' cannot be set. It
+is not on the appropriate screen, or unknown.`).
+
+So, for every roster `fail` about to be recorded:
+
+1. **Draft and create the ticket** per
+   `../../qa-pipeline-code/references/bug-report-template.md`, through
+   the Atlassian connector — which authenticates as **the pipeline
+   operator**, so the operator is the reporter. The summary **must
+   begin with `[<STABLE-ID>]`** (`[TMU-REG-04]`, …): that prefix is the
+   dedupe key, and it is what the next step matches on.
+2. **Then `record_case_result`.** The open issue already references the
+   stable id, so the service **links** it instead of filing a second —
+   `created: false` in `run_defects`. One ticket, the operator's name
+   on it, and the template's shape.
+
+**The prefix is load-bearing, and the failure is on record.** EP-57409
+was filed by hand moments before qa-service auto-filed EP-57410 for the
+same failing case. Its summary carried no `[TMU-BUG-09]` prefix, so the
+dedupe matched nothing and the team got two tickets for one failure;
+EP-57409 was then closed as a duplicate. Never file a roster bug
+without the prefix, and never strip it from one.
+
+**If the ticket was already auto-filed** (an earlier run, or a `fail`
+recorded before this rule), do not open a second one: correct it in
+place — summary, description and the tracker's structured fields — and
+say in the final response that the reporter is the service account and
+why it cannot be changed from here. The dedupe key stays exactly as it
+is.
 
 ## Retractions
 

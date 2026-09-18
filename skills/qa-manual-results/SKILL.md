@@ -178,8 +178,23 @@ said, what was measured, and the clause the new verdict rests on.
 Show the user exactly what will be written — including **every `fail`
 about to be recorded, case by case**, because recording a `fail` on the
 run files one deduplicated Jira defect for that case (`test-runs.md`);
-that list is the per-bug yes — then on explicit yes:
+that list is the per-bug yes. **Show the drafted bug beside each
+`fail`**: under the filing order below, that draft is what gets created,
+so it is part of what the user is saying yes to. Then, on explicit yes:
 
+- **Roster bugs FIRST, before the verdicts that file them.** For every
+  case whose Result is FAIL, create its Jira bug now, per
+  `../qa-pipeline-code/references/bug-report-template.md`, with the
+  summary beginning `[<STABLE-ID>]` and the tracker's structured fields
+  filled. It is created through the Atlassian connector, so **the
+  operator is the reporter** — the whole point of the order
+  (`../qa-pipeline/references/test-runs.md` → "File the ticket FIRST,
+  then record the `fail`"). Search for an existing open ticket for that
+  stable id first: found → use it, create nothing. Then record the
+  verdict below, which links the open ticket instead of filing a second
+  (`created: false` in `run_defects` — check it, and say so if it reads
+  `true`, because that means a duplicate was filed and the prefix did
+  not match).
 - **QA Service run** (connector present): for every case with a
   Result, `record_case_result` on the pass's run — **`source` and
   `principal` follow the row**: a `manual` row → `source: manual`,
@@ -288,14 +303,25 @@ account nobody deactivates is a live credential nobody rotates
 
 ### Step 5 — Offer to file unfiled bugs
 
-A human `fail` on a **roster case** already filed (or linked) its
-defect through the run — read the keys back with `run_defects` and put
-them in the report. The offer below is for FAILs with **no roster
-case**: risk rows never promoted, observations the tester confirmed, a
-FAIL on a run without a suite. One offer listing them all — via the
-`/knowledge-base` skill when installed, else per
+A human `fail` on a **roster case** had its bug created in step 4,
+before the verdict, and the verdict then linked it — read the keys back
+with `run_defects` and put them in the report. Two checks there: every
+roster FAIL has a key, and each reads `created: false` (a `true` means
+the prefix missed and a duplicate exists — consolidate it, keeping the
+one whose summary carries the `[<STABLE-ID>]` prefix, and say so).
+
+The offer below is for FAILs with **no roster case**: risk rows never
+promoted, observations the tester confirmed, a FAIL on a run without a
+suite. One offer listing them all — via the `/knowledge-base` skill
+when installed, else per
 `../qa-pipeline-code/references/bug-report-template.md` with duplicate
 search first. File only what the user confirms.
+
+**A ticket qa-service filed on an earlier run** (before 0.43.6, or from
+a `fail` recorded out of order) is corrected in place, never re-filed:
+summary, description and the structured fields, with the dedupe prefix
+untouched. Its reporter stays the service account — say so in the final
+response rather than implying it was fixed.
 
 ## Final response
 

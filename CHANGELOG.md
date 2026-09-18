@@ -5,6 +5,76 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.43.6 — 2026-09-18 — the bug the pipeline files is reported by a bot
+
+Found on EP-57410's bug-fix run, and reported twice by the operator
+before it was understood: "poorly formatted and it's again from claude
+agent".
+
+**What was wrong**
+
+`record_case_result` files the Jira defect itself the moment a `fail` is
+recorded. The pipeline leaned on that for roster cases — `test-runs.md`
+said so explicitly, and `bug-report-template.md` applied only to
+findings with *no* covering case. So the ticket a developer actually
+opens was written by qa-service, not by this pipeline, and it shows:
+
+- the summary is the **test case title**, which reads like a
+  requirement rather than a defect ("Portal, API and admin panel read
+  the same on a login conflict" — for a ticket about them *not* reading
+  the same);
+- the description is the case record with escaped quotes, "Steps:",
+  "Case notes:" and the rest of the QA artefact;
+- the EP project's **structured bug form** — Steps to reproduce,
+  Expected result, Actual result, Admin panel URL, Environment, Event —
+  is left entirely empty;
+- and the reporter is the service account, **"Claude Agent"**.
+
+The last one cannot be repaired afterwards: `reporter` is not on the EP
+project's edit screen, and the API refuses it (`Field 'reporter' cannot
+be set. It is not on the appropriate screen, or unknown.` — EP-57509,
+2026-09-18).
+
+**The fix — invert the order**
+
+A `fail` only files a ticket when no open issue already references the
+case's stable id. So the ticket is now created **first**, through the
+Atlassian connector (which authenticates as the operator, making the
+operator the reporter), with the summary beginning `[<STABLE-ID>]`; the
+`fail` recorded afterwards finds it and links it — `created: false`.
+One ticket, the operator's name on it, the template's shape, and the
+tracker's own fields filled.
+
+**The prefix is load-bearing.** EP-57409 was filed by hand moments
+before qa-service auto-filed EP-57410 for the same case. Its summary had
+no `[TMU-BUG-09]` prefix, the dedupe matched nothing, and the team got
+two tickets for one failure; EP-57409 was closed as a duplicate. That
+incident is now written into the rule it explains.
+
+**Changed**
+
+- `qa-pipeline/references/test-runs.md` — new section "File the ticket
+  FIRST, then record the `fail`", the EP-57409 incident, and what to do
+  with tickets an earlier run already auto-filed (correct in place,
+  never re-file; say the reporter cannot be changed).
+- `qa-pipeline-code/references/bug-report-template.md` — now covers
+  roster bugs, not just findings without a case; the `[<STABLE-ID>]`
+  summary rule; and the EP field map (`customfield_10377` /
+  `_10147` / `_10146` are **ADF** — a plain string is rejected;
+  `_10259`, `_10260`, `_10252`, `_10253` are strings). Also: re-check
+  labels after creation, because the AI Bug Analyzer bot rewrites them.
+- `qa-manual-results/SKILL.md` — step 4 creates roster bugs before the
+  verdicts that file them and checks `created: false` afterwards; step 5
+  no longer claims the run already filed them.
+- `qa-pipeline-code/SKILL.md` — step 7's roster-case bullet follows the
+  same order.
+
+**Not fixed here, because it is not ours:** qa-service could set
+`reporter` from the verdict's `principal` when it files. That would make
+this inversion unnecessary and fix it for every consumer, not just this
+pipeline. Raised with the qa-service side; the workaround above stands
+until then.
+
 ## 0.43.5 — 2026-09-17 — two lookups that matched nothing, and a clone nobody refreshed
 
 Found while running the docs phase on EP-57221. Both defects share a
