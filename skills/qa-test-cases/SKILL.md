@@ -152,6 +152,20 @@ at the docs phase, blind — the binding routing rule, and what the
 later stages do with the tags, is the routing invariant in
 `../qa-run-analyzer/references/status-vocabulary.md`.
 
+**Exports — headers AND values, always**
+(`../qa-pipeline/references/export-checks.md`). Every case that reads
+an export of any kind (XLSX / CSV / PDF / report file / emailed
+attachment / integration payload) states all three layers in its Exp:
+the header row (columns, labels, stated order), **named cell values**
+for fixture rows ("the Email cell in `zz_x3`'s row reads
+`zz_x3@…`"), and "no asserted column is empty on every row". An Exp
+that names only headers, columns, a row count or "the file downloads"
+is incomplete — write the value lines. An export's header presence is
+**not** a Structural check on its own: it lives in the same case as the
+values (a header-only case is how EP-48506 shipped two blank columns).
+Its `[test data]` gives every asserted column a distinctive value, and
+spans the entity creation paths the requirement mentions.
+
 ## Step 2 — Write the test cases (behavioural checks)
 
 ### Numbering

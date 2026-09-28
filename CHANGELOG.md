@@ -5,6 +5,79 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.44.0 — 2026-09-28 — an export is tested by its cells, not its headers
+
+Found on EP-57871's repro run: a live-event report (Groceryshop) of the
+Download Schedule XLSX Email column blank on every row, two days after
+the EP-48506 export refactor shipped in Prod 2026-09-23.
+
+**What was wrong**
+
+EP-48506 went through the whole pipeline (QA sub-task EP-57095) and the
+RC regression (EP-57431), and shipped two defects:
+
+- **EP-57871** — Email blank for every counterpart whose per-event
+  record held no copy of their email (admin-panel-created accounts);
+- **EP-57884** — Job Title and Tel. blank on every row, for everyone
+  (the export looks the value up under a renamed key).
+
+The case that should have caught both, TC-REQ-4.2 "Custom form fields
+appear as XLSX columns", said *"Read the header row"*. It passed on its
+own terms, with a causal proof that ticking a field made its column
+appear; nobody read a cell. Code review marked it QA citing only the
+header builder, never the value source. The export the run itself saved
+(`EP-48506-export-41603.xlsx`, 2,052 rows) has **Job title filled on 0
+of 2,052 rows** next to columns filled ~750 times. The RC check read the
+header row of an exhibitor with an empty schedule — no data rows at all.
+
+**The rule — on every run, not only a refactor**
+
+`skills/qa-pipeline/references/export-checks.md` (new, single home):
+every export assertion — XLSX, CSV, PDF, report file, emailed
+attachment, integration payload; first run, retest, bug-fix, RC —
+checks three layers: the **header row**, **named cell values** for
+fixture rows (the expected value read from the entity first), and the
+**fill profile** of every column (a column empty on every row is a
+finding until the fixture explains it; a column that lost values vs a
+baseline is a FAIL candidate even when no case names it). Structure
+alone caps at `PARTIAL — structure only` (a Half row in the walk) and
+never exits PASS. Fixtures carry a distinctive value in every asserted
+column, span more than one creation path, and have at least one data
+row.
+
+- **qa-test-cases** — an export case's Exp names cell values; an
+  export's columns are never a Structural check on their own
+  (`check-decomposition.md`).
+- **code-review** — traces each asserted column to its value source; a
+  changed value source is a `RISK-CR` row even when the header code is
+  untouched.
+- **api-testing** — an HTTP-fetchable export is profiled and
+  value-checked; the profiler output is the evidence.
+- **qa-manual-runsheet / qa-manual-walk** — an export card's "You
+  should see" names a cell; a "pass" that speaks only of columns gets
+  the positive-control question and is a Half row or BLOCKED
+  (`values not read`), never a full PASS.
+- **qa-run-analyzer** — 🔴 an export PASS on structure only, or an
+  export case with no cell value in its Exp; 🟡 a saved export with an
+  unexplained all-empty column.
+- **status-vocabulary** — the cross-stage rule "Exports: no PASS
+  without values".
+
+**The instrument**
+
+`skills/api-testing/scripts/export_profile.py` (new, stdlib only — the
+pipeline machine has no `openpyxl`): header, row count, per-column
+filled count with samples, `WARN EMPTY ON EVERY ROW`, `--baseline` for
+columns that lost values, `--expect 'COLUMN|ROW-MATCH|VALUE'` for named
+cells (exit 1 on a miss), `--selftest`. Run over the EP-48506 export it
+prints `WARN EMPTY ON EVERY ROW: 15 Job title` — the defect, eighteen
+days before it was reported. `verify_plugin.py` check 7 now runs its
+self-test alongside `reconcile_counts.py`'s.
+
+**Not in this release:** EP-57871's ledger row #10 (`create_test_run`
+rejects stable ids though `test-runs.md` says they are accepted) — a
+🟡, carried.
+
 ## 0.43.6 — 2026-09-18 — the bug the pipeline files is reported by a bot
 
 Found on EP-57410's bug-fix run, and reported twice by the operator

@@ -180,6 +180,14 @@ Structural checks are `[UI]` by nature. An `[API]` "the field is
 present in the response" check is behavioural — it needs a call — and
 becomes a test case.
 
+**An export's columns are never structural.** "The XLSX has an Email
+column" needs an export to verify and, alone, proves nothing about the
+export working: it is behavioural, and it goes into the SAME case as
+the values that column must hold — header row, named cell values, no
+asserted column empty on every row
+(`../../qa-pipeline/references/export-checks.md`). EP-48506's
+header-only case passed while Email and Job Title shipped blank.
+
 ## Sufficiency criterion
 
 ### Sufficient when

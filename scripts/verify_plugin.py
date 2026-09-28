@@ -26,7 +26,7 @@ Checks (MAINTAINERS recipe step 6.4):
                 references in one of the last two so this can check them
   6. vocabulary every status in status-vocabulary.md has its base token
                 in reconcile_counts.py STATUSES
-  7. selftest   reconcile_counts.py --selftest passes
+  7. selftest   reconcile_counts.py and export_profile.py --selftest pass
   8. staged     `git diff --cached --name-only -z` has no run-artefact path
                 — judged on the first segment (`runs/`) and the BASENAME
                 only (EP-*, GS-*, build_*, repro_*, *-testdata*, *-runsheet*,
@@ -253,14 +253,20 @@ def check_vocabulary(root, r):
         r.ok(f"vocabulary: every status in status-vocabulary.md is in STATUSES ({len(statuses)} tokens)")
 
 
+SELFTESTED_SCRIPTS = ("skills/qa-run-analyzer/scripts/reconcile_counts.py",
+                      "skills/api-testing/scripts/export_profile.py")
+
+
 def check_selftest(root, r):
-    p = subprocess.run([sys.executable, "skills/qa-run-analyzer/scripts/reconcile_counts.py", "--selftest"],
-                       cwd=root, capture_output=True, text=True,
-                       encoding="utf-8", errors="replace")
-    if p.returncode == 0 and "SELFTEST PASS" in p.stdout:
-        r.ok("selftest: reconcile_counts.py --selftest PASS")
-    else:
-        r.fail("selftest: reconcile_counts.py --selftest FAILED\n" + (p.stdout + p.stderr).strip())
+    for script in SELFTESTED_SCRIPTS:
+        name = os.path.basename(script)
+        p = subprocess.run([sys.executable, script, "--selftest"],
+                           cwd=root, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+        if p.returncode == 0 and "SELFTEST PASS" in p.stdout:
+            r.ok(f"selftest: {name} --selftest PASS")
+        else:
+            r.fail(f"selftest: {name} --selftest FAILED\n" + (p.stdout + p.stderr).strip())
 
 
 def check_staged(root, r):

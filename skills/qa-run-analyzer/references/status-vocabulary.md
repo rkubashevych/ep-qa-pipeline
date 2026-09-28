@@ -94,6 +94,13 @@ Cross-stage rules that live with the vocabulary:
   pass is worse than a failure because nobody investigates it.
 - A case that arrived as FAIL from code review exits stages 7/8 only
   as FAIL CONFIRMED or FAIL REJECTED.
+- **Exports: no PASS without values.** A verdict on an export (XLSX /
+  CSV / PDF / report / attachment / payload) needs the header row, the
+  case's named cell values and the per-column fill profile; structure
+  alone (headers, counts, "the file opens") caps at
+  `PARTIAL — structure only` (API/WEB) or a Half row (manual), and a
+  column empty on every row is a finding until the fixture explains it
+  (`../../qa-pipeline/references/export-checks.md`).
 - **If you write the doubt, you must classify it.** When a stage's own
   finding says the case's WORDING is what makes it fail ("depends on
   the reading", "the spec doesn't state a limit", "would pass under

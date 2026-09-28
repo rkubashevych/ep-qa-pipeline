@@ -327,7 +327,14 @@ Each test case gets one status:
   absence on a surface, a delivered notification, export contents,
   cache behaviour over time, anything that depends on data, timing, or
   an external system — the verdict is QA no matter how convincing the
-  code looks. A code-review PASS removes the case from all runtime
+  code looks. **For an export case, trace every asserted column to its
+  value source** — the query, field or key that fills the cell — not
+  only to the code that builds the header, and cite both
+  (`../qa-pipeline/references/export-checks.md`). A value source that
+  changed between the old and the new code (a different table, a
+  renamed key, a dropped merge) is a `RISK-CR-<n>` row even when the
+  header code is untouched: EP-48506's review cited only the header
+  builder, and two columns shipped blank. A code-review PASS removes the case from all runtime
   execution (stages 7 and 8 skip PASS cases), so an over-generous PASS
   here is how 65% of a real run's cases never touched a running
   system.

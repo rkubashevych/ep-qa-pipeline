@@ -305,6 +305,19 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
   alone is compliant (the Playwright backend cannot always write the
   file — `playwright-executor.md` → Evidence); a screenshot alone is
   compliant on the extension backend.
+- 🔴 **export PASS on structure only** — any PASS (api-testing,
+  web-testing, or a manual row) on an export case whose evidence records
+  only the header row, a column list, a row count or "the file
+  downloads", with no named cell value and no fill profile
+  (`../qa-pipeline/references/export-checks.md`). Also 🔴 an export
+  case in the test-cases file whose Exp names no cell value.
+- 🟡 **empty export column** — any export file in `runs/<KEY>/r<N>/`
+  (evidence, fixtures, a saved download) with a column empty on every
+  data row that no report explains. Run
+  `../api-testing/scripts/export_profile.py <file>` over each saved
+  export; it prints `WARN EMPTY ON EVERY ROW` for exactly these. The
+  EP-48506 run saved an export with Job title filled on 0 of 2,052 rows
+  and nobody looked — it shipped as EP-57884.
 - 🟡 routing integrity: every case in api-testing's "Route to
   web-testing" section and every code-review `RE-ROUTE [UI]` case
   appears in web-testing's Results (or its Not-executed-here with a

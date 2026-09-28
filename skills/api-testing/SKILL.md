@@ -67,8 +67,15 @@ web-testing) and do not inspect code (that is code-review).
   "Not executed here"; `[UI]` cases are web-testing's.
   - Exception: an `[export/email]` case whose artifact is fetchable
     over HTTP (an XLS/CSV export endpoint) MAY be executed here —
-    download with the right auth context and verify the contents.
-    Report it under a clearly-labelled "[export/email] executed via
+    download with the right auth context and verify the contents:
+    **headers AND values** (`../qa-pipeline/references/export-checks.md`)
+    — the header row, the case's named cells (`--expect`) and the
+    per-column fill profile, all from `scripts/export_profile.py`, whose
+    output goes into the case's evidence. Read each named cell's
+    expected value from the entity before exporting. A header-only
+    read exits `PARTIAL — structure only`, never PASS; a column empty on
+    every row is a finding until the fixture explains it. Report it
+    under a clearly-labelled "[export/email] executed via
     API" group so reconciliation is not confused. Email sends and
     external integration pushes stay in "Not executed here".
 - **Read-only by default.** Perform a write (`saveSettings`, `set`,

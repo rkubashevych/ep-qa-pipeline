@@ -38,7 +38,7 @@ store the words verbatim** as the note.
 
 | The tester says (examples) | Verdict | What the agent does |
 |---|---|---|
-| "pass", "ok", "yes", "works", "as expected", "✓" | PASS | On a card with ONE visible pass condition: record and move on. On an absence-check or half-observable card: ask the positive-control question first (below). |
+| "pass", "ok", "yes", "works", "as expected", "✓" | PASS | On a card with ONE visible pass condition: record and move on. On an absence-check, half-observable or export card: ask the positive-control question first (below). |
 | any description of a mismatch — "the star lit up", "it shows 0", "I got a 500", "the button isn't there" | FAIL | Restate once, naming the expectation: "So the star lit — recording FAIL against 'star stays empty'. Right?" One confirmation, then ask for evidence once (screenshot / Jam link / the exact error text). Never nag for evidence. |
 | "can't", "no access", "page won't load", "the account doesn't log in", "the email never came" | BLOCKED | Record the reason in the tester's words. Probe the blocker if it is something the agent can check from here (a login, a host, a fixture id) — a dissolved blocker turns the card back into a WALK card. |
 | on an absence check, the **positive control is missing** — "the list is empty… and the counter reads 0", "the existing favourite isn't there either" | BLOCKED (`fixture not proven`) | Not a FAIL: the state the case depends on was never there (the fixture, the tracking, the login), so the product was not tested. A FAIL here would file a Jira defect for a broken fixture (`provisioning-rules.md` → the tracking trap). Record the tester's words, note which control failed, and tell the tester in one sentence. Exception: when the control IS the case's own assertion (the case says the counter must read 1), that is a FAIL. |
@@ -79,6 +79,18 @@ Some cards cannot be judged from a bare "pass":
   notes, in the results file, that the other half rests on the machine
   verdict named in backstage. Never let a half-observable card read as
   fully human-confirmed.
+- **Export cards** — the file downloads with every expected header and
+  still ships a blank column (EP-48506 → EP-57871 / EP-57884). The
+  card's **You should see** names a cell value; a "pass" that speaks
+  only of the file, the columns or the row count is structure only.
+  Ask: *"and the <column> cell in <row>'s row — what does it read? any
+  column empty all the way down?"* before recording. An answer that
+  never gets to a value is a **Half** row — the human PASS covers the
+  structure, and the note names the machine value check it rests on
+  (`api-testing`'s profile for that export); with no machine value check
+  behind it, keep asking, and if the tester cannot read the cells record
+  BLOCKED (`values not read`) — never a full PASS
+  (`../../qa-pipeline/references/export-checks.md` → Verdicts).
 - **Lagging surfaces** — backstage says `wait: 45 min` or similar. The
   agent says it up front (`say-first:`), offers to defer the card to
   the end of the session, and on return asks when the action was

@@ -194,7 +194,14 @@ exported sheet's rows. Follow them literally.
 
 2. **Every card has a "You should see".** The pass condition, stated so
    a verdict can be reached without opening another file. A card
-   without it cannot be judged, only performed.
+   without it cannot be judged, only performed. **On an export card it
+   names a cell, not a column:** "the Email cell in `zz_x3`'s row reads
+   `zz_x3@…`, and no column is empty all the way down" — never "the
+   Email column is there" (`../qa-pipeline/references/export-checks.md`;
+   a header-only card is how EP-48506 passed with two blank columns).
+   The fixtures behind it follow that file's "Fixtures that can fail":
+   a distinctive value in every asserted column, more than one creation
+   path, at least one data row.
 
 3. **Name the surface, not the intent.** "Open Marketplace → Brands and
    click the star on any brand card", not "attempt to favourite a
