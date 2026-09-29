@@ -19,7 +19,16 @@ re-discovers what it can instead of trusting this file.
 | Other RC portals | `rctest-rc`, `axent-rc`, `test43-rc`, `mp-rc`, `tos23rc-rc`, `canyon2026-clone-*-rc`, `mp-clone-*-rc` (all `.expoplatform.net`) | EP-57431 `-rc-presence-check.md`; EP-RC-gdpr-event-scan.md (42 events) |
 | RC branches | `expoplatform-main-ira`: **`RC`** · `portal-ui`: **`rc-next14`** (not `rc`, which is stale since 2026-05) · `admin-ui`: **`rc`** | Bitbucket refs query (below) |
 
-Credentials: `.env.qa-agents` is alpha2-scoped. On RC:
+**Read the RC values from `.env.qa-agents`, not from this table.** The
+file's RC block holds `RC_ADMIN_BASE_URL`, `RC_EVENT_ID` and
+`RC_FRONTEND_HOST` (`../../qa-pipeline/references/environment.md`).
+When `RC_EVENT_ID` differs from the table, the file wins, and the
+report says which event was used. The optional `RC_ADMIN_USERNAME` /
+`RC_ADMIN_PASSWORD` / `RC_ORGANIZER_API_KEY` are used only when they
+are filled in. Never substitute the alpha `ADMIN_*` / `ORGANIZER_API_KEY`
+for them.
+
+Credentials: the file's default block is alpha2-scoped. On RC:
 - the organizer API key is rejected by the portal;
 - the admin credentials do not work portal-side;
 - the admin panel is reached by the user signing in by hand in the

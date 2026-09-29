@@ -77,8 +77,9 @@ it before step 1.
 1. **Plan and confirm (one pause).** Show, per item: the repos and
    markers to check, the runtime probes (named by stable id), which
    probes need the user signed in to the RC admin, and which need a
-   setting changed on a shared RC event. Show the hosts, each checked
-   against `ALLOWED_HOSTS` (`../qa-pipeline/references/environment.md`).
+   setting changed on a shared RC event. Show the hosts, taken from the
+   env file's `RC_*` block and each checked against `ALLOWED_HOSTS`
+   (`../qa-pipeline/references/environment.md`).
    A production host is refused. Nothing runs before a yes. The yes
    covers reads only. **Every setting change is asked for separately,
    when it is reached.**

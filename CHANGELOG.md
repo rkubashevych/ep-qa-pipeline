@@ -49,6 +49,12 @@ only in a local file and a Jira comment.
   - where the members-only switch now lives (General → Modules →
     Exhibitors → OPEN ACCESS pill);
   - the run values, the report template and the comment shape.
+- **RC block in `.env.qa-agents`:**
+  - `RC_ADMIN_BASE_URL`, `RC_EVENT_ID` and `RC_FRONTEND_HOST`, plus
+    optional RC credentials that stay empty until RC has its own account
+    (`environment.md`);
+  - `qa-rc-smoke` reads its hosts and event from this block;
+  - the alpha values are never substituted for the RC ones.
 - **Dispatcher:** a new first row routes an RC regression ticket (or
   "are these on RC") to `qa-rc-smoke`, never to the docs phase.
 - **Wiring:** `README.md`, `MAINTAINERS.md` layout, `CLAUDE.md` (16
