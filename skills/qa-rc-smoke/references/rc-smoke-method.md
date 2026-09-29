@@ -194,6 +194,15 @@ case:
     off the roster, and write it in the report as "present".
   - An inconclusive runtime is `blocked`, with the instrument failure
     in the note.
+- **Evidence on every verdict** (`test-runs.md`: attach one whenever a
+  URL exists). At step 5, attach
+  `{kind: link, url: https://expoplatform.atlassian.net/browse/<ITEM>, caption: "<ITEM> — the item under test"}`.
+  After step 6 posts the comment, re-record each verdict unchanged
+  with a second link,
+  `…/browse/<RC-KEY>?focusedCommentId=<comment id>`, captioned
+  `"<RC-KEY> RC smoke results comment"`. A re-record supersedes and
+  keeps history. EP-57782's first recording had no links and was
+  re-recorded with them.
 - A fully recorded run completes itself; `close_test_run` is only for
   rows deliberately left unrun.
 

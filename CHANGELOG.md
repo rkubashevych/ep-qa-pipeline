@@ -59,6 +59,10 @@ only in a local file and a Jira comment.
   - the organizer key does not fall back for portal calls, because the
     alpha key is rejected on RC portals; on RC admin REST it is
     untested.
+- **Every RC smoke verdict carries links.** Each gets a link to the
+  item's ticket, then a second link to the results comment once it is
+  posted, as the EP-57907 run's verdicts do. EP-57782's first recording
+  had none.
 - **Dispatcher:** a new first row routes an RC regression ticket (or
   "are these on RC") to `qa-rc-smoke`, never to the docs phase.
 - **Wiring:** `README.md`, `MAINTAINERS.md` layout, `CLAUDE.md` (16
