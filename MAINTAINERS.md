@@ -38,6 +38,7 @@ skills/
   qa-run-analyzer/             # run-health check (both phases)
   qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
   qa-refinement/               # pre-estimation mode: stages 1-2 + recon + questions comment + QA sizing
+  qa-rc-smoke/                 # release-candidate mode: scope items on RC — code, served build, runtime smoke
   qa-pipeline-docs/            # orchestrator: stages 1, 2, 4 + publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
 fixtures/EP-0000-context.md    # synthetic docs-phase smoke-test input (the one EP-* file that is tracked)

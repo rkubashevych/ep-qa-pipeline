@@ -1,6 +1,6 @@
 # qa-pipeline-skill
 
-ExpoPlatform's QA pipeline plugin (15 skills) AND a one-plugin
+ExpoPlatform's QA pipeline plugin (16 skills) AND a one-plugin
 marketplace. The run workspace and the credentials are NOT here since
 0.39.0 — they live in `~/.ep-qa` (`EP_QA_HOME`). Full map: `MAINTAINERS.md` — read it before
 changing anything. This file is only the gotchas that must be loaded

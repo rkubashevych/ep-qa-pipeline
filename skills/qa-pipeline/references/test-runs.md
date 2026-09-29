@@ -41,7 +41,10 @@ closed at stage 10.
   of `first run` (r1), `retest <k>` (r<k+1>), `bug-fix` — e.g.
   `EP-56133 first run 2026-08-20 — alpha2`, `EP-56133 retest 3
   2026-09-07 — alpha2`. Retest rounds are numbered in the title; the
-  ledger (`open-items-ledger.md`) carries the round.
+  ledger (`open-items-ledger.md`) carries the round. An RC smoke
+  (`qa-rc-smoke`) is its own pass on the RC ticket: one run across the
+  scope items' suites, titled `<RC-KEY> RC smoke — <release> — rc
+  (event <id>)` (`../../qa-rc-smoke/references/rc-smoke-method.md`).
 - **`env`:** the target host label as the run used it (`alpha2`, `rc`,
   `alphanext-<n>`). Never a credential, never a full URL with a token.
 - **`releaseId`:** when the ticket's `fixVersion` or the suite names a
@@ -60,8 +63,13 @@ closed at stage 10.
   `ep-qa-pipeline agent (<KEY> <mode>, stage <n>)`. On human verdicts
   (stage 10): the tester's e-mail, taken from the run sheet / the user
   — never the agent's label on a human result.
-- **Roster = the scope.** Pass the suite case ids (stable ids are
-  accepted) of exactly the cases step 0 put in scope — the suite cases
+- **Roster = the scope.** Pass the **catalogue ids** (the UUIDs that
+  `search` / `get_suite` return) of exactly the cases step 0 put in
+  scope. `create_test_run` does **not** resolve stable ids: it answers
+  "none of the given case ids exist" (EP-57871 r1, EP-57782). Resolve
+  each stable id with `search {query: <stable id>, kinds: ["testCase"]}`
+  first. `record_case_result` and `excludeCaseIds` do accept stable
+  ids. The scope is the suite cases
   marked `detail.ticket = <KEY>`, or the confirmed retest scope, or the
   bug-fix mini cases. **The roster is fixed at creation**
   and that is the point: a case authored after the pass began is not

@@ -40,6 +40,9 @@ runs/<ISSUEKEY>/
     -walk-plan.md · -walk-state.json · -walk-results.md ·
     -manual-results.md · -testdata.json · -testdata-notes.md ·
     -runsheet.xlsx · build_runsheet_<ISSUEKEY>.py
+  <RC-KEY>-rc-smoke.md          qa-rc-smoke (0.46.0), at the folder root of
+                                the RC regression ticket — no docs/, no r<N>/;
+                                a re-smoke appends a dated section
   (FAIL screenshots: $EP_QA_HOME/evidence/<ISSUEKEY>-r<N>-<TC>-fail.png —
    Playwright's --output-dir is one flat folder, so they sit beside runs/)
 ```

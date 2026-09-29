@@ -118,6 +118,24 @@ names who should handle it instead).
 - ❌ "retest EP-55123" / "test the bugfix EP-55123" → qa-pipeline-code
 - ❌ "walk me through EP-55123" → qa-manual-walk
 - ❌ "ingest the manual results" → qa-manual-results
+- ✅ "qa pipeline — I need to smoke test if these items are on rc env
+  EP-57782" (an RC regression ticket, mode not named in skill terms) →
+  proposes the RC smoke
+- ❌ "run the RC smoke for EP-57782" → qa-rc-smoke (mode named)
+
+## qa-rc-smoke (release-candidate mode)
+- ✅ "smoke test the RC for EP-57782"
+- ✅ "check these items are on RC: EP-57107, EP-57398, EP-57509"
+- ✅ "RC regression for Prod 2026-09-30" / pasted "[Regression] RC
+  release …" ticket + "check it"
+- ✅ "are the release items deployed to rc?"
+- ❌ "retest EP-57398 on alpha2" → qa-pipeline-code (retest mode)
+- ❌ "test the bugfix EP-57509" → qa-pipeline-code (bug-fix mode)
+- ❌ "run the full regression suite" → CI, no skill
+- ❌ "check EP-57398 on production" → refused: production is never a
+  test target (chat answer)
+- ❌ "what's in the Prod 2026-09-30 release?" → plain chat / JQL, no
+  skill
 
 ## qa-pipeline-docs (orchestrator)
 - ✅ "run the QA docs pipeline for EP-55123"

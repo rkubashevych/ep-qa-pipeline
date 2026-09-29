@@ -8,7 +8,8 @@ description: >
   phase when the docs are published, bug-fix mode for
   a standalone Bug, retest when a fix landed, the guided manual walk
   when the walk plan is built, manual-results ingestion when a filled
-  sheet is back. Use when the user says "qa this ticket", "process
+  sheet is back, the RC smoke for a "[Regression] RC release" ticket.
+  Use when the user says "qa this ticket", "process
   EP-1234 for testing", "run the pipeline on this", or pastes a ticket
   and asks to test it without naming a mode. Do NOT use when the user
   names a specific mode or stage ("run the docs pipeline", "prepare
@@ -65,6 +66,7 @@ the QA Service suite/run, then Jira (a Jira comment alone never decides).
 
 | State observed (run folder → QA Service → Jira) | Proposed route |
 |---|---|
+| The ticket is an RC regression ticket (summary `[Regression] RC release …`, scope items linked in the description), or the user asks whether items are on RC | **RC smoke** — `qa-rc-smoke` on that ticket. Step 1's sub-task and suite reads do not apply to it; the mode reads each scope item's state itself. Never the docs phase: the ticket is a container, not a story |
 | No suite; the user's words are about estimation, refinement or "what questions do we have" — or the ticket is a QA sub-task a human created (no pipeline label) and dev has not started | **Refinement** — `qa-refinement` on the parent Story: questions comment + QA sizing, no test cases; the docs phase follows once the answers are in |
 | No run folder, no suite, no QA sub-task; ticket is a Story/Task (or Bug with real scope) | **Docs phase** — `qa-pipeline-docs` now; code phase afterwards in a FRESH chat (hand the user the exact command) |
 | No run folder, no suite, no QA sub-task; ticket is a Bug | **Bug-fix mode** — `qa-pipeline-code`, cases derived from the ticket |

@@ -10,8 +10,8 @@
     {
       "name": "ep-qa-pipeline",
       "source": "./",
-      "version": "0.45.1",
-      "description": "End-to-end QA pipeline: pre-estimation questions and sizing, Jira ticket, groomed requirements, test cases, PR review, API testing, UI testing, guided manual walk, with orchestrators, a run-health analyzer, and Jira + QA Service publishing."
+      "version": "0.46.0",
+      "description": "End-to-end QA pipeline: pre-estimation questions and sizing, a release-candidate smoke, Jira ticket, groomed requirements, test cases, PR review, API testing, UI testing, guided manual walk, with orchestrators, a run-health analyzer, and Jira + QA Service publishing."
     }
   ]
 }

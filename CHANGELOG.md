@@ -5,6 +5,70 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.46.0 — 2026-09-29 — the release candidate gets a record
+
+Found on EP-57782, the auto-generated "[Regression] RC release Prod
+2026-09-30" ticket with 3 scope items (EP-57107, EP-57398, EP-57509).
+The request was "smoke test if these items are on rc env". The
+dispatcher had no route for it. Each item had an alpha run, so none of
+docs / code / retest fit. The smoke was run by hand, as on EP-53978
+(2026-09-04) and EP-57431 (2026-09-18). Asked afterwards whether RC
+smokes are recorded in QA Service, the answer was no: all three lived
+only in a local file and a Jira comment.
+
+**New skill — `qa-rc-smoke` (release-candidate mode).**
+- Input: the RC regression ticket, or a list of keys. Output:
+  `runs/<RC-KEY>/<RC-KEY>-rc-smoke.md`, one QA Service test run
+  (`env: rc`) across the scope items' suites, and one Jira comment on a
+  yes. It never signs off and never transitions the ticket.
+- **Three layers, reported separately:**
+  - code on the repo's RC branch (discovered each run: `RC`,
+    `rc-next14`, `rc`);
+  - the served build (the portal's `_next/static` chunks; admin-ui's
+    `adminv2/assets/index-*.js`, reachable only once signed in);
+  - a runtime smoke of the item's core cases.
+
+  "Present" and "works" never merge. On EP-57782, EP-57398 was
+  present (code + build) for an hour before its runtime could be
+  measured.
+- **Read-only by default.** A setting change on a shared RC event gets
+  its own yes. The user flips it by hand when the permission layer
+  refuses the agent: it refused replaying the Exhibitor settings form
+  ("Modify Shared Resources"). The precondition and the restore are
+  each verified by a guest probe with a timestamp.
+- **An instrument proves itself first.** A mocked 401 on RC's
+  SSR-rendered exhibitor listing produced no toast, but so did the 500
+  control and the `/brands` control. Recorded as inconclusive, not as a
+  pass. The real check (members-only on, guest in incognito) passed
+  later.
+- `skills/qa-rc-smoke/references/rc-smoke-method.md` holds:
+  - the RC estate (hosts, default event 32785, the portal list, which
+    credentials do not work on RC);
+  - the marker, ancestry and bundle recipes;
+  - the admin iframe (`#newAdminIframe`);
+  - where the members-only switch now lives (General → Modules →
+    Exhibitors → OPEN ACCESS pill);
+  - the run values, the report template and the comment shape.
+- **Dispatcher:** a new first row routes an RC regression ticket (or
+  "are these on RC") to `qa-rc-smoke`, never to the docs phase.
+- **Wiring:** `README.md`, `MAINTAINERS.md` layout, `CLAUDE.md` (16
+  skills), `evals/triggering.md` (a new section plus two dispatcher
+  lines), and `data-locations.md` (the RC ticket's folder has no
+  `docs/` and no `r<N>/`).
+
+**Fixed — `create_test_run` and stable ids (EP-57871 ledger row #10,
+carried as 🟡 in 0.44.0).** `test-runs.md` said stable ids are accepted
+on the roster. They are not: "none of the given case ids exist"
+(EP-57871 r1, again on EP-57782). The roster now says to use catalogue
+ids and to resolve stable ids with `search` first. `record_case_result`
+and `excludeCaseIds` do take stable ids.
+
+**Hygiene, again:** the admin-ui iframe `src` (with its session token)
+was printed on EP-57782, the same class as EP-57509 ledger row #10.
+`qa-rc-smoke` rules strip the query string before reading a frame URL.
+The same rule for `web-testing` is **not in this release**: carried on
+EP-57509's ledger.
+
 ## 0.45.1 — 2026-09-29 — the run link, shipped
 
 0.45.0's entry describes "The final comment links the run, not only
