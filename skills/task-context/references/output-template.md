@@ -21,6 +21,7 @@ Generated: <YYYY-MM-DD>
 - AC-1 (Confluence §<section>): <criterion, verbatim>
 - AC-2 (Confluence §<section>): <criterion, verbatim>
 - AC-3 (Confluence §<section>): <criterion, verbatim>
+- SB-1 (Confluence §<n>, spec body): <rule from the page's spec body that the AC heading does not restate — omit when none>
 - JD-1 (Jira Description): <requirement stated only in the Description>
 
 AC items on the page: <N> · captured: <N><; not readable: <what and why — omit when equal>>

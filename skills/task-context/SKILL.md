@@ -105,7 +105,14 @@ affected. It feeds grooming's dependency questions and risk ratings.
    "SCOUT — Search" primary endpoint with those keywords (read that
    skill's SKILL.md for the current URL/token contract — do not copy
    it here, it rotates). Take the top 3–5 documentation hits.
-3. **Fallback — SCOUT fails or knowledge-base not installed:** use the
+   **Check the host first:** a stage may call only the hosts in
+   `ALLOWED_HOSTS` (`../qa-pipeline/references/environment.md`). When
+   the SCOUT host is not listed, skip straight to the fallback and write
+   `Source: connector fallback (SCOUT host not in ALLOWED_HOSTS)`. Never
+   call it anyway. (EP-56227, 2026-09-29: the endpoint had moved to a
+   host the list did not carry.)
+3. **Fallback — SCOUT fails, its host is not allowed, or knowledge-base
+   is not installed:** use the
    Atlassian connector directly: `searchConfluenceUsingCql` on the
    ExpoDoc space (`text ~ "<keywords>"`), and `searchJiraIssuesUsingJql`
    for EP bugs, open and closed (`project = EP AND issuetype = Bug AND
@@ -200,6 +207,15 @@ Requirements section is not a merged paraphrase; it is a ledger:
   item genuinely holds two independent rules, keep it as ONE `AC-n`
   and let grooming split it into REQ-Na / REQ-Nb (the ledger id stays
   the page's unit).
+- **Spec-body rules (0.45.0).** Many AC pages carry a "What needs to
+  be done" or spec section (§1…§n) above the acceptance-criteria
+  heading. Its rules are page content but not criteria, and the ones
+  NOT repeated under the AC heading were lost or relabelled by hand
+  (EP-56227: 9 such rules, including "the headers are not
+  selectable"). Capture each as
+  `SB-1 (Confluence §3, spec body): <the rule, verbatim>`. SB items
+  are not counted in the page/captured line. A rule the AC restates
+  gets no SB bullet, because the `AC-n` already carries it.
 - Items only the Jira Description states: `JD-1 (Jira Description): …`.
   Items only a comment states go to "Additional requirements (from
   comments)" as `CM-1 (comment <date>): …`.

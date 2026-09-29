@@ -40,7 +40,11 @@ asking the user is the last resort):
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
 `<ISSUEKEY>-web-evidence.md` (the FAIL evidence sections § 5 checks),
 `<ISSUEKEY>-sources.md` (the source register § 7 checks against),
-`<ISSUEKEY>-recon.md`,
+`<ISSUEKEY>-recon.md`, `<ISSUEKEY>-open-questions.md`,
+`<ISSUEKEY>-answers.md` and `<ISSUEKEY>-sizing.md` (qa-refinement's
+files; informational, except that a question classed "not clear to
+them" or "not needed" in `-answers.md` is a 🟡 on how the question was
+written),
 `<ISSUEKEY>-walk-plan.md` (stage 9's plan — for the voice check and
 the coverage map), `<ISSUEKEY>-walk-results.md` (the walk's verdicts),
 `<ISSUEKEY>-manual-results.md`,
@@ -56,6 +60,9 @@ current.
 
 Detect the phase from what is present:
 - Docs phase = context/requirements/test-cases.
+- Refinement = context/requirements/open-questions with no test cases.
+  The ledger and recon checks apply; coverage checks that need test
+  cases do not, and their absence is not a finding.
 - Code phase = pr-summary/code-review/api-testing/web-testing.
 Analyze whatever is there; do not require files from the other phase.
 

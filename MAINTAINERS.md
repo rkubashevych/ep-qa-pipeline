@@ -37,6 +37,7 @@ skills/
   qa-manual-results/           # stage 10b — write back walk results / a completed sheet, retract wrong verdicts
   qa-run-analyzer/             # run-health check (both phases)
   qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
+  qa-refinement/               # pre-estimation mode: stages 1-2 + recon + questions comment + QA sizing
   qa-pipeline-docs/            # orchestrator: stages 1, 2, 4 + publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
 fixtures/EP-0000-context.md    # synthetic docs-phase smoke-test input (the one EP-* file that is tracked)
@@ -230,6 +231,8 @@ carried between them; the QA Service run carries the verdicts anyway.
 | Test login / host | `skills/web-testing/references/login-config.md` |
 | Jira custom-field / AC source | `skills/task-context/references/field-maps.md` |
 | Bitbucket auth (token/scopes, branch vs PR mode) + the curl/git command workflows | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
+| Recon rules (sources in order, the one allowed setting flip, the header) | `skills/qa-pipeline/references/recon.md` |
+| Grooming open-questions comment shape (questions only, re-run edit-in-place) | `skills/qa-pipeline-code/references/jira-writing-style.md` → "Grooming open-questions comment" |
 | Jira publish values (project, issue type id, assignee, label) | `skills/qa-pipeline-docs/references/publish-config.md` |
 | Results-comment format (wave-1 status line, wave-2 human summary, story notes) | `skills/qa-pipeline-code/references/results-comment-template.md` |
 | Structural checks in the suite (`-STRUCT-` cases), bug-fix mini suite | `skills/qa-pipeline-docs/references/qa-service-publish.md` |

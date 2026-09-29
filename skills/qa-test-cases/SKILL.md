@@ -47,7 +47,7 @@ From the requirements file, the skill takes:
 - The numbered requirements — the only source of behaviour. Each
   `REQ-N` (or `REQ-Na` sub-item) becomes a group in the output.
 - Each requirement's `source:` line — the AC-ledger ids (`AC-n` /
-  `JD-n` / `CM-n`) it was built from. Copy them onto the group's
+  `SB-n` / `JD-n` / `CM-n`) it was built from. Copy them onto the group's
   `Covers:` line, so every test case and structural line is traceable
   to the acceptance criterion it verifies, and the Statistics block can
   state `AC coverage` mechanically.
@@ -299,8 +299,8 @@ After generating and before saving the file:
   on its heading — zero or two is an error. Structural requirements
   have none. The core count equals the number of behavioural
   requirements.
-- **AC coverage is complete:** every `AC-n` in the requirements file's
-  `source:` lines appears on a `Covers:` line of a group that has at
+- **AC coverage is complete:** every `AC-n` (and `SB-n`, since 0.45.0)
+  in the requirements file's `source:` lines appears on a `Covers:` line of a group that has at
   least one test case or structural line. `reconcile_counts.py` prints
   the ledger sets; the Statistics `AC coverage:` line states
   `<n>/<N>` and names any uncovered id with the reason grooming gave.

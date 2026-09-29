@@ -14,7 +14,8 @@ description: >
   for a ticket", "groom and write test cases", "publish the test cases
   / add these cases to QA Service" (publish-only on existing files), or
   gives a ticket and wants the full test-case set without
-  invoking each stage by hand.
+  invoking each stage by hand. Only questions and a QA estimate before
+  estimation, no test cases → qa-refinement.
 ---
 
 # QA Pipeline -- Docs (stages 1-4 + publish)
@@ -56,6 +57,33 @@ counted.
 - A Jira ticket key or URL (e.g. `EP-44730`). If the key is itself a
   sub-task, use its parent Story as the story for publishing.
 
+## After a refinement run — reuse, don't redo (0.45.0)
+
+When `runs/<ISSUEKEY>/docs/` already holds `qa-refinement` output
+(`-open-questions.md`, `-answers.md`, `-recon.md`, `-sizing.md`), say so
+in the first line ("Refinement run found: N questions, M answered") and
+carry each file forward:
+
+- **Stages 1–2 still re-run.** The ticket changed, which is the point
+  of asking. task-context re-reads the description and comments, where
+  the answers were written. Grooming also reads `-answers.md` as the
+  owner's answers (its Inputs) and re-applies every settled one as
+  `resolved by the owner (<date>)`, including the inferred ones and
+  the "AC still says otherwise" notes that no Jira field carries.
+- **Recon is reused, not repeated.** Keep `-recon.md`. Run recon only
+  for BEHAVIOUR items it does not cover, and append them as the next
+  `B<n>` sections. Never overwrite the file (`recon.md` → "Reuse").
+- **Questions: only what is new or still open.** Before step 2 drafts
+  anything, read `-open-questions.md` and `-answers.md`:
+  - a question the owner answered is settled and never asked again;
+  - one still waiting (not clear, partial, or in a posted follow-up
+    with no answer) is listed in the publish preview as "still open
+    since <date>", not re-posted;
+  - only items grooming raises for the first time go into a new
+    comment, in the same shape.
+- **Publish adopts the QA sub-task** named on `-sizing.md`'s
+  `QA sub-task:` line (step 6).
+
 ## When to run (shift-left)
 
 The docs phase needs only the ticket, not the code — run it as EARLY
@@ -92,35 +120,23 @@ full** — do not summarise or shortcut it. Stages share the run folder
      access exists).** Grooming marks each open item SPEC (an intent
      decision only the PM/owner can make) or BEHAVIOUR ("how does the
      app work today?" — an observable fact). BEHAVIOUR items do not go
-     to a human until observation has been tried: dispatch a
-     READ-ONLY look at the running system (admin panel, live pages, a
-     generated export, existing Confluence "how it works" pages — and,
-     when a local repo clone exists, the code itself: a constant, a
-     threshold, a column list is a current-behaviour fact, cited
-     file+line; clone location and rules:
-     `../pr-summary/references/bitbucket-access.md` → "Local clone")
-     and write `<ISSUEKEY>-recon.md`, opening with this header verbatim:
-     "These are observations of CURRENT behaviour, not requirements.
-     They settle what a tester needs to know; they do not change the
-     acceptance criteria. Where observed behaviour and the AC could
-     diverge, the item is raised as a question, not resolved."
-     Rules: strictly no writes; every observation carries its evidence
-     (URL/element/response, per the Probe convention); recon facts may
-     ground an expected result ONLY where the requirement itself
-     references current behaviour — they never become requirements.
-     Fold the answers back into the requirements file as "resolved by
-     observation (recon)". No env access / user declines → skip, and
-     BEHAVIOUR items go to the ticket like everything else. Real-run
-     evidence: a run with recon ended with 1 open question; comparable
-     runs without it posted 4–5, most answerable by looking.
+     to a human until observation has been tried: run recon per
+     **`../qa-pipeline/references/recon.md`** (the single home since
+     0.45.0 — sources in order docs → refreshed local clone → the
+     running system; read-only except one narrow, restored setting
+     flip; the verbatim header; folding back into the requirements
+     file as "Resolved by observation (recon)"). No env access / user
+     declines → skip, and BEHAVIOUR items go to the ticket like
+     everything else.
    - **Open items → ticket NOW, not at publish (shift-left is a
      clock, not a label).** Only SPEC items and BEHAVIOUR items recon
      could not settle go to the ticket. Draft the comment immediately
-     — one line per item, grouped Questions / Contradictions / Gaps,
-     no pipeline jargon; voice rules:
-     `../qa-pipeline-code/references/jira-writing-style.md`
-     — show it, and ask ONE quick yes/no: "post these
-     open questions to <KEY> now?". On yes, post before stage 4; the
+     in the **questions-only shape**
+     (`../qa-pipeline-code/references/jira-writing-style.md` →
+     "Grooming open-questions comment": one intro line, then numbered
+     one-line questions — no section headers, no evidence), save it as
+     `<ISSUEKEY>-open-questions.md`, show it, and ask ONE quick yes/no:
+     "post these open questions to <KEY> now?". On yes, post before stage 4; the
      run continues either way. (An answer arriving while stages 3–4
      run can still fix the cases this run; a question first seen at
      the publish preview has already cost the whole phase — on a real
@@ -179,6 +195,23 @@ full** — do not summarise or shortcut it. Stages share the run folder
        "Superseded by <NEW-KEY> (newer pipeline run)" and offer to
        close it. The code phase already prefers the newest; humans
        need the pointer.
+     - **Exception — adopt a QA sub-task a human already created
+       (0.45.0).** When the story has a QA sub-task WITHOUT the pipeline
+       label — typically created at estimation, before the pipeline ran
+       (EP-57799 on EP-56227) — creating a second one splits the
+       tracker. Find candidates with `parent = <KEY>` and a summary
+       starting "QA" (or the `QA sub-task` type where the project has
+       one); `qa-refinement` records the one it saw on the
+       `QA sub-task:` line of `<KEY>-sizing.md`. Offer in the SAME
+       preview: "adopt <KEY-X> instead of creating a new sub-task".
+       On yes:
+       - add the label;
+       - keep the summary, the assignee and the human's description;
+       - append the pipeline description below it, under a `QA
+         pipeline` heading. Never replace what a person wrote.
+       On no, create a new one as usual and leave the human's sub-task
+       untouched. The supersede rule does not apply to it, because it
+       was never a pipeline sub-task.
    - **Description content** (a summary, NOT a second tracker):
      - Links to the spec/Confluence AC and the parent story.
      - The QA Service suite line: the full **bare** suite URL (never a

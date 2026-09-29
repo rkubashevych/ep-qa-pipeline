@@ -33,4 +33,4 @@ Generated: <YYYY-MM-DD>
   - source: CM-5
   - mitigated by: REQ-4
 
-AC coverage: <n>/<N> AC items mapped · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
+AC coverage: <n>/<N> AC items mapped< · SB <n>/<N> — only when the context has SB-n items> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>

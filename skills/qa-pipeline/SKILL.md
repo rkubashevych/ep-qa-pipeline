@@ -3,15 +3,17 @@ name: qa-pipeline
 description: >
   The pipeline's front door. Give it a ticket (key, URL, or pasted) —
   it reads the ticket's type and pipeline state, proposes the right
-  route, and on confirmation invokes it: docs phase for a fresh
-  Story/Task, code phase when the docs are published, bug-fix mode for
+  route, and on confirmation invokes it: refinement (questions +
+  sizing) before estimation, docs phase for a fresh Story/Task, code
+  phase when the docs are published, bug-fix mode for
   a standalone Bug, retest when a fix landed, the guided manual walk
   when the walk plan is built, manual-results ingestion when a filled
   sheet is back. Use when the user says "qa this ticket", "process
   EP-1234 for testing", "run the pipeline on this", or pastes a ticket
   and asks to test it without naming a mode. Do NOT use when the user
-  names a specific mode or stage ("run the docs pipeline", "retest",
-  "walk me through", "ingest the results") — those skills trigger
+  names a specific mode or stage ("run the docs pipeline", "prepare
+  for estimation", "retest", "walk me through", "ingest the results")
+  — those skills trigger
   directly.
 ---
 
@@ -63,6 +65,7 @@ the QA Service suite/run, then Jira (a Jira comment alone never decides).
 
 | State observed (run folder → QA Service → Jira) | Proposed route |
 |---|---|
+| No suite; the user's words are about estimation, refinement or "what questions do we have" — or the ticket is a QA sub-task a human created (no pipeline label) and dev has not started | **Refinement** — `qa-refinement` on the parent Story: questions comment + QA sizing, no test cases; the docs phase follows once the answers are in |
 | No run folder, no suite, no QA sub-task; ticket is a Story/Task (or Bug with real scope) | **Docs phase** — `qa-pipeline-docs` now; code phase afterwards in a FRESH chat (hand the user the exact command) |
 | No run folder, no suite, no QA sub-task; ticket is a Bug | **Bug-fix mode** — `qa-pipeline-code`, cases derived from the ticket |
 | Suite exists (or a QA sub-task carries its suite line); no `r<N>/` reports, no test run | **Code phase** — `qa-pipeline-code` (fresh chat recommended if this one already ran the docs phase) |
@@ -94,3 +97,7 @@ orchestrator's step 0 doesn't re-discover it.
   proposing a fresh docs run.
 - If the user's message already names a mode, this skill should not
   have fired — hand over silently to the named skill.
+- A QA sub-task given as input is not a docs-phase target on its own:
+  route on its parent Story. A human-created one (no pipeline label)
+  usually means estimation is next, so refinement is the default
+  proposal. Carry its key forward so the docs phase can adopt it later.

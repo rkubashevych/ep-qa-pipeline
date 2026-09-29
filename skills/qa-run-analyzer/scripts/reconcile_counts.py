@@ -247,8 +247,10 @@ def locate(key, stage, d, docs):
 # qa-test-cases carries them on each group's `Covers:` line. The ledger check
 # is the set difference across the three files — "every criterion reaches a
 # test case" as arithmetic, not judgement.
-LEDGER_ID = re.compile(r"\b(AC|JD|CM)-\d+\b")
-CONTEXT_BULLET = re.compile(r"^- ((?:AC|JD|CM)-\d+) \(", re.M)
+# SB-n (0.45.0): a rule from the AC page's spec body that the AC heading does
+# not restate. Not counted on the page/captured line, but mapped like JD.
+LEDGER_ID = re.compile(r"\b(AC|SB|JD|CM)-\d+\b")
+CONTEXT_BULLET = re.compile(r"^- ((?:AC|SB|JD|CM)-\d+) \(", re.M)
 PAGE_COUNT = re.compile(r"^AC items on the page:\s*(\d+)\s*·\s*captured:\s*(\d+)", re.M)
 SOURCE_LINE = re.compile(r"^\s*-\s*source:\s*(.+)$", re.M)
 COVERS_LINE = re.compile(r"^Covers:\s*(.+)$", re.M)
@@ -270,7 +272,9 @@ def ledger_report(context, requirements, test_cases):
     req = ledger_ids(requirements, SOURCE_LINE) if requirements else None
     tcs = ledger_ids(test_cases, COVERS_LINE) if test_cases else None
     if ctx is not None:
-        by = {k: sorted(i for i in ctx if i.startswith(k)) for k in ("AC", "JD", "CM")}
+        by = {k: sorted(i for i in ctx if i.startswith(k + "-")) for k in ("AC", "SB", "JD", "CM")}
+        if not by["SB"]:
+            del by["SB"]  # keep the pre-0.45 line shape when a page has no spec body
         pc = PAGE_COUNT.search(context)
         page = f" · page {pc.group(1)}/captured {pc.group(2)}" if pc else " · no page-count line"
         lines.append("AC ledger (context): " + " ".join(f"{k}={len(v)}" for k, v in by.items()) + page)
@@ -602,6 +606,15 @@ def check_ledger(errs):
     out2 = "\n".join(ledger_report("## Requirements\n- plain bullet\n", "- REQ-1: x\n", "## REQ-1 — x\n"))
     if "pre-0.42" not in out2:
         errs.append(f"ledger: legacy files not recognised:\n{out2}")
+    # SB-n spec-body items (0.45.0): counted in the ledger, mapped like JD,
+    # absent from the line when a page has none (the shape above stays as is)
+    if "SB=" in out:
+        errs.append(f"ledger: SB= printed for a context with no SB items:\n{out}")
+    ctx_sb = LEDGER_CTX.replace("- JD-1 (Jira Description)",
+                                "- SB-1 (Confluence §1, spec body): headers not selectable\n- JD-1 (Jira Description)")
+    out3 = "\n".join(ledger_report(ctx_sb, LEDGER_REQ, None))
+    if "SB=1" not in out3 or "MISSING: SB-1" not in out3:
+        errs.append(f"ledger: SB item not counted or not reported missing:\n{out3}")
 
 
 def selftest():

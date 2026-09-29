@@ -5,6 +5,217 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.45.0 — 2026-09-29 — questions before estimation, not after test design
+
+Found on EP-56227 / QA sub-task EP-57799 (Location filter). The
+estimation meeting needed QA's open questions and a QA estimate before
+any test design. No skill did that, so it was run by hand:
+1. task-context and grooming on the parent Story;
+2. code recon and a browser recon;
+3. a questions comment (150682);
+4. a sizing note.
+
+The hand run found six spec/build contradictions. One was the hall
+tick: the AC says direct items only, while FE ticks the hall plus all
+its stands. It also produced a QA estimate of 5–6 days, against the 2d
+on the ticket.
+
+**New skill — `qa-refinement` (pre-estimation mode).**
+- Flow: the parent Story → task-context → grooming (auto-default) →
+  recon → ONE questions-only comment on a yes → `<KEY>-sizing.md`.
+- It writes no test cases, no suite and no sub-task.
+- It shares `runs/<KEY>/docs/` with the docs phase, so the recon is
+  reused when the docs phase runs on the answered ticket.
+- Sizing: `skills/qa-refinement/references/sizing-template.md` holds the
+  scope matrix, the case-count arithmetic, effort ranges and blockers.
+- The dispatcher proposes refinement when the user asks about
+  estimation, or when the input is a human-created QA sub-task and dev
+  has not started.
+
+**Gaps closed where they live**
+- **Recon had no single home.** Its rules were a paragraph inside
+  `qa-pipeline-docs` step 2, so standalone grooming had none. They now
+  live in `skills/qa-pipeline/references/recon.md`, which both
+  orchestrators use:
+  - sources in order: docs → a *refreshed* clone (integration branch,
+    never a feature branch) → the running system;
+  - the verbatim header;
+  - one allowed write: a reversible setting flip on a test event, only
+    on the user's yes, with the original value read first and restored
+    and re-read after. EP-56227 flipped Sessions "Allow other location"
+    to show that the card keeps a custom location the filter would hide;
+  - never open a page that persists on load (admin Display Filters);
+  - screenshots go to `$EP_QA_HOME/evidence/`, because the Playwright
+    MCP refused the run folder.
+- **The open-questions comment is questions only.** EP-56227's first
+  version had four headed sections and evidence per item. The user
+  asked for "just questions", and it was edited in place.
+  - The shape now lives in `jira-writing-style.md` → "Grooming
+    open-questions comment": one intro line and numbered one-line
+    questions.
+  - Re-runs edit the comment in place until someone replies; after
+    that they post "Still open from <date>".
+  - `qa-pipeline-docs` step 2 uses the same shape and saves the draft
+    as `<KEY>-open-questions.md`.
+- **The docs phase can adopt a QA sub-task a human created.** Until now
+  the publish always created a new one, and the supersede rule only
+  knew labelled pipeline sub-tasks. EP-57799 was made by hand at
+  estimation, so the docs run would have left two QA sub-tasks.
+  - The publish preview now offers "adopt <KEY> instead".
+  - Adopting adds the label, keeps the summary, the assignee and the
+    human's description, and appends the pipeline description under a
+    `QA pipeline` heading.
+  - The rule "always create a NEW sub-task", with the supersede comment
+    added in 0.8.0, stays for pipeline-created ones.
+- **Spec-body rules get ledger ids (`SB-n`).** The AC page's "What needs
+  to be done" §1–§7 carried 9 rules the AC heading never restated,
+  including "headers are not selectable", which was one of the
+  contradictions.
+  - task-context captures them as `SB-n (Confluence §n, spec body)`.
+  - Grooming maps them like AC items: every `SB-n` needs a `source:`
+    line.
+  - qa-test-cases carries them onto `Covers:`, and both templates'
+    `AC coverage:` lines print `SB n/N` when SB items exist. The smoke
+    test caught that stage 4 and the templates were first left without
+    SB, which would have shown every spec-body rule as `MISSING` at
+    stage 4.
+  - `reconcile_counts.py` counts them, prints `SB=` only when there
+    are some, and has a new self-test case.
+  - `SB`, not `SPEC`: `SPEC` is already grooming's SPEC/BEHAVIOUR class
+    and part of the `SPEC-DEFECT` verdict.
+- **The SCOUT host is checked against `ALLOWED_HOSTS`.** The
+  knowledge-base endpoint had moved to a host the list does not carry.
+  task-context now goes straight to the connector fallback and says so.
+- **Standalone grooming says what it does not do.** It ends at the file
+  and points to `qa-refinement` for posting.
+
+**Wiring:**
+- dispatcher route and rule; analyzer inputs and a "refinement" phase;
+- `data-locations.md`: `-open-questions.md` and `-sizing.md`;
+- README, MAINTAINERS (layout and lookup rows), CLAUDE.md (15 skills);
+- evals: a `## qa-refinement` section plus ❌ lines on grooming, docs
+  and the dispatcher.
+
+**The first answers, measured (same day).** The PM answered all 15
+questions inline in the Story description.
+
+| Outcome | Questions |
+|---|---|
+| Answered cleanly | 9 (1, 2, 4, 10, plus the looser 5–8 and 13) |
+| Answered a different question | 1 (Q9, "free-text custom locations") |
+| Not clear to them | 2: Q3 bounced back ("need to clarify 'Search Within Filters' toggle @Roman"); Q12 got "Question is not clear" |
+| Not needed | 3: Q11 was a meta-request; Q14 asked about scope the AC already states; Q15 asked about environment and date, which the user ruled out ("we need only what is blocking us from covering the new feature with cases") |
+
+Every clean answer went to an either/or question with two outcomes a
+user can see. Every miss named a setting or concept in the pipeline's
+words.
+
+What changed:
+- **What earns a place.** `jira-writing-style.md` → "Grooming
+  open-questions comment" admits only a question that blocks a test
+  case, with the REQ it blocks named in the file. Planning (environment,
+  dates, owners), questions the spec already answers, and meta-requests
+  are out. Environment and dates move to the sizing note's "Blocks
+  execution" list.
+- **Four writing rules**, each tied to its miss:
+  - one decision, with visible outcomes;
+  - a setting named by where it lives and what it does today (Q3);
+  - a concrete example for a mismatch (Q12);
+  - the words on the screen, not pipeline vocabulary (Q9).
+- **Answers are read in two places**: the replies and the description.
+  The PM answered inline and left only "Answered in description".
+- **`qa-refinement` answers pass** ("check the answers to our
+  questions"):
+  - writes `<KEY>-answers.md`, classing each answer as answered /
+    partial / different question (inferred) / not clear / not needed;
+  - folds the settled answers into the requirements as `resolved by
+    the owner`;
+  - posts a NEW follow-up with only the unclear items, rewritten by the
+    rules. When a reply asked QA to clarify something, the follow-up
+    answers that first.
+- The original comment is never edited once answered.
+- The analyzer flags a "not clear" or "not needed" question 🟡.
+- `-answers.md` is added to `data-locations.md`.
+- The qa-refinement description gained the answers-pass trigger
+  (1017 characters). The evals gained ✅/❌ lines, including one against
+  qa-manual-results, whose "results" are test verdicts, not answers.
+
+**The docs phase picks up the refinement run.** Before this, a docs run
+on the same folder would have:
+- re-run recon and overwritten `-recon.md`;
+- never read `-answers.md`, losing the inferred answers and the "AC
+  still says otherwise" notes;
+- drafted a fresh questions comment that could re-ask what the owner
+  had answered.
+
+Now:
+- `qa-pipeline-docs` → "After a refinement run — reuse, don't redo":
+  - stages 1–2 still re-run, because the ticket changed;
+  - grooming reads `-answers.md` as the owner's answers (Inputs);
+  - recon appends and never overwrites (`recon.md` → "Reuse");
+  - questions: answered ones are settled, waiting ones are listed as
+    "still open since <date>", and only new items are posted;
+  - the QA sub-task on `-sizing.md` is adopted at publish.
+
+**The final comment links the run, not only the suite.** Found on
+EP-57907: the PM had to be shown which verdicts the machine recorded,
+and the comment carried the run only as a bare id. Nobody could open
+it, and no doc named the page's URL.
+- `qa-service-publish.md` → Web UI base URL: the test-run page is
+  `<base>/<productId>/test-runs/<runId>`, checked on the EP-57907 run.
+- `results-comment-template.md`: the human summary's Test docs line
+  and both story notes (passed and failed) now carry a bare-URL `Run:`
+  line.
+- The rule says where "who recorded it" shows: each case's page, under
+  Execution history, says `machine · ep-qa-pipeline agent …` or the
+  tester. The run page's roster shows only the verdict.
+
+**Verification**
+- `verify_plugin.py`: 10 ok.
+- `reconcile_counts.py --selftest`: PASS, with the new SB case.
+- **Trigger walk** (a cold agent routing all 87 lines from descriptions
+  alone): 0 disagreements. It found one new ambiguity: "estimate this
+  story in story points" could fire qa-refinement. Fixed with an
+  explicit story-points / whole-team exclusion.
+- **Docs smoke test** (`EP-0000` through grooming and test-cases):
+  - every fixture expectation holds, with the ledger at 6/6 → 6/6 and
+    core = 6;
+  - the run wrote 13 cases against the example's 10, because it split
+    REQ-2's conflict versions and added the 9th-toggle and per-event
+    limit cases.
+
+**Noted by the review, not changed in this release** (pre-existing, not
+caused by 0.45.0):
+- Three more trigger ambiguities:
+  - "manual testing" fits both runsheet and walk;
+  - "what were the results of the run?" could fire qa-run-analyzer;
+  - "test this public REST API" could fire api-testing, which has no
+    non-ExpoPlatform exclusion.
+- `test-cases-example.md` breaks two of its SKILL's rules:
+  - it puts `[core]` on the happy path where a denial path exists (Core
+    selection rule 1);
+  - it asserts both conflict versions in one case's Exp, which can never
+    pass.
+  It also names a "9 / 10 / 11" boundary set while testing only 10 and
+  11.
+- A requirement clause sourced from the Jira Description without a
+  `JD-n` bullet has no guidance for its `source:` line. The fixture's
+  "★ Featured" is the example.
+- `reconcile_counts.py` reads a stray `<KEY>-*.md` in the cwd ahead of
+  `docs/` when no `r<N>` exists.
+
+Candidates for the next docs-stage release.
+
+**Considered and not adopted**
+- *Posting the sizing to Jira.* An estimate is the QA engineer's
+  commitment, not the pipeline's output. It stays in the run folder
+  unless the user asks.
+- *Draft test cases during refinement.* They would be written against
+  open questions, and the docs phase rewrites them anyway.
+- *Running qa-run-analyzer at the end of refinement.* Without test
+  cases most of its checks do not apply. It still reads the files when
+  run on demand, in the new "refinement" phase.
+
 ## 0.44.0 — 2026-09-28 — an export is tested by its cells, not its headers
 
 Found on EP-57871's repro run: a live-event report (Groceryshop) of the

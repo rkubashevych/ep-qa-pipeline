@@ -34,6 +34,13 @@ Data sources for this skill:
 - the attachments the context file references, if they are needed to
   understand the requirements
 - the user's answers to grooming questions
+- `<ISSUEKEY>-answers.md`, when a `qa-refinement` run left one: the
+  ticket owner's answers to the posted questions, each already classed.
+  Treat "answered", "partial" and "inferred" rows as answers the user
+  gave. Write them onto the REQ they settle as `resolved by the owner
+  (<date>): <answer>` (mark an inferred one "(inferred)"). Keep a note
+  wherever the answer overrides the AC wording. Rows classed "not clear"
+  or still waiting stay open.
 
 The context file may contain warning notes from the context-collection
 skill (for example "⚠️ No Confluence acceptance-criteria page linked").
@@ -91,18 +98,23 @@ in the chain. REQ-5 in the grooming file is the same REQ-5 in the
 test cases (and their structural lines), in the code review, and onward.
 
 **Every REQ names the ledger items it comes from — mandatory (0.42.0).**
-The context file's bullets carry `AC-n` / `JD-n` / `CM-n` ids (the AC
-ledger — task-context SKILL.md). Each `REQ-N` gets a `source:` line
+The context file's bullets carry `AC-n` / `JD-n` / `CM-n` ids — and
+`SB-n` for rules in the AC page's spec body (0.45.0) — which make up the
+AC ledger (task-context SKILL.md). Each `REQ-N` gets a `source:` line
 listing the ids it is built from — usually one (`source: AC-3`),
 sometimes several when grooming merged a criterion with the Description
 clause that completes it (`source: AC-3, JD-1`), and a split REQ-5a /
-REQ-5b both carry the same `AC-n`. Then the rule: **every `AC-n` in the
-context file appears on at least one `source:` line.** Grooming may
+REQ-5b both carry the same `AC-n`. Then the rule: **every `AC-n` and
+every `SB-n` in the context file appears on at least one `source:`
+line.** (`reconcile_counts.py` holds JD and CM ids to the same set
+difference; an unmapped one is a finding too.) Grooming may
 judge a criterion untestable or out of scope — that is a finding, and
 the REQ is still written (marked "(needs clarification)" or with the
 scope ruling) so the id is carried, never dropped. Close the
 Requirements section with the coverage line:
-`AC coverage: <n>/<N> AC items mapped · JD <n>/<N> · CM <n>/<N>` — the
+`AC coverage: <n>/<N> AC items mapped · JD <n>/<N> · CM <n>/<N>`
+(plus ` · SB <n>/<N>` when the context file has spec-body `SB-n` items;
+they are mapped like AC items) — the
 numbers come from counting the ids, and any AC item missing from every
 `source:` line is named there (`uncovered: AC-5 — <reason>`) and
 repeated in the Notes. `reconcile_counts.py <KEY>` computes the same
@@ -354,10 +366,11 @@ Restraint, in order of how often it is got wrong:
    requirement text and mark it "(unresolved conflict)" so it is not
    silently lost.
    - **Exception — auto-default mode:** when running under the
-     qa-pipeline-docs orchestrator (unless the user asked for
-     interactive mode), do not wait: treat every finding as "skip" per
-     the rules above and continue. The findings still get presented in
-     chat and resurface at the orchestrator's publish confirmation.
+     qa-pipeline-docs or qa-refinement orchestrator (unless the user
+     asked for interactive mode), do not wait: treat every finding as
+     "skip" per the rules above and continue. The findings still get
+     presented in chat, and the orchestrator turns them into the
+     ticket's open-questions comment.
 9. Produce the final list: covered requirements unchanged + problem
    requirements rewritten taking the alignment into account, each with
    its risk rating (see "Risk rating"). Copy the "Goal" section from
@@ -380,3 +393,9 @@ The template is in references/output-template.md.
 ## Final response
 
 After saving the file, report the path to the saved file.
+
+Run on its own, this stage ends at the file. Recon and posting the
+open questions to the ticket are orchestrator steps
+(`../qa-pipeline/references/recon.md`; `qa-pipeline-docs` step 2). When
+the user wants the questions on the ticket before estimation, say that
+`qa-refinement` does exactly that on the same run folder.

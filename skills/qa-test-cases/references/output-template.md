@@ -46,7 +46,7 @@ lines**.
 ```
 ## REQ-N — <requirement label>  [risk: <High|Medium|Low>] [<channel tag(s)>]
 
-Covers: <AC-n[, JD-n, CM-n] — the ids from the requirement's source: line>
+Covers: <AC-n[, SB-n, JD-n, CM-n] — the ids from the requirement's source: line>
 Applied techniques: <technique(s) — once per requirement group>
 
 ### TC-REQ-N.M — <scenario name>  [<channel tag>]
@@ -96,7 +96,7 @@ Close the file with:
   counted once, here) · [mobile] <N> · [export/email] <N>
 - Core cases: <N> (= behavioural requirements)
 - Structural checks: <S> (not in the total)
-- AC coverage: <n>/<N> AC items covered · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
+- AC coverage: <n>/<N> AC items covered< · SB <n>/<N> — only when SB-n items exist> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
 - Total number of test cases: <N>
 
 Every number is re-derivable with

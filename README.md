@@ -37,6 +37,8 @@ These skills were adapted for ExpoPlatform's stack:
 
 > **Memory across rounds.** `<KEY>-open-items.md` (`skills/qa-pipeline/references/open-items-ledger.md`) carries what a round left undecided — risk rows, in/out rulings, findings with no case and no key — into the next round's scope confirmation; the analyzer writes it, stage 10 closes rows, and an item carried two rounds with no decision is a 🔴.
 
+> **Before estimation = `qa-refinement`.** It runs stages 1–2 and recon (code first, then the test environment with you signed in), posts ONE questions-only comment to the Story on your yes, and writes a QA sizing note (`<KEY>-sizing.md`: scope matrix, rough case count, effort range, blockers) for estimation and decomposition. It writes no test cases and publishes nothing. It shares `runs/<KEY>/docs/` with the docs phase, which runs once the answers are in and can adopt a QA sub-task someone created by hand instead of making a second one.
+
 > Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post + stage 9 walk plan, with the walk and the write-back run on demand when the tester is ready). And one front door wraps the orchestrators: **`qa-pipeline`** — give it any ticket ("qa this ticket EP-1234") and it reads the ticket's state, proposes the route (docs / code / bug-fix / retest / walk / ingest results), and invokes it on your confirmation. Direct invocation of any orchestrator or mode still works exactly as before.
 
 ## How the flow works

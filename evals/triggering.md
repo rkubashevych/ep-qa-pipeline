@@ -23,6 +23,8 @@ names who should handle it instead).
 - ✅ (auto) after task-context inside qa-pipeline-docs
 - ❌ "write requirements for a new feature" → not this pipeline; chat
 - ❌ "groom the backlog" → PM activity, no skill
+- ❌ "check the ticket for open questions before we estimate" →
+  qa-refinement (grooming runs inside it, plus recon and the comment)
 
 
 ## qa-test-cases (stage 4)
@@ -97,6 +99,8 @@ names who should handle it instead).
 - ❌ "build me the run sheet" → qa-manual-runsheet
 - ❌ "walk me through EP-55123" → qa-manual-walk (results come after)
 - ❌ "what were the results of the run?" → read the report/Jira, chat
+- ❌ "check the answers to our questions on EP-56227" → qa-refinement
+  (answers pass on the grooming questions, not test results)
 
 ## qa-run-analyzer
 - ✅ "analyze the run", "how did that run go"
@@ -107,7 +111,10 @@ names who should handle it instead).
 ## qa-pipeline (dispatcher)
 - ✅ "qa this ticket EP-55123"
 - ✅ "process EP-55123 for testing" / pasted ticket + "test this"
+- ✅ "qa this ticket EP-57799" (a human-created QA sub-task, dev not
+  started) → proposes refinement on the parent Story
 - ❌ "run the QA docs pipeline for EP-55123" → qa-pipeline-docs
+- ❌ "prepare EP-56227 for estimation" → qa-refinement (mode named)
 - ❌ "retest EP-55123" / "test the bugfix EP-55123" → qa-pipeline-code
 - ❌ "walk me through EP-55123" → qa-manual-walk
 - ❌ "ingest the manual results" → qa-manual-results
@@ -119,6 +126,22 @@ names who should handle it instead).
   EP-55123" (publish-only mode — stages 1–4 skipped when their files exist)
 - ❌ "publish this page to Confluence" → confluence-sync
 - ❌ "just groom the requirements" → requirements-grooming alone
+- ❌ "prepare EP-57799 for estimation — what questions do we have?" →
+  qa-refinement (no test cases before the answers)
+
+## qa-refinement (pre-estimation mode)
+- ✅ "I need to prepare EP-57799 for estimation and decomposition —
+  check if there are questions from our side"
+- ✅ "refinement for EP-56227"
+- ✅ "what questions do we have for this ticket before we estimate?"
+- ✅ "QA estimate prep for EP-56227" / "decomposition prep"
+- ✅ "check the answers to our questions on EP-56227" (answers pass)
+- ❌ "the tester finished, here are the results" → qa-manual-results
+  (test verdicts, not answers to grooming questions)
+- ❌ "build the test cases for EP-56227" → qa-pipeline-docs
+- ❌ "groom the requirements" (a file, no posting) → requirements-grooming
+- ❌ "estimate this story in story points" (no QA context) → chat
+- ❌ "what does EP-56227 say?" → plain chat answer, no skill
 
 ## qa-pipeline-code (orchestrator)
 - ✅ "run the QA code pipeline", "run the QA checks"
