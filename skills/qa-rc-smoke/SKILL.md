@@ -104,7 +104,9 @@ it before step 1.
    principal). Write `<RC-KEY>-rc-smoke.md` from the template in the
    method.
 6. **Publish (one pause)** — show the Jira comment (Markdown, not wiki
-   markup), post it on a yes, and link the QA Service run. Never
+   markup), post it on a yes, with the QA Service run as a bare
+   `Run: https://qa-service.expoplatform.com/expoplatform/test-runs/<run id>`
+   line. Never
    transition the ticket and never write "signed off". The sign-off is
    the release owner's decision; this comment is the evidence for it.
 

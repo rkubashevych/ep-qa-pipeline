@@ -228,7 +228,12 @@ text). Keep it to one screen:
 - the results table (item · code · served build · runtime · result);
 - one short paragraph per item;
 - the caveats;
-- the QA Service run link;
+- the run link as a bare URL on its own line:
+  `Run: https://qa-service.expoplatform.com/expoplatform/test-runs/<run id>`
+  (the pattern in `../../qa-pipeline-docs/references/qa-service-publish.md`,
+  the same line as `../../qa-pipeline-code/references/results-comment-template.md`).
+  Step 5 creates the run before step 6 posts, so the id always exists.
+  A comment without it is incomplete;
 - the closing line `This is not a sign-off. It is evidence for the
   sign-off decision.`
 
