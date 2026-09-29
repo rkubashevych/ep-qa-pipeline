@@ -137,12 +137,16 @@ report (`runs/<STORY>/r<N>/<STORY>-run-report.md`).
 **Test docs:** <N> requirements / <M> cases; QA Service run <id>
 (<closed / running>: <N> pass · <N> fail · <N> blocked · <N> skipped) —
 https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path>
+Run: https://qa-service.expoplatform.com/expoplatform/test-runs/<run id>
 ```
 
 QA Service line rules: include it whenever the docs phase published a
-suite (even if this pass recorded no run — then say "no run: <reason>").
-Omit the line entirely only when no
-suite exists for this ticket. **Write the full bare URL** — never
+suite (even if this pass recorded no run — then say "no run: <reason>"
+and drop the `Run:` line). Omit the line entirely only when no
+suite exists for this ticket. The run link is what a reader opens to
+check the verdicts; who recorded each one (machine or a named tester)
+shows on each case's page under Execution history, not on the run
+page's roster. **Write the full bare URL** — never
 `[text](url)`: the connector's markdown→ADF conversion drops
 hyperlinks, so a markdown link lands in Jira as unclickable text
 (see qa-service-publish.md → "Writing the suite link into Jira").
@@ -208,7 +212,8 @@ verdicts alone; if the user insists on a story note at step 8, use the title
 **Result:** all passed<, N non-blocking notes: <one line each>>.
 **Not covered here:** <N [mobile]/[export] cases → manual check> *(omit if none)*
 **Test docs:** https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path> *(bare URL, never a markdown link; omit if no suite)*
-**Details:** per-case verdicts on QA Service run <run id>; full reports held by QA (run folder, <KEY> r<N>)
+**Run:** https://qa-service.expoplatform.com/expoplatform/test-runs/<run id> *(bare URL; per-case verdicts)*
+**Details:** full reports held by QA (run folder, <KEY> r<N>)
 **Status:** ready for <merge / release / next step>
 ```
 
@@ -260,7 +265,8 @@ know how much of the feature is sound, not only that it failed>
 
 **Not covered:** <N> blocked by environment/access, <N> awaiting a manual run
 **Test docs:** https://qa-service.expoplatform.com/expoplatform/test-suites/<suite path> *(bare URL)*
-**Details:** per-case verdicts on QA Service run <run id>; full reports held by QA (run folder, <KEY> r<N>)
+**Run:** https://qa-service.expoplatform.com/expoplatform/test-runs/<run id> *(bare URL; per-case verdicts)*
+**Details:** full reports held by QA (run folder, <KEY> r<N>)
 ```
 
 Rules:

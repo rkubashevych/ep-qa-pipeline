@@ -50,7 +50,7 @@ invoking the pipeline; honour that for the run without arguing.
 | Suite prefix | short UPPERCASE mnemonic of the feature (2–8 chars, e.g. `ZTB`, `PSRCH`). Propose one; the user can override at the pause. |
 | Folder | `get_suite_tree` (product `expoplatform`) is where a `folderId` comes from — the organizer tree is `<role>` → feature folders (`common/…`, `organizer/payments/…`). File the suite under the folder whose name is the feature area; omit `folderId` only when no folder fits and say so in the preview |
 | Teams | `teams` on `create_suite` — one or more of `Organizer` / `Exhibitor` / `Visitor` / `Mobile` / `Data Science` / `Integration` / `Designers` / `Staff` / `Hyve`. Map from the role: `exhibitor` → Exhibitor, `visitor` → Visitor, `organizer` / `admin` → Organizer, `common` → the team the story's dev sub-tasks belong to (ask at the pause when unclear). A suite created without `teams` is flagged "No team" in the web UI (`common/meeting-export` landed that way); `assign_suite_teams` repairs an existing one |
-| Web UI base URL | `https://qa-service.expoplatform.com` — suite detail page: `<base>/<productId>/test-suites/<suite path>` (verified, e.g. `/expoplatform/test-suites/exhibitor/exhibitor-favorites`). |
+| Web UI base URL | `https://qa-service.expoplatform.com` — suite detail page: `<base>/<productId>/test-suites/<suite path>` (verified, e.g. `/expoplatform/test-suites/exhibitor/exhibitor-favorites`). Test run page: `<base>/<productId>/test-runs/<runId>` (verified 2026-09-29 on the EP-57907 run). |
 
 **Writing the suite link into Jira — bare URL only.** The Atlassian
 connector's markdown→ADF conversion drops/mangles `[text](url)`

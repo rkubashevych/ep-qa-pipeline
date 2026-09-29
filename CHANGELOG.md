@@ -5,6 +5,16 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.45.1 — 2026-09-29 — the run link, shipped
+
+0.45.0's entry describes "The final comment links the run, not only
+the suite", but the commit left out the two files that change. They
+ship here, unchanged from that description:
+- `skills/qa-pipeline-code/references/results-comment-template.md`:
+  a bare-URL `Run:` line in the human summary and both story notes.
+- `skills/qa-pipeline-docs/references/qa-service-publish.md`: the
+  test-run page URL pattern.
+
 ## 0.45.0 — 2026-09-29 — questions before estimation, not after test design
 
 Found on EP-56227 / QA sub-task EP-57799 (Location filter). The
