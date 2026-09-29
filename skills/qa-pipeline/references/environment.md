@@ -72,7 +72,7 @@ The only place a credential lives. Variables (the api-testing reference
 | Variable | Used by |
 |---|---|
 | `ADMIN_BASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ORGANIZER_API_KEY`, `EVENT_ID`, `BASE_URL`, `BASE_PATH` | api-testing, stage 9 provisioning, the walk's AGENT-RUNS cards |
-| `RC_ADMIN_BASE_URL`, `RC_EVENT_ID`, `RC_FRONTEND_HOST` (hosts and event, not secrets); optional `RC_ADMIN_USERNAME`, `RC_ADMIN_PASSWORD`, `RC_ORGANIZER_API_KEY`, which stay empty unless RC has its own account | qa-rc-smoke only. The alpha block stays the default for every other stage, and nothing falls back from an `RC_*` to an alpha value. The alpha organizer key is rejected on RC portals (EP-57431), and an empty RC credential means the user signs in by hand |
+| `RC_ADMIN_BASE_URL`, `RC_EVENT_ID`, `RC_FRONTEND_HOST` (hosts and event, not secrets); optional `RC_ADMIN_USERNAME`, `RC_ADMIN_PASSWORD`, `RC_ORGANIZER_API_KEY` | qa-rc-smoke only; the alpha block stays the default for every other stage. **The RC admin is the same account as alpha2** (confirmed 2026-09-29), so when `RC_ADMIN_USERNAME` / `RC_ADMIN_PASSWORD` are empty, `ADMIN_USERNAME` / `ADMIN_PASSWORD` are used against `RC_ADMIN_BASE_URL`. The organizer key does **not** carry over to portals: the alpha key is rejected on RC portals (EP-57431), and on RC admin REST it is untested (`qa-rc-smoke/references/rc-smoke-method.md`) |
 | `BB_API_TOKEN` (and the other Bitbucket variables in `pr-summary/references/bitbucket-access.md`) | pr-summary, code-review |
 | `ALLOWED_HOSTS` | every stage that sends a request to a product host (below) |
 | `QA_OPERATOR_EMAIL` | qa-pipeline-docs publish (the QA sub-task assignee), qa-manual-results (the default tester principal) |

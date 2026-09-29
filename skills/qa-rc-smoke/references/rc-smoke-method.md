@@ -23,16 +23,26 @@ re-discovers what it can instead of trusting this file.
 file's RC block holds `RC_ADMIN_BASE_URL`, `RC_EVENT_ID` and
 `RC_FRONTEND_HOST` (`../../qa-pipeline/references/environment.md`).
 When `RC_EVENT_ID` differs from the table, the file wins, and the
-report says which event was used. The optional `RC_ADMIN_USERNAME` /
-`RC_ADMIN_PASSWORD` / `RC_ORGANIZER_API_KEY` are used only when they
-are filled in. Never substitute the alpha `ADMIN_*` / `ORGANIZER_API_KEY`
-for them.
+report says which event was used.
 
-Credentials: the file's default block is alpha2-scoped. On RC:
-- the organizer API key is rejected by the portal;
-- the admin credentials do not work portal-side;
-- the admin panel is reached by the user signing in by hand in the
-  Playwright browser.
+Credentials on RC:
+- **Admin:** the same account as alpha2 (confirmed 2026-09-29). Use
+  `RC_ADMIN_USERNAME` / `RC_ADMIN_PASSWORD` when set, otherwise
+  `ADMIN_USERNAME` / `ADMIN_PASSWORD`, against `RC_ADMIN_BASE_URL`. The
+  admin-panel session login (`/admin/index/login` → cookie →
+  `/admin/exhibitions/select/<RC_EVENT_ID>`) follows the api-testing
+  reference §3. Read values with `load-env.sh` and never print them.
+  If the permission layer refuses a scripted login, fall back to the
+  user signing in by hand in the Playwright browser, which is how
+  EP-57782 ran.
+- **Organizer key:** the alpha `ORGANIZER_API_KEY` is rejected on RC
+  portals (EP-57431). Whether RC admin REST (`/api/v1/login`, which
+  sends it as `Authorization: Basic`) accepts it is **untested**. Use
+  `RC_ORGANIZER_API_KEY` when set. Otherwise the alpha key may be tried
+  once for the admin REST login, and the report records the answer.
+  Never use it for portal calls.
+- **Portal:** the admin credentials do not work portal-side (a separate
+  account space). Guest endpoints need nothing.
 
 Guest endpoints need nothing. `ALLOWED_HOSTS` must list the RC hosts;
 `*.expoplatform.net` covers them all (a `*.rc.expoplatform.net` entry
