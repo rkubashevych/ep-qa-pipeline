@@ -185,7 +185,13 @@ full** — do not summarise or shortcut it. Stages share the run folder
      requirement / case / structural-check counts, or "appending to
      existing suite", or "skipped — connector not enabled: code phase
      will read runs/<ISSUEKEY>/docs/ on this machine only"). Proceed
-     only after an explicit yes.
+     only after an explicit yes. The writes are one plan,
+     `docs/<ISSUEKEY>-publish-plan.json`
+     (`../qa-pipeline/references/write-plans.md`): `make` before the
+     preview, which ends with its `Plan: … sha256 …` line; `check` after
+     the yes; every `createJiraIssue` / `create_*` / `edit_*` call
+     executed from the file — never recomposed, and after a compaction
+     re-read from it.
    - Create via `createJiraIssue` with the project key, issue type,
      assignee, summary format, and label from
      **`references/publish-config.md`** (edit that file, not this one,

@@ -21,7 +21,8 @@ skimmer, nobody tagged. **Nothing else is posted in wave 1.**
 **Wave 2 (stage 10, after the manual round):** the human summary below,
 plus story notes / bug filings / decision requests — all on
 human-confirmed verdicts. Narrow wave-1 exception: runtime-confirmed +
-evidenced + blocking the manual round.
+evidenced (rated SUFFICIENT by the step-5 evidence audit) + blocking the
+manual round.
 
 ## The retired archive (0.33.0) — and the rules that survive it
 
@@ -233,7 +234,8 @@ devs read the story, not the sub-task — and that matters *more* when a
 run produced defects, not less. Post it **in addition to** the
 reassignment path, not instead of it. Wave 2, like the PASS note: the
 human verdicts are in; qa-pipeline-code step 8 posts it only under its
-narrow wave-1 exception (a runtime-confirmed, evidenced, blocking fault).
+narrow wave-1 exception (a runtime-confirmed, evidenced, blocking fault
+the evidence audit rated SUFFICIENT).
 
 Group the defects by what a reader has to decide about them, not by the
 order they were filed. A flat list of thirteen keys tells a manager

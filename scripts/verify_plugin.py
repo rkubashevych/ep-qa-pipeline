@@ -26,7 +26,8 @@ Checks (MAINTAINERS recipe step 6.4):
                 references in one of the last two so this can check them
   6. vocabulary every status in status-vocabulary.md has its base token
                 in reconcile_counts.py STATUSES
-  7. selftest   reconcile_counts.py and export_profile.py --selftest pass
+  7. selftest   reconcile_counts.py, export_profile.py, source_tools.py,
+                plan_hash.py and skill_stamp.py --selftest pass
   8. staged     `git diff --cached --name-only -z` has no run-artefact path
                 — judged on the first segment (`runs/`) and the BASENAME
                 only (EP-*, GS-*, build_*, repro_*, *-testdata*, *-runsheet*,
@@ -54,12 +55,17 @@ TEXT_GLOBS = ("README.md", "MAINTAINERS.md", "CHANGELOG.md", "CLAUDE.md",
 # commit touching that skill failed the gate (the one check that guards
 # credentials is the one people then learn to skip with --no-git).
 ARTEFACT_DIRS = ("runs",)
+# any path segment: the saved source texts hold verbatim client pages (0.47.0)
+ARTEFACT_SEGMENTS = ("sources",)
 ARTEFACT_BASENAMES = [
     re.compile(p) for p in (
         r"^EP-\d", r"^GS-", r"^build_", r"^repro_", r"-testdata", r"-runsheet",
         r"-walk-", r"^\.env", r"^_[^_]", r"^navigation_paths\.json", r"\.bak$",
         r"\.diff$", r"-preserved-entries", r"-open-items\.md$",
         r"-manual-results\.md$", r"-human-summary\.md$", r"-web-evidence\.md$",
+        # 0.47.0 run artefacts: the api evidence, the audit, the write plans
+        r"-api-evidence\.md$", r"-evidence-audit\.md$", r"-plan(\.approved)?\.json$",
+        r"-plan\.sha256$", r"^confluence-\d+\.md$", r"^jira-[A-Z][A-Z0-9]*-\d+-(description|comments)\.md$",
     )
 ]
 
@@ -71,6 +77,8 @@ def is_artefact(path):
         return True
     if parts[0] == "fixtures":
         return False
+    if any(seg in ARTEFACT_SEGMENTS for seg in parts[:-1]):
+        return True
     base = parts[-1]
     return any(pat.search(base) for pat in ARTEFACT_BASENAMES)
 DESC_LIMIT = 1024
@@ -254,7 +262,10 @@ def check_vocabulary(root, r):
 
 
 SELFTESTED_SCRIPTS = ("skills/qa-run-analyzer/scripts/reconcile_counts.py",
-                      "skills/api-testing/scripts/export_profile.py")
+                      "skills/api-testing/scripts/export_profile.py",
+                      "skills/qa-pipeline/scripts/source_tools.py",
+                      "skills/qa-pipeline/scripts/plan_hash.py",
+                      "skills/qa-pipeline/scripts/skill_stamp.py")
 
 
 def check_selftest(root, r):
@@ -316,12 +327,19 @@ def selftest_patterns():
     must_catch = ["runs/EP-1/r1/EP-1-code-review.md", "EP-99-runsheet.xlsx",
                   "_s9_tok.json", ".env.qa-agents", "build_runsheet_EP-1.py",
                   "skills/web-testing/navigation_paths.json", "GS-API-V2-context.md",
-                  "some/dir/EP-5-testdata.json", "x.diff", "EP-1-walk-plan.md"]
+                  "some/dir/EP-5-testdata.json", "x.diff", "EP-1-walk-plan.md",
+                  "GSX-1-evidence-audit.md", "FOO-2-api-evidence.md",
+                  "FOO-2-run-plan.json", "FOO-2-run-plan.approved.json", "FOO-2-run-plan.sha256",
+                  "docs/sources/jira-EP-1-comments.md", "confluence-1846673419.md",
+                  "jira-EP-12-description.md", "x/sources/anything.md"]
     must_pass = ["skills/qa-manual-runsheet/SKILL.md",
                  "skills/qa-manual-runsheet/references/runsheet-format.md",
                  "skills/qa-manual-walk/references/walk-plan-format.md",
                  "skills/api-testing/scripts/load-env.sh", "fixtures/EP-0000-context.md",
                  "scripts/verify_plugin.py", "skills/x/__init__.py", ".gitignore",
+                 "skills/qa-pipeline/references/write-plans.md",
+                 "skills/qa-pipeline-code/references/evidence-audit.md",
+                 "skills/qa-pipeline/scripts/plan_hash.py",
                  "docs/ep-qa-pipeline-retrospective-EP-47675.md"]
     bad = [p for p in must_catch if not is_artefact(p)] + \
           [p for p in must_pass if is_artefact(p)]

@@ -41,7 +41,7 @@ template. Only the "how a step is executed" changes.
 | `computer` click/type/key | `locator.click()` / `locator.fill()` / `keyboard.press()` |
 | `form_input` | `locator.fill()` / `select_option()` |
 | `get_page_text` | `page.inner_text("body")` |
-| screenshot (FAIL evidence) | screenshot tool + trace if available |
+| screenshot (FAIL / `[core]` PASS evidence) | screenshot tool + trace if available |
 
 MUI notes from browser-rules.md still apply (selects are buttons +
 listbox portals; date pickers need keyboard entry).
@@ -62,9 +62,15 @@ listbox portals; date pickers need keyboard entry).
 4. Persist auth state per host when the MCP supports it, so one login
    covers the run.
 
-## Evidence (FAIL only) — what the backend can actually write
+## Evidence — what the backend can actually write
 
-On every FAIL / FAIL CONFIRMED record, in this order of preference:
+Since 0.47.0 **every PASS gets a `§n` reading too**, and every `[core]`
+PASS a screenshot (`<ISSUEKEY>-r<N>-<TC-ID>-pass.png`): the step-5
+evidence audit re-reads them (`../../qa-pipeline-code/references/evidence-audit.md`).
+A PASS reading is short — URL, signed-in role, the quoted text or
+aria excerpt that satisfies the case's expected result, timestamp; no
+console lines unless something was logged. On every FAIL / FAIL
+CONFIRMED record, in this order of preference:
 
 1. **The screenshot, straight into `$EP_QA_HOME/evidence/`.** The
    Playwright MCP server writes only inside its output directory, so the
@@ -81,7 +87,7 @@ On every FAIL / FAIL CONFIRMED record, in this order of preference:
    report and fall to 2.
 2. **The documented equivalent — always written:**
    `<ISSUEKEY>-web-evidence.md` in the run folder, one numbered section
-   per FAIL: the URL, the exact DOM / text reading that contradicts the
+   per FAIL (and, short form, per PASS / FAIL REJECTED — above): the URL, the exact DOM / text reading that contradicts the
    expectation (aria snapshot or `inner_text` excerpt, quoted), the
    console lines captured **before** navigating away, the timestamp.
    The report row cites `web-evidence.md §n` — that reference is what
@@ -89,8 +95,11 @@ On every FAIL / FAIL CONFIRMED record, in this order of preference:
    an on-disk screenshot cannot be uploaded there anyway.
 
 A FAIL with a `§n` reading and no screenshot is compliant; a FAIL with
-neither is not a FAIL, it is a claim. Nothing is captured for PASS —
-evidence noise costs tokens and review time.
+neither is not a FAIL, it is a claim — and since 0.47.0 the same holds
+for a PASS. (Until then: "nothing is captured for PASS — evidence noise
+costs tokens and review time". The cost is a few lines per case; the
+saving was that a wrong PASS had nothing anyone could re-read, and it
+reached the walk plan as "settled".)
 
 ## Known risks
 

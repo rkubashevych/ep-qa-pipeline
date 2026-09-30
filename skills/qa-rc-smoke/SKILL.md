@@ -102,7 +102,10 @@ it before step 1.
    exercised (`../qa-pipeline/references/test-runs.md`, with the RC
    specifics in the method: title, `env: rc`, release, catalogue ids,
    principal). Write `<RC-KEY>-rc-smoke.md` from the template in the
-   method.
+   method. The comment in step 6 is a one-write plan,
+   `<RC-KEY>-rc-comment-plan.json` (`../qa-pipeline/references/write-plans.md`):
+   what you show is `plan_hash.py show` of it, and `check` runs before
+   posting.
 6. **Publish (one pause)** — show the Jira comment (Markdown, not wiki
    markup), post it on a yes, with the QA Service run as a bare
    `Run: https://qa-service.expoplatform.com/expoplatform/test-runs/<run id>`

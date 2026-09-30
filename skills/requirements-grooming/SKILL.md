@@ -251,6 +251,41 @@ messages", "handle", "support".
   - things that are obvious from the task or product context — do not
     re-ask what is already clear
 
+### Finding codes (0.47.0)
+
+Every finding carries exactly one code, and its consequence is stated
+from a tester's seat: the finding line contains "a tester reading this
+would ___", before the `→ <what is needed>` part. If you cannot finish
+the sentence, it is not a finding. Line shape:
+`- REQ-N <CODE> (<SPEC|BEHAVIOUR>): <essence> — a tester reading this
+would <consequence> → <what is needed>`. The class in brackets is the
+one the next rule already requires; the class goes on questions and may
+be omitted on the other categories.
+
+| Code | The requirement… | Example consequence |
+|---|---|---|
+| `UNTESTABLE` | has no observable pass/fail outcome | "…would have no result to compare against" |
+| `AMBIGUOUS` | has a word two testers would read two ways ("recent", "relevant", "all places") | "…would pick any date range and call it a pass" |
+| `COMPOUND` | holds two independent rules in one statement | "…would pass it with only one rule working" |
+| `INCOMPLETE` | leaves a branch, state, role, boundary or error path unstated | "…would not know what the 11th favourite should do" |
+| `UNMEASURABLE` | names a quality with no threshold ("fast", "clear") | "…would have no number to fail it on" |
+| `CONTRADICTS` | conflicts with another source, another REQ, or an established suite requirement | "…would fail it against one source and pass it against the other" |
+| `IMPLEMENTATION` | prescribes how instead of what, **and** that blocks testing the what | "…would test the mechanism and miss the behaviour" |
+| `UNSOURCED` | has no single document stating the whole of it (the scope-difference rule above) | "…would test a clause no acceptance criterion contains" |
+
+- The code decides nothing on its own. The categories below and the
+  SPEC / BEHAVIOUR class still route the finding.
+- What the code adds is comparability: the analyzer and the next round
+  can count `AMBIGUOUS` findings instead of re-reading prose.
+- **The codes stay internal.** They appear in chat, in the findings
+  pause and in `<ISSUEKEY>-open-questions.md`. They never appear in the
+  posted questions comment, which uses the words on the screen
+  (`../qa-pipeline-code/references/jira-writing-style.md` → "Grooming
+  open-questions comment").
+
+The codes are borrowed from qa-service's `requirement-review` rubric,
+which puts severity as a consequence in the same way.
+
 ## Risk rating
 
 Rate each requirement's product risk — **High / Medium / Low** —
@@ -345,19 +380,20 @@ Restraint, in order of how often it is got wrong:
    Chat format:
 
    ### Questions
-   - REQ-3: <essence of the problem> → <what is needed to resolve it>
+   - REQ-3 AMBIGUOUS (SPEC): <essence of the problem> — a tester reading this
+     would <consequence> → <what is needed to resolve it>
 
    ### Contradictions
-   - REQ-5: <essence> → <what is needed>
+   - REQ-5 CONTRADICTS: <essence> — a tester reading this would <…> → <what is needed>
 
    ### Potential bugs
-   - REQ-7: <essence> → <what is needed>
+   - REQ-7 INCOMPLETE: <essence> — a tester reading this would <…> → <what is needed>
 
    ### Uncovered requirements
-   - REQ-9: <essence> → <what is needed>
+   - REQ-9 UNTESTABLE: <essence> — a tester reading this would <…> → <what is needed>
 
    ### Risks
-   - REQ-7: <essence> → <what is needed>
+   - REQ-7 INCOMPLETE: <essence> — a tester reading this would <…> → <what is needed>
 
    Do not write empty categories.
 8. Wait for the user's answers, align on the decisions. If the user

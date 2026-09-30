@@ -97,33 +97,24 @@ unless `runs/<STORY>/docs/<STORY>-test-cases.md` exists here: then say
 the run uses the local copy and cannot write verdicts to a run. Never
 discover this at extraction time.
 
-**Build the source register — REQUIRED, in every mode.** Rules and the
-table format: `../qa-pipeline/references/sources-of-record.md`. Fetch
-each governing document once and write `<KEY>-sources.md`:
-
-1. The **acceptance criteria** — the Confluence page linked from the
-   story (`getJiraIssueRemoteIssueLinks`, then `getConfluencePage`),
-   which the docs phase already itemised as the AC ledger (`AC-n` on
-   the context bullets, `source:` on each REQ, `Covers:` on each case
-   group). Every `Source:` line a stage writes for an AC clause carries
-   that id. In bug-fix and retest mode fetch the page that governs the
-   *feature*, reached via the parent story or the suite.
-2. The **as-built documentation** — the page written from merged code
-   (ExpoPlatform: space `FRON` for the front end, `DS` for the search
-   service). It is rarely linked from the ticket; the reference file
-   lists the four ways to find it. **This is not optional.** A brief
-   says what should exist; only the as-built doc says what deliberately
-   does not, and that is the document that stops a false defect. No such
-   page → record the row as `NONE FOUND` and flag it in the run report.
-3. The **implementing sub-task's acceptance criteria**, from the PR /
-   branch derivation below.
-4. The **ticket under test** itself — for a Bug, its reproduction steps
-   and stated expected result.
-
-Show the register in chat (one line per source) before dispatching
-stage 5, and pass it to every stage. `task-context` (stage 1) does this
-for the docs phase, but stage 1 does **not** run in retest or bug-fix
-mode — which is why this step lives here and runs unconditionally.
+**Build the source register — REQUIRED, in every mode**
+(`../qa-pipeline/references/sources-of-record.md` §1–2: kinds,
+precedence, table, how to find the as-built doc). Fetch each governing
+document once and write `<KEY>-sources.md`: (1) the **acceptance
+criteria** page — the docs phase's AC ledger, whose `AC-n` every
+`Source:` line carries (bug-fix / retest: the page governing the
+*feature*); (2) the **as-built documentation** — **not optional**: only
+it says what deliberately does not exist, which is what stops a false
+defect; none → a `NONE FOUND` row, flagged in the run report; (3) the
+implementing sub-task's AC; (4) the ticket under test (a Bug: its
+repro and stated expected result). **Save each body verbatim, fenced,
+to `r<N>/sources/`, then run `source_tools.py drift <STORY>`** (§8–§9):
+`STALE` criteria and `NEW MATERIAL` go under `## Changed since the docs
+phase` in the register and into the retest-scope confirmation or the
+pre-stage-5 line; stages 6–8 treat the re-fetched text as governing.
+Show the register (one line per source + the drift result) before stage
+5 and pass it to every stage — stage 1 does not run in retest or
+bug-fix mode, which is why this step lives here and runs unconditionally.
 
 **Same-session shortcut:** if `<STORY>-test-cases.md` is already in
 the run folder, skip only the Jira sub-task lookup below — still
@@ -267,9 +258,10 @@ Cowork), run stages 5–7 each as a SEPARATE subagent so a multi-PR
 story does not exhaust the orchestrator's context:
 
 - Give the subagent the stage's SKILL.md path, the input file paths,
-  and the run folder. It follows the SKILL.md in full, writes
-  the stage report, and returns only a short summary (<= 10 lines:
-  counters, verdict, blockers) — never the report content.
+  and the run folder — paths, not pasted text (pasted external text is
+  fenced: `../qa-pipeline/references/untrusted-content.md`). It follows
+  the SKILL.md in full, writes the stage report, and returns only a
+  short summary (<= 10 lines: counters, verdict, blockers).
 - Resolve everything that could pause BEFORE dispatching (step 0's
   environment check). Subagents cannot ask the user — one that hits a
   missing input stops and RETURNS the blocker; the orchestrator asks,
@@ -301,11 +293,13 @@ story does not exhaust the orchestrator's context:
    absent (web-testing "Execution backends"); the report header names
    the one used. **PAUSE** (extension backend only) for browser login
    and any unknown navigation path. Produces `<STORY>-web-testing.md`
-   and, for every FAIL, `<STORY>-web-evidence.md` §n (+ screenshots in
-   `evidence/` where the backend can write them).
+   and `-web-evidence.md` §n per PASS/FAIL (+ `evidence/` screenshots).
 
-5. **qa-run-analyzer** — run automatically; writes
-   `<STORY>-run-report.md`.
+5. **Evidence audit, then qa-run-analyzer.** The audit: a FRESH
+   subagent, `references/evidence-audit.md` → "Brief" + file paths only;
+   writes `<STORY>-evidence-audit.md`; a PASS it does not rate
+   SUFFICIENT is not recorded at step 6 and is must-walk at stage 9.
+   Then the analyzer writes `<STORY>-run-report.md`.
 6. **Publish in two waves — only the first happens now.** Formats:
    **`references/results-comment-template.md`**; the reasoning and the
    closing checklist: **`references/wave1-and-verification.md`**.
@@ -332,7 +326,8 @@ story does not exhaust the orchestrator's context:
      `reconcile_counts.py <STORY>` (self-test first) and compare with
      each report's Scope/Statistics; any disagreement is fixed in the
      report BEFORE the preview — wrong numbers must not reach Jira, the
-     suite or the human summary.
+     suite or the human summary. Same gate: `source_tools.py quotes
+     <STORY>` (`sources-of-record.md` §8).
    - **Publication gate on the drafted comment BEFORE showing it**
      (`../qa-pipeline/references/sources-of-record.md` § 7): every line
      a reader would take as "this is broken" carries its register row
@@ -349,10 +344,13 @@ story does not exhaust the orchestrator's context:
      name the release owner to ask — `test-runs.md` → `releaseId`),
      evidence links per verdict where a URL exists, roster count
      (= the step-0 scope count, or say why not), rows per verdict, rows
-     left `not_run` for the human round, and — narrow exception only —
+     left `not_run` for the human round, the rows **held back by the
+     evidence audit** (by case), and — narrow exception only —
      each `fail` **by case** (recording a `fail` files the Jira defect
      there and then). (b) "Post the status line?" — show the comment
-     verbatim and its ticket. A yes to (a) never implies (b).
+     verbatim and its ticket. A yes to (a) never implies (b). Each
+     question is one write plan — `<STORY>-run-plan.json`,
+     `<STORY>-status-plan.json` (`../qa-pipeline/references/write-plans.md`).
    - **After the yes to (a), in this order:** (1) `create_test_run` on the
      in-scope suite case ids; (2) `record_case_result` per row, `source:
      machine`, exactly per the `test-runs.md` mapping — FAIL / PARTIAL
@@ -391,7 +389,8 @@ story does not exhaust the orchestrator's context:
      dedup-searches and creates routed Jira bugs. **Default path:**
      draft per **`references/bug-report-template.md`**, search Jira for
      duplicates, show every draft, `createJiraIssue` only after an
-     explicit yes per bug. Never file silently.
+     explicit yes per bug. Never file silently. Drafts pass `quotes
+     --file`; the yes'd ones form `<STORY>-bugs-plan.json`, confirmed once.
 
 8. **Close the loop — hand the story back (wave 2, stage 10).** Never
    transition or reassign silently — show and confirm first. **Never
@@ -430,7 +429,8 @@ story does not exhaust the orchestrator's context:
      authorisation first. Never an event with real client data; never
      a guessed event. The host passed `ALLOWED_HOSTS` at step 0; the
      event authorisation is the second, separate gate.
-   - Feed it this run's verdict files and the step-6 run id. Outputs
+   - Feed it this run's verdict files, `<STORY>-evidence-audit.md` and
+     the step-6 run id. Outputs
      `<STORY>-walk-plan.md`, `-testdata.json`, `-testdata-notes.md`
      (`-runsheet.xlsx` only on request) — **live throwaway credentials,
      under `$EP_QA_HOME/runs/`, never in Jira**. Report counts: cards

@@ -109,7 +109,7 @@ h3. Source
 AC-<n> · Register row <#> — <document>, <section> · REQ-N
 TC-REQ-N.M (<STORY>-test-cases.md) · its Exp: block: <verbatim>
 Stage: api-testing | web-testing · Status: FAIL / FAIL CONFIRMED
-Evidence: <STORY>-web-evidence.md §<n> (web) / the request + response in <STORY>-api-testing.md (api)
+Evidence: <STORY>-web-evidence.md §<n> (web) / <STORY>-api-evidence.md §<n> (api)
 Code-review finding (if any): <file, line, one-line finding>
 ```
 

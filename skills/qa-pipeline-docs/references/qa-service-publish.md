@@ -251,7 +251,16 @@ requirements" / "Import docs" (`start_collect_requirements`,
 merge a fresh extraction into the register by stableId, and since the
 extractor mints its own ids they may duplicate rather than enrich —
 and the pipeline never deletes (Preconditions). Test on a throwaway suite before ever pointing
-them at a real one.
+them at a real one. **`start_import_docs` stays forbidden on a real
+suite, and not only for duplicates** (0.47.0, from reading the service's
+code):
+- it REPLACES the content by deleting and re-inserting every
+  requirement row, which cascade-deletes their approved versions,
+  reviews and impact notices;
+- it can rewrite the suite's prefix from the extraction, and nothing
+  checks that prefix for uniqueness;
+- its tool description mentions neither
+  (`docs/reviews/QA-SERVICE-CODE-ANALYSIS-2026-09-30.md` §4.1-E).
 
 ## Suite selection — append by default
 
@@ -487,9 +496,19 @@ short, inside the same step-6 confirmation:
   in-scope suite case ids) — then `record_case_result` per case using
   the mapping table, `source: machine`. **A `fail` files a Jira defect
   at record time**, so FAIL / PARTIAL rows stay `not_run` until stage 10
-  (narrow exception: runtime-confirmed + evidenced + blocking).
+  (narrow exception: runtime-confirmed + evidenced — rated SUFFICIENT by
+  the step-5 evidence audit — + blocking).
 - The run is left `running` when any row is `not_run`; stage 10 records
   the human pass into the same run and closes it.
+- **A case's `implemented` status, a link with `resolved: true`, and
+  `product_coverage.verified` are the service's claims, not evidence.**
+  In the service's code, "verified" means the linked FILE exists:
+  - the test name is not checked;
+  - a link pinned to an unmerged PR counts;
+  - a red test counts.
+
+  No stage cites them as proof that behaviour works (§4.1-D of the code
+  analysis above).
 - Do NOT overwrite the lifecycle `status` (e.g. `implemented`) with a
   run result; the only status the pipeline ever changes after creation
   is `na` for a superseded case (docs phase).

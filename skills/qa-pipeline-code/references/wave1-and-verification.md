@@ -20,8 +20,9 @@ tentative does not make readers treat it tentatively; withholding
 it does.)
 
 The exception, and it is narrow: a finding may publish in wave 1 only if
-ALL of: confirmed at RUNTIME (not a code read); evidence attached; and it
-blocks the manual round from proceeding. A code-read FAIL never qualifies.
+ALL of: confirmed at RUNTIME (not a code read); evidence attached, and
+rated SUFFICIENT by the step-5 evidence audit (0.47.0); and it blocks
+the manual round from proceeding. A code-read FAIL never qualifies.
 
 ## Why no archive comments
 
@@ -51,12 +52,22 @@ covers what they actually did. Verify the final state now:
 - **Write-back landed:** connector present → `get_test_run` on the
   run step 6 created: roster count == the step-0 scope count, and
   the `progress` partition matches the stage reports under the
-  `test-runs.md` mapping (`pass` = PASS + FAIL REJECTED, `blocked`,
-  `skipped` = NOT EXECUTED + NOT-TESTABLE + SPEC-DEFECT,
-  `known_defect` = keyed FAIL CONFIRMED, `not_run` = the FAIL /
-  PARTIAL rows the human will walk). Then
+  `test-runs.md` mapping (`pass` = PASS + FAIL REJECTED **minus the
+  rows the evidence audit held back**, `blocked`, `skipped` = NOT
+  EXECUTED + NOT-TESTABLE + SPEC-DEFECT, `known_defect` = keyed FAIL
+  CONFIRMED the audit rated SUFFICIENT, `not_run` = the FAIL / PARTIAL
+  rows the human will walk + the held-back rows + any `BLOCKED
+  (quota)` rows). **A held-back or quota row showing as `not_run` is
+  correct, not a mismatch. Never "fix" it by recording it.** Then
   `executed_coverage(suiteId)`: `neverExecuted` fell by the recorded
-  count. A mismatch is a count-gate ❌ — fix it now. Connector absent
+  count. A mismatch is a count-gate ❌ — fix it now.
+- **Evidence audit honoured** (0.47.0): no row the audit held back
+  reached the run as `pass`, no narrow-exception `fail` lacks a
+  SUFFICIENT rating, and every held-back row has a walk card in
+  `<KEY>-walk-plan.md`. The analyzer cannot check this at step 5,
+  because recording and the plan happen after it; this is where it is
+  checked. A ❌ here is a false pass or an untested case on the
+  record. Connector absent
   → state that no durable per-case record exists beyond the Jira
   comments.
 - **Findings traceable:** every FAIL / FAIL CONFIRMED across the

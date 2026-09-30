@@ -48,7 +48,8 @@ else differs:
   per `../../qa-pipeline-docs/references/qa-service-publish.md` →
   "Bug-fix mode — the regression mini suite" — **behind its own
   REQUIRED PAUSE** (preview the suite, the requirement and each case;
-  write nothing before the yes). That is what lets step 6 open a run with a
+  write nothing before the yes; the writes are one plan,
+  `<STORY>-minisuite-plan.json` — `../../qa-pipeline/references/write-plans.md`). That is what lets step 6 open a run with a
   roster and stage 10 record the human verdicts; until 0.33.0 a
   bug-fix run left no durable record at all (EP-56998 open-items
   #13). Connector absent → PAUSE, say what is lost, continue only
@@ -110,6 +111,21 @@ web-testing in Cowork after 5–7 ran in Claude Code) unless the user
 asks to re-run. Tell the user which stages were restored complete
 vs partial vs pending before continuing.
 
+**A quota stop is a resume, not a finding (0.47.0).** A stage cut short
+by a Claude usage limit or a connector rate limit marks the rows it did
+not reach `BLOCKED (quota)` with the error text
+(`../../qa-run-analyzer/references/status-vocabulary.md`) and writes
+`Completeness: partial — quota: <error text>`. On resume, re-dispatch
+exactly those rows once the limit has reset, not the whole stage. Never
+record them on the run, never read them as an environment outage, and
+never let the step-6 preview count them as blocked cases. A stage
+killed by the limit may not have written its report at all. Then
+resume reads what exists: cases with no row in a partial report, or
+every case of a stage with no report, are the unreached rows. Say
+`quota stop inferred` once. Until 0.47.0
+such a stop surfaced as `BLOCKED — tool failed`, which read like the host
+was down.
+
 ## Retest mode (the fix came back)
 
 Two ways in, both valid: the
@@ -157,6 +173,12 @@ stage report; one of them was then failed by accident and recorded
 as an unstatused observation, and the other was never executed at
 all.) No suite or no connector → say once in the run report that
 the scope could not be reconciled against the system of record.
+**The suite diff cannot see a change to the PAGE** (a PM edits the AC
+page from "up to 10" to "up to 20", nobody touches the suite — both
+still agree). Step 0's `source_tools.py drift` can: every `STALE`
+criterion's cases are listed in `<STORY>-retest-scope.md` with an
+explicit in/out decision, in the same confirmation
+(`../../qa-pipeline/references/sources-of-record.md` §9).
 **The scope binds ALL stages including stage 9:** pr-summary runs
 on the fix branch/PR; 6–8 execute only the scoped cases;
 `qa-manual-runsheet` builds cards for the scoped cases ONLY — never

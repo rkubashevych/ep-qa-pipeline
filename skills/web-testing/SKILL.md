@@ -125,8 +125,11 @@ scripted-login path and its profile persists logins across sessions,
 which changes what "fresh session" means for a test.)
 
 The workflow below is backend-neutral — "PAUSE for login" applies to
-the extension path only. Screenshots on both backends: only as
-evidence for FAIL / FAIL CONFIRMED, never for PASS.
+the extension path only. Evidence on both backends (0.47.0): a
+`web-evidence.md §n` reading for every PASS, FAIL and FAIL CONFIRMED;
+a screenshot for every FAIL / FAIL CONFIRMED and every `[core]` PASS.
+The step-5 evidence audit re-reads them — a verdict without one is not
+recorded (`../qa-pipeline-code/references/evidence-audit.md`).
 
 ## Workflow
 
@@ -242,13 +245,25 @@ For each test case in the scope:
    checked against the per-step expectation or the case's `Exp:`
    block).
 3. **Classify** per the "Classification" section.
-4. **If FAIL or FAIL CONFIRMED** — capture evidence and write it as
-   the next `§<n>` of `<ISSUEKEY>-web-evidence.md` (screenshot path,
-   the step, what the page showed; format in
-   references/playwright-executor.md → Evidence — the same file for
-   both backends). The finding's `Evidence:` line names that section;
-   step 6 of qa-pipeline-code and the analyzer refuse a FAIL without
-   one. No screenshots for PASS, BLOCKED, FAIL REJECTED.
+4. **Record the evidence — every PASS, FAIL, FAIL CONFIRMED and FAIL
+   REJECTED**
+   (0.47.0). Write the next `§<n>` of `<ISSUEKEY>-web-evidence.md`
+   (format in references/playwright-executor.md → Evidence — the same
+   file for both backends): the URL, the role you are signed in as,
+   the step, and **the page's own text quoted** — the reading that
+   satisfies (PASS) or contradicts (FAIL) the case's expected result,
+   never a restatement of the expectation. Screenshot: every FAIL /
+   FAIL CONFIRMED and every `[core]` PASS. The Results row's Comment
+   (PASS) or the finding's `Evidence:` line (FAIL) names the section.
+   Why a PASS too: the step-5 evidence audit — a fresh reader who did
+   not run the case — decides from these whether the verdict can be
+   believed, and a PASS with nothing to read is held back from the run
+   and sent to the walk. A PASS taken on an expired session is exactly
+   the one whose reading shows a sign-in page. A FAIL REJECTED is a
+   pass claim, so it gets a reading too (the page showing the
+   behaviour working). No evidence section for BLOCKED: its `Probe:`
+   is the evidence. Structural checks: one `§n` per page lists the
+   labels and types read there.
 5. **Continue to the next case** without stopping.
 6. **Structural checks for the page:** after a page group's cases,
    run the `[UI]` structural checks belonging to that page (the

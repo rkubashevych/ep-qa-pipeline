@@ -3,6 +3,7 @@
 Requirements: <path to the requirements file>
 Notes: <carry forward any warning/unresolved-conflict note from the requirements file; omit the line if none>
 Generated: <YYYY-MM-DD>
+Skill: <the line `skill_stamp.py qa-test-cases` prints>
 
 ---
 

@@ -36,7 +36,9 @@ skills/
   qa-manual-walk/              # stage 10a — the live, card-by-card manual session in chat
   qa-manual-results/           # stage 10b — write back walk results / a completed sheet, retract wrong verdicts
   qa-run-analyzer/             # run-health check (both phases)
-  qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode
+  qa-pipeline/                 # dispatcher: reads ticket state, routes to a mode;
+                               #   references/ + scripts/ shared by every stage
+                               #   (source_tools.py, plan_hash.py, skill_stamp.py — 0.47.0)
   qa-refinement/               # pre-estimation mode: stages 1-2 + recon + questions comment + QA sizing
   qa-rc-smoke/                 # release-candidate mode: scope items on RC — code, served build, runtime smoke
   qa-pipeline-docs/            # orchestrator: stages 1, 2, 4 + publish
@@ -241,6 +243,11 @@ carried between them; the QA Service run carries the verdicts anyway.
 | What earlier rounds left open (carried risk rows, in/out rulings, `[core]` nominations) | `skills/qa-pipeline/references/open-items-ledger.md` → `<KEY>-open-items.md` |
 | Regression after a skill edit | run `fixtures/EP-0000-context.md` through the docs stages (step 4 of the recipe) |
 | Anything structural before a commit (versions, descriptions, line endings, wiring, references, vocabulary, staged artefacts) | `python3 scripts/verify_plugin.py` |
+| Evidence audit (who rates a runtime verdict's proof, what a held-back PASS becomes) | `skills/qa-pipeline-code/references/evidence-audit.md` |
+| A write landed differently from the preview; the plan-file protocol | `skills/qa-pipeline/references/write-plans.md` + `skills/qa-pipeline/scripts/plan_hash.py` |
+| Fencing other people's text (Jira, Confluence, PRs, replies) | `skills/qa-pipeline/references/untrusted-content.md` |
+| A `Clause:` that is not a quote; a page edited since the docs phase | `skills/qa-pipeline/references/sources-of-record.md` §8–§9 + `skills/qa-pipeline/scripts/source_tools.py` (`quotes`, `drift`) |
+| Which skill version wrote a report | its `Skill:` header line (`skills/qa-pipeline/scripts/skill_stamp.py`, `data-locations.md`) |
 | "Feature/toggle not visible on env X" | **deployment**, not the skill — confirm the branch is deployed to that host (feature branches ≠ master/alpha2) |
 
 ## Gotchas

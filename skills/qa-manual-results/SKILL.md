@@ -173,7 +173,20 @@ observation the stage reports labelled correctly does not reappear as a
 defect (nor as a row in a failure table, nor under a column implying a
 requirement), and a defect owned by another ticket names that key on its
 line. Retractions are held to the same standard: state what the record
-said, what was measured, and the clause the new verdict rests on.
+said, what was measured, and the clause the new verdict rests on. Then
+run `source_tools.py quotes <KEY> --file <the drafted summary> <the bug
+drafts>` (`../qa-pipeline/references/sources-of-record.md` §8): an
+`UNVERIFIED` or `TOO SHORT` clause is re-copied from the saved source
+or its line is relabelled before the preview.
+
+**One write plan covers the step-4 write-back**:
+`r<N>/<KEY>-writeback-plan.json` — bugs, verdicts, retractions, the
+summary (`../qa-pipeline/references/write-plans.md`). The step-4b
+handback is confirmed on its own, so it is its own plan,
+`r<N>/<KEY>-handback-plan.json`.
+Bug keys the first writes return are `$bug-<TC>` placeholders in the
+verdicts that link them. `make` before the preview, `check` after the
+yes, execute from the file.
 
 Show the user exactly what will be written — including **every `fail`
 about to be recorded, case by case**, because recording a `fail` on the
@@ -273,7 +286,8 @@ manual results are in:
   PARENT story (template:
   `../qa-pipeline-code/references/results-comment-template.md`) and
   the "QA done" transition from publish-config — this step is the
-  one that posts and transitions; same confirm rules as any Jira write.
+  one that posts and transitions; same confirm rules as any Jira write,
+  and the offer is `<KEY>-handback-plan.json` (story note + transition).
 - Verdict flipped to ❌ (retractions/new FAILs): offer the reassign +
   "Story note — QA failed" (same template file) instead, and make sure
   any earlier provisional story note is superseded by a comment stating

@@ -139,7 +139,8 @@ When it is a retest:
 2. The Structural checks section of `<ISSUEKEY>-test-cases.md`
    (STRUCT cases in the suite) — the structural checks. Optional.
 3. Any verdict files that already exist — `<ISSUEKEY>-code-review.md`,
-   `-api-testing.md`, `-web-testing.md` — and the pass's QA Service
+   `-api-testing.md`, `-web-testing.md`, `-evidence-audit.md` (it
+   overrides a stage report for the rows it holds back) — and the pass's QA Service
    test run when one exists. Optional; used to decide which cases are
    settled without a card and to fill each card's `machine:` key.
 4. `$EP_QA_HOME/.env.qa-agents` for host and credentials
@@ -270,7 +271,10 @@ the plan, one row in an exported sheet):
 
 1. **Must-walk (never reducible):** every case with no runtime-verified
    machine verdict — QA, FAIL claims, routed-in, unresolved BLOCKED,
-   NOT EXECUTED — plus the VERIFY spot-checks (High-risk or
+   NOT EXECUTED, and (0.47.0) every PASS, FAIL REJECTED and
+   structural PASS the evidence audit (`<ISSUEKEY>-evidence-audit.md`)
+   rated INSUFFICIENT or UNVERIFIABLE,
+   in full form, its remediation line as the backstage `why:` — plus the VERIFY spot-checks (High-risk or
    code-reading-only machine PASSes), plus the `[core]` case of every
    behavioural REQ even when machine-settled. A machine-settled clean
    PASS on a Low/Medium-risk core case enters in short form
@@ -319,7 +323,8 @@ tester singles one out — the walk names them when recording, and stage
   what would unblock it and who can provide it.
 - **ALREADY SETTLED** — an existing verdict file answers it with
   runtime-grade evidence (executed in stage 7/8 under the
-  absence-check protocol) AND the case's risk is Low/Medium. Carry the
+  absence-check protocol, and rated SUFFICIENT by the evidence audit
+  when one ran) AND the case's risk is Low/Medium. Carry the
   verdict and its source so the human skips it.
 - **VERIFY (spot-check)** — the machine has a PASS, but it is exactly
   the kind the creator's error model distrusts: a PASS on a

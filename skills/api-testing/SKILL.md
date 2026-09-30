@@ -167,7 +167,17 @@ test-cases order.
 3. Read the actual value from the response envelope (`.data`, §5) and
    compare to the expected result.
 4. Classify (below). Capture endpoint + observed field as evidence
-   (redact tokens).
+   (redact tokens) in the Results row. **Since 0.47.0, also write a
+   `§<n>` of `<ISSUEKEY>-api-evidence.md`** for every PASS, FAIL,
+   FAIL CONFIRMED, FAIL REJECTED and PARTIAL row: the method + path +
+   auth context (the role, never the token), the request body's
+   relevant keys, the HTTP status, and the response excerpt that
+   decides the verdict, quoted from `.data`. Name it in the row's
+   Comment. The step-5 evidence audit rates the row from this section
+   (`../qa-pipeline-code/references/evidence-audit.md`). It can re-issue
+   a GET only when the call needs no login step, and the audit may run
+   where there is no shell; a write can never be re-issued. The
+   section is therefore the proof that survives the run.
 
 ### Step 5 — Build the report
 Create `<ISSUEKEY>-api-testing.md` per `references/output-template.md`.

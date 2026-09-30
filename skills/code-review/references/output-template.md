@@ -3,6 +3,7 @@
 Test cases: <path to the test-cases file>
 PR: <URL>
 Completeness: <complete | partial — N of M cases not reviewed: <reason>>
+Skill: <the line `skill_stamp.py code-review` prints>
 Notes: <carry forward any warning/unresolved-conflict note from the test-cases file; omit the line if none>
 
 ## Results

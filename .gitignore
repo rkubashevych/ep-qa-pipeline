@@ -34,6 +34,17 @@ GS-*
 *-api-testing.md
 *-web-testing.md
 *-run-report.md
+# 0.47.0: api evidence, the evidence audit, approved write plans
+*-api-evidence.md
+*-evidence-audit.md
+*-plan.json
+*-plan.approved.json
+*-plan.sha256
+# saved source texts: verbatim client pages and tickets (sources-of-record.md §8)
+sources/
+confluence-[0-9]*.md
+jira-*-description.md
+jira-*-comments.md
 
 # local investigation / review working files
 *-alpha-repro.md

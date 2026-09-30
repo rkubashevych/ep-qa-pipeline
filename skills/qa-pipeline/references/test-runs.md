@@ -47,6 +47,10 @@ closed at stage 10.
   (event <id>)` (`../../qa-rc-smoke/references/rc-smoke-method.md`).
 - **`env`:** the target host label as the run used it (`alpha2`, `rc`,
   `alphanext-<n>`). Never a credential, never a full URL with a token.
+  **Always lowercase** (0.47.0). The service compares `env` exactly and
+  case-sensitively, and it is free text, so `rc`, `RC` and `Rc` would
+  be three scopes and `executed_coverage` would split silently
+  (`docs/reviews/QA-SERVICE-CODE-ANALYSIS-2026-09-30.md` §4.2 #9).
 - **`releaseId`:** when the ticket's `fixVersion` or the suite names a
   release that `list_releases` returns — a verdict is resolved per
   (case, release), so this is what makes `executed_coverage` scopable.
@@ -62,7 +66,13 @@ closed at stage 10.
 - **`principal`** (on the run and on every machine verdict):
   `ep-qa-pipeline agent (<KEY> <mode>, stage <n>)`. On human verdicts
   (stage 10): the tester's e-mail, taken from the run sheet / the user
-  — never the agent's label on a human result.
+  — never the agent's label on a human result. **Pass `principal` and
+  `source` on every `record_case_result`, always.** The service stores
+  the `principal` string as given, not the verified caller, and
+  defaults a missing `source` to `manual`. A machine verdict sent
+  without `source` is recorded as a human claim, and one sent without
+  `principal` is anonymous (qa-service `runTools.ts`,
+  `testRunStore.ts`; the code analysis above, §4.2 #3).
 - **Roster = the scope.** Pass the **catalogue ids** (the UUIDs that
   `search` / `get_suite` return) of exactly the cases step 0 put in
   scope. `create_test_run` does **not** resolve stable ids: it answers
@@ -98,11 +108,13 @@ reporter ("File the ticket FIRST, then record the `fail`", below).
 | `FAIL REJECTED` | `pass` | `FAIL REJECTED — CR finding <…> refuted: <observed>` |
 | `BLOCKED` (with `Probe:`) | `blocked` | the probe and its response |
 | `BLOCKED (unverified)` | `blocked` | `UNVERIFIED — <reason>; would verify: <…>` |
+| `BLOCKED (quota)` (0.47.0) | **none — stays `not_run`**; the stage resumes those rows after the reset (`../../qa-pipeline-code/references/run-modes.md` → "Resume mode") | — (a limit of our tooling is not a fact about the case) |
+| any runtime `PASS` / `FAIL REJECTED` / structural PASS the **evidence audit** rated INSUFFICIENT or UNVERIFIABLE (0.47.0) | **none — stays `not_run`**, and the case is must-walk in stage 9 | — (the audit file names the reason; `../../qa-pipeline-code/references/evidence-audit.md`) |
 | `NOT EXECUTED`, `NOT-TESTABLE`, `NOT-TESTABLE (instrumentation)` | `skipped` | `NOT EXECUTED — <environmental reason>` / `NOT-TESTABLE — <correct endpoint>` (a routed case is not skipped — it carries the executing stage's verdict) |
 | `SPEC-DEFECT` | `skipped` | `SPEC-DEFECT — case says <X>, source says <Y>` **plus** the `discrepancy:` line on the case (`qa-service-publish.md`). **Never `known_defect`** — that asserts a product defect exists; the defect is in the case text |
 | `FAIL CONFIRMED` whose defect already has a Jira key (the bug this retest re-tests, or a key named in the case) | `known_defect` | `FAIL CONFIRMED — <key>: <observed>`. Files nothing; the key is already open |
 | `FAIL`, `FAIL CONFIRMED` with no key, `PARTIAL`, code-review `FAIL` runtime could not reach | **none — the row stays `not_run` in wave 1** | — (see next section) |
-| narrow wave-1 exception: runtime-confirmed + evidenced + **blocking the manual round** | `fail` | where / expected / actual + `Source:` + `Clause:`. Named case by case in the confirmation preview: recording it **is** filing the bug |
+| narrow wave-1 exception: runtime-confirmed + evidenced (**the evidence audit rated it SUFFICIENT**, 0.47.0) + **blocking the manual round** | `fail` | where / expected / actual + `Source:` + `Clause:`. Named case by case in the confirmation preview: recording it **is** filing the bug |
 | `OBSERVATION`, `OBSERVATION (no source checked)` | none on its own (a case that passed is `pass`; the observation goes in its note, labelled) | `… OBSERVATION (no source checked): <question form>` |
 | `QA`, `N/A`, `RE-ROUTE [UI]` (CR) | none — input statuses; the executing stage's verdict is recorded | — |
 | human `PASS` / `FAIL` / `BLOCKED` / `SKIPPED` (stage 10) | `pass` / `fail` / `blocked` / `skipped`, **`source: manual`** | the tester's Notes verbatim, bug key if any |

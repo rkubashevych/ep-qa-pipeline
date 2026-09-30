@@ -33,7 +33,7 @@ The names of the Claude in Chrome extension tools:
 | `navigate` | Go to a URL |
 | `find` | Find an element by a natural-language description |
 | `read_page` | Page structure (accessibility tree) |
-| `computer` action: `screenshot` | Screenshot (only for FAIL evidence) |
+| `computer` action: `screenshot` | Screenshot (FAIL evidence, `[core]` PASS evidence) |
 | `computer` action: `left_click` | Click by coordinates or ref |
 | `computer` action: `type` | Enter text |
 | `computer` action: `key` | Press a key |
@@ -197,10 +197,13 @@ cannot be verified.
 
 ## Screenshots
 
-- Take a screenshot only for FAIL and FAIL CONFIRMED —
-  as evidence of the discrepancy.
-- Do not take screenshots for PASS, BLOCKED, FAIL REJECTED,
-  OBSERVATION.
+- Take a screenshot for FAIL and FAIL CONFIRMED (the discrepancy)
+  and, since 0.47.0, for every `[core]` PASS — the step-5 evidence
+  audit re-opens them (`../../qa-pipeline-code/references/evidence-audit.md`).
+  Every PASS, `[core]` or not, also gets its `web-evidence.md §n`
+  reading (SKILL.md step 4).
+- Do not take screenshots for BLOCKED, FAIL REJECTED, OBSERVATION, or
+  a non-core PASS.
 - Do not show screenshots to the user in the chat — they are
   only for the agent's internal analysis.
 

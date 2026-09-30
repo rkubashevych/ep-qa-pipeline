@@ -8,9 +8,11 @@
 Code review: <path to the code-review file>
 Test cases: <path to the test-cases file>
 Environment: <ADMIN_BASE_URL> · event <EVENT_ID> · frontend host <FE host, if used>
+Evidence: <ISSUEKEY>-api-evidence.md (<N> sections — one per PASS / FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL row)
 Completeness: <complete | partial — N of M in-scope cases not executed: <reason>>
 Notes: <carry forward any warning/unresolved-conflict note from the code-review or test-cases file; omit if none>
 Date: <YYYY-MM-DD>
+Skill: <the line `skill_stamp.py api-testing` prints>
 
 ## Scope
 
@@ -51,7 +53,7 @@ Date: <YYYY-MM-DD>
 | RISK-CR-2 | <risk name — no covering case> | code-review risk 2 | FAIL CONFIRMED | POST /api/v1/... | risk confirmed at runtime — see Findings |
 
 ## Findings
-> For every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED / NOT-TESTABLE. PASS needs no entry.
+> For every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED / NOT-TESTABLE. PASS needs no entry — its proof is its `api-evidence §n`, named in the row's Comment.
 
 ### FAIL: TC-REQ-24.2 — <scenario name>
 - **Arrived as:** QA
@@ -61,6 +63,7 @@ Date: <YYYY-MM-DD>
 - **Request:** <params / body — tokens redacted>
 - **Expected:** <expected field/value>
 - **Actual:** <observed field/value from .data>
+- **Evidence:** <ISSUEKEY>-api-evidence.md §<n>
 
 ### FAIL CONFIRMED: RISK-CR-2 — <risk name>
 - **Arrived as:** code-review risk 2

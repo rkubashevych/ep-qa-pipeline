@@ -2,6 +2,7 @@
 
 Context: <path to the context file>
 Generated: <YYYY-MM-DD>
+Skill: <the line `skill_stamp.py requirements-grooming` prints>
 
 ## Goal
 <short expected outcome of the task — from the context file, unchanged>

@@ -31,7 +31,8 @@ runs/<ISSUEKEY>/
   docs/                         stages 1–4 (re-run = overwrite in place):
     <ISSUEKEY>-context.md · -requirements.md · -recon.md ·
     -open-questions.md · -answers.md · -sizing.md (qa-refinement, 0.45.0) ·
-    -test-cases.md · -run-report.md
+    -test-cases.md · -run-report.md · sources/ ·
+    -publish-plan.json · -questions-plan.json (0.47.0)
     (-checklist.md on tickets run before 0.40.0 — read-only)
   r1/  r2/  r3/ …               one folder per code-phase PASS:
     <ISSUEKEY>-pr-summary.md · -sources.md · -code-review.md ·
@@ -39,13 +40,36 @@ runs/<ISSUEKEY>/
     -run-report.md · -retest-scope.md · -human-summary.md ·
     -walk-plan.md · -walk-state.json · -walk-results.md ·
     -manual-results.md · -testdata.json · -testdata-notes.md ·
-    -runsheet.xlsx · build_runsheet_<ISSUEKEY>.py
+    -runsheet.xlsx · build_runsheet_<ISSUEKEY>.py ·
+    -api-evidence.md · -evidence-audit.md · -<step>-plan.json · sources/ (0.47.0)
   <RC-KEY>-rc-smoke.md          qa-rc-smoke (0.46.0), at the folder root of
                                 the RC regression ticket — no docs/, no r<N>/;
-                                a re-smoke appends a dated section
+                                a re-smoke appends a dated section;
+                                <RC-KEY>-rc-comment-plan.json beside it (0.47.0)
   (FAIL screenshots: $EP_QA_HOME/evidence/<ISSUEKEY>-r<N>-<TC>-fail.png —
    Playwright's --output-dir is one flat folder, so they sit beside runs/)
 ```
+
+**Added in 0.47.0**, in the same folders:
+- `sources/` holds the verbatim, fenced source texts
+  (`docs/sources/` from task-context, `r<N>/sources/` from the code
+  phase's register; `sources-of-record.md` §8).
+- `<ISSUEKEY>-api-evidence.md` holds the PASS and FAIL request/response
+  excerpts from api-testing.
+- `<ISSUEKEY>-evidence-audit.md` is the step-5 audit
+  (`../../qa-pipeline-code/references/evidence-audit.md`).
+- `<ISSUEKEY>-<step>-plan.json` (+ `.approved.json`, `.sha256`) is the
+  approved write plan of each confirmation (`write-plans.md`).
+
+**Every stage report names the skill that wrote it.** The header
+carries `Skill: <name> <plugin version> · sha <7>`, printed by
+`python3 <plugin>/skills/qa-pipeline/scripts/skill_stamp.py <name>`.
+The sha covers what the skill runs with: its SKILL.md, `references/`
+and `scripts/`, plus the shared `qa-pipeline` references and scripts and
+the status vocabulary. A local edit anywhere in that set that was never
+released shows as a different sha under the same version. No shell → write `Skill: <name> <version from plugin.json>`
+without the sha. The analyzer reads these lines to tie a misbehaving
+stage to the rules it ran with.
 
 **File names do not change** — they keep the `<ISSUEKEY>-<stage>.md`
 shape so every script, regex and archive label keeps working. Only the

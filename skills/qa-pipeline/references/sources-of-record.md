@@ -54,6 +54,11 @@ one row per source, with its id, what it governs, and the fetch date.
 | 4 | Ticket under test | EP-56133 | the reproduction and its expected result | 2026-09-07 |
 ```
 
+**Finding the acceptance-criteria page:** `getJiraIssueRemoteIssueLinks`
+on the story, then `getConfluencePage` on the Confluence link (in bug-fix
+and retest mode, the page governing the *feature*, reached via the
+parent story or the suite).
+
 **Finding the as-built document** — it is rarely linked from the ticket,
 which is why it kept being missed. In order:
 
@@ -71,7 +76,10 @@ If no as-built document exists, record that as a row with
 finding about the feature's documentation; silence is not.
 
 **One fetch per distinct source per run**, not per case or per finding —
-in practice three to five fetches. Cache them in the register.
+in practice three to five fetches. Cache them in the register, **and
+save each fetched body verbatim** to `r<N>/sources/<label>.md`, fenced
+(§8). The register row says what the source is; the saved file is what
+every `Clause:` of this pass is checked against.
 
 ## 3. The gate
 
@@ -90,6 +98,11 @@ For each candidate defect, record two lines:
 Source: <register row #> — <document>, <section> · AC-<n>
 Clause: "<the sentence, quoted verbatim>"
 ```
+
+**Verbatim means copied from the saved source file, not retyped from
+memory.** Since 0.47.0 the quote is checked mechanically (§8). A
+paraphrase inside quotation marks is a misquotation, whichever words it
+changes.
 
 The trailing `· AC-<n>` is the ledger id of the acceptance criterion the
 clause belongs to (task-context SKILL.md → "The AC ledger"); it is what
@@ -197,3 +210,134 @@ unsourced defect claim, contradicted by the contract, one confirmation
 away from a developer's ticket. The tester caught it by asking which
 document required the rendered count to equal the match count. Nothing
 did. One sourced row survived the check; four did not.
+
+## 8. Saved source text and the quote check (0.47.0)
+
+§3 required a verbatim clause. Until 0.47.0 nothing checked that the
+words inside the quotation marks were on the page:
+- the analyzer raised 🔴 on a FAIL with **no** `Clause:` line;
+- a FAIL whose clause was a paraphrase passed every check.
+
+A bug quoting "Exhibitors can add up to 10 favourites" against a page
+that says "*Visitors* can add up to 10 favourite exhibitors" loses its
+credibility at the first reply. The idea is borrowed from qa-service
+(`lib/server/requirementSources.ts`): the service looks for each
+recorded quote in the text it actually fetched and marks the quote
+unverified when it is not there.
+
+**Saved sources.** Every source fetched as a source of record is saved
+**verbatim, as returned** (no tidying, no summarising) to one file per
+source, fenced (`untrusted-content.md`):
+
+| Folder | Written by | Files |
+|---|---|---|
+| `runs/<KEY>/docs/sources/` | `task-context` | `confluence-<pageId>.md` (the AC page), `jira-<KEY>-description.md`, `jira-<KEY>-comments.md`, `jira-<SUBKEY>-description.md` per sub-task it read |
+| `runs/<KEY>/r<N>/sources/` | `qa-pipeline-code` step 0 | one file per register row, same naming (`confluence-<pageId>.md` for the brief and the as-built doc, `jira-<SUBKEY>-description.md` for the implementing sub-task) — **plus, always, the story's `jira-<STORY>-description.md` and `jira-<STORY>-comments.md`** (one `getJiraIssue` call), so the `JD-n` / `CM-n` ledger items are re-checked too, not only the AC page |
+
+Write the body with the Write tool, then fence it:
+
+```
+python3 <plugin>/skills/qa-pipeline/scripts/source_tools.py fence \
+  --label 'confluence:<id> "<title>" · fetched <date>' <raw> --out <file>
+```
+
+With no shell, write the fence lines by hand. The same file name
+across folders is what lets §9 compare them.
+
+**The check.**
+
+```
+python3 <plugin>/skills/qa-pipeline/scripts/source_tools.py quotes <KEY> [--round r<N>] [--file <draft>]
+```
+
+- It reads every `Clause: "…"` in the round's reports, or in the drafts
+  named with `--file`.
+- It looks for each clause in the saved sources, ignoring case,
+  whitespace, curly quotes, dashes and markup.
+- An ellipsis (`…`) splits a quote into parts; each part must be found,
+  in order.
+
+It prints one of three results:
+
+| Result | Meaning | What to do |
+|---|---|---|
+| `OK` | the words are in a saved source | — |
+| `UNVERIFIED` | not found | Re-copy the clause from the saved file. If the page genuinely does not say it, the finding has no clause: `OBSERVATION (no source checked)` (§4). Never publish it as a quote. |
+| `TOO SHORT` | a quote (or an ellipsis part) of fewer than 4 words — "the organiser" verifies against almost any page | Quote the whole sentence |
+
+**Where it runs:**
+- the step-6 count gate of `qa-pipeline-code` (the round's reports);
+- the bug drafts before the step-7 offer (`--file`);
+- the stage-10 human summary and bug drafts before the write-back
+  preview (`--file`);
+- the analyzer's §7.
+
+A published line with an `UNVERIFIED` clause is a 🔴.
+
+**No shell** (a Cowork session without one): do the same comparison by
+reading. Open the saved source, find each clause, and write `quote check
+by hand — N clauses` in the report. The rule holds; only the instrument
+changes.
+
+**Pre-0.47 rounds** have no `sources/` folder. The check falls back to
+the context file's verbatim AC ledger and says how many files it read.
+Nothing to read at all means exit 2, and the check is reported as not
+run, not passed.
+
+## 9. Drift — the source changed since the docs phase (0.47.0)
+
+The retest already diffs the **suite** against the docs-phase file
+(`../../qa-pipeline-code/references/run-modes.md`). That catches a case a PM
+added in QA Service. It cannot catch a change to the **page**:
+- a PM edits the AC page from "up to 10" to "up to 20";
+- nobody touches the suite;
+- suite and file still agree, and the pass tests the old rule.
+
+The idea is borrowed from qa-service (`lib/server/sourceWatch.ts`): a
+fingerprint of the fetched text, never of its `updated` timestamp.
+Jira's timestamp moves on every comment, including our own.
+
+```
+python3 <plugin>/skills/qa-pipeline/scripts/source_tools.py drift <KEY> [--round r<N>]
+```
+
+It compares each `r<N>/sources/` file with the docs-phase file of the
+same name, then re-finds each `AC-n` / `SB-n` / `JD-n` / `CM-n` ledger
+item's verbatim text in the re-fetched sources. Its results:
+- `unchanged` / `CHANGED` / `NEW SOURCE` / `NOT RE-FETCHED` per source
+  file;
+- **`STALE AC-n`**: the criterion's wording is gone from the re-fetched
+  page. Every REQ whose `source:` names it, and every case covering it,
+  may now test a rule the page no longer states;
+- `NEW MATERIAL`: up to 8 long lines (60 or more characters) the
+  re-fetched page has and the old one did not. This is often a new
+  criterion that no REQ carries yet;
+- `not re-checked`: a ledger item whose source file was not re-fetched
+  this pass. It is said, not failed.
+- exit 2, `NOT CHECKED`: no docs-phase file was re-fetched under the
+  same name. Check the file names; this is never a clean result. With
+  no shell, compare the saved pages by reading and say so, as for
+  quotes.
+- `not anchored`: a ledger item whose text was never found verbatim in
+  the docs-phase sources (stage 1 paraphrased it). Drift cannot watch
+  it. Say so once.
+
+**What happens next** (`qa-pipeline-code` step 0):
+- A `STALE` or `NEW MATERIAL` line goes into `<KEY>-sources.md` under
+  `## Changed since the docs phase`, and into the chat line that shows
+  the register.
+- **Retest:** each stale criterion's cases are listed in
+  `<KEY>-retest-scope.md` with an explicit in/out decision, in the same
+  confirmation as the rest of the scope. New material is a
+  `[Input]` ledger row (`open-items-ledger.md`) until someone decides
+  whether it is a requirement.
+- **First code-phase run:** the same lines are shown before stage 5.
+  Stages 6–8 treat the **re-fetched** text as governing. A case whose
+  expected result the new text contradicts is `SPEC-DEFECT`, never a
+  FAIL against the build.
+
+**Limits, said once.** The check sees only what was saved: the AC page,
+the description, the comments and the sub-task descriptions. It does not
+see an attachment or a page nobody linked. A reworded criterion reads
+`STALE` even when its meaning did not change, so a human decides; the
+script only makes sure someone looks.

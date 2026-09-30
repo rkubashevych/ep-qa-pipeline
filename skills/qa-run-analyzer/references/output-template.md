@@ -3,6 +3,7 @@
 Phase analyzed: <docs / code / both>
 Files reviewed: <list>
 Generated: <YYYY-MM-DD>
+Skill: <the line `skill_stamp.py qa-run-analyzer` prints>
 
 ## Health at a glance
 

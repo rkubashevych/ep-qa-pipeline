@@ -8,10 +8,11 @@ Code review: <path to the code-review file>
 Test cases: <path to the test-cases file>
 Host: <the base URL / test host actually used>
 Backend: <Playwright MCP | Chrome extension (fallback: <reason>)>
-Evidence: <ISSUEKEY>-web-evidence.md (<N> sections) · omit if no FAIL
+Evidence: <ISSUEKEY>-web-evidence.md (<N> sections — every PASS, FAIL and FAIL CONFIRMED has one; screenshots for FAILs and `[core]` PASSes)
 Completeness: <complete | partial — N of M in-scope cases not executed: <reason>>
 Notes: <carry forward any warning/unresolved-conflict note from the code-review or test-cases file; omit the line if none>
 Date: <YYYY-MM-DD>
+Skill: <the line `skill_stamp.py web-testing` prints>
 
 ## Scope
 
@@ -49,12 +50,12 @@ Date: <YYYY-MM-DD>
 
 | TC | Name | Arrived as | Status | Comment |
 |----|------|--------|--------|---------|
-| TC-REQ-1.1 | <scenario name> | QA | PASS | — |
+| TC-REQ-1.1 | <scenario name> | QA | PASS | web-evidence §1 |
 | TC-REQ-1.2 | <scenario name> | QA | FAIL | Step 3: expected "X", actual "Y" |
 | TC-REQ-2.1 | <scenario name> | FAIL | FAIL CONFIRMED | UI confirms the bug |
 | TC-REQ-2.2 | <scenario name> | FAIL | FAIL REJECTED | UI works correctly |
 | TC-REQ-3.1 | <scenario name> | QA | BLOCKED | Element not found |
-| TC-REQ-4.1 | <scenario name> | QA | PASS | OBSERVATION: <what was noticed> |
+| TC-REQ-4.1 | <scenario name> | QA | PASS | web-evidence §5 · OBSERVATION: <what was noticed> |
 
 ## Findings
 
@@ -104,9 +105,9 @@ Section rules:
   (`../../qa-pipeline/references/sources-of-record.md`) and an
   `Evidence:` line naming its `<ISSUEKEY>-web-evidence.md` section —
   both backends. No clause in any source → `OBSERVATION (no source checked)`.
-- Comment column: for PASS — a dash or OBSERVATION. For FAIL — a short description. For BLOCKED — the reason. For FAIL CONFIRMED/REJECTED — a short description.
+- Comment column: for PASS — its `web-evidence §n` (0.47.0: a PASS with no reading is held back by the step-5 evidence audit), plus any OBSERVATION. For FAIL — a short description. For BLOCKED — the reason. For FAIL CONFIRMED/REJECTED — a short description.
 - Findings — for FAIL, FAIL CONFIRMED, FAIL REJECTED and BLOCKED.
-- PASS needs no explanation.
+- PASS needs no Findings entry — its proof is the `web-evidence §n` reading the Comment names.
 - FAIL REJECTED also has a finding — so it is clear what exactly was refuted.
 - If there are no findings — the section is not created.
 

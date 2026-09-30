@@ -5,6 +5,7 @@ Automated record read from: <QA Service run <id> / verdict files in runs/<KEY>/r
 QA Service run: <id> — <status after this stage: closed / running (why)> · recorded <N> manual verdicts + <N> agent-run witnessed verdicts (<N> supersede a machine verdict)
 Case corrections applied to the suite: <N> (table below) · Observations carried as questions: <N>
 Date: <YYYY-MM-DD>
+Skill: <the line `skill_stamp.py qa-manual-results` prints>
 
 ## Summary
 

@@ -35,6 +35,24 @@ These skills were adapted for ExpoPlatform's stack:
 
 > **Stage 10b = `qa-manual-results`.** The write-back: from the walk results (or a filled run sheet / TC-Result-Notes table), this stage joins the results **by TC id, never row position**, reconciles them against the machine verdicts on the pass's **QA Service test run**, shows every `fail` about to be recorded, and on the tester's yes records the human verdicts into the same run (`source: manual`, the tester as principal; agent-run cards stay `source: machine`; a re-record supersedes and keeps history — that is the **retraction**), finishes the run (the service auto-completes a fully recorded run; `close_test_run` is only for rows deliberately left unrun), applies case corrections to the suite, and posts the first human-facing summary. A retraction of a verdict that reached a Jira comment is also posted on the ticket where it was published. Until stage 10b runs, the machine verdicts are provisional and the run stays open. See `skills/qa-pipeline/references/test-runs.md`.
 
+> **Honesty devices (0.47.0), borrowed from the QA Service's own code.**
+> Each is a script with a `--selftest`, plus one rule doc:
+> - **Evidence audit.** A fresh subagent that did not run the tests
+>   re-reads every runtime verdict's proof before anything is recorded.
+>   A PASS it cannot believe goes to the walk, not the run
+>   (`skills/qa-pipeline-code/references/evidence-audit.md`).
+> - **Write plans.** Every confirmed write runs from a plan file whose
+>   hash the preview showed and `check` re-verifies
+>   (`skills/qa-pipeline/scripts/plan_hash.py`, `skills/qa-pipeline/references/write-plans.md`).
+> - **Fenced sources.** Other people's text is marked as data
+>   (`skills/qa-pipeline/references/untrusted-content.md`).
+> - **Saved sources.** Every fetched source is kept verbatim, so each
+>   `Clause:` is checked against the page it quotes, and a page edited
+>   since the docs phase is caught (`skills/qa-pipeline/scripts/source_tools.py`,
+>   `skills/qa-pipeline/references/sources-of-record.md` §8–§9).
+> - **Also:** grooming finding codes, a `Skill:` version stamp on every
+>   report, and a `BLOCKED (quota)` class for our own tooling limits.
+
 > **Memory across rounds.** `<KEY>-open-items.md` (`skills/qa-pipeline/references/open-items-ledger.md`) carries what a round left undecided — risk rows, in/out rulings, findings with no case and no key — into the next round's scope confirmation; the analyzer writes it, stage 10 closes rows, and an item carried two rounds with no decision is a 🔴.
 
 > **Before estimation = `qa-refinement`.** It runs stages 1–2 and recon (code first, then the test environment with you signed in), posts ONE questions-only comment to the Story on your yes, and writes a QA sizing note (`<KEY>-sizing.md`: scope matrix, rough case count, effort range, blockers) for estimation and decomposition. It writes no test cases and publishes nothing. It shares `runs/<KEY>/docs/` with the docs phase, which runs once the answers are in and can adopt a QA sub-task someone created by hand instead of making a second one.
@@ -51,7 +69,8 @@ These skills were adapted for ExpoPlatform's stack:
 5. **pr-summary** — reads the Bitbucket PR (or branch) and builds a navigation map of the changes for the reviewer.
 6. **code-review** — verifies each test case against the PR code and produces a compact pass/fail table with findings for failures.
 7. **api-testing** — executes the `[API]` cases (code-review QA/FAIL items) against the running REST API via curl using `.env` credentials; covers admin REST, legacy admin-panel, and exhibitor-token (frontend) cases. Read-only by default; any write snapshots-and-reverts or uses a throwaway entity. Pauses if `.env` / a per-event frontend host is missing.
-8. **web-testing** — executes the `[UI]` QA items and any failed code-review items in a browser it drives itself (Playwright MCP by default, the Chrome extension as fallback), confirming bugs in the UI, and writes a detailed report.
+8. **web-testing** — executes the `[UI]` QA items and any failed code-review items in a browser it drives itself (Playwright MCP by default, the Chrome extension as fallback), confirming bugs in the UI, and writes a detailed report with a recorded reading for every PASS and FAIL.
+   Then the **evidence audit** (a fresh subagent) rates every runtime verdict's proof before the run is recorded.
 9. **qa-manual-runsheet** — provisions fixture data on a throwaway event and builds the walk plan — plain-language cards grouped by login, rigour kept backstage — so the human tests only what is left, in words a person can act on.
 10. **qa-manual-walk** → **qa-manual-results** — the agent walks the tester through the plan one card at a time, running the API cards itself and collecting verdicts in the tester's own words; then the write-back joins by TC id and corrects the published record with explicit retractions where the human proved a verdict wrong.
 
@@ -62,7 +81,7 @@ The team-specific choices to confirm before a first run (the per-skill `setup-gu
 - **Confluence access** — Acceptance Criteria live on Confluence pages linked from the ticket, so the Atlassian connector must have **Confluence enabled**, not just Jira. (No custom-field ID needed — stage 1 reads the linked Confluence page directly.)
 - **Bitbucket API token** — set `BB_EMAIL` (your Atlassian email) and `BB_API_TOKEN`. App passwords no longer work (disabled June 9, 2026). A `read:repository`-scoped token (like the existing `bitbucket-git-cli`) is enough for **branch mode** (give the skill the branch = issue key, e.g. `EP-54610`). **PR-URL mode** also needs `read:pullrequest:bitbucket` — add it via a new "with scopes" token, or just use branch mode. Workspace/repo in PR URLs may be slugs or UUIDs — both are handled.
 - **web-testing login** — `web-testing/references/login-config.md` ships filled in for the ExpoPlatform e2e alpha (`e2e-testing-alpha2`), reading credentials from `~/.ep-qa/.env.qa-agents` (`ADMIN_USERNAME`/`ADMIN_PASSWORD` — the admin login, plus admin impersonation for visitor/exhibitor roles) — never inline them, never commit them. Adopting for another product: replace the URLs and field descriptions with yours.
-- **Playwright MCP output folder** — start the Playwright MCP server with `--output-dir` pointing at `~/.ep-qa/evidence` so FAIL screenshots land next to the runs instead of in a per-session temp folder: `claude mcp add playwright -- npx @playwright/mcp@latest --output-dir ~/.ep-qa/evidence` (Windows: `--output-dir %USERPROFILE%\.ep-qa\evidence`). `web-testing/references/playwright-executor.md` → Evidence.
+- **Playwright MCP output folder** — start the Playwright MCP server with `--output-dir` pointing at `~/.ep-qa/evidence` so FAIL and `[core]` PASS screenshots land next to the runs instead of in a per-session temp folder: `claude mcp add playwright -- npx @playwright/mcp@latest --output-dir ~/.ep-qa/evidence` (Windows: `--output-dir %USERPROFILE%\.ep-qa\evidence`). `web-testing/references/playwright-executor.md` → Evidence.
 - **Trigger phrases** — adjust the `description` frontmatter in each `SKILL.md` to match how your team naturally phrases requests.
 - **Credentials and the allow-list** — one file, `~/.ep-qa/.env.qa-agents` (or wherever `EP_QA_HOME` points), holds every credential plus `ALLOWED_HOSTS`, the hosts a stage may call; a run does not start without the list, and production (`*.expoplatform.com`) is refused even when listed. Nothing a run writes lands in this checkout — `skills/qa-pipeline/references/environment.md`.
 

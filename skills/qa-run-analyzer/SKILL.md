@@ -38,7 +38,9 @@ asking the user is the last resort):
 `<ISSUEKEY>-checklist.md` only on tickets run before 0.40.0),
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
-`<ISSUEKEY>-web-evidence.md` (the FAIL evidence sections § 5 checks),
+`<ISSUEKEY>-web-evidence.md` and `<ISSUEKEY>-api-evidence.md` (the
+evidence sections § 5 checks), `<ISSUEKEY>-evidence-audit.md` (the
+step-5 audit, 0.47.0), the saved `sources/` folders (§ 7),
 `<ISSUEKEY>-sources.md` (the source register § 7 checks against),
 `<ISSUEKEY>-recon.md`, `<ISSUEKEY>-open-questions.md`,
 `<ISSUEKEY>-answers.md` and `<ISSUEKEY>-sizing.md` (qa-refinement's
@@ -181,6 +183,14 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   test cases or structural lines (`reconcile_counts.py` reports
   `untagged=`).
 - A stage that clearly errored or was skipped in the chain.
+- 🟡 **no `Skill:` line** on a report written by 0.47.0 or later, or
+  two reports of one pass carrying different plugin versions (a run
+  resumed across an update). Say which. The line is what ties a
+  misbehaving stage to the rules it ran with (`../qa-pipeline/references/data-locations.md`).
+- **`BLOCKED (quota)` rows** are counted on their own line and are
+  never a Product or Environment finding. 🟡 [Pipeline] when a report
+  with such rows says `Completeness: complete`, or when they reach the
+  run as `blocked`. The fix is a resume, not a re-plan.
 
 ### 4. QA Service sync (Pipeline) — only when the connector is present
 
@@ -293,6 +303,25 @@ present a step-5 run as having verified the publish.
 
 ### 5. Evidence quality (Pipeline) — can the verdicts be believed?
 
+**The evidence audit (0.47.0)** — `../qa-pipeline-code/references/evidence-audit.md`:
+
+- 🔴 **no audit** on a code-phase pass with runtime PASS rows (and no
+  skip line saying why).
+- 🔴 **a held-back row recorded anyway**: a PASS the audit rated
+  INSUFFICIENT or UNVERIFIABLE reached the run as `pass`, or a
+  narrow-exception `fail` has no SUFFICIENT rating.
+- 🔴 **a held-back row with no walk card**: nothing in the walk plan
+  covers it, so the case is neither settled nor tested.
+
+  In the orchestrated flow the analyzer runs at step 5, before the run
+  is recorded and the plan built. So these two are checked there by the
+  post-publish verification (`../qa-pipeline-code/references/wave1-and-verification.md`),
+  and here only on an on-demand or later-round run.
+- 🟡 `Independent: no — inline`, or `Rows audited` short of the row
+  count (the audit skipped rows).
+- Report the audit counts beside the stage counts in the findings
+  summary ("web PASS 34 — 28 sufficient, 6 held back").
+
 Audit against `../api-testing/references/absence-check-protocol.md`:
 
 - 🔴 any absence-check PASS (in api-testing or web-testing) with no
@@ -307,8 +336,9 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
 - 🟡 any absence verdict from a single immediate read with no second
   read after the measured ingestion lag.
 - 🔴 a web-testing FAIL / FAIL CONFIRMED with neither a
-  `<KEY>-web-evidence.md §n` reading nor a screenshot in
-  `runs/<KEY>/r<N>/evidence/` — a claim, not a verdict. A `§n` reading
+  `<KEY>-web-evidence.md §n` reading nor a screenshot at
+  `$EP_QA_HOME/evidence/<KEY>-r<N>-<TC>-*.png` (the flat store
+  `data-locations.md` names) — a claim, not a verdict. A `§n` reading
   alone is compliant (the Playwright backend cannot always write the
   file — `playwright-executor.md` → Evidence); a screenshot alone is
   compliant on the extension backend.
@@ -404,6 +434,15 @@ is cheaper to find here than after the bug is filed.
   example of a type the front end does not render).
 - 🔴 **any FAIL / FAIL CONFIRMED / `RISK-CR-*` row without a
   `Source:` + `Clause:` pair.** Count them; name them.
+- 🔴 **a clause that is not a quote** — run
+  `../qa-pipeline/scripts/source_tools.py quotes <KEY>`; every
+  `UNVERIFIED` / `TOO SHORT` line in a report that fed a published
+  line is a misquotation on the record (`sources-of-record.md` §8).
+  🟡 when it stayed inside an unpublished report. Exit 2 (no saved
+  sources) is "not checked", said once — never "clean".
+- 🟡 **drift not decided** — `<KEY>-sources.md` lists a `STALE`
+  criterion or `NEW MATERIAL` (§9) and no retest-scope line, ledger
+  row or SPEC-DEFECT answers it.
 - 🟡 **any `OBSERVATION (no source checked)` presented as a defect** —
   in a defect list, a bug draft, a run-sheet row phrased as a fault, or
   the human summary's confirmed-bugs section. The status is correct and

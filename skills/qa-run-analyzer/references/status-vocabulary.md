@@ -15,7 +15,7 @@ Legend for "Emitted by": CR = code-review (stage 6), API = api-testing
 
 | Status | Emitted by | Meaning | Evidence required |
 |---|---|---|---|
-| `PASS` | CR, API, WEB | Expected result confirmed. CR: only when fully determined by the code TEXT — runtime observables are QA. API/WEB: subject to the absence-check protocol on instrumented surfaces. | CR: file+behaviour. API: endpoint + observed value. WEB: steps executed. |
+| `PASS` | CR, API, WEB | Expected result confirmed. CR: only when fully determined by the code TEXT — runtime observables are QA. API/WEB: subject to the absence-check protocol on instrumented surfaces, and to the step-5 evidence audit (`../../qa-pipeline-code/references/evidence-audit.md`) — a PASS the audit rates INSUFFICIENT / UNVERIFIABLE is not recorded as `pass`. | CR: file+behaviour. API: endpoint + observed value in the row, and (0.47.0) its `<KEY>-api-evidence.md §n` request/response excerpt. WEB (0.47.0): a `<KEY>-web-evidence.md §n` reading — URL, signed-in role, the quoted text that satisfies the expected result — plus a screenshot on `[core]` cases. |
 | `FAIL` | CR, API, WEB | Concrete expected-vs-actual discrepancy, for a case that arrived as QA. | Always: where, expected, actual. CR adds file+line; WEB adds a `web-evidence.md §n` reading (URL, quoted DOM/text, console lines) and a screenshot where the backend can write one (`playwright-executor.md` → Evidence). |
 | `FAIL CONFIRMED` | API, WEB, MR | A code-review FAIL confirmed at runtime (or by the human). Never plain PASS/FAIL for arrived-as-FAIL cases. | The CR finding + what was observed. |
 | `FAIL REJECTED` | API, WEB | A code-review FAIL that runtime disproves — compensated elsewhere or CR was wrong. Counted as a pass in human summaries. | The CR finding + the correct observed behaviour. |
@@ -26,6 +26,7 @@ Legend for "Emitted by": CR = code-review (stage 6), API = api-testing
 | `PARTIAL` | API, WEB | Some steps/surfaces pass, others do not (or are unreachable — e.g. an "anywhere" claim with unenumerated roles). | Which passed, which did not/could not. |
 | `BLOCKED` | API, WEB | Tried and could not execute: missing auth/host/data, unreachable precondition. Not a FAIL. | The reason + a recorded `Probe:` (verbatim call/check + response) proving the blocker is real. |
 | `BLOCKED (unverified)` | API, WEB | BLOCKED with NO probe recorded. A distinct statistics row; the analyzer flags 🔴 if it survives to the final verdict — wrong blockers keep being accepted (9 across two runs dissolved on one probe each). | The unprobed reason + what would verify it. |
+| `BLOCKED (quota)` | API, WEB (a CR / pr-summary run cut short the same way reports `Completeness: partial — quota: <error text>`) | Stopped by OUR tooling's limit, not by the product or the environment: a Claude usage / session limit, a connector or MCP rate limit (HTTP 429, "rate limit", "usage limit", "quota"), a tool budget. Never a finding about the product, never counted with the environment blockers, never a reason to call a host down. The report is `Completeness: partial`; the stage is resumed after the reset for exactly these rows (`../../qa-pipeline-code/references/run-modes.md` → "Resume mode"). Borrowed from qa-service's failure classes (quota vs boot vs exec). | The limit's error text verbatim, and when it said it resets if it said so. |
 | `NOT EXECUTED` | API, WEB | In scope but not attempted, for a stated environmental reason (no such event/endpoint/host). Distinct from BLOCKED (which means tried). Counts toward `Completeness: partial`. | The environmental reason. |
 | `NOT-TESTABLE` | API | The case cannot be validated as written — endpoint mapping wrong/ambiguous. | The correct endpoint + what it actually does. |
 | `NOT-TESTABLE (instrumentation)` | API | This stage's instrument cannot measure the claim (instrumented surface + API-created precondition, or absence check with no positive control). Always also listed under "Route to web-testing". | Why the instrument cannot measure it (protocol reference). |
@@ -92,6 +93,10 @@ coverage hole, not a pass (analyzer: routing integrity).
 Cross-stage rules that live with the vocabulary:
 - Prefer BLOCKED / NOT-TESTABLE / QA over a doubtful PASS — a false
   pass is worse than a failure because nobody investigates it.
+- **The stage that ran a case does not grade its own proof** (0.47.0).
+  Runtime verdicts pass the step-5 evidence audit before they are
+  recorded; the audit file supersedes the reports for the rows it holds
+  back, the way `-manual-results.md` supersedes them for human verdicts.
 - A case that arrived as FAIL from code review exits stages 7/8 only
   as FAIL CONFIRMED or FAIL REJECTED.
 - **Exports: no PASS without values.** A verdict on an export (XLSX /
