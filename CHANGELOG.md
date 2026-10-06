@@ -5,6 +5,61 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.47.1 — 2026-10-06 — names in the questions comment are checked, not borrowed
+
+**Incident — EP-55996 / EP-56350, 2026-10-06.** The story's EM asked
+for the 10 Sep questions comment to be re-validated. The comment said
+"the switch's screen" and "the existing AI switch", and the EM's reply
+was "which screen? if it's settings, say so".
+
+0.45.0 already required "the words on the screen" (jira-writing-style,
+rules 2 and 4), and the re-validated first draft followed that rule in
+form. It still had four wrong names, because nothing checked where a
+name came from:
+- "Matchmaking sorting on Marketplace" under Registration Settings →
+  Exhibitor → Additional Settings, copied from the spec. The live
+  toggle is Networking & Matchmaking → Matchmaking → 'Use
+  "Recommendation For You" by default on the Marketplace and Delegate
+  pages'.
+- "Exhibitor categories", also from the spec. The page is Participant
+  Categories, column "Search Weight".
+- "search with ElasticSearch off", where the page's own help text says
+  "regular search".
+- "weak matches", the RFC's word, with no example.
+
+`recon.md` sent the browser only to medium-confidence behaviour items,
+so labels were never a reason to look. Only a browser pass, run because
+the user asked for one, caught the errors. The same pass also settled
+a question: the Exhibitors page already states that a typed search
+sorts by relevance only.
+
+**What changes**
+- **`jira-writing-style.md` → "Every name in the comment is a checked
+  name"**: `<KEY>-open-questions.md` carries a `## Names` table, one
+  row per page, path, tab, toggle, field, button, column or message
+  the draft names.
+  - The source is `screen <host> <date>` or `label <repo> <file:line>`.
+    A spec, an RFC, a ticket or a Confluence page is never a source
+    for a name.
+  - `spec only` rows block the draft.
+  - A thing that does not exist yet is attributed to its proposal
+    (`proposed — <doc>`).
+  - A menu path, or a setting that two views render, needs `screen`.
+  - RFC or contract words that appear nowhere on screen are explained
+    with an example.
+- **`recon.md` → "Labels pass"**: a third reason to use the running
+  system. Every unconfirmed name in the draft is checked, the label
+  file first and then the screen, read-only, even when all behaviour
+  items are settled. When Playwright is held by another session, the
+  Chrome extension is the fallback.
+- **`qa-refinement` steps 3.2 and 4, and `qa-pipeline-docs` step 2,**
+  point to both rules. The refinement draft is not shown while any
+  name row says `spec only`.
+- `MAINTAINERS.md` "Where to look" row updated.
+
+No frontmatter `description` changed, so `evals/triggering.md` is
+unaffected. No script changed.
+
 ## 0.47.0 — 2026-09-30 — honesty devices borrowed from the QA Service
 
 This release comes from a read of the qa-service source code

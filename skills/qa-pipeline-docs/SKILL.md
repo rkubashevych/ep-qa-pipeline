@@ -134,7 +134,9 @@ full** — do not summarise or shortcut it. Stages share the run folder
      in the **questions-only shape**
      (`../qa-pipeline-code/references/jira-writing-style.md` →
      "Grooming open-questions comment": one intro line, then numbered
-     one-line questions — no section headers, no evidence), save it as
+     one-line questions — no section headers, no evidence; every name
+     checked against the screen or a label file in the file's `## Names`
+     table, never taken from the spec), save it as
      `<ISSUEKEY>-open-questions.md`, show it, and ask ONE quick yes/no:
      "post these open questions to <KEY> now?". On yes, post before stage 4; the
      run continues either way. (An answer arriving while stages 3–4

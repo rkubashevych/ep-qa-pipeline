@@ -77,9 +77,13 @@ docs run usually finds a recon file from refinement.
    - Fan out with a read-only search agent when there are more than
      two or three items. Every answer carries repo + path + line and a
      short quote.
-3. **The running system**, for what code alone leaves at medium
-   confidence or below, or for what a tester must see: rendered text,
-   a reload, a setting's effect on a card.
+3. **The running system**, for three things:
+   - what code alone leaves at medium confidence or below;
+   - what a tester must see: rendered text, a reload, a setting's
+     effect on a card;
+   - every name the questions comment will use that no screen or label
+     file has confirmed yet. That is the labels pass below, and it runs
+     even when every behaviour item is settled.
    - Hosts: only hosts in `ALLOWED_HOSTS` (`environment.md`). Never
      production.
    - Login: the user signs in to admin by hand in the Playwright
@@ -89,6 +93,47 @@ docs run usually finds a recon file from refinement.
    - Screenshots go to `$EP_QA_HOME/evidence/` (the Playwright MCP's
      `--output-dir`). The run folder is outside its allowed roots, so
      name the file there in the recon section instead.
+
+## Labels pass — the names the comment will use (0.47.1)
+
+The questions comment names pages, toggles, tabs and messages. Each
+name needs a row in the `## Names` table of `<KEY>-open-questions.md`
+(`../../qa-pipeline-code/references/jira-writing-style.md` → "Every
+name in the comment is a checked name").
+
+The labels pass confirms the rows that are still `spec only`.
+- **Label file first, when a clone exists.** Grep the view or
+  translation file that renders the text on the integration branch:
+  legacy admin `backend/admin/views/**.volt` + `backend/admin/langs/en.php`,
+  admin-ui `src`, portal-ui `plugins/i18n/locales/en/translation.json`.
+  - A hit gives a `label` source with file:line.
+  - A label file is not proof the label is live, because the same
+    setting can have two views. EP-55996's "Matchmaking sorting on
+    Marketplace" is the label in `search/settings.volt`. The toggle
+    admins actually use for that setting is labelled differently, on
+    Networking & Matchmaking → Matchmaking. When a setting has more
+    than one view, or a menu path is in doubt, confirm it on screen.
+- **Then the screen, for every name still unconfirmed and every menu
+  path.**
+  - Open each page read-only and record:
+    - the sidebar section and item;
+    - the tab-strip label;
+    - the page title;
+    - the exact control text.
+  - On the visitor side, run the flow the question describes. Example:
+    search a word and read the tab number.
+  - A typed search counts as a read. Saving a form does not.
+- **Write the result back** to the Names table, with a `screen` source
+  and the corrected name, and add a `B<n>` section to `-recon.md`.
+- **A label pass can settle a question.** On EP-55996 the Exhibitors
+  page already said "When searching by word or phrase, sorting is
+  based solely on the relevance of the search results". That dropped
+  a SPEC-looking question about matchmaking order.
+
+The browser rules are the same as above. The user signs in by hand.
+When the Playwright browser is held by another session ("Browser is
+already in use"), use the Claude in Chrome extension instead of
+waiting.
 
 ## Writes — none, with one narrow exception
 

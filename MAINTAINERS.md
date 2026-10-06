@@ -235,7 +235,7 @@ carried between them; the QA Service run carries the verdicts anyway.
 | Jira custom-field / AC source | `skills/task-context/references/field-maps.md` |
 | Bitbucket auth (token/scopes, branch vs PR mode) + the curl/git command workflows | `skills/pr-summary/references/bitbucket-access.md` (shared source of truth — pr-summary and code-review both point here) |
 | Recon rules (sources in order, the one allowed setting flip, the header) | `skills/qa-pipeline/references/recon.md` |
-| Grooming open-questions comment shape (questions only, re-run edit-in-place) | `skills/qa-pipeline-code/references/jira-writing-style.md` → "Grooming open-questions comment" |
+| Grooming open-questions comment shape (questions only, the `## Names` table, re-run edit-in-place) | `skills/qa-pipeline-code/references/jira-writing-style.md` → "Grooming open-questions comment" |
 | Jira publish values (project, issue type id, assignee, label) | `skills/qa-pipeline-docs/references/publish-config.md` |
 | Results-comment format (wave-1 status line, wave-2 human summary, story notes) | `skills/qa-pipeline-code/references/results-comment-template.md` |
 | Structural checks in the suite (`-STRUCT-` cases), bug-fix mini suite | `skills/qa-pipeline-docs/references/qa-service-publish.md` |

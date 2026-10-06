@@ -70,9 +70,11 @@ and following it **in full**.
 3. **Recon** — per **`../qa-pipeline/references/recon.md`**:
    1. **Code first.** Refresh the local clones, then fan out one
       read-only search agent over the BEHAVIOUR items.
-   2. **Then the browser, for medium-or-lower confidence only.** Ask
-      the user whether to run it, and name any setting flip in that
-      ask. The user signs in to admin by hand.
+   2. **Then the browser**, for two things: medium-or-lower
+      confidence items, and the labels pass (`recon.md` → "Labels
+      pass") over every name step 4 will use that no screen has
+      confirmed. Ask the user whether to run it, and name any setting
+      flip in that ask. The user signs in to admin by hand.
    3. Write `<STORY>-recon.md` and fold each result back into the
       requirements file.
 
@@ -97,6 +99,14 @@ and following it **in full**.
       - every setting named by where it lives and what it does today;
       - a concrete example for any mismatch;
       - the words on the screen, not the code's.
+
+      The file also carries the `## Names` table (`jira-writing-style.md`
+      → "Every name in the comment is a checked name"). Each page,
+      path, toggle, tab or message the draft names gets a row whose
+      source is `screen` or `label`, never the spec. Do not show the
+      draft while any row still says `spec only`. On EP-55996 four
+      such names reached the first draft, and an EM had to ask "which
+      screen?".
 
       Next to each question in the file, note the REQ it blocks and
       its grooming finding code (`AMBIGUOUS`, `INCOMPLETE`, … —

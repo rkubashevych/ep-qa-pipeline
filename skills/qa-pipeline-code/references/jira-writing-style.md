@@ -132,6 +132,63 @@ the pipeline knew.
    context. Q9 said "free-text custom locations" and was answered as a
    question about something else.
 
+**Every name in the comment is a checked name (0.47.1).** Rules 2 and
+4 say to use the words on the screen. Without a check, a draft still
+borrows names from the spec, the code or an RFC. On EP-55996
+(2026-10-06), the first draft of the re-validated comment had four
+wrong names, and every one came from a source other than the product:
+- "Matchmaking sorting on Marketplace" under Registration Settings →
+  Exhibitor → Additional Settings: copied from the spec. The page has
+  no such toggle. The real one is Networking & Matchmaking →
+  Matchmaking → 'Use "Recommendation For You" by default on the
+  Marketplace and Delegate pages'.
+- "Exhibitor categories": also from the spec. The page is Registration
+  Settings → Exhibitor → Participant Categories, column "Search
+  Weight".
+- "search with ElasticSearch off": the page's own help text says
+  "regular search".
+- "weak matches": the RFC's word, with no example.
+
+The 10 Sep original of the same comment said "the switch's screen" and
+"the existing AI switch". The story's EM answered it with "which
+screen? if it's settings, say so". Only a browser pass found the
+errors.
+
+So `<KEY>-open-questions.md` carries a **`## Names`** table, one row
+per page, menu path, tab, toggle, field, button, column or message the
+draft names:
+
+| Name as written | What it is | Source |
+|---|---|---|
+| Networking & Matchmaking → Search | sidebar section → page | screen, api-alpha2, 2026-10-06 |
+| "Use ElasticSearch" | toggle on that page | label, monolith `backend/admin/views/search/main.volt:16` |
+
+- **Source is one of two kinds:**
+  - `screen <host> <date>`: seen in the running product during
+    recon;
+  - `label <repo> <file:line>`: the view or translation file that
+    renders the text, on the integration branch. A label is enough
+    for a single control on a known page. A menu path, or a setting
+    that two views render, needs `screen`.
+- **A spec, an RFC, a ticket or a Confluence page is never a source
+  for a name.** They are sources of intent, and they get labels
+  wrong. Write `spec only` and check it before posting:
+  - a recon labels pass (`../../qa-pipeline/references/recon.md` →
+    "Labels pass"), or a label-file lookup;
+  - or describe the thing by what the user sees ("the number on the
+    Exhibitors tab") instead of naming it.
+- **A thing the product does not have yet** has no on-screen name. An
+  example is a setting an RFC proposes. Call it what the proposal
+  calls it, attribute it ("RFC-0010 proposes a dropdown …"), and give
+  its row the source `proposed — <doc>`.
+- **The path counts as well as the label.** "Exhibitor categories"
+  was the right idea on the wrong page. Record the whole path, section
+  → page → tab, the way the sidebar and tab strip show it.
+- **Pre-post check:** every bolded or quoted name in the draft has a
+  row. No row says `spec only`. Every RFC or contract word that
+  appears nowhere on screen ("weak", "engine", "index", "reader") is
+  explained with an example of what the user would see.
+
 **Answers come back in two places.** Read both before calling anything
 open:
 - replies under the comment;
