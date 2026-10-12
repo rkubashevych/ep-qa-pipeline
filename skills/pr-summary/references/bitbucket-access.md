@@ -37,6 +37,52 @@ default branch; `portal-ui` and `admin-ui` branch from `master`.
 Diffing a monolith branch against `master` produces a wrong diff.
 When in doubt, `git remote show origin | grep HEAD`.
 
+## Finding the branch — dev sub-tasks and the fallback (qa-pipeline-code step 0)
+
+**The query names no issue type** (CHANGELOG 0.47.2):
+
+```
+parent = <STORY> AND issuetype in subTaskIssueTypes()
+  AND (labels IS EMPTY OR labels != "qa-pipeline")
+```
+
+Fetch `issuetype` and `customfield_12440` (Discipline). Jira validates
+every name in an `issuetype in (…)` list against the whole site and
+returns HTTP 400 for the query when one is missing. `Backend sub-task`
+/ `Frontend sub-task` existed in HV on 2026-09-17 and were gone on
+2026-10-12. `subTaskIssueTypes()` cannot go stale like that. The label
+exclusion drops the pipeline's own QA sub-task and the Defects stage 10
+files.
+
+**Classify each row by Discipline, not type.** EP files every sub-task
+as `Sub-task`.
+
+| Discipline / type | Meaning |
+|---|---|
+| `Backend`, `Frontend` | dev sub-task |
+| `QA`, `Spec`, any other value; type `Defect` | not a dev sub-task: list it as skipped |
+| empty | candidate. Most sub-tasks never set it (304 of 412 EP sub-tasks in 30 days to 2026-10-12) |
+
+Try each dev sub-task's and candidate's **key as the branch name** in
+each repo (`git fetch` / the API).
+
+**Fallback — no dev sub-task, or none whose key exists as a branch.**
+The second half matters: on EP-55889 the Backend sub-task EP-56179 had
+no branch; the work was on `EP-55889`. In order:
+1. `getJiraIssueRemoteIssueLinks` on the story — Bitbucket PR URLs.
+2. The story's description and comments, **and the sub-tasks'
+   comments** (a tech spec often names the branch and commit), for PR
+   URLs (`bitbucket.org/<workspace>/<repo>/pull-requests/<id>`) or a
+   `Branch` line.
+3. The story key itself as the branch name in each repo.
+4. Still nothing → PAUSE and ask. Do not guess further.
+
+**A branch already merged** into its base diffs empty
+(`origin/alpha...origin/<branch>`). Hand pr-summary the branch's own
+commit range instead. `git log origin/<branch>` shows where the
+ticket's commits start; diff that base against the tip. Say so in the
+branch list.
+
 ## Authentication setup
 
 - Configure git credentials (or an SSH key) for the workspace.

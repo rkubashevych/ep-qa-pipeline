@@ -5,6 +5,55 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.47.2 — 2026-10-12 — the dev sub-task lookup names no issue type
+
+**Incident: EP-55889 r1, 2026-10-12 (ledger row 7).** In code-phase step 0
+the dev-branch query
+`parent = EP-55889 AND issuetype in ("Backend sub-task","Frontend sub-task","Sub-task") AND (labels IS EMPTY OR labels != "qa-pipeline")`
+came back with **HTTP 400**: "The value 'Frontend sub-task' does not
+exist for the field 'issuetype'", and the same for 'Backend sub-task'.
+The run went on only because the operator retried by hand without the
+type clause.
+
+**Why it broke.** 0.43.5 widened the type list on the assumption that
+the typed names exist in HV and only `Sub-task` exists in EP. On
+2026-10-12 HV lists the same types as EP: `Sub-task` and `Defect`. The
+typed names are gone from the site. Jira validates every name in an
+`issuetype in (…)` list against the whole site, so one dead name fails
+the entire query. The 0.43.5 failure was silent (0 rows); this one is
+loud (400). Both came from naming a type at all.
+
+**What changes** (`qa-pipeline-code` SKILL.md step 0 item 2, now a short pointer; the procedure lives in `pr-summary/references/bitbucket-access.md` → "Finding the branch", which keeps the SKILL under 500 lines):
+- **The JQL names no type.** It is now
+  `parent = <STORY> AND issuetype in subTaskIssueTypes() AND (labels IS EMPTY OR labels != "qa-pipeline")`.
+  `subTaskIssueTypes()` resolves to whatever sub-task types the site
+  has, so a renamed or removed type cannot break the query. Verified on
+  EP-55889: it returns the 5 non-pipeline sub-tasks; the label still
+  drops the pipeline's QA sub-task and the stage-10 Defect EP-58581.
+- **Dev sub-tasks are told apart by the Discipline field**
+  (`customfield_12440`), not by type, because EP files everything as
+  `Sub-task`. `Backend` / `Frontend` = dev sub-task. `QA`, `Spec`,
+  other values, and type `Defect` = skipped. Empty = candidate.
+  Discipline is often unset: 304 of 412 EP sub-tasks created in the
+  last 30 days have none. So an empty value keeps the row as a
+  candidate instead of dropping it.
+- **The fallback also fires when no dev sub-task key exists as a
+  branch**, not only when there are no dev sub-tasks. On EP-55889 the
+  Backend sub-task EP-56179 had no branch; the work was on `EP-55889`,
+  named in the tech-spec sub-task's comment. The fallback now also
+  reads the sub-tasks' comments for a `Branch` line or PR URL.
+- **A branch already merged into alpha** diffs empty against it. Step 0
+  now hands pr-summary the branch's own commit range and says so. That
+  was done by hand on EP-55889.
+- `publish-config.md`: the 2026-09-17 note that HV has `QA sub-task` /
+  `Backend sub-task` / `Frontend sub-task` is marked historical, with
+  the 2026-10-12 re-check. The run-time issue-type lookup it describes
+  is unchanged and still correct.
+
+**Not changed:** the QA-sub-task lookups. The dispatcher and the code
+phase match `labels = "qa-pipeline"` and never a type, so they were not
+affected.
+
 ## 0.47.1 — 2026-10-06 — names in the questions comment are checked, not borrowed
 
 **Incident — EP-55996 / EP-56350, 2026-10-06.** The story's EM asked

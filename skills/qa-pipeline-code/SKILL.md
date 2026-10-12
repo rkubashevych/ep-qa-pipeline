@@ -207,25 +207,19 @@ Otherwise, using the Atlassian connector and the Story key:
    "Retest mode".
 
 2. **Dev branches.** `searchJiraIssuesUsingJql` with
-   `parent = <STORY> AND issuetype in ("Backend sub-task","Frontend
-   sub-task","Sub-task") AND (labels IS EMPTY OR labels != "qa-pipeline")`.
-   Both the widened type list and the label exclusion are
-   load-bearing (CHANGELOG 0.43.5): the typed names exist only in HV,
-   EP files dev sub-tasks as plain `Sub-task`. Each dev sub-task's
-   **key is its branch name** — use these for branch mode; no PR URLs
-   needed. List them before starting, and say so plainly when the
-   query returns none.
-   - **Fallback — no dev sub-tasks** (Bugs, small Stories/Tasks carry
-     the work on the main issue). Look for the PR/branch on the main
-     issue, in order: (1) `getJiraIssueRemoteIssueLinks` on `<STORY>`
-     — collect Bitbucket PR URLs; (2) scan the description and
-     comments for PR URLs
-     (`bitbucket.org/<workspace>/<repo>/pull-requests/<id>`);
-     (3) try the issue key itself as the branch name in each repo
-     (devs branch as `<KEY>` by convention — confirm existence via
-     `git fetch` / the API); (4) still nothing → PAUSE and ask. Do not
-     guess further. Whatever is found, list the PRs/branches (and
-     where each was found) before starting.
+   `parent = <STORY> AND issuetype in subTaskIssueTypes() AND (labels IS
+   EMPTY OR labels != "qa-pipeline")`. **Never name an issue type in
+   this JQL**: one name the site lacks fails the whole query with HTTP
+   400 (CHANGELOG 0.47.2). Tell dev sub-tasks apart by Discipline
+   (`customfield_12440`: `Backend` / `Frontend`; empty = candidate),
+   try each one's **key as its branch name**, and fall back to
+   remote-link PRs, PR URLs or a `Branch` line in the story's and
+   sub-tasks' comments, then the story key. Fall back also when no
+   sub-task key exists as a branch. Still nothing → PAUSE and ask. A
+   branch already merged into its base needs its own commit range.
+   Full procedure: `../pr-summary/references/bitbucket-access.md` →
+   "Finding the branch". List the PRs/branches found (and where each
+   was found) before starting, and say so plainly when nothing was.
 
 3. **Refresh the local clones** before stage 5, once per run, for every
    repo the derived branches live in, and report each clone's tip date
