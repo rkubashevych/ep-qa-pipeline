@@ -69,6 +69,7 @@ AC items on the page: <N> · captured: <N><; not readable: <what and why — omi
 > Established test design for the touched feature — background and
 > comparison material for grooming. Not requirements of this task.
 
+- Developer's suite: <yes — `<path>` (found in <ticket comment / remote link / <repo>:docs/specs/<file>>); their requirements for <KEY>: <ids> | none found (<sources checked>)>
 - Suite: `<path>` — <title> (<N> requirements / <M> cases)
 - Summary: <one line>
 - <stableId> — <title> (<kind>)

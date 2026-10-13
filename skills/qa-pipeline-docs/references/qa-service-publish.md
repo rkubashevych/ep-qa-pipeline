@@ -273,6 +273,28 @@ introduces a feature that has no suite yet.
 Always resolve the target BEFORE writing, and name it in the publish
 preview so the user can redirect:
 
+0. **A developer's suite comes first (0.49.0).** When the context
+   file's `Developer's suite:` line says `yes`, that suite is the
+   target. The developer already registered this ticket's requirements
+   there with `sdlc-qa`. A second suite would split the ticket, and a
+   case whose requirement sits in another suite reads as 0 % coverage
+   with no warning. Then:
+   - **Match our requirements to theirs before creating any.** When a
+     REQ states the same behaviour as one of the developer's
+     requirements, don't create it. Our cases trace to the developer's
+     stableId, and the local requirements file records `→ <their id>`
+     on that REQ. Create only the REQs with no counterpart, in the
+     suite's prefix.
+   - **Never edit, retire or re-kind the developer's requirements or
+     cases.** They belong to the developer's spec. When ours and theirs
+     disagree, grooming raises it as a Contradiction question.
+   - The case-dedup rule below covers the developer's cases too.
+   - The preview names it: "appending to the developer's suite <path>
+     (found in <where>): N of their requirements reused, M new". When
+     the feature search would have picked a different suite, show that
+     one as the runner-up.
+   `Developer's suite: none found`, or no such line (a context file
+   from before 0.49) → steps 1–4 below, unchanged.
 1. `search {query: "<feature words>", kinds: ["suite"]}` (the context
    file's "Existing QA Service suite" section usually already names the
    suite — then search its prefix). `search` matches titles and prefixes,
@@ -305,7 +327,9 @@ preview so the user can redirect:
 
 ## Procedure (inside the step-6 confirmed publish)
 
-1. `search` for the feature's suite (fallback `list_suites`); pick the
+1. The developer's suite when the context file names one (Suite
+   selection step 0); otherwise `search` for the feature's suite
+   (fallback `list_suites`). Pick the
    target per "Suite selection" above — append to the feature's existing
    suite by default; a new suite only when the feature has none. New
    suite → `get_suite_tree` for the `folderId` (Config → Folder).
@@ -431,6 +455,16 @@ CONTENT (the team may have fixed cases in the web UI between phases):
      analyzer's AC-ledger check and `reconcile_counts.py` read those
      lines, not the suite. No `detail.ac` (published before 0.42) → say
      so once; the ledger check then reports the pass as pre-0.42.
+   - **A REQ mapped to a developer's requirement** (`→ <id>`, Suite
+     selection step 0) keeps its `source:` and `Covers:` lines from the
+     local docs file, because the developer's requirement has no
+     `detail.ac`.
+   - **A developer's suite that appeared after the docs phase**
+     (0.49.0): when pr-summary's `Developer's register:` line names a
+     suite other than the one in the QA sub-task, say so in the
+     reconciliation list. Don't move any cases. Add a To do to the human
+     summary: "Merge our <N> cases for <KEY> into the developer's suite
+     <path> (QA)".
 3. Connector absent or suite not found → `runs/<STORY>/docs/` on this
    machine is the only source (pre-0.33 tickets: the legacy archive
    comment via `extract_archive.py`). Neither reachable → PAUSE; never
@@ -594,7 +628,9 @@ old ticket without guessing.
 ## Publish preview additions (same single pause)
 
 The step-6 preview shown to the user must also state:
-- QA Service: **appending** N requirements / M cases to existing suite
+- QA Service: **appending to the developer's suite** `<path>` (found
+  in <where>; N of their requirements reused, M new) — or
+  **appending** N requirements / M cases to existing suite
   `<path>` (K duplicates skipped) — or **creating** suite `<path>`
   (prefix `<PREFIX>`) because the feature has no suite yet — or
   "skipped (connector not enabled)".

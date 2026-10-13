@@ -318,6 +318,42 @@ account nobody deactivates is a live credential nobody rotates
   coming); say so in the final response — the next round's stage 9
   provisions fresh ones regardless.
 
+### Step 4d — Register the PR's tests in QA Service (0.49.0)
+
+QA Service counts a developer's test only once someone registers it.
+Nothing registers itself (`get_help_topic registering`). Read the
+"Tests in this PR" table in `<ISSUEKEY>-pr-summary.md`. If it says
+"None" or the connector is absent, skip this step and say so. Otherwise
+sort each test file into one of three cases:
+
+- **It declares a case id that exists in the product** (check with
+  `search`) → `link_implemented_tests {suiteId: <that case's suite>,
+  links: [{stableId, ref: "<path>::<method or test title>", level,
+  repo, landing, prBranch}], verify: true}`. Use `landing: "merged"`
+  when the branch is merged, else `"pr"` with `prBranch`. This works
+  before the merge. The ref names the method or test, never the file
+  alone.
+- **No declared id, and the branch is merged into the repo's
+  configured branch** → `discover_tests {suiteId: <the ticket's
+  suite>, pathPrefixes: [the files]}` first. That preview writes
+  nothing. Check `rateLimited`, `failedReads` and `truncated` before
+  trusting it. A changed test that `search` already finds as a case in
+  another suite belongs to that suite, so discover it there instead.
+  Then `apply: true` with `refs` for the tests the user picks.
+- **No declared id, and not merged yet** → it can't be registered now.
+  Discovery reads only the configured branch, and a pre-merge link
+  needs an id in the test. Put a To do in the summary, "Register <N>
+  tests from PR #<n> in QA Service after the merge (QA)", and append a
+  ledger row so the next round picks it up. Do the same for a test in a
+  repo the product can't discover (QA Service discovers one repo per
+  product).
+
+Show every call (suiteId, refs, landing) in one confirmation, from one
+plan, `r<N>/<ISSUEKEY>-tests-plan.json`
+(`../qa-pipeline/references/write-plans.md`). Read the response. A link that came back unverified doesn't count as
+coverage, so report it. Decide the To do lines before step 4 posts the
+summary.
+
 ### Step 5 — Offer to file unfiled bugs
 
 A human `fail` on a **roster case** had its bug created in step 4,
@@ -348,5 +384,6 @@ non-standard / unmatched / not run); every RETRACTION on its own line
 to); bugs linked and bugs filed (run-filed keys from `run_defects` and
 template-filed keys, separately); the run id and its final status
 (`closed`, or why not); the ledger rows closed and the rows carried
-forward; the throwaway fixtures retired (or why not); and what is
+forward; the throwaway fixtures retired (or why not); the PR's tests
+registered, linked or left for after the merge (step 4d); and what is
 still untested.

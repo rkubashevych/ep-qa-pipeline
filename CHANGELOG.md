@@ -5,6 +5,60 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.49.0 — 2026-10-13 — the developer's suite first, and the PR's tests registered
+
+**Trigger: a review of the company `sdlc` plugin (v1.2.0), 2026-10-13.**
+Its `sdlc-qa` lane lets a developer register a ticket's requirements
+and tests in QA Service while building it. The review concluded that
+our pipeline should not adopt sdlc: it serves a different job, and its
+QA Service rules are already here. Two gaps were worth closing:
+- **Two suites for one ticket.** When a developer has already
+  registered the ticket, our docs phase could create or pick a second
+  suite. Per sdlc-qa's own failure list, a case and its requirement in
+  different suites read as 0 % coverage, with no warning.
+- **Developer tests nobody registers.** QA Service reads a repo only
+  when asked. On EP-58440 the PR changed ScheduleExportCest, and the
+  pipeline only mentioned it.
+
+**What changes — the developer's suite (the user's rule: check for it
+first; none → our suite as usual):**
+- `task-context` → "Existing QA Service suite", new step 0. It looks
+  for a developer's suite in two places:
+  - a QA Service suite URL on the ticket that the pipeline didn't post;
+  - a `docs/specs/<KEY>-*.md` with a `## Register — QA Service` section,
+    on the story and dev sub-task branches, then on the default branch.
+  The context file gets a `Developer's suite:` line.
+- `qa-service-publish.md` → Suite selection, new step 0. When a
+  developer's suite exists, it is the target:
+  - our REQs are matched to the developer's requirements first, and a
+    match is reused (`→ <their id>`), not created;
+  - the developer's items are never edited or retired;
+  - the preview says "appending to the developer's suite".
+  When there's none, steps 1–4 run unchanged.
+- The code phase (same file, "Code phase"):
+  - a REQ mapped to a developer's requirement keeps its local `source:`
+    and `Covers:` lines;
+  - a developer's suite that appears after the docs phase (pr-summary's
+    `Developer's register:` line) is reported, and the merge becomes a
+    To do. Cases are never moved automatically.
+
+**What changes — the PR's tests:**
+- `pr-summary` gets a required "Tests in this PR" section: each test
+  file added or changed, its repo, its level from the file name, the
+  case ids it declares, and whether the branch is merged.
+- `qa-manual-results` gets a new step 4d, under one confirmation and
+  plan `<KEY>-tests-plan.json`:
+  - a test that declares an existing case id → `link_implemented_tests`
+    (`landing: pr` works before the merge);
+  - merged, no id → a `discover_tests` preview, then `apply`;
+  - not merged, no id → a To do plus a ledger row, because QA Service
+    can't see it yet.
+- `write-plans.md` lists the new plan.
+
+**Not adopted from sdlc:** the six-stage lifecycle, the bindings file,
+ticket-keyed commits, and the edited-in-place status comment. Our
+two-comment rule stays.
+
 ## 0.48.0 — 2026-10-13 — the QA result comment: one table, every item once
 
 **Trigger: the EP-58440 human summary (2026-10-13).** The facts were

@@ -182,6 +182,27 @@ Derive it from the per-file descriptions you already wrote (it is
 mostly a regrouping); if the PR touches nothing user-observable, write
 "None".
 
+## Tests in this PR (required section, 0.49.0)
+
+QA Service doesn't register a developer's tests by itself; it reads
+the repo only when asked. So list every automated test file the PR adds
+or changes (category `test` above), one row each:
+- the path and repo, and whether it is added or changed;
+- the level QA Service will give it, from the file name: `*Test.php` →
+  U, `*Cest.php` → AE, `*.test.ts(x)` → CFE, otherwise "unknown";
+- the case ids it declares, if any: an `@testCaseId <ID>` docblock line
+  in PHP, an id at the start of an `it('<ID>: …')` / `test('<ID>: …')`
+  title in TS, or an old-style `test_<ID>_…` method name;
+- whether the branch is merged into the repo's default branch yet.
+
+`qa-manual-results` step 4d registers them from this list. If the PR
+changes no test files, write "None".
+
+Also note a changed `docs/specs/<KEY>-*.md` with a `## Register — QA
+Service` section: the developer has registered this ticket's
+requirements, and the section names their suite. Copy the suite path
+and requirement IDs into this section's last line.
+
 ## Verification before saving
 
 Before saving, check:
@@ -212,3 +233,5 @@ After saving the file, report:
 - The path to the saved file
 - The number of changed files
 - The number of shared / high blast-radius files flagged (or "none")
+- The number of test files added or changed (or "none"), and the
+  developer's suite if the PR carries a Register section

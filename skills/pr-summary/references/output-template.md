@@ -32,6 +32,18 @@ Skill: <the line `skill_stamp.py pr-summary` prints>
 - <endpoint / setting / state field / counter / UI element>: <what changed, one line>
 - None *(if the PR touches nothing user-observable)*
 
+## Tests in this PR
+> Every automated test file the PR adds or changes. qa-manual-results
+> step 4d registers them in QA Service from this table.
+
+| File | Repo | Added / changed | Level | Declared case ids | Merged into default branch |
+|------|------|-----------------|-------|-------------------|----------------------------|
+| <path> | <main / portal-ui / admin-ui> | <added / changed> | <U / AE / CFE / unknown> | <ids, or —> | <yes / no> |
+
+- None *(if the PR changes no test files)*
+
+Developer's register: <suite path + requirement IDs from a changed `docs/specs/<KEY>-*.md`, or "none in this PR">
+
 ## Shared / high blast-radius files
 
 <"None", or one line per shared changed file:>

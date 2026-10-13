@@ -160,6 +160,26 @@ If the QA Service MCP connector is present in the session, pull the
 feature's established requirements so grooming can check the ticket
 against them instead of re-deriving from scratch:
 
+0. **Look for the developer's suite first (0.49.0).** A developer
+   using the `sdlc` plugin registers the ticket's requirements in QA
+   Service before QA does (`sdlc-qa`, stage 2). Check two places:
+   - **The ticket.** A `qa-service.expoplatform.com/…/test-suites/…`
+     URL in the story, its sub-tasks, their comments or remote links.
+     A pipeline QA sub-task's description doesn't count, because the
+     pipeline wrote it.
+   - **The repo.** A spec file `docs/specs/<KEY>-*.md` (sdlc names it
+     `<TICKET>-YYYY-MM-DD-<slug>.md`) with a `## Register — QA Service`
+     section. That section names the product, the suite, its prefix and
+     the requirement IDs the ticket owns. Look on the branches named
+     after the story and its dev sub-tasks in each repo, then on each
+     repo's default branch. Use the local clone if there is one, else
+     the Bitbucket `src` endpoint
+     (`../pr-summary/references/bitbucket-access.md`). If there's no
+     branch yet or no access, skip this source and say so.
+   Found → `get_suite` with `productId` to confirm it exists, write the
+   section as in step 2 with the `Developer's suite: yes …` line on
+   top, and skip step 1. Not found → write `Developer's suite: none
+   found (<sources checked>)` and continue with step 1 as usual.
 1. `search {query: "<feature words>", kinds: ["suite"], productId:
    "expoplatform"}` with the same keywords as the impact scan (two or
    three calls with different word sets are fine — each answer is ~1 KB;
