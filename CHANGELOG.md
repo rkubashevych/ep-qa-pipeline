@@ -5,6 +5,65 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.48.0 — 2026-10-13 — the QA result comment: one table, every item once
+
+**Trigger: the EP-58440 human summary (2026-10-13).** The facts were
+right, but the user found it hard to read: "different fonts styling is
+used and table is hard to read, maybe there is some not relevant info".
+Three causes:
+- **Six type styles in one comment:** an h1 title, bold pseudo-headings,
+  a plain `Status:` line, "**Label:** text" lines, inline code, and URLs
+  mid-sentence.
+- **A stage table in pipeline terms.** "Code review ✅ 0 / 0, 5 checked
+  at runtime" tells a PM nothing.
+- **Repetition.** EP-58568 appeared in the intro, in Needs a human and
+  in Carried forward. The product questions appeared twice.
+
+**What changes** (`qa-pipeline-code/references/results-comment-template.md`
+→ "Comment — human summary", rewritten, with EP-58440 redone as the
+worked example):
+- **Shape:** `##` verdict title · ≤ 2-sentence intro · one
+  **What we checked / How / Result** table (one row per case up to 8,
+  else per area; How = By hand · Browser · API · Code only) · `###`
+  Bugs · Retracted · To do · Questions · Not tested · a `---` footer.
+  The hand-edited EP-57698 summary (2026-10-06) already had this table.
+- **Style rules:** one `##`, only `###` below it, no bold, inline code
+  or italics in the body, no ids in prose, and bare URLs only in the
+  footer.
+- **Every item once.** **To do** (with an owner on each line) and
+  **Questions** replace Needs a human, Requirements to correct,
+  Unverified defect claims and Carried forward. Every open ledger row
+  still lands in one of the two. An item with its own ticket is named
+  once, by key.
+
+**Rules kept, in new words (none dropped):**
+- `Status: VERIFIED / PARTIALLY VERIFIED` is now the mandatory footer
+  line "Checked by hand: N of M". It is the same honesty device in
+  words a reader can't misread. The step-6 local file still carries
+  `Status: DRAFT — awaiting stage 10`.
+- An unconfirmed code-read defect is a To do that must say "code read
+  only". The 50 % base rate that created "Unverified defect claims" is
+  quoted in the template.
+- A `Code only` row may show ✅ only with "Code only" in How.
+- The publication gate (sources-of-record § 7) still applies line by
+  line to Bugs.
+- The count rule now matches the table to the QA Service run.
+
+**Removed from the Jira comment:**
+- **The stage-verdict table.** The per-stage counters stay in the stage
+  reports and the run report, and the count gate still runs.
+- **The run-health line.** It is pipeline-internal and stays in the run
+  report and chat.
+
+**Renamed references:** qa-manual-results (steps 3, 4, 4c), the ledger
+doc, the runsheet, code-review, api-testing, web-testing,
+status-vocabulary, qa-service-publish, bug-report-template, the
+analyzer, wave1-and-verification and the qa-pipeline-code SKILL.
+
+**Not changed:** the wave-1 status line, the retraction comment, and
+the two story notes (QA passed / QA failed). Only their "stage table"
+reference is renamed.
+
 ## 0.47.2 — 2026-10-12 — the dev sub-task lookup names no issue type
 
 **Incident: EP-55889 r1, 2026-10-12 (ledger row 7).** In code-phase step 0

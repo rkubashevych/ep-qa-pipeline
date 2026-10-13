@@ -104,8 +104,9 @@ first — Jira archive comments are legacy, read only on pre-0.33 tickets).
   0.30.0 rule against mislabelling the source cuts both ways.)
 - **A `Half` row is half a verdict.** The human PASS covers the
   visible half; the note names the machine verdict the rest rests on.
-  Record the human verdict with that note; the summary's PARTIALLY
-  VERIFIED wording covers it.
+  Record the human verdict with that note; the summary's table shows it
+  as "Browser + by hand" (or "API + by hand"), and its "Checked by
+  hand: N of M" footer line covers it.
 - Normalize statuses case-insensitively to PASS / FAIL / BLOCKED /
   SKIPPED; anything else (e.g. "N/A — spec premise false") is recorded
   verbatim under "Non-standard verdicts" for a human decision, not
@@ -240,15 +241,17 @@ so it is part of what the user is saying yes to. Then, on explicit yes:
   `<ISSUEKEY>-manual-results.md` stays in the run folder and the run
   holds every verdict; a fenced dump on any ticket is a ❌. Write the
   summary as the complete
-  picture, not a delta — overall verdict, stage table, confirmed bugs,
-  **Retractions listed first with old → new and reason**, what needs a
-  human, what was not tested — because no earlier human summary
-  exists. Where the machine's verdict and the human's disagree, state
-  the human's and note the machine's in one clause. (On older tickets
-  where a pre-two-wave summary WAS posted, open with "supersedes the
-  <date> summary for N cases".) End the summary with **Carried
-  forward** — one line per still-open row of `<ISSUEKEY>-open-items.md`,
-  so the reader sees what this round did *not* settle.
+  picture, not a delta, in the template's shape (0.48.0): verdict
+  title, intro, the What / How / Result table, Bugs, **Retracted**
+  (old → new and reason), To do, Questions, Not tested, and the
+  footer with "Checked by hand: N of M". No earlier human summary
+  exists, so nothing can be left to one. Where the machine's verdict
+  and the human's disagree, the table shows the human's and the
+  Retracted line notes the machine's. (On older tickets where a
+  pre-two-wave summary WAS posted, the intro says "supersedes the
+  <date> summary for N cases".) Every still-open row of
+  `<ISSUEKEY>-open-items.md` appears once, in **To do** or
+  **Questions**, so the reader sees what this round did *not* settle.
 - **The ledger** (`../qa-pipeline/references/open-items-ledger.md`):
   this is the only stage that closes a row — and it also **appends** a
   row for anything this round reported but did not settle (a
@@ -309,8 +312,8 @@ account nobody deactivates is a live credential nobody rotates
   one confirmation for the whole list — the hosts were allow-listed at
   stage 9 and are not re-checked here.
 - Where the environment has no deactivation path, write the list into
-  the human summary's **Needs a human** as "retire N test accounts on
-  <env>" so the environment owner sees it.
+  the human summary's **To do** as "retire N test accounts on <env>
+  (environment owner)" so the environment owner sees it.
 - Skip when the user says the fixtures are still needed (a retest is
   coming); say so in the final response — the next round's stage 9
   provisions fresh ones regardless.

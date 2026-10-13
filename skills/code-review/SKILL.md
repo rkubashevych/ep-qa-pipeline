@@ -364,7 +364,7 @@ Each test case gets one status:
   requires (or the case's premise names something that does not exist
   in this codebase). The defect is in the CASE, not the code — record
   file+line showing the deliberate behaviour and what the case should
-  say. Feeds the human summary's "Requirements to correct" section.
+  say. Feeds a case-correction line in the human summary's "To do".
 - `OBSERVATION (no source checked)` — a real thing seen in the code
   with no clause in any register source saying it is wrong (Source
   fidelity, above). A question, never a verdict; kept out of every
@@ -379,7 +379,8 @@ Rules:
   It must reach runtime confirmation (stages 7/8: FAIL CONFIRMED /
   FAIL REJECTED) or the manual round before anyone acts on it. If
   runtime cannot confirm it (BLOCKED), it is reported under
-  "Unverified defect claims" in the human summary — never as a settled
+  a "Confirm or drop … (code read only)" line in the human summary's
+  "To do" — never as a settled
   FAIL, and it never files a bug (step 7 gate). Measured base rate:
   half of code-read-only negative verdicts were wrong across real runs
   (6 of 12 on one ticket).

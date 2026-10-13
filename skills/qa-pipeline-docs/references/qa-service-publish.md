@@ -533,8 +533,8 @@ short, inside the same step-6 confirmation:
   open-items ledger (`../../qa-pipeline/references/open-items-ledger.md`).
 - **SPEC-DEFECT verdicts:** append a `discrepancy:` line to the suite
   case's notes stating what the case says vs what the spec/behaviour
-  is, and list the case under "Requirements to correct" in the human
-  summary. Do not silently fix the case text — the correction goes
+  is, and list the case as a case-correction line under "To do" in the
+  human summary. Do not silently fix the case text — the correction goes
   through the docs-phase owner. On the run the case is `skipped` with a
   `SPEC-DEFECT —` note — never `known_defect`, which asserts a product
   defect (`test-runs.md`, mapping table).

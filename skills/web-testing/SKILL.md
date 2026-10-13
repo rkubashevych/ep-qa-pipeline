@@ -324,7 +324,7 @@ statuses land there first. This stage emits:
   result is wrong (the assumed UI element does not exist as described,
   the expected behaviour contradicts the ticket's own spec). Not a
   FAIL, not a PASS: the case or requirement needs correcting; feeds
-  the human summary's "Requirements to correct" section. **If you
+  a case-correction line in the human summary's "To do". **If you
   write the doubt, you must classify it** (status-vocabulary,
   cross-stage rules): a finding that blames the case's wording IS a
   SPEC-DEFECT — do not record a FAIL and explain in the notes why it

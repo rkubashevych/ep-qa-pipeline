@@ -49,7 +49,7 @@ Skill: <the line `skill_stamp.py api-testing` prints>
 | TC-REQ-37.1 | <scenario name> | QA | NOT-TESTABLE (instrumentation) | — | instrumented surface + API-created precondition — see Route to web-testing |
 | TC-REQ-30.1 | <scenario name> | QA | BLOCKED | — | precondition unreachable |
 | TC-REQ-13.1 | <scenario name> | PASS(code) | NOT EXECUTED | — | no BM endpoint reachable on the supplied hosts |
-| TC-REQ-35.1 | <scenario name> | QA | SPEC-DEFECT | POST /api/v1/... | case premise wrong — see Findings + "Requirements to correct" |
+| TC-REQ-35.1 | <scenario name> | QA | SPEC-DEFECT | POST /api/v1/... | case premise wrong — see Findings (feeds the summary's "To do") |
 | RISK-CR-2 | <risk name — no covering case> | code-review risk 2 | FAIL CONFIRMED | POST /api/v1/... | risk confirmed at runtime — see Findings |
 
 ## Findings

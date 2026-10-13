@@ -121,7 +121,7 @@ Code-review finding (if any): <file, line, one-line finding>
   one bug listing all affected TC-IDs.
 - Redact every token/credential; screenshots must not show secrets.
 - After creation, the new bug keys go into the human summary's
-  **Confirmed bugs** (and the run's `fail` rows link them on the QA
+  **Bugs** (and the run's `fail` rows link them on the QA
   Service side). No extra "bugs filed" comment on the sub-task — the
   status line and the human summary are the only two comments a ticket
   gets (`results-comment-template.md`).

@@ -79,9 +79,11 @@ verdicts (the QA Service run holds those — `test-runs.md`).
   observations carried as questions, corrections not applied), since no
   analyzer pass follows it. Closing: when a decision lands (a PM ruling, a case promoted to the
   suite, an item filed as a bug — write the key, a risk row executed to
-  a verdict), fill `Decision` and `Closed`. It also lists the still-open
-  rows at the end of the human summary under **Carried forward** — one
-  line each, so the reader of the summary sees what the round did *not*
+  a verdict), fill `Decision` and `Closed`. It also puts every
+  still-open row in the human summary, once: an action row under
+  **To do** with its owner, a question row under **Questions**
+  (0.48.0; until then a separate **Carried forward** list repeated
+  them). The reader of the summary sees what the round did *not*
   settle.
 - The user closes a row by saying so ("drop RISK-CR-2") — record the
   reason as the Decision; never delete the row.

@@ -309,7 +309,7 @@ the plan, one row in an exported sheet):
 5. **What's left out is named, not dropped:** unselected cases appear
    in the Coverage section as `settled (<status>, <source>)`.
    Stage 10 records those verdicts as machine-only — the summary's
-   PARTIALLY VERIFIED wording already covers that honestly.
+   "Checked by hand: N of M" footer line already covers that honestly.
 
 A card's verdict applies to every case in its `covers:` list unless the
 tester singles one out — the walk names them when recording, and stage

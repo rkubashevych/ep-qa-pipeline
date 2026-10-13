@@ -445,7 +445,7 @@ is cheaper to find here than after the bug is filed.
   row or SPEC-DEFECT answers it.
 - 🟡 **any `OBSERVATION (no source checked)` presented as a defect** —
   in a defect list, a bug draft, a run-sheet row phrased as a fault, or
-  the human summary's confirmed-bugs section. The status is correct and
+  the human summary's Bugs section. The status is correct and
   its placement is not.
 - 🟡 **a defect resting on a precedent ticket instead of a clause.**
   A closed ticket shows how a similar case was ruled; it is not a

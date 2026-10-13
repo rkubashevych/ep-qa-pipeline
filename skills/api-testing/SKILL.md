@@ -213,7 +213,7 @@ or changed statuses land there first. This stage emits:
 - `SPEC-DEFECT` — executing the case showed its PREMISE or expected
   result is wrong (the assumed setting does not exist, the expected
   value contradicts the ticket's own spec). Not a product FAIL, not a
-  PASS: feeds the human summary's "Requirements to correct" and a
+  PASS: feeds a case-correction line in the human summary's "To do" and a
   `discrepancy` note on the suite case. **If you write the doubt, you
   must classify it** (status-vocabulary, cross-stage rules): a finding
   that blames the case's wording IS a SPEC-DEFECT, not a FAIL.

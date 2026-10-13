@@ -11,7 +11,7 @@ that closes every run. Moved here verbatim in 0.41.0.
 ## Why two waves — and why "provisional" labels do not work
 
 **Wave 2 — after `qa-manual-results` (stage 10), never now.** The
-human summary, the story comment, the stage-verdict table, and any
+human summary, the story comment, the results table, and any
 request for a product decision — by then every verdict is
 human-confirmed or retracted. (Real-run rationale: a PROVISIONAL
 label prevented nothing — a mis-typed bug, three already-answered

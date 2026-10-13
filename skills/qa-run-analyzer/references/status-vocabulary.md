@@ -22,7 +22,7 @@ Legend for "Emitted by": CR = code-review (stage 6), API = api-testing
 | `QA` | CR only | Cannot be verified against code text; needs runtime. INPUT status for stages 7/8 — never an output of theirs. | — |
 | `N/A` | CR | The case does not apply to this PR (code absent from it). | Reason in Findings. |
 | `RE-ROUTE [UI]` | CR | Channel tag is wrong: the assertion originates in client-side code. Web-testing takes the case regardless of tag. Replaces QA for that case. | File+line of the client-side behaviour. |
-| `SPEC-DEFECT` | CR, API, WEB | The CASE (premise or expected result) is wrong, not the code. Feeds "Requirements to correct" + a `discrepancy` suite note. | What the case says vs what the spec/behaviour is. |
+| `SPEC-DEFECT` | CR, API, WEB | The CASE (premise or expected result) is wrong, not the code. Feeds a case-correction line in the summary's "To do" + a `discrepancy` suite note. | What the case says vs what the spec/behaviour is. |
 | `PARTIAL` | API, WEB | Some steps/surfaces pass, others do not (or are unreachable — e.g. an "anywhere" claim with unenumerated roles). | Which passed, which did not/could not. |
 | `BLOCKED` | API, WEB | Tried and could not execute: missing auth/host/data, unreachable precondition. Not a FAIL. | The reason + a recorded `Probe:` (verbatim call/check + response) proving the blocker is real. |
 | `BLOCKED (unverified)` | API, WEB | BLOCKED with NO probe recorded. A distinct statistics row; the analyzer flags 🔴 if it survives to the final verdict — wrong blockers keep being accepted (9 across two runs dissolved on one probe each). | The unprobed reason + what would verify it. |

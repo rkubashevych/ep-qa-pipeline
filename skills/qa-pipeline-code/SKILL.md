@@ -311,7 +311,7 @@ story does not exhaust the orchestrator's context:
    rule").
 
    **Wave 2 — after `qa-manual-results` (stage 10), never now:** the
-   human summary, the story note, the stage-verdict table, any request
+   human summary, the story note, the results table, any request
    for a product decision. **The narrow exception:** a finding may
    publish in wave 1 only if ALL of — confirmed at RUNTIME, evidence
    attached, blocks the manual round. A code-read FAIL never qualifies.
