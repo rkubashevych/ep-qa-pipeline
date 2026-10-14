@@ -5,6 +5,67 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.54.0 — 2026-10-14 — QA Service's sign-off and source watch, used as checks
+
+**Trigger: the first `qa-service-watch` triage (2026-10-14,
+`~/.ep-qa/qa-service-watch/2026-10-14-triage.md`).** Three candidates
+were tried on MEXP (EP-55889). The user approved two.
+
+**`feature_signoff` → stage 10 (`qa-manual-results` Step 4), read-only.**
+- It works: READY / NOT READY, with blockers by rule (SO-RULE-02/03/04)
+  and warnings.
+- **Wrong scope for a ticket.** It judges the whole feature suite: on
+  EP-55889 it found 59 blockers, of which 4 were the ticket's (the 2
+  known `<`/`>` defects and the 2 requirements they fail). The other
+  55 were V2/V3 API requirements of other work.
+- **Too long to post.** Its comment is 23,260 characters.
+- So the pipeline uses it as a check:
+  - blockers are split by this ticket's step-0 scope;
+  - this ticket's blockers go on a new footer line (`QA Service
+    sign-off: READY | NOT READY — <n> for this ticket (<ids>) · <m>
+    elsewhere in the feature suite`), and each must already be a Bug, a
+    To do or a Question;
+  - its warnings go to the ledger;
+  - never `waive` unasked;
+  - its comment is posted only on request, and only for a suite that is
+    the ticket's own (re-posts update in place via `commentId`).
+- `results-comment-template.md`: the footer line.
+- It already found two real things on MEXP:
+  - 6 cases "passed but the ref no longer resolves" (the links hit by
+    Bitbucket 429, 0.50.2);
+  - MEXP-TSW-01..06 traceability naming `EP-54007`, a Jira key in a
+    requirement-id field.
+
+**`check_source_updates` → code-phase step 0, as `sources-of-record.md`
+§9b, right after `source_tools.py drift`.**
+- It is QA Service's server-side twin of our drift check: a text digest,
+  then relocating each requirement's stored quote.
+- Its notices (`stale_quote`, `new_material`) on this ticket's
+  requirements go under "Changed since the docs phase" (marked
+  `(QA Service source watch)`) and into the ledger, merged with the
+  local drift when they agree.
+- The first call records a baseline.
+- Notices are never resolved, dismissed or re-baselined unasked.
+- Suites published before 0.47.0 record no `sources` (MEXP: nothing
+  watched). That is said once, and the local drift stays the check.
+
+**Analyzer** (`references/qa-service-first-checks.md`): 🟡 sign-off not
+checked; 🟡 a ticket blocker missing from the summary; 🟡 a source-watch
+notice not carried.
+
+**Not adopted — `feedback_draft` / `post_register_feedback`:**
+- **SECURITY:** `feedback_draft` returned the QA Service bot account's
+  live Atlassian API token (`identity.auth.token`) in a read-only
+  response. The token must be rotated and the leak reported to the QA
+  Service owners. The pipeline must not call the tool until it is fixed.
+  The token is not reproduced here.
+- On MEXP it had nothing to send: every requirement with a blocker or
+  major finding is excluded as `no_source`.
+- It is a different message from our grooming questions comment (review
+  findings sent to the source document).
+- Revisit after the fix, as a route for the 0.50.1 review-pass
+  findings.
+
 ## 0.53.0 — 2026-10-14 — qa-service-watch: a weekly check of what changed in QA Service
 
 **Trigger: the user, 2026-10-14:** "wire something to our qa pipeline

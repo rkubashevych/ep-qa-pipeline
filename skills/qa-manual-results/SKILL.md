@@ -164,6 +164,32 @@ and the bug-key table.
 
 ### Step 4 — Write back (REQUIRED PAUSE / CONFIRM)
 
+**QA Service sign-off check (0.54.0) — read-only, inside this step.**
+After the verdicts are recorded and before the summary is posted, call
+`feature_signoff {jiraKey: <STORY>, suiteIds: [<the suite>]}`. It judges
+the WHOLE feature suite (SO-RULE-02 no register, -03 a requirement not
+passed, -04 a case failing / blocked / known defect), so split its
+`blockers` by this ticket's scope — the requirements and cases this run
+selected at code-phase step 0 (`detail.ticket` / the ticket's
+`sources`):
+- **this ticket's blockers** → the summary footer line `QA Service
+  sign-off: READY | NOT READY — <n> for this ticket (<ids>)`, and each
+  one must already be a Bug, a To do or a Question in the summary; add
+  the missing ones;
+- **the rest of the suite** → only a count on the same line
+  (`· <m> elsewhere in the feature suite`), never as items: they are
+  other work's open cases (EP-55889, 2026-10-14: 4 of 59 blockers were
+  the ticket's);
+- **`warnings`** (a passed case whose ref no longer resolves, a
+  traceability id the register does not hold) → ledger rows.
+Never `waive` on your own judgement — only an exception the user
+names, with its reason. Its `comment.markdown` is NOT posted by default
+(23,000 characters on a feature suite, against the one-table summary).
+Post it only when the user asks AND every requirement in the suite is
+this ticket's; a re-post passes the earlier comment's `commentId` so it
+updates in place. No connector or no suite → `QA Service sign-off: not
+checked — <reason>`.
+
 **Run the publication gate on the drafted summary first**
 (`../qa-pipeline/references/sources-of-record.md` § 7). This comment is
 the first and often only thing a human reads, so it is the highest-stakes

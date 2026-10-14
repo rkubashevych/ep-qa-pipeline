@@ -238,6 +238,11 @@ correct, Unverified defect claims and Carried forward.
   `Test run: none, <reason>`. **`Test cases:`** goes in whenever a suite
   exists. The run page is where a reader checks the verdicts; who
   recorded each one shows on each case's page under Execution history.
+- **`QA Service sign-off:`** (0.54.0, stage 10 only) — `READY` or
+  `NOT READY — <n> for this ticket (<ids>) · <m> elsewhere in the
+  feature suite`, from `feature_signoff`, split by this ticket's scope
+  (`qa-manual-results` → Step 4). The wave-1 status line and the step-6
+  draft don't carry it: the verdicts it reads are not final yet.
 - **No run-health line in Jira.** The 🟢/🟡 health line is about the
   pipeline, not the product. It stays in the run report and in chat.
 

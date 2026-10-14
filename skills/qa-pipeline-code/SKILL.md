@@ -109,7 +109,7 @@ it says what deliberately does not exist, which is what stops a false
 defect; none → a `NONE FOUND` row, flagged in the run report; (3) the
 implementing sub-task's AC; (4) the ticket under test (a Bug: its
 repro and stated expected result). **Save each body verbatim, fenced,
-to `r<N>/sources/`, then run `source_tools.py drift <STORY>`** (§8–§9):
+to `r<N>/sources/`, run `source_tools.py drift <STORY>` + §9b** (§8–§9):
 `STALE` criteria and `NEW MATERIAL` go under `## Changed since the docs
 phase` in the register and into the retest-scope confirmation or the
 pre-stage-5 line; stages 6–8 treat the re-fetched text as governing.

@@ -286,6 +286,31 @@ run, not passed.
 
 ## 9. Drift — the source changed since the docs phase (0.47.0)
 
+**§9b — QA Service's own source watch (0.54.0), run right after
+`source_tools.py drift`.** QA Service watches the same pages server-side,
+by the same idea (a text digest, then relocating each requirement's
+stored quote), and keeps the result as notices everyone sees in the web
+UI:
+1. `check_source_updates {suiteId}` — re-reads every document the
+   suite's requirements cite. The first call on a suite records a
+   baseline and reports nothing; say "QA Service source watch: baseline
+   recorded".
+2. `list_source_impacts {suiteId}` — the open notices. Keep the ones on
+   this ticket's requirements: `stale_quote` (the passage a requirement
+   rests on was rewritten) and `new_material` (a paragraph no quote
+   covers, raised against the suite).
+3. They go under `## Changed since the docs phase` in `<KEY>-sources.md`
+   marked `(QA Service source watch)`, beside the local drift lines, and
+   into the ledger. A notice the local drift also found is one item, not
+   two.
+4. **Never resolve, dismiss or adopt a baseline on your own.** Closing a
+   notice (`resolve_source_impact`) is the docs-phase owner's call after
+   the requirement was edited or judged unaffected; a dismissal needs a
+   written reason.
+A suite whose requirements record no `sources` (published before 0.47.0
+— MEXP on 2026-10-14) has nothing to watch: say "QA Service source
+watch: no sources recorded" once, and keep relying on the local drift.
+
 The retest already diffs the **suite** against the docs-phase file
 (`../../qa-pipeline-code/references/run-modes.md`). That catches a case a PM
 added in QA Service. It cannot catch a change to the **page**:

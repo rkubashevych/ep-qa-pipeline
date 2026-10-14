@@ -33,6 +33,15 @@ Part of § 4 "QA Service sync" in `../SKILL.md`. Read
   - 🔴 **override approval** — an entry of this ticket approved with
     `approvedVia: override`. The pipeline never calls
     `approve_register_entry`; name who did.
+- **Sign-off and source watch** (0.54.0):
+  - 🟡 **sign-off not checked** — a stage-10 summary with no `QA Service
+    sign-off:` footer line while the connector was present;
+  - 🟡 **a ticket blocker missing from the summary** — a `feature_signoff`
+    blocker on this ticket's cases that is neither a Bug, a To do nor a
+    Question;
+  - 🟡 **source-watch notice not carried** — an open `stale_quote` /
+    `new_material` notice on this ticket's requirements that is not in
+    `<KEY>-sources.md` or the ledger.
 - Report the split in the findings summary: adopted A · written here W
   · code-level K, and the level histogram of this ticket's cases. All
   cases at `M` / `E2E` with a pure rule among the requirements is a 🟡
