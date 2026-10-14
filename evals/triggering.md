@@ -123,6 +123,19 @@ names who should handle it instead).
   proposes the RC smoke
 - ❌ "run the RC smoke for EP-57782" → qa-rc-smoke (mode named)
 
+## qa-api-tests (API cases → implemented in QA Service)
+- ✅ "automate the API cases for EP-57310"
+- ✅ "write the API tests for this ticket and register them in QA Service"
+- ✅ "make the API cases implemented in QA Service for EP-55889"
+- ✅ "create the frontend test sub-task for EP-57253"
+- ❌ "test the API for EP-1234" / "hit the endpoints" → api-testing
+  (executes cases on a test env, writes no test code)
+- ❌ "register the tests from PR #5544" (already written and merged)
+  → qa-manual-results step 4d, or the QA Service link tools
+- ❌ "write test cases for EP-1234" → qa-test-cases / qa-pipeline-docs
+- ❌ "implement the unit tests for visitor/meeting-request" (a suite,
+  no ticket, not API) → QA Service's own qa-implement-tests flow
+
 ## qa-rc-smoke (release-candidate mode)
 - ✅ "smoke test the RC for EP-57782"
 - ✅ "check these items are on RC: EP-57107, EP-57398, EP-57509"

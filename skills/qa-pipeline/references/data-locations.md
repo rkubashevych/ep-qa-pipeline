@@ -42,7 +42,8 @@ runs/<ISSUEKEY>/
     -walk-plan.md · -walk-state.json · -walk-results.md ·
     -manual-results.md · -testdata.json · -testdata-notes.md ·
     -runsheet.xlsx · build_runsheet_<ISSUEKEY>.py ·
-    -api-evidence.md · -evidence-audit.md · -<step>-plan.json · sources/ (0.47.0)
+    -api-evidence.md · -evidence-audit.md · -<step>-plan.json · sources/ (0.47.0) ·
+    -api-tests.md (qa-api-tests, 0.51.0)
   <RC-KEY>-rc-smoke.md          qa-rc-smoke (0.46.0), at the folder root of
                                 the RC regression ticket — no docs/, no r<N>/;
                                 a re-smoke appends a dated section;

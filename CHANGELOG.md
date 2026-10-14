@@ -5,6 +5,93 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.51.0 — 2026-10-14 — qa-api-tests: API cases implemented through QA Service, frontend cases to the frontend developer
+
+**Trigger: the user, after checking PR #5544 (EP-57310, suite TMU)
+against QA Service.** The direction: for every task, the API tests
+should be *implemented* in QA Service, not left *planned*, and the
+frontend cases should go to the frontend developer while the backend
+API ones stay with QA. The example was EP-58302, "Frontend: implement
+automated tests for the Language filter (QA Service suite LANGF)".
+
+**What was found:**
+- **PR #5544 was written by hand** in a session: one Codeception Cest,
+  a `@testCaseId` per test, two `@skip` with reasons, then linked with
+  `landing: pr`. TMU has no implement runs. 9 of 11 tests resolve, and
+  the two skipped ones are correctly unlinked. The PR is still open, so
+  "implemented" runs in no CI yet.
+- **QA Service ships the whole workflow.** `list_agent_actions` →
+  `implement_tests` (agent `bitbucket-test-implementer`, skill
+  `api-e2e-tests-authoring`, client mode, runnable). It authors, runs
+  on the docker-local harness, opens a PR, and records `implemented`
+  only for a ref that resolves. Its own executor skill is
+  `qa-implement-tests` (digest `c2046eea6bba`).
+- **Unscoped, the plan picks the wrong cases.** `plan_implement_tests`
+  on TMU / AE selected BUG-01 and BUG-05 (blocked, skipped in the PR)
+  and REG-04 (its API half already linked). Scope has to come from the
+  ticket.
+- **QA Service does not create the Backend/Frontend pair by itself.**
+  Its `request_dev_tests` files one task per suite and level, on request
+  ("[QA][Tests] HUB: add 15 Unit tests …", label `qa-test-request`). The
+  "Backend: / Frontend: implement automated tests …" pairs
+  (EP-58301/58302, HV-660…677, 2026-10-07) were filed in a batch by a
+  colleague. They are not a QA Service default.
+
+**What changes — new skill `qa-api-tests`:**
+- **Step 0:**
+  - fetches `qa-implement-tests` at run time and follows it, so QA
+    Service's method changes need no plugin release;
+  - checks the action is runnable;
+  - checks the backend checkout and the docker-local harness.
+- **Step 1:**
+  - selects this ticket's `AE` / `C` cases with no resolved link;
+  - sets aside cases blocked by a defect or an open question, with the
+    reason;
+  - always passes `stableIds` to the plan.
+- **Step 2:** links tests the repo already has and notes `@skip`ped
+  ones (`detail.devTests`), the `request_dev_tests` existingCheck idea
+  applied to the API half.
+- **Step 3:**
+  - `plan_implement_tests` per level, policy `flag-only` / draft PR /
+    `stampIds`;
+  - one confirmation with plan `r<N>/<KEY>-apitests-plan.json`, then
+    the batch loop;
+  - verify, tag;
+  - a To do and a ledger row to re-link after the PR merges.
+- **Step 4:** `request_dev_tests` for `CFE` and `E2E` under the story,
+  through its own checks, assigned to the story's frontend developer.
+  Backend Unit / Integration cases are listed and requested only on an
+  explicit yes.
+- **Step 5:** `r<N>/<KEY>-api-tests.md`.
+- **`references/local-harness.md`**, from the team's harness repo
+  `ExpoPlatform-Ltd/php-monolyth-local-env` (README + `API-TESTS.md`,
+  commit `942f8a5`, which the user pointed to). That repo stays the
+  source of truth. The reference records what the skill depends on:
+  - the Step 0 checks (`expo-qa-server`, hosts, a smoke run);
+  - the run command;
+  - the "red on clean alpha" list to check before calling a product
+    defect;
+  - the conventions the QA Service plan does not set: branch
+    `qa/<KEY>-<slug>` passed as `targetBranch` (the plan proposed
+    `qa/ae-<suite-path>`), `@testCaseId` in the method docblock,
+    `@skip … — EP-x`;
+  - what CI runs: only unit suites gate a PR; `api-admin` /
+    `api-front` / `api-mob` run only in the manual `alpha-full-tests`
+    pipeline, so the local run is the only execution before a merge.
+
+**Wiring:**
+- the README stage table and a note;
+- MAINTAINERS layout;
+- the dispatcher route "API automation";
+- the code phase's final response offers it;
+- `write-plans.md`, `data-locations.md`;
+- `evals/triggering.md` (new section, 4 ✅ / 4 ❌);
+- plugin description.
+
+**Not done:** no implement run was started. The first real run, on
+TMU or MEXP, is the end-to-end test, and it needs the docker-local
+harness up on this machine.
+
 ## 0.50.2 — 2026-10-14 — corrections from applying 0.50 to the Meeting Export suite
 
 **Trigger: applying the 0.50 flow by hand to `common/meeting-export`
