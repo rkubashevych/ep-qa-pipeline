@@ -104,13 +104,42 @@ API half was already linked. **Always pass `stableIds`.**
 ## Step 2 — Link tests that already exist
 
 Developers often write the test without the case id; QA Service then
-reads the case as missing. For each selected case, search the backend
-checkout at the configured branch (`git grep` on `origin/alpha` after a
-fetch) and on open branches named after `<KEY>` or its sub-tasks: the
-case id, the ticket key, and the endpoint path from the case's steps.
-- **Covers the case fully, not `@skip`ped** →
+reads the case as missing.
+
+**Search every home of the level, not only the monolith (0.55.0).**
+`list_repositories {productId}` lists, per repo, the `surfaces` it is a
+home for — including **verify-only** homes, where tests live that no
+implement run writes. For `expoplatform`, backend `AE` has two: the
+monolith (`main`, Codeception) and **`teststone`** (Vitest,
+`tests/api-e2e/<feature>/`, contracts in `tests/api-contract/`). On
+MEXP (2026-10-14) all 66 meeting-export API tests were in teststone and
+this step had looked only in the monolith. Search each home at its
+configured branch (a local clone after a fetch, else the Bitbucket /
+GitHub API) and the open branches named after `<KEY>` or its sub-tasks:
+the case id, an older id the suite was imported under (MEXP was written
+from a plan whose ids read `API-E2E-MTEX-<SEG>-NN`), the ticket key,
+and the endpoint path from the case's steps. Read the assertions, not
+only the title: a test that accepts "error **or** clamped" does not
+cover a case that requires an error (MEXP-VAL-04).
+
+**A link resolves only when the case id is IN the test file.** QA
+Service verifies a link by finding the stableId in the file at that
+ref; the test's own title and an older id do not count. All 40 MEXP →
+teststone links landed `partial`, "stableId … not found in the file"
+(2026-10-14). So a test found without the case id is either:
+- **linked and the id stamped** — a PR to that repo putting `<ID>: ` at
+  the start of each test title (`it('MEXP-TSW-01: …')`; PHP:
+  `@testCaseId` in the method docblock), after the user's yes (it is
+  another repo's code); re-link with `landing: "pr"` + `prBranch`, then
+  `merged` after the merge; or
+- **left unlinked**, with the ref in `detail.devTests` and a To do
+  "stamp <N> case ids in <repo> (QA)".
+A link recorded before the id is in the file reads `partial` and counts
+toward nothing; say so instead of reporting the case as covered.
+- **Covers the case fully, not `@skip`ped, id in the file** →
   `link_implemented_tests {suiteId, links: [{stableId, ref:
-  "<path>::<method>", level, repo: "main", landing}], verify: true}` —
+  "<path>::<method or exact test title>", level, repo: <the home's
+  repoId: "main", "teststone", …>, landing}], verify: true}` —
   `landing: "merged"` on the configured branch, `"pr"` + `prBranch`
   otherwise. Drop the case from Step 3.
 - **Partial** → keep it; hand the ref to the implementer in the plan

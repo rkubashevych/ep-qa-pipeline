@@ -5,6 +5,52 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.55.0 — 2026-10-14 — qa-api-tests searches every home of the level, and knows a link needs the id in the file
+
+**Trigger: the user pointed out existing meeting-export API tests
+(2026-10-14):** "teststone, main: tests/api-e2e/meeting-export/ — 22
+specs … QA Service: suite MEXP; the API tests are not linked yet."
+- The check confirmed it: 24 files, 66 Vitest tests (V2 + V3).
+- 22 of them carry ids `API-E2E-MTEX-<SEG>-NN` matching `MEXP-<SEG>-NN`
+  one-to-one. The MEXP API cases were written from that plan, under the
+  old prefix MTEX.
+- `ep54007-timestamp-write.spec.ts` (`describe "EP-54007: …"`) explains
+  the stray `EP-54007` the sign-off flagged in MEXP-TSW traceability.
+- Earlier the same day, both the MEXP update and `qa-api-tests` Step 2
+  had searched only the monolith.
+
+**Linked on MEXP, with the user's yes:**
+- 40 cases → teststone, `landing: merged`:
+  - 14 by id;
+  - 20 by an equal check;
+  - 6 probable, confirmed by the user: PAG-01, LIST-02, LOC-01,
+    GATE-02, FILT-01, SCHEMA-01.
+- Not linked:
+  - VAL-04: the test accepts "error or clamped", the case requires an
+    error;
+  - 12 tests with no case (client fault tolerance, DB view and setting
+    canaries, contactless / type=event exclusion, a few invariants).
+- **All 40 came back `partial`: "stableId … not found in the file".**
+  QA Service resolves a link only when the case id is physically in the
+  test file. teststone carries the MTEX ids or none. The links record
+  the mapping and count toward nothing until the ids are stamped.
+
+**What changes — `qa-api-tests` Step 2:**
+- **Search every home of the level.** `list_repositories` lists the
+  surfaces per repo, verify-only homes included. For backend AE that is
+  the monolith AND teststone.
+  - Search each at its configured branch for: the case id, an older id
+    the suite was imported under, the ticket key, the endpoint path.
+  - Read the assertions, not only titles.
+- **A link resolves only with the id in the file.** A test found
+  without it is either:
+  - linked with the id stamped, via a PR to that repo after the user's
+    yes, then re-linked; or
+  - left unlinked, with `detail.devTests` and a To do.
+  A `partial` link is never reported as coverage.
+- The link call takes the home's `repoId` (`main`, `teststone`, …), not
+  always `main`.
+
 ## 0.54.0 — 2026-10-14 — QA Service's sign-off and source watch, used as checks
 
 **Trigger: the first `qa-service-watch` triage (2026-10-14,
