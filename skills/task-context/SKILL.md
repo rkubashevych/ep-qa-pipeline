@@ -262,6 +262,18 @@ Requirements section is not a merged paraphrase; it is a ledger:
   `SB-1 (Confluence §3, spec body): <the rule, verbatim>`. SB items
   are not counted in the page/captured line. A rule the AC restates
   gets no SB bullet, because the `AC-n` already carries it.
+- **Tech-spec statements (0.57.0)** — only when the ticket has a tech
+  spec (see "Attachments → The tech spec"). Each statement in it that a
+  test could check from outside — a data mapping, a limit, a default, an
+  empty / null rule, an in-scope or out-of-scope surface, an effect on a
+  consumer — becomes
+  `TS-1 (Tech spec §2, <file>): <the statement, verbatim>`. Not a TS
+  item: implementation internals no test can see (a helper's name, a
+  file, "no migration"), the spec's own Tests table and AC-trace table
+  (copy those two verbatim under the section, as they are). A statement
+  the AC already makes gets no TS bullet; one that adds to it, narrows it
+  or contradicts it does. TS items are mapped like SB items and are not
+  counted on the page/captured line.
 - Items only the Jira Description states: `JD-1 (Jira Description): …`.
   Items only a comment states go to "Additional requirements (from
   comments)" as `CM-1 (comment <date>): …`.
@@ -354,6 +366,38 @@ Flow:
    in the context as present but not processed.
 6. If the user skips the upload — record the attachments in the context
    as present but not processed.
+
+### The tech spec (0.57.0)
+
+Developers now attach a tech spec to the story — a Markdown file
+(EP-55889: `EP-58436-tech-spec.md`, written on the spec sub-task
+EP-58436): data mapping, limits, scope, what is out of scope, the dev
+tests they plan, and their own AC trace. It is the one document that
+says what the build will do beyond the acceptance criteria, and on
+EP-55889 three of its rules reached no case (the translation-map
+fallback, the empty map, "the Custom meetings report does not change").
+
+1. **Find it.** `getJiraIssue {fields: ["attachment"]}` on the story and
+   on each sub-task whose summary names a spec ("Spec", "Tech spec",
+   "Technical design"). A tech spec is an `.md` / `.markdown` attachment
+   whose name contains `tech-spec` / `tech_spec` / `techspec` / `spec`,
+   or whose first heading starts with "Tech Spec". Several → take each;
+   say which is newest.
+2. **Fetch it yourself — no upload needed.** The Atlassian connector's
+   `downloadJiraIssueAttachment` (run with `executeRead`) returns a
+   short-lived, single-file download command. Run it once, saving to
+   `runs/<KEY>/docs/sources/<file>`. The link carries a token: never
+   print it, never put it in a file; report the saved path only.
+   (Fallback when the operation is unavailable: ask for the upload, as
+   for any attachment.)
+3. **Write it into the context** under `## Tech spec (as-designed —
+   <file>, <date>)`: the `TS-n` ledger items (Requirements → the AC
+   ledger, above), then the spec's Tests table and AC-trace table
+   verbatim. Its status is **as-designed documentation**: it says what
+   the developer intends to build, not what product asked for
+   (`../qa-pipeline/references/sources-of-record.md` §1).
+4. **No tech spec** → write `Tech spec: none attached` and change
+   nothing else; the docs phase runs as before.
 
 ## Collecting and cross-referencing data
 

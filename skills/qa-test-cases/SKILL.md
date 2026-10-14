@@ -200,7 +200,11 @@ each with the reason:
 - `code-level (U)` / `(I)` / `(C)` / `(CFE)` — proven by the
   product's own test suites in CI, not by this pipeline at runtime. It
   stays in the suite as coverage; cite it on the REQ group's `Code-level:`
-  line.
+  line. A test the tech spec plans (its Tests table, carried in the
+  requirements Notes — 0.57.0) is named on that same line by its spec id
+  (`EP55889-COLUMNS-05 (planned, tech spec)`), so registration finds it
+  after the merge. An `[as-designed]` REQ's cases are runtime cases like
+  any other.
 - `duplicate of <stableId>` — two QA Service cases verify the same check.
 - `expected result not in the requirements` — the grounding rule below
   applies to adopted cases too; a generated case that asserts more than
@@ -354,7 +358,8 @@ After generating and before saving the file:
   on its heading — zero or two is an error. Structural requirements
   have none. The core count equals the number of behavioural
   requirements.
-- **AC coverage is complete:** every `AC-n` (and `SB-n`, since 0.45.0)
+- **AC coverage is complete:** every `AC-n` (and `SB-n`, since 0.45.0,
+  and `TS-n` — tech-spec items, since 0.57.0)
   in the requirements file's `source:` lines appears on a `Covers:` line of a group that has at
   least one test case or structural line. `reconcile_counts.py` prints
   the ledger sets; the Statistics `AC coverage:` line states

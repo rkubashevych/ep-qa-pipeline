@@ -30,7 +30,7 @@ and a contradiction is a `discrepancy` finding, not a defect.
 | # | Kind | Where it lives | What it settles |
 |---|------|----------------|-----------------|
 | 1 | **Product brief / acceptance criteria** | Confluence, linked from the ticket (ExpoPlatform: space `P2`) | What the build must do. The Given/When/Then clauses. |
-| 2 | **As-built documentation** | Confluence, written from merged code (ExpoPlatform: space `FRON` for front end, `DS` for the search service) | What the build actually does, and what it deliberately does **not** do. Names the entities, states and paths that exist. |
+| 2 | **As-built documentation** | Confluence, written from merged code (ExpoPlatform: space `FRON` for front end, `DS` for the search service); **the developer's tech spec** attached to the story or its spec sub-task (`<file>.md`, the `TS-n` items — 0.57.0) | What the build actually does, and what it deliberately does **not** do. Names the entities, states and paths that exist. A tech spec is *as-designed* until the code merges: a TS rule the code contradicts is a question to the developer (their spec or their code is wrong), never a case edit and never a defect on its own. |
 | 3 | **Implementing sub-task's own acceptance criteria** | Jira, on the Backend/Frontend sub-task | What was actually commissioned. A clause in the brief but not here is a mis-derived requirement. |
 | 4 | **The ticket under test** | Jira description + comments | For a Bug: the reproduction steps and the stated expected result. Nothing else. |
 

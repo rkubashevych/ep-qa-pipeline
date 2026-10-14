@@ -120,6 +120,32 @@ numbers come from counting the ids, and any AC item missing from every
 repeated in the Notes. `reconcile_counts.py <KEY>` computes the same
 sets for the analyzer; a mismatch is a 🔴.
 
+**Tech-spec items — `TS-n` (0.57.0), only when the context has a
+`## Tech spec` section.** They are mapped like SB items: every `TS-n`
+appears on at least one `source:` line, and the coverage line gains
+` · TS <n>/<N>`. For each one:
+- **It restates an AC / SB rule more precisely** (a limit, a default,
+  the field a column reads) → add the `TS-n` to that REQ's `source:` and
+  fold the precise value into the REQ text, marked `(tech spec)`.
+- **It adds observable behaviour no AC states** (the 32,767-character
+  cut, a translation-map fallback, an empty-map rule) → a new REQ, kind
+  `rule` / `fr`, with ` [as-designed]` after the risk marker, so a
+  reader knows product never asked for it — it is what the developer
+  built.
+- **It puts a surface out of scope** ("the Custom meetings report is
+  unchanged") → a REQ that the named surface does NOT change, so a
+  regression case guards it.
+- **It contradicts an AC / SB rule** → the REQ keeps the spec-of-record
+  version, and grooming raises a Contradiction finding, SPEC class,
+  quoting both: the spec of record wins until the owner says otherwise
+  (`../qa-pipeline/references/sources-of-record.md` §1).
+- **An AC item the spec's own AC-trace table does not mention** → a
+  finding "AC-n not addressed by the tech spec", BEHAVIOUR class: recon
+  or the developer can say whether it was simply left out of the table.
+- The spec's **Tests table** (planned developer tests) is not a source of
+  requirements; carry it to the Notes so stage 4 can name those tests on
+  the `Code-level:` line and registration can find them later.
+
 ## Grooming method
 
 For each requirement from the context file go through four questions:

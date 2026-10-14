@@ -133,6 +133,7 @@ digest recorded in the report:
 | `VERIFIED` | continue | continue |
 | `DRIFT` | **a possible product defect, never a case edit.** The case is set aside from Step 3 (its test would be red); the code / spec difference goes to the ledger and the bug offer, quoted from both sides | **the case is wrong.** Propose the correction: `edit_test_case` with a `correction` key (old claim → what the code does, `file:line`, commit); `edit_requirement` with the code as `sources` (`kind: context`); `status: retired` for a requirement the code contradicts outright, with the reason |
 | `DRIFT` that looks unintended (a silent fallback, an unvalidated range) | as above | correct the case to the as-built behaviour AND create an `oq` requirement asking whether it is intended (MEXP-OQ-06 / OQ-07) |
+| `DRIFT` on an `[as-designed]` requirement (from the developer's tech spec, `detail.basis` — 0.57.0) | — | **a question to the developer**, not a case edit and not a defect: their spec or their code is wrong. Ledger row + a line in the human summary's Questions; the case is set aside until they answer |
 | `GAP` | keep, list in the report | keep, list in the report |
 | `CONFLICT` | an `oq` requirement naming both oracles | same |
 

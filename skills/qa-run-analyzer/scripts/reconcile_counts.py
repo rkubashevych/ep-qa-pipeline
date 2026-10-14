@@ -249,8 +249,10 @@ def locate(key, stage, d, docs):
 # test case" as arithmetic, not judgement.
 # SB-n (0.45.0): a rule from the AC page's spec body that the AC heading does
 # not restate. Not counted on the page/captured line, but mapped like JD.
-LEDGER_ID = re.compile(r"\b(AC|SB|JD|CM)-\d+\b")
-CONTEXT_BULLET = re.compile(r"^- ((?:AC|SB|JD|CM)-\d+) \(", re.M)
+# TS-n (0.57.0): a testable statement from the developer's tech spec (an .md
+# attached to the story or its spec sub-task). Mapped like SB.
+LEDGER_ID = re.compile(r"\b(AC|SB|TS|JD|CM)-\d+\b")
+CONTEXT_BULLET = re.compile(r"^- ((?:AC|SB|TS|JD|CM)-\d+) \(", re.M)
 PAGE_COUNT = re.compile(r"^AC items on the page:\s*(\d+)\s*·\s*captured:\s*(\d+)", re.M)
 SOURCE_LINE = re.compile(r"^\s*-\s*source:\s*(.+)$", re.M)
 COVERS_LINE = re.compile(r"^Covers:\s*(.+)$", re.M)
@@ -272,9 +274,10 @@ def ledger_report(context, requirements, test_cases):
     req = ledger_ids(requirements, SOURCE_LINE) if requirements else None
     tcs = ledger_ids(test_cases, COVERS_LINE) if test_cases else None
     if ctx is not None:
-        by = {k: sorted(i for i in ctx if i.startswith(k + "-")) for k in ("AC", "SB", "JD", "CM")}
-        if not by["SB"]:
-            del by["SB"]  # keep the pre-0.45 line shape when a page has no spec body
+        by = {k: sorted(i for i in ctx if i.startswith(k + "-")) for k in ("AC", "SB", "TS", "JD", "CM")}
+        for k in ("SB", "TS"):
+            if not by[k]:
+                del by[k]  # keep the older line shape when there is no spec body / tech spec
         pc = PAGE_COUNT.search(context)
         page = f" · page {pc.group(1)}/captured {pc.group(2)}" if pc else " · no page-count line"
         lines.append("AC ledger (context): " + " ".join(f"{k}={len(v)}" for k, v in by.items()) + page)
@@ -615,6 +618,15 @@ def check_ledger(errs):
     out3 = "\n".join(ledger_report(ctx_sb, LEDGER_REQ, None))
     if "SB=1" not in out3 or "MISSING: SB-1" not in out3:
         errs.append(f"ledger: SB item not counted or not reported missing:\n{out3}")
+    # TS-n tech-spec items (0.57.0): counted and mapped like SB; no TS= field
+    # when the ticket has no tech spec.
+    if "TS=" in out:
+        errs.append(f"ledger: TS= printed for a context with no tech spec:\n{out}")
+    ctx_ts = ctx_sb + "\n- TS-1 (Tech spec §2, EP-58436-tech-spec.md): both cells are cut to 32767 characters\n"
+    out4 = "\n".join(ledger_report(ctx_ts, LEDGER_REQ + "\n- source: TS-1\n", LEDGER_TC))
+    tc_line = [x for x in out4.splitlines() if x.startswith("AC ledger (test-cases)")]
+    if "TS=1" not in out4 or not tc_line or "TS-1" not in tc_line[0]:
+        errs.append(f"ledger: TS item not counted, or not reported missing on Covers:\n{out4}")
 
 
 def selftest():

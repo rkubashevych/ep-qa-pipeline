@@ -5,6 +5,67 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.57.0 — 2026-10-14 — the developer's tech spec is a docs-phase source (TS-n)
+
+**Trigger: the user, 2026-10-14.** EP-55889 now carries an attached
+`EP-58436-tech-spec.md`. The user: "I believe all future tasks will
+include these specs — check them in the docs phase so they're covered
+with tests too; if there is no tech spec attachment, do our regular
+flow."
+
+**What the check of EP-55889 showed.** The tech spec states rules the
+docs phase never saw, because it read only the AC page and the
+sub-tasks. Against MEXP:
+- covered: column order, Subject/Message mapping, the 32,767 cut,
+  regular/table meetings, column shift;
+- partly covered: the translation-map fallback order (current language,
+  then `en`); RPT-01 only checks "text, not JSON";
+- not covered: a map with neither key gives an empty cell;
+- not covered: "out of scope: the Custom meetings report does not
+  change" (it sat on the open-items list as an unmapped change since
+  r1).
+
+The Atlassian connector can fetch an attachment itself
+(`downloadJiraIssueAttachment` → a short-lived single-file link), so no
+upload is needed.
+
+**What changes:**
+- **`task-context` → Attachments → "The tech spec":**
+  - finds an `.md` tech spec on the story or a spec sub-task;
+  - fetches it to `docs/sources/` (never printing the link's token);
+  - writes a `## Tech spec (as-designed — <file>)` section: one
+    `TS-n (Tech spec §k, <file>)` ledger bullet per externally checkable
+    statement, plus the spec's Tests and AC-trace tables verbatim.
+    Internals no test can see are not TS items;
+  - no tech spec → `Tech spec: none attached`, nothing else changes.
+- **`requirements-grooming`:** every `TS-n` appears on a `source:`
+  line, like SB. Then:
+  - a more precise restatement is folded into its REQ;
+  - new observable behaviour becomes a REQ marked `[as-designed]`;
+  - an out-of-scope surface becomes a "does not change" REQ;
+  - a contradiction with the AC is a SPEC finding, and the AC wins;
+  - an AC the spec's trace omits is a BEHAVIOUR finding;
+  - the planned dev tests are carried to the Notes.
+- **`qa-test-cases`:**
+  - TS ids count in AC coverage;
+  - planned dev tests are named on `Code-level:` lines, so registration
+    finds them after the merge.
+- **Publish:** a TS-sourced REQ gets a `document` source with the
+  verbatim quote. An `[as-designed]` REQ gets
+  `detail.basis: as-designed (tech spec)`.
+- **`sources-of-record.md` §1:** a tech spec is as-built / as-designed
+  documentation, not a spec of record. A TS rule the code contradicts is
+  a question to the developer.
+- **`qa-api-tests` Step 1b:** `DRIFT` on an `[as-designed]` REQ becomes
+  a question to the developer (ledger + Questions). It is never a case
+  edit and never a defect.
+- **`reconcile_counts.py`:**
+  - `TS` joins `LEDGER_ID` / `CONTEXT_BULLET` and the context count line;
+  - the `TS=` field is omitted when there is no tech spec, so older
+    output and the fixture are unchanged;
+  - self-test: TS counted, a TS missing from `Covers:` reported, no
+    `TS=` without a tech spec.
+
 ## 0.56.0 — 2026-10-14 — qa-api-tests checks the cases against the code first
 
 **Trigger: the MEXP V2 coverage check, 2026-10-14.** The user asked why
