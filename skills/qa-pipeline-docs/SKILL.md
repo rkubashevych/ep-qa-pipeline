@@ -196,7 +196,10 @@ full** — do not summarise or shortcut it. Stages share the run folder
    requirements the user's answers changed, creates only the cases
    written here, stamps the adopted ones and marks the not-adopted ones
    (`qa-service-publish.md` → "Adopted cases" and "Cases stage 4 did
-   not adopt"). (b) is on whenever the connector
+   not adopt"). It also files this ticket's requirements into topic
+   folders and, as the last write, starts QA Service's review pass over
+   the ticket's requirements and cases, which runs in the background
+   (0.50.1, Procedure steps 4b and 7). (b) is on whenever the connector
    is present; when it is absent or the user declines, publish (a) only
    and say so plainly in the final response: the code phase for this
    ticket can then run only on this machine, from
@@ -312,7 +315,8 @@ After publishing, report:
   count-verification result (or "QA Service publish skipped —
   connector not enabled"); the split "adopted from QA Service A ·
   written here W · code-level K"; the tests discovery imported, or the
-  To do when discovery could not run.
+  To do when discovery could not run; the review pass: its verdicts if
+  it finished, else "running — job <id>".
 - The run-analyzer health verdict (🟢/🟡/🔴 per category) and any
   ⚠ SPECIAL ATTENTION items for the code phase.
 - The next step: run `qa-pipeline-code` on the Story key in a fresh

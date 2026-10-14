@@ -148,7 +148,8 @@ Otherwise, using the Atlassian connector and the Story key:
      list both (0.50.0). Report "suite holds N cases;
      M + S in scope; K code-level (CI), J not adopted" (M behavioural,
      S structural — both on the roster); local ids from
-     `detail.pipelineId`.
+     `detail.pipelineId`. Then `register_review_status` (0.50.1,
+     `qa-service-publish.md` → Procedure step 7).
    - Rebuild the **Structural checks** section from the `-STRUCT-`
      cases, the stableId on each line
      (`- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check>`) — roster

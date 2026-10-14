@@ -5,6 +5,61 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.50.1 — 2026-10-14 — requirement folders and QA Service's review, filled too
+
+**Trigger: the user's question after 0.50.0, "we will use all QA
+Service fields filled then, they won't be empty?"** Two QA Service
+states were still left empty on every pipeline publish:
+- **Requirement folders.** Our requirements landed "Not in a folder".
+  The EP-55889 sandbox comparison (same day) showed QA Service's own
+  extraction filing every requirement under a topic. The plugin never
+  called `group_requirements`.
+- **Approved versions.** QA Service approves a requirement or case only
+  through its own AI review (the `requirement-review` /
+  `test-case-review` skills). The plugin never ran it, so every entry it
+  published read as never approved.
+
+**What changes (`qa-service-publish.md` → Procedure):**
+- Step 4b: one `group_requirements` call for this ticket's
+  requirements, `scope: "unfiled"`. It reuses the case folder plan's
+  functionality labels, keeps a rule, its invariant, risk and `fr`
+  together, and never uses kind-named folders. It previews first; the
+  apply comes after the step-6 yes. The verify step checks every
+  requirement has a `folderPath`.
+- Step 7, the last write: `start_register_review` over this ticket's
+  requirements and cases (written, adopted, STRUCT). It runs in the
+  background and doesn't hold the final response.
+  - A failing verdict goes to the ledger (requirement, `[Input]`) or
+    becomes a To do (case). The finding is quoted, never silently
+    edited away.
+  - `approve_register_entry` (approval without a review) is never
+    called.
+- `qa-pipeline-code` step 0 reads `register_review_status` and reports
+  approved / failed / never reviewed. A case that failed review still
+  runs, because the review judges the text, not the product.
+- `qa-run-analyzer` (`references/qa-service-first-checks.md`):
+  - 🟡 requirements not in a folder;
+  - 🟡 review never started;
+  - 🟡 failing review, which becomes 🔴 [Pipeline] when the finding is on
+    neither the ledger nor a To do;
+  - 🔴 an override approval on this ticket's entries.
+
+**Still left empty on purpose:** the suite's `displayName` / `category`
+(human-owned, 0.50.0), and pending tags (`approve_tag` is a person's
+call).
+
+**EP-55889 sandbox comparison (recorded in
+`runs/EP-55889/r2/EP-55889-requirements-comparison.md`):**
+- QA Service's `start_collect_requirements`, given the same four
+  docs-phase sources, extracted 7 requirements to our 8. It found
+  nothing we missed. It kept a "UI view of the report" requirement our
+  recon had shown untestable, and added one clause no source states.
+- It rewrote the shadow suite's prefix from `SBXMEXP` to `MR` and
+  minted its own ids. That confirms the 0.47.0 rule on a real run:
+  `start_collect_requirements` and `start_import_docs` stay off real
+  suites, and our register stays the only one. The shadow suite awaits
+  deletion by the user.
+
 ## 0.50.0 — 2026-10-14 — QA Service authors first, the pipeline fills the gaps
 
 **Trigger: the EP-55889 suite (`common/meeting-export`, prefix `MEXP`),

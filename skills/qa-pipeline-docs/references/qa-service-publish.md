@@ -417,6 +417,24 @@ preview so the user can redirect:
    pipeline's) — list any pending names in the final response. Untagged
    cases are invisible to `get_coverage`, which is the point of this
    step.
+4b. **File the requirements into topic folders (0.50.1).** Without
+   this they land "Not in a folder", while QA Service's own extraction
+   files every requirement under a topic (the EP-55889 sandbox
+   comparison, 2026-10-14). One `group_requirements` call with this
+   ticket's requirements only, `scope: "unfiled"` (never re-files a
+   requirement a human placed):
+   - one folder per behaviour area — reuse the case folder plan's
+     functionality labels, so a requirement and its cases sit under the
+     same name; an existing folder path is reused, never renamed;
+   - a rule, the invariant behind it, the risk to it and the `fr`
+     implementing it go in the same folder (their `detail` cross-links
+     are the signal);
+   - never a folder named after a kind ("Risks", "Open questions") —
+     the tool rejects it, because kind is not a topic.
+   Call it first without `apply` (a preview, written into the publish
+   plan and shown in the step-6 preview), then with `apply: true` after
+   the yes. Report anything it returns as dropped, rejected or left
+   unfiled.
 5. Verify: `get_suite` once at the end and check:
    - counts match the statistics block of the test-cases file;
    - **status buckets account for every case** — all-zero means `status`
@@ -454,6 +472,8 @@ preview so the user can redirect:
    - **folder distribution matches the plan** — no case in "General",
      no folder over ~10 cases. Fixable in place:
      `create_test_case_folder` + `move_test_case`.
+   - **every requirement of this ticket has a `folderPath`** (0.50.1) —
+     an unfiled one is fixable with another `group_requirements` call.
    Fix what is fixable before finishing; report the rest.
 
 > **Verified — all three edit tools MERGE.** Omitted fields are
@@ -470,6 +490,35 @@ preview so the user can redirect:
    on its own. (Until 0.34 it rode on the checkbox-tracker lines.)
    A standalone map block was measured at ~2,000 characters and went
    stale the first time stableIds were corrected.
+7. **Start QA Service's review pass (0.50.1)** — the last write, after
+   the verify, so it reviews the final text. QA Service approves a
+   requirement or case only through its own AI review (the
+   `requirement-review` and `test-case-review` skills); until then the
+   web UI shows it as never approved. One call:
+   `start_register_review {suiteId, stableIds: [this ticket's
+   requirements + its cases (written here, adopted and STRUCT)],
+   subjects: ["requirement", "testCase"]}`. It reviews one entry at a
+   time, about a minute or two each, in the background: poll with
+   `get_job`, but do not hold the final response for it. Report "review
+   running — N entries, job <id>" when it has not finished.
+   - **A passing verdict mints the approved version.** Nothing to do.
+   - **A failing verdict is a finding, not something to fix
+     silently.** For a requirement it goes to the open-items ledger as
+     `[Input]` with the reviewer's finding verbatim, and to the next
+     grooming round. For a case, a To do: "Revise <stableId> — <finding>
+     (QA)". Never edit an entry only to make it pass.
+   - **Never `approve_register_entry`.** It approves without a review
+     and is stamped `approvedVia: override`; it exists for a host with no
+     reviewer, not to clear a failing verdict.
+   - The code phase reads the outcome with one `register_review_status`
+     at step 0 and reports approved / failed / never reviewed for the
+     in-scope entries; each failing finding goes to the ledger. A case
+     that failed review still runs — the review judges the case text,
+     not the product. The analyzer reports it too.
+   - A later `edit_requirement` that changes the text un-approves it, and
+     once the requirement is at v2 or later the review raises pending
+     notices on its cases. A re-run's step 7 reviews only what changed:
+     the default scope is "not approved at its current text".
 
 ## Code phase — suite as the case source (qa-pipeline-code step 0)
 
@@ -697,6 +746,9 @@ The step-6 preview shown to the user must also state:
   re-created) · W written here (created) · J not adopted (marked
   `pipelineSkip`, reasons listed) · K code-level", and any header field
   still to fill.
+- The requirement folder preview from `group_requirements` (0.50.1),
+  and the review pass that will start after the writes ("N
+  requirements + M cases, ~1–2 min each, in the background").
 - The **folder plan**: each functionality folder with its case count
   (target ~5–8 per folder), plus — when the target suite's existing
   cases sit in "General" — the offer to reorganize them into the same

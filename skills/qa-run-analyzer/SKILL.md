@@ -297,8 +297,8 @@ the whole product, ~190 KB) and report ONE of:
 - 🟡 **foreign prefix** — this ticket's stableIds not starting with the
   suite's `prefix` (EP-55889: `MEETING-EXPORT-*` in `MEXP`); fix with
   `edit_requirement` / `edit_test_case` `stableId`.
-- **QA Service first (docs stage 3, 0.50.0)** — the export, adoption,
-  discovery and digest checks: `references/qa-service-first-checks.md`.
+- **QA Service first + publish completeness (0.50.0–0.50.1)** — export,
+  adoption, discovery, digest, folder and review checks: `references/qa-service-first-checks.md`.
 
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh

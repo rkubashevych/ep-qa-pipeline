@@ -1,4 +1,4 @@
-# QA Service first — the analyzer's stage-3 checks (0.50.0)
+# QA Service first — the analyzer's stage-3 and publish-completeness checks (0.50.0, 0.50.1)
 
 Part of § 4 "QA Service sync" in `../SKILL.md`. Read
 `<KEY>-qs-cases.md`, the export docs stage 3 writes
@@ -20,6 +20,19 @@ Part of § 4 "QA Service sync" in `../SKILL.md`. Read
   from the one `../../qa-test-cases/references/test-levels.md` mirrors.
   Fix: re-read its "Level Assignment Rules", refresh the mirror, add a
   CHANGELOG entry.
+- 🟡 **requirements not in a folder** (0.50.1) — a requirement of this
+  ticket with no `folderPath` in `get_suite`. Fix with
+  `group_requirements` (`scope: "unfiled"`).
+- **QA Service review** (0.50.1) — one `register_review_status`:
+  - 🟡 **review never started** — none of this ticket's entries has a
+    review verdict, and no job is running. Fix: `start_register_review`
+    with this ticket's stableIds.
+  - 🟡 **failing review** — each failing requirement or case, with the
+    reviewer's finding verbatim. It must be on the ledger or a To do;
+    absent from both is a 🔴 [Pipeline] (a finding silently dropped).
+  - 🔴 **override approval** — an entry of this ticket approved with
+    `approvedVia: override`. The pipeline never calls
+    `approve_register_entry`; name who did.
 - Report the split in the findings summary: adopted A · written here W
   · code-level K, and the level histogram of this ticket's cases. All
   cases at `M` / `E2E` with a pure rule among the requirements is a 🟡
