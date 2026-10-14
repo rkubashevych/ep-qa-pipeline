@@ -101,6 +101,55 @@ Without this list, `plan_implement_tests` picks every case at the level
 that lacks a link: on TMU it chose the two blocked cases and one whose
 API half was already linked. **Always pass `stableIds`.**
 
+## Step 1b — Check the cases against the code (0.56.0)
+
+A case can be wrong before a single test is written. MEXP's V2 cases
+(2026-10-14) were imported from an old test plan that said "V2 has no
+pagination" and "V2 surfaces non-appointment meetings"; the code does
+neither. The teststone tests were written from the same plan, so tests
+and cases agreed with each other and both missed the code, and the
+tests were lenient where the authors were unsure ("400 or 200"). Linking
+or implementing on top of such a case only spreads the error.
+
+So before Step 2, run QA Service's **`claim-review`** method on the
+selected cases — `get_skill claim-review`, followed as fetched, its
+digest recorded in the report:
+- **Claims:** each case's assertions and preconditions, and the summary
+  of each requirement it traces to. They are current-state claims here:
+  the feature is built and merged by the time this skill runs (stage 10
+  step 6).
+- **Oracle:** the code at the configured branch in a local clone,
+  cited as `file:line` (the controller action, the request DTO, the
+  validation class, the query). A read-only GET on an `ALLOWED_HOSTS`
+  test environment may settle a claim the code leaves open. Nothing
+  else counts; no oracle → `GAP`.
+- **Output:** `r<N>/<KEY>-claim-review.json` in claim-review's own
+  contract.
+
+**What each verdict leads to — decided by where the case came from:**
+
+| Verdict | Case or requirement backed by a spec of record (`sources` with a Jira / Confluence quote — `../qa-pipeline/references/sources-of-record.md`) | No source, or an imported plan / as-built doc only |
+|---|---|---|
+| `VERIFIED` | continue | continue |
+| `DRIFT` | **a possible product defect, never a case edit.** The case is set aside from Step 3 (its test would be red); the code / spec difference goes to the ledger and the bug offer, quoted from both sides | **the case is wrong.** Propose the correction: `edit_test_case` with a `correction` key (old claim → what the code does, `file:line`, commit); `edit_requirement` with the code as `sources` (`kind: context`); `status: retired` for a requirement the code contradicts outright, with the reason |
+| `DRIFT` that looks unintended (a silent fallback, an unvalidated range) | as above | correct the case to the as-built behaviour AND create an `oq` requirement asking whether it is intended (MEXP-OQ-06 / OQ-07) |
+| `GAP` | keep, list in the report | keep, list in the report |
+| `CONFLICT` | an `oq` requirement naming both oracles | same |
+
+Also a finding, whatever the source: **a case whose assertion accepts
+two outcomes** ("400 or 404", "200 or 400") where the code returns
+one. It hides the very thing it should check; tighten it to the code's
+answer (for a spec-backed case, only when the spec does not decide).
+
+Every correction, retirement and new `oq` goes into the Step 3 plan and
+preview — nothing is edited before the yes. Never "correct" a
+spec-backed requirement to match the code: a requirement says what
+should be true, and making it agree with the build hides the defect
+(claim-review's own rule: requirements are not reality-checked
+unasked). A linked test whose case Step 1b changed is re-checked in
+Step 2: it is unlinked when it no longer asserts the corrected case
+(MEXP-V2-02/03/04/06/08, 2026-10-14).
+
 ## Step 2 — Link tests that already exist
 
 Developers often write the test without the case id; QA Service then
@@ -233,7 +282,8 @@ for the backend developer, and file it only on an explicit yes.
 ## Step 5 — Report
 
 Write `r<N>/<KEY>-api-tests.md`: the method digests (`qa-implement-tests`,
-agent, authoring skill); per case — implemented / partial / linked
+agent, authoring skill, `claim-review`); the Step 1b verdict counts and
+every correction, retirement and open question it led to; per case — implemented / partial / linked
 existing / set aside (reason) / requested from frontend (sub-task key);
 the PR link and its state; the To do and ledger rows. Chat: three lines —
 how many API cases are now implemented, the PR, the frontend sub-task.

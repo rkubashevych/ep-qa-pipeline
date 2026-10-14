@@ -42,6 +42,15 @@ Part of § 4 "QA Service sync" in `../SKILL.md`. Read
   - 🟡 **source-watch notice not carried** — an open `stale_quote` /
     `new_material` notice on this ticket's requirements that is not in
     `<KEY>-sources.md` or the ledger.
+- **API cases checked against the code** (0.56.0):
+  - 🟡 **no claim review** — `<KEY>-api-tests.md` exists but no
+    `<KEY>-claim-review.json`: the API cases were linked or implemented
+    without being checked against the code (MEXP V2, 2026-10-14);
+  - 🔴 **spec-backed case "corrected" to the code** — an
+    `edit_test_case` / `edit_requirement` correction on a case or
+    requirement whose `sources` carry a Jira / Confluence quote. That
+    hides a possible defect; it should have been a ledger row and a bug
+    offer.
 - Report the split in the findings summary: adopted A · written here W
   · code-level K, and the level histogram of this ticket's cases. All
   cases at `M` / `E2E` with a pure rule among the requirements is a 🟡

@@ -5,6 +5,65 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.56.0 — 2026-10-14 — qa-api-tests checks the cases against the code first
+
+**Trigger: the MEXP V2 coverage check, 2026-10-14.** The user asked why
+the gaps were missed. The answer:
+- the V2 cases were imported from an old test plan and never compared
+  with the code;
+- the teststone tests were written from the same plan, so tests and
+  cases agreed with each other and both missed the code;
+- where the authors were unsure, the tests were made lenient ("400 or
+  200", "400 or 404", `order_by=id`);
+- QA Service's review judges how a case is written, not whether it is
+  true;
+- coverage counts cases, not behaviours.
+
+Three requirements turned out false against the code:
+- "V2 has no pagination": it is paginated, 100 by default, 500 at most;
+- "V2 surfaces non-appointment / contactless meetings": it filters to
+  appointments with participants;
+- "order_by=id": V2 supports `account_id` and `time` only.
+
+The user approved wiring QA Service's `claim-review` method into the
+skill.
+
+**What changes — `qa-api-tests` Step 1b (new), before linking:**
+- **Method:** `claim-review`, fetched at run time (digest recorded) and
+  run on the selected cases.
+- **Claims:** each case's assertions and preconditions, plus the
+  summaries of the requirements it traces to. They are current-state
+  claims, because the feature is merged by stage 10.
+- **Oracle:** the code at the configured branch (`file:line`). An
+  allowed-host GET may also be used. No oracle means `GAP`.
+- **Output:** `r<N>/<KEY>-claim-review.json`.
+- **What a verdict leads to depends on where the case came from:**
+  - `DRIFT` on a **spec-backed** case (Jira / Confluence quote) is a
+    possible product defect. The case is not edited; it goes to the
+    ledger and the bug offer, and is set aside from implementation.
+  - `DRIFT` on a case with **no source, or an imported plan or as-built
+    doc only**, means the case is wrong. A correction is proposed (with
+    a `correction` key and the code as `sources`), or the requirement is
+    retired. An `oq` is added when the behaviour looks unintended.
+  - `CONFLICT` becomes an `oq`.
+- **A two-outcome assertion** ("400 or 404") is a finding wherever the
+  code returns one answer.
+- Every correction goes into the Step 3 plan, behind the yes. A spec
+  requirement is never "corrected" to match the build (claim-review's
+  own rule).
+- A linked test whose case changed is re-checked in Step 2, and
+  unlinked when it no longer asserts the corrected case.
+
+**Analyzer:**
+- 🟡 API cases linked or implemented with no claim review;
+- 🔴 a spec-backed case or requirement "corrected" to the code.
+
+**Also recorded — the MEXP work this came from:**
+- FR-02 / FR-07 corrected; DISC-02 / RULE-09 / INV-09 retired;
+- 7 V2 cases fixed, and 5 lenient teststone links removed;
+- new cases V2-09..14, and OQ-06 / OQ-07;
+- 13 tests requested in EP-58756.
+
 ## 0.55.0 — 2026-10-14 — qa-api-tests searches every home of the level, and knows a link needs the id in the file
 
 **Trigger: the user pointed out existing meeting-export API tests
