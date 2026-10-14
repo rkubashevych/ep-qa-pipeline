@@ -29,16 +29,24 @@ check), exits 23. Composer, migrations and swagger have already run, so
 run that login check by hand (`-o NUL`) instead of reading the exit 23
 as a failed setup.
 
-**API v2 cannot run here (0.59.0).** Every `api-public` v2 request writes
-an `api_public_log` item to DynamoDB in `afterExecuteRoute`
-(`LoggerPublicApi::logInsert`). The harness has no AWS credentials, so
-`putItem` throws and the request answers 500 with an empty body. The
-error handler then tries to log to DynamoDB again. All v2 folders in
-`api-public` are `@skip`ped for this reason ("API v2 segfaults in
-docker-local", EP-50537…50541; meetings export EP-50538/50539). A v2
-case is set aside with that reason, not reported as a missing harness.
-**v3 runs normally** (Bearer key; e.g. `Products/*V3Cest`,
-`Meetings/*V3Cest`).
+**API v2 runs only with `s3.enabled = false` (0.59.1; 0.59.0 said it
+could not run).** v2 public requests log to DynamoDB
+(`LoggerPublicApi::logInsert`, the `api_public_log` table). The
+harness has no AWS keys, so with the template's
+`[amazon] s3.enabled = true` that write throws and the request answers
+500. The backend clone's `config.ini` (git-ignored, line `s3.enabled`)
+set to `false` makes v2 run: on MEXP, the v2 export, contract and
+v2/v3 parity Cests went from 500 to green (`API-TESTS.md` §14 lists the
+same fix). Back the file up before the edit, say in the report that it
+was changed, and leave it as the user wants it. In CI v2 stays blocked
+(EP-50538 / EP-50539), so a v2 test is green locally only.
+**v1 writes that record statistics** (`/api/v1/schedule/save` edit,
+`confirm`) need a reachable DynamoDB whatever the flag says. With
+`false` they fail with "Typed property …Statistics\Providers\Dynamo::
+$marshaler must not be accessed before initialization"; with `true`
+they fail on missing AWS keys. Such a case needs LocalStack; set it
+aside, don't report it as a product defect. **v3 runs normally**
+(Bearer key; e.g. `Products/*V3Cest`, `Meetings/*V3Cest`).
 
 ## Running one test (what the batch loop executes)
 

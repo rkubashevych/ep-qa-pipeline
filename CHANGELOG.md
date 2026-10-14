@@ -5,6 +5,35 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.59.1 — 2026-10-14 — V2 runs locally with s3.enabled = false; re-check the home before the push
+
+**Trigger: the user asked whether Viktor Mikhalkin had added tests to QA
+Service (2026-10-14).** He had: PR #5624 (EP-58770, Integration team,
+part of the teststone migration epic EP-54486). It merged 44 meeting
+export tests into `api-public/Meetings/` while `qa-api-tests` was
+writing its own 31. Four file names were the same. His links replaced
+ours on 27 cases, and our PR #5626 was declined as a duplicate. The four
+cases his PR does not cover (MEXP-LOC-01, SRT-01, SCOPE-01, SCOPE-02)
+were rebuilt on his base class.
+
+**Corrected (0.59.0 was wrong).** `local-harness.md` said API v2 cannot
+run in docker-local. It can: set `[amazon] s3.enabled = false` in the
+backend clone's git-ignored `config.ini`. On MEXP, the v2 export,
+contract and parity Cests went from 500 to green with that change. Two
+limits stay:
+- v2 is still blocked in CI (EP-50538 / EP-50539);
+- v1 writes that record statistics (`schedule/save` edit, `confirm`)
+  need a reachable DynamoDB whatever the flag says. They are set aside;
+  a red test there is not a product defect.
+
+**Added.** `qa-api-tests` Step 3 re-checks the home before the push:
+- fetch `alpha` and look for new commits under the target folder;
+- check for open PRs that touch the folder;
+- run `get_suite` again for new links.
+
+When something overlaps, the branch is rebuilt on the other work, not
+opened in parallel.
+
 ## 0.59.0 — 2026-10-14 — qa-api-tests: lessons from the first full MEXP run
 
 **Trigger: the first qa-api-tests run that wrote tests end to end**
