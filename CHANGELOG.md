@@ -5,6 +5,41 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.58.0 — 2026-10-14 — teststone is frozen: never a home for links or test requests
+
+**Trigger: teststone's maintainer (Viktor Mikhalkin), 2026-10-14**, on
+the MEXP handoff: "teststone is frozen, you should not use it. There is
+only one scenario when we use it, within the Integration team: our
+native integrations." Then: "QA Service has the suite MEXP «Meeting
+Export». The API tests should be there."
+
+**What 0.55.0 got wrong.** It told `qa-api-tests` Step 2 to search
+every home QA Service lists for a level, including the **verify-only**
+ones, and named `teststone` as the second backend `AE` home. On MEXP
+that led to three things that all had to be undone: 40 cases linked to
+teststone meeting-export tests, a stamping patch sent to the
+maintainer, and EP-58756 filed for 13 new tests there. A verify-only
+listing in QA Service says where tests *are*, not that they run. Frozen
+tests run nowhere, so each link was coverage that did not exist.
+
+**Changed.**
+- `qa-api-tests` Step 2: search the homes that run, never a frozen one.
+  For `expoplatform` backend `AE` / `C` that is the monolith only
+  (`universal/Tests/Codeception/api-*`). Never link to, request in, or
+  stamp ids in teststone (exception: the Integration team's
+  native-integration suites). A teststone test on the feature is
+  reference reading only, recorded on the case as
+  `detail.referenceTest` and handed to the implementer. The `repo`
+  example no longer lists `teststone`.
+- `pr-summary/references/bitbucket-access.md`: teststone is marked
+  frozen in the list of workspace test repos.
+
+**Undone on MEXP the same day (data, not plugin).** All 40 links were
+removed and the cases read `planned` with a `referenceTest` note each.
+EP-58756 was retargeted to `api-public/Meetings/`, assigned to QA and
+marked blocked by EP-50538 / EP-50539. EP-58720 has a comment. The
+patch is withdrawn.
+
 ## 0.57.0 — 2026-10-14 — the developer's tech spec is a docs-phase source (TS-n)
 
 **Trigger: the user, 2026-10-14.** EP-55889 now carries an attached

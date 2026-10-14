@@ -156,29 +156,39 @@ Step 2: it is unlinked when it no longer asserts the corrected case
 Developers often write the test without the case id; QA Service then
 reads the case as missing.
 
-**Search every home of the level, not only the monolith (0.55.0).**
+**Search the homes that run, never a frozen one (0.58.0).**
 `list_repositories {productId}` lists, per repo, the `surfaces` it is a
-home for — including **verify-only** homes, where tests live that no
-implement run writes. For `expoplatform`, backend `AE` has two: the
-monolith (`main`, Codeception) and **`teststone`** (Vitest,
-`tests/api-e2e/<feature>/`, contracts in `tests/api-contract/`). On
-MEXP (2026-10-14) all 66 meeting-export API tests were in teststone and
-this step had looked only in the monolith. Search each home at its
-configured branch (a local clone after a fetch, else the Bitbucket /
-GitHub API) and the open branches named after `<KEY>` or its sub-tasks:
-the case id, an older id the suite was imported under (MEXP was written
-from a plan whose ids read `API-E2E-MTEX-<SEG>-NN`), the ticket key,
-and the endpoint path from the case's steps. Read the assertions, not
-only the title: a test that accepts "error **or** clamped" does not
-cover a case that requires an error (MEXP-VAL-04).
+home for, including **verify-only** homes, where tests live that no
+implement run writes. A verify-only listing does not mean the tests
+run. For `expoplatform`, backend `AE` and `C` have one live home: the
+monolith (`main`, Codeception, `universal/Tests/Codeception/api-*`).
+**`teststone` is frozen** (its maintainer, 2026-10-14). The only
+exception is the Integration team's native-integration suites. Its
+tests run nowhere, so a link to one counts as coverage that does not
+exist. Never link a case to a teststone test, never request tests there,
+never stamp ids there. A teststone test on the feature is reference
+reading only: note it on the case (`detail.referenceTest`: path ::
+title, "frozen, not linked") and hand it to the implementer as what to
+assert. On MEXP the pipeline linked 40 cases there, sent a stamping
+patch and filed a test request for it (0.55.0). All three were undone
+the same day.
+
+Search the live home at its configured branch (a local clone after a
+fetch, else the Bitbucket / GitHub API) and the open branches named
+after `<KEY>` or its sub-tasks. Search for the case id, an older id the
+suite was imported under (MEXP was written from a plan whose ids read
+`API-E2E-MTEX-<SEG>-NN`), the ticket key, and the endpoint path from the
+case's steps. Read the assertions, not only the title: a test that
+accepts "error **or** clamped" does not cover a case that requires an
+error (MEXP-VAL-04).
 
 **A link resolves only when the case id is IN the test file.** QA
 Service verifies a link by finding the stableId in the file at that
-ref; the test's own title and an older id do not count. All 40 MEXP →
-teststone links landed `partial`, "stableId … not found in the file"
+ref; the test's own title and an older id do not count. All 40 MEXP
+links landed `partial`, "stableId … not found in the file"
 (2026-10-14). So a test found without the case id is either:
-- **linked and the id stamped** — a PR to that repo putting `<ID>: ` at
-  the start of each test title (`it('MEXP-TSW-01: …')`; PHP:
+- **linked and the id stamped** — a PR to that (live) repo putting `<ID>: ` at
+  the start of each test title (`it('FAV-TC-03: …')`; PHP:
   `@testCaseId` in the method docblock), after the user's yes (it is
   another repo's code); re-link with `landing: "pr"` + `prBranch`, then
   `merged` after the merge; or
@@ -189,7 +199,7 @@ toward nothing; say so instead of reporting the case as covered.
 - **Covers the case fully, not `@skip`ped, id in the file** →
   `link_implemented_tests {suiteId, links: [{stableId, ref:
   "<path>::<method or exact test title>", level, repo: <the home's
-  repoId: "main", "teststone", …>, landing}], verify: true}` —
+  repoId, e.g. "main">, landing}], verify: true}` —
   `landing: "merged"` on the configured branch, `"pr"` + `prBranch`
   otherwise. Drop the case from Step 3.
 - **Partial** → keep it; hand the ref to the implementer in the plan

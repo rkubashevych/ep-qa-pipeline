@@ -238,7 +238,10 @@ component paths exceed the 260-char limit and the checkout fails
 half-done (recover with `git restore --source=HEAD :/`).
 
 Known workspace repos beyond the product (for the exists-a-test-already
-check): `teststone` (Playwright+Vitest testkit), `playwright-tests`
+check): `teststone` (Playwright+Vitest testkit; **frozen** since
+2026-10-14, except the Integration team's native integrations. Its
+tests run nowhere: read them as reference, never count or link them as
+coverage), `playwright-tests`
 (e2e), `ds-api-tests` (Postman regression), `qa-tests` (Cypress+Locust),
 `docker-local` (full local platform via Docker Compose). ⚠
 `playwright-tests` and `qa-tests` have a COMMITTED `.env` in git
