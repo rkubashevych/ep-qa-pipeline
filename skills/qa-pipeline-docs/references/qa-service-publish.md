@@ -1,8 +1,9 @@
 # QA Service publish — suite creation from pipeline output
 
 **Contents:** Preconditions · Config · Mapping — pipeline files → QA
-Service (requirements, test cases, Structural checks → STRUCT cases,
-suite header, correcting a suite, never `summarize_requirement`) ·
+Service (requirements, test cases, adopted cases, cases stage 4 did not
+adopt, Structural checks → STRUCT cases, suite header, correcting a
+suite, never `summarize_requirement`) ·
 Suite selection — append by default · Procedure (inside the step-6
 confirmed publish) · Code phase — suite as the case source · Bug-fix
 mode — the regression mini suite · Result write-back (incl. Improvised
@@ -49,7 +50,8 @@ invoking the pipeline; honour that for the run without arguing.
 | Suite title | the story summary, cleaned (no ticket key, no "[QA-PIPELINE]") |
 | Suite prefix | short UPPERCASE mnemonic of the feature (2–8 chars, e.g. `ZTB`, `PSRCH`). Propose one; the user can override at the pause. |
 | Folder | `get_suite_tree` (product `expoplatform`) is where a `folderId` comes from — the organizer tree is `<role>` → feature folders (`common/…`, `organizer/payments/…`). File the suite under the folder whose name is the feature area; omit `folderId` only when no folder fits and say so in the preview |
-| Teams | `teams` on `create_suite` — one or more of `Organizer` / `Exhibitor` / `Visitor` / `Mobile` / `Data Science` / `Integration` / `Designers` / `Staff` / `Hyve`. Map from the role: `exhibitor` → Exhibitor, `visitor` → Visitor, `organizer` / `admin` → Organizer, `common` → the team the story's dev sub-tasks belong to (ask at the pause when unclear). A suite created without `teams` is flagged "No team" in the web UI (`common/meeting-export` landed that way); `assign_suite_teams` repairs an existing one |
+| Teams | `teams` on `create_suite` — one or more of `Organizer` / `Exhibitor` / `Visitor` / `Mobile` / `Data Science` / `Integration` / `Designers` / `Staff` / `Hyve`. Map from the role: `exhibitor` → Exhibitor, `visitor` → Visitor, `organizer` / `admin` → Organizer, `common` → the team the story's dev sub-tasks belong to (ask at the pause when unclear). A suite created without `teams` is flagged "No team" in the web UI. **Appending counts too (0.50.0):** `common/meeting-export` was created by QA Service's importer with no team, EP-55889 appended to it, and the rule — written for `create_suite` only — never fired; it stayed "No team" until 2026-10-14 (fixed by hand: Exhibitor). An empty `teams` on the target suite is filled in the same write, whoever created the suite |
+| Jira keys | `jiraKeys` on the suite (0.50.0) — the ticket key, added to the existing list (`edit_suite` REPLACES the list: send existing + ours). A bug filed from a failing case in the suite is related to these tickets; with none, it lands on no feature ticket |
 | Web UI base URL | `https://qa-service.expoplatform.com` — suite detail page: `<base>/<productId>/test-suites/<suite path>` (verified, e.g. `/expoplatform/test-suites/exhibitor/exhibitor-favorites`). Test run page: `<base>/<productId>/test-runs/<runId>` (verified 2026-09-29 on the EP-57907 run). |
 
 **Writing the suite link into Jira — bare URL only.** The Atlassian
@@ -80,7 +82,11 @@ sub-task description, human summary comment, story note.
 
 `create_requirement` accepts `kind`, `title`, `summary`, `stableId`,
 `priority` AND `detail`. Send them all in the creating call; no
-follow-up `edit_requirement` is needed on a fresh publish.
+follow-up `edit_requirement` is needed on a fresh publish. Since 0.50.0
+the requirements are created at docs stage 3, before stage 4
+(`qa-service-first.md`), so QA Service can generate against them; step
+6 only edits the ones the user's answers changed. Without stage 3 they
+are created here, as before.
 
 | Pipeline | QA Service |
 |---|---|
@@ -112,7 +118,7 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 | — | `stableId` = `<PREFIX>-<SEG>-NN`, where `<SEG>` is a 2–5 char aspect code shared by the cases of one behaviour area (`AUTH`, `VAL`, `DATA`, `READ`, `REG`, `CTR`, `BVA`, `PRIV`…), numbered per segment from 01. Fall back to the channel code (`UI`/`API`/`MOB`/`EXP`) only when no aspect is meaningful. **Never a flat `<PREFIX>-01…89`** — IDs must carry meaning. |
 | requirement group `REQ-N` | `folderName` = a functionality label derived from the REQ group's behaviour area (e.g. "Opted-out favourite is invisible to the other party"). **Target ~5–8 cases per folder:** split a large REQ group into sub-aspect folders ("<area> — validation", "<area> — permissions"), merge adjacent tiny groups under one functional label. **Never dump everything into "General"** — a publish where any case lands in General, or one folder holds >10 cases, is a mapping failure; fix the folder plan before writing. State the folder plan (folder → case count) in the publish preview. |
 | parent `REQ-N` (+ any seam requirements the case also covers) | `traceability` = the requirement stableIds, kind-correct (`["<PREFIX>-RULE-02","<PREFIX>-INV-01"]`) — list every requirement the case verifies, not just the parent |
-| channel tag → level | Pass **`levels`** (the code array — this is what the Coverage-by-level table counts and the implement workflow selects on) AND `levelText`: `[API]` → `levels: ["AE"]`, `API-E2E` · `[UI]` → `["E2E"]`, `E2E (UI)` · `[mobile]` → `["M"]`, `Manual` · `[export/email]` → `["M"]`, `Manual` · dual-tagged `[API][UI]` → `["AE", "E2E"]`, `API-E2E + E2E (UI)` (one case, two levels — never two cases). Other codes when they genuinely apply: `U` Unit, `I` Integration, `C` Contract, `CFE` Component-FE, `Perf` Performance, `worker` Worker-home. A case with no `levels` is counted nowhere and can never be picked up for automation. **Never invent labels** — `API`, `E2E (mobile)`, `E2E (export/email)` are not canonical. |
+| channel tag → level | Pass **`levels`** (the code array — this is what the Coverage-by-level table counts and the implement workflow selects on) AND `levelText`: `[API]` → `levels: ["AE"]`, `API-E2E` · `[UI]` → `["E2E"]`, `E2E (UI)` · `[mobile]` → `["M"]`, `Manual` · `[export/email]` → `["M"]`, `Manual` · dual-tagged `[API][UI]` → `["AE", "E2E"]`, `API-E2E + E2E (UI)` (one case, two levels — never two cases). Other codes when they genuinely apply: `U` Unit, `I` Integration, `C` Contract, `CFE` Component-FE, `Perf` Performance, `worker` Worker-home. A case with no `levels` is counted nowhere and can never be picked up for automation. **Never invent labels** — `API`, `E2E (mobile)`, `E2E (export/email)` are not canonical. **A `Level:` line wins (0.50.0):** when the TC block carries one, `levels` = its codes and `levelText` = their names joined with ` + ` (`Level: U + M` → `["U","M"]`, `Unit + Manual`); the channel mapping above applies only when the line is absent (`../../qa-test-cases/references/test-levels.md`) |
 | — | `status` = `planned` (vocabulary: `planned` / `implemented` / `partial` / `deferred` / `na`). **`draft` is NOT in the vocabulary** — it renders as 0 in every readiness bucket. Use `deferred` for a case knowingly not executable yet, `na` for one routed out. |
 | `Applied techniques` (per REQ group) | `techniques`, uppercase tokens (`BVA`, `EP`, `STATE`, `DT`, `UC`, `CONTRACT`, `INVARIANT`, `UI-CONF`) |
 | requirement risk | `priority`: High → `P0`, Medium → `P1`, Low → `P2` |
@@ -128,6 +134,35 @@ case is empty. `edit_test_case` is for CORRECTING cases later.
 | ` [core]` heading marker | `detail.core` = `yes` on the REQ's core case (the human-tier representative the walk, stage 10a, always presents); omit on all other cases. Also propose a `core` tag in step 4 where the tag catalogue allows — pending approval is fine. |
 | `TC-REQ-N.M` id | `detail.pipelineId` = `TC-REQ-N.M` (since 0.34.0). The code phase rebuilds the local file's ids from this; never from a Jira comment |
 | the ticket | `detail.ticket` = `<ISSUEKEY>` (since 0.34.0). The per-ticket scope marker: step 0 executes the suite cases whose `detail.ticket` is this run's key (plus team-added cases tracing to this run's requirements). Feature tags are NOT used for this — the tag catalogue is the platform-feature vocabulary and needs approval |
+
+### Adopted cases → `edit_test_case` (0.50.0)
+
+A TC block with an `Adopted: <stableId>` line is a case QA Service
+already holds (generated or discovered at stage 3). It is never created
+again. One `edit_test_case` per adopted case stamps what makes it this
+ticket's case:
+
+- `detail.ticket` = `<ISSUEKEY>` and `detail.pipelineId` =
+  `TC-REQ-N.M` — so step 0 of the code phase scopes and joins it like
+  one of ours;
+- `detail.core` = `yes` when the block is `[core]`;
+- `levels` / `levelText` only when the block's `Level:` line adds a
+  code the case lacks (send the union, never fewer codes).
+
+Never rewrite its `title`, `steps`, `assertions`, `testData`,
+`traceability` or `status`: stage 4 adopted it because it already fits,
+and the merge semantics keep everything not sent. Inside `detail`, send
+only the keys above — each key sent replaces that key's value.
+
+### Cases stage 4 did not adopt → `detail.pipelineSkip` (0.50.0)
+
+Each line under "QA Service cases not adopted" in the test-cases file
+gets one `edit_test_case` setting `detail.pipelineSkip` =
+`<ISSUEKEY>: <reason>` (append with `; ` when the key already holds
+another ticket's entry). Nothing else changes: the case stays in the
+suite, with its status and links, as coverage the team can still use or
+implement. The marker only tells the code phase not to run it for this
+ticket (Code phase, below). Never delete, merge or retire such a case.
 
 ### Structural checks → `create_test_case` (STRUCT cases) — since 0.33.0
 
@@ -171,19 +206,17 @@ the roster row:
 - the scope count is reported as `M + S` (behavioural + structural),
   and roster count = M + S in the post-publish check.
 
-### Suite header — set it IN `create_suite`
+### Suite header — every field, on create AND on append (0.50.0)
 
-`create_suite` accepts the header fields directly: `summary` (a
-paragraph saying what the feature is and what this suite covers — model
-it on an importer-built suite), `status` (`Draft`), `owner` (the
-pipeline operator + team), `lastReviewed` (today, YYYY-MM-DD) and
-`teams` (Config → Teams), on top of `title` / `productId` / `prefix` /
-`folderId`. Pass them at creation — a suite that lands with a bare title
-or no team is an incomplete publish, and it is a missed parameter, not a
-limitation.
-
-Use `edit_suite` only to fix or refresh the header of a suite that
-already exists (e.g. bump `lastReviewed` when appending to it).
+The field-by-field rule is the table in `qa-service-first.md` →
+"Procedure" step 1: `teams`, `jiraKeys`, `owner`, `summary`, `status`,
+`lastReviewed`, `folderId`, `priority`; `displayName` / `category` are
+left to humans. New suite → pass them all in `create_suite`. Existing
+suite → ONE `edit_suite` that fills the empty ones, adds this ticket
+to `jiraKeys` and bumps `lastReviewed` — never blanks a field a human
+set. When stage 3 ran, it already wrote the header; step 6 re-checks
+it. Until 0.50.0 this section covered `create_suite` only, which is how
+an appended-to suite kept `teams: []` (Config → Teams).
 
 ### Correcting an existing suite (all of it is editable now)
 
@@ -245,7 +278,11 @@ those buttons on a suite it published. Pipeline-authored requirement
 text is authoritative — a generated label is not an improvement over it.
 
 **Post-publish enrichment that IS safe:** "Auto-tag untagged" /
-`apply_auto_tags` (additive, touches only tag links). Treat "Collect
+`apply_auto_tags` (additive, touches only tag links). **Case generation
+is safe too (0.50.0)**: `start_generate_test_cases` only appends cases —
+`full` runs only on a suite with no cases, `gaps` authors only for
+requirements no case names and touches nothing existing. Docs stage 3
+uses it (`qa-service-first.md`). Treat "Collect
 requirements" / "Import docs" (`start_collect_requirements`,
 `start_import_docs`) as UNVERIFIED on an already-populated suite: they
 merge a fresh extraction into the register by stableId, and since the
@@ -314,7 +351,11 @@ preview so the user can redirect:
    - *Re-run of the same ticket*: append only what is new or changed.
    In every case use the suite's existing prefix and continue its
    stableId numbering (`get_suite` → highest used id). Apply the
-   case-dedup rule below.
+   case-dedup rule below. **The prefix is the suite's, never a new
+   one:** EP-55889 appended `MEETING-EXPORT-*` requirements and cases
+   to the `MEXP` suite, so one feature now carries two id families and
+   `search MEXP` misses half of it. Every stableId this publish writes
+   starts with `get_suite` → `prefix`; the verify step checks it.
 3. **No match → create a new suite**, named after the FEATURE (never
    after the ticket key), path/prefix per Config. This is the genuinely
    new-feature case only.
@@ -359,7 +400,10 @@ preview so the user can redirect:
 3. Create requirements in file order (one `create_requirement` each,
    full content), then cases in file order (one `create_test_case`
    each, full content). Requirements first — cases reference their
-   stableIds in `traceability`. Every case carries its `folderName`
+   stableIds in `traceability`. When stage 3 ran (0.50.0): the
+   requirements exist — edit only the changed ones; create only the TC
+   blocks without an `Adopted:` line; stamp each adopted case and mark
+   each not-adopted one (the two "Mapping" sections above). Every case carries its `folderName`
    from the folder plan; when appending, reuse the suite's existing
    functionality folders where the label matches and create new ones
    only for genuinely new areas.
@@ -398,8 +442,15 @@ preview so the user can redirect:
      `edit_requirement` (`kind` + corrected `stableId`) — do it rather
      than reporting it.
    - the suite header is filled (`summary`, `status`, `owner`,
-     `lastReviewed`, `teams` non-empty) — otherwise call `edit_suite` /
-     `assign_suite_teams`.
+     `lastReviewed`, `teams` non-empty, `jiraKeys` holds this ticket) —
+     otherwise call `edit_suite` / `assign_suite_teams`. This applies to
+     an appended-to suite as much as to a new one.
+   - **every stableId this publish wrote starts with the suite's
+     prefix** — a foreign prefix is fixable in place with
+     `edit_requirement` / `edit_test_case` `stableId` (references are
+     rewritten).
+   - **every adopted case carries `detail.ticket`, and every
+     not-adopted one `detail.pipelineSkip`** for this ticket.
    - **folder distribution matches the plan** — no case in "General",
      no folder over ~10 cases. Fixable in place:
      `create_test_case_folder` + `move_test_case`.
@@ -435,7 +486,15 @@ CONTENT (the team may have fixed cases in the web UI between phases):
    (`sources` with `kind: jira, label: <KEY>`) that lacks the marker
    (team-added — flag it). Join local ↔ suite by `detail.pipelineId`
    (pre-0.34 suites: the case id on the sub-task's tracker lines — shape
-   in "Legacy formats" below; older still: match by title). Then reconcile
+   in "Legacy formats" below; older still: match by title). **Two kinds
+   of case are listed, never run (0.50.0):** a case whose
+   `detail.pipelineSkip` names this key (stage 4 did not adopt it, the
+   reason is in the marker), and a code-level case — its `levels` hold
+   only `U` / `I` / `C` / `CFE` / `Perf` / `worker` — which the
+   product's CI proves, not this pipeline. Report them as "K code-level
+   (CI), J not adopted" next to the scope count. A case tracing to this
+   run's requirements with neither marker nor `detail.ticket` is still
+   team-added: run it and flag it. Then reconcile
    the extracted `<STORY>-test-cases.md` against the suite cases:
    - a suite case's content differs (steps/assertions/priority edited
      in the UI) → the suite version wins; update the local file.
@@ -634,6 +693,10 @@ The step-6 preview shown to the user must also state:
   `<path>` (K duplicates skipped) — or **creating** suite `<path>`
   (prefix `<PREFIX>`) because the feature has no suite yet — or
   "skipped (connector not enabled)".
+- When stage 3 ran (0.50.0): "A adopted from QA Service (stamped, not
+  re-created) · W written here (created) · J not adopted (marked
+  `pipelineSkip`, reasons listed) · K code-level", and any header field
+  still to fill.
 - The **folder plan**: each functionality folder with its case count
   (target ~5–8 per folder), plus — when the target suite's existing
   cases sit in "General" — the offer to reorganize them into the same

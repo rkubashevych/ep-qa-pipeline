@@ -143,6 +143,13 @@ names who should handle it instead).
 - ✅ "add these cases to QA Service" / "publish the test cases for
   EP-55123" (publish-only mode — stages 1–4 skipped when their files exist)
 - ❌ "publish this page to Confluence" → confluence-sync
+- ❌ "via QA Service, discover the tests under <path> for suite X and
+  import them" → the QA Service tools directly (or sdlc-qa "link the
+  tests I just wrote"); the docs phase discovers only inside its own
+  stage 3 (0.50.0)
+- ❌ "generate test cases for the Exhibitor Favorites suite in QA
+  Service" (no ticket) → QA Service `start_generate_test_cases`
+  directly, not a pipeline run
 - ❌ "just groom the requirements" → requirements-grooming alone
 - ❌ "prepare EP-57799 for estimation — what questions do we have?" →
   qa-refinement (no test cases before the answers)

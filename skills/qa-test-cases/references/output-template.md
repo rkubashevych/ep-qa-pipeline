@@ -49,9 +49,12 @@ lines**.
 
 Covers: <AC-n[, SB-n, JD-n, CM-n] — the ids from the requirement's source: line>
 Applied techniques: <technique(s) — once per requirement group>
+Code-level: <QA Service code-level cases for this REQ, e.g. MEXP-EX-03 (U, implemented); omit the line if none>
 
 ### TC-REQ-N.M — <scenario name>  [<channel tag>]
 
+Adopted: <QA Service stableId — only when the case is adopted from <ISSUEKEY>-qs-cases.md; omit otherwise>
+Level: <QA Service level codes, e.g. U + M — only when not the channel's default; omit otherwise>
 Pre: <precondition>
 Steps:
 1. <action> [data: <value, or a realistic example marked [test data]>]
@@ -85,6 +88,17 @@ from 1 under each REQ. After the publish, the code phase rebuilds each
 line with its suite id: `- [ ] REQ-N/struct-1 · <PREFIX>-STRUCT-01 [UI] <…>`.
 Omit the whole section only when the ticket has no structural check.
 
+```
+## QA Service cases not adopted
+
+> Cases in <ISSUEKEY>-qs-cases.md that no TC block adopted. They stay
+> in the suite; the publish marks them `detail.pipelineSkip` so the
+> code phase does not run them. Omit the section when the file was
+> absent or every case was adopted.
+
+- <stableId> — <code-level (U) | duplicate of <stableId> | expected result not in the requirements | outside this ticket>
+```
+
 ---
 
 ## Statistics
@@ -96,6 +110,8 @@ Close the file with:
 - Channel breakdown: [UI] <N> · [API] <N> · [API][UI] <N> (dual-tagged,
   counted once, here) · [mobile] <N> · [export/email] <N>
 - Core cases: <N> (= behavioural requirements)
+- Written by: <A> adopted from QA Service · <W> written here (A + W = total; omit the line when no qs-cases file existed)
+- Levels: <code> <N> · <code> <N> … (from `Level:` lines, channel default where absent)
 - Structural checks: <S> (not in the total)
 - AC coverage: <n>/<N> AC items covered< · SB <n>/<N> — only when SB-n items exist> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
 - Total number of test cases: <N>

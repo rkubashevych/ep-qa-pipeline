@@ -34,7 +34,8 @@ Reads whichever of these exist — resolved per
 `../qa-pipeline/references/data-locations.md` (run folder first;
 asking the user is the last resort):
 `<ISSUEKEY>-context.md`, `<ISSUEKEY>-requirements.md`,
-`<ISSUEKEY>-test-cases.md` (with its Structural checks section;
+`<ISSUEKEY>-qs-cases.md` (docs stage 3's QA Service export, 0.50.0 —
+§ 4 checks it), `<ISSUEKEY>-test-cases.md` (with its Structural checks section;
 `<ISSUEKEY>-checklist.md` only on tickets run before 0.40.0),
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
@@ -287,9 +288,17 @@ the whole product, ~190 KB) and report ONE of:
 - 🟡 **empty trace graph** — `traceLinks` is `[]` while cases carry
   `traceability`: the links never materialized; re-sending
   `traceability` on a case rebuilds the suite's edges.
+- 🔴 **no owner / no ticket** — `teams: []` ("No team" in the web UI)
+  or `jiraKeys` without `<KEY>`, on a suite created OR appended to
+  (EP-55889, 0.50.0). Give the call: `edit_suite {suiteId, teams,
+  jiraKeys: [<existing…>, "<KEY>"]}`.
 - 🟡 **bare suite header** — no `summary` / `owner` / `status` /
-  `lastReviewed` on the suite, or `teams: []` (the web UI flags it "No
-  team"). Fixable with `edit_suite` / `assign_suite_teams`.
+  `lastReviewed`. Fixable with `edit_suite`.
+- 🟡 **foreign prefix** — this ticket's stableIds not starting with the
+  suite's `prefix` (EP-55889: `MEETING-EXPORT-*` in `MEXP`); fix with
+  `edit_requirement` / `edit_test_case` `stableId`.
+- **QA Service first (docs stage 3, 0.50.0)** — the export, adoption,
+  discovery and digest checks: `references/qa-service-first-checks.md`.
 
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh

@@ -107,6 +107,7 @@ nothing checks it mechanically.
 
 | Pause | Plan file |
 |---|---|
+| `qa-pipeline-docs` step 3: the suite header, the requirements, case generation and test discovery (0.50.0) | `docs/<KEY>-qs-plan.json` |
 | `qa-pipeline-docs` step 6: the sub-task + the suite publish | `docs/<KEY>-publish-plan.json` |
 | `qa-refinement`: the questions comment (and a re-run's in-place edit) | `docs/<KEY>-questions-plan.json` |
 | `qa-pipeline-code` step 6 (a): the run + its verdicts | `r<N>/<KEY>-run-plan.json` |

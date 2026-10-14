@@ -142,9 +142,13 @@ Otherwise, using the Atlassian connector and the Story key:
      FEATURE: execute only cases whose `detail.ticket` is `<STORY>`,
      plus team-added cases tracing to this run's requirements (flag
      them); pre-0.34 suites: the legacy tracker-line ids ("Legacy
-     formats"). Never the whole suite. Report "suite holds N cases;
-     M + S in scope" (M behavioural, S structural — both on the
-     roster); local ids from `detail.pipelineId`.
+     formats"). Never the whole suite. Never run a case whose
+     `detail.pipelineSkip` names `<STORY>`, nor a code-level one
+     (`levels` only `U`/`I`/`C`/`CFE`/`Perf`/`worker` — CI proves it):
+     list both (0.50.0). Report "suite holds N cases;
+     M + S in scope; K code-level (CI), J not adopted" (M behavioural,
+     S structural — both on the roster); local ids from
+     `detail.pipelineId`.
    - Rebuild the **Structural checks** section from the `-STRUCT-`
      cases, the stableId on each line
      (`- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check>`) — roster

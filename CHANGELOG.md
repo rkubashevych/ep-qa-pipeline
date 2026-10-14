@@ -5,6 +5,123 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.50.0 — 2026-10-14 — QA Service authors first, the pipeline fills the gaps
+
+**Trigger: the EP-55889 suite (`common/meeting-export`, prefix `MEXP`),
+read 2026-10-14.** The user asked for every possible test to be in QA
+Service, and for every field QA Service shows to be filled. The suite
+showed four gaps:
+- **0 Unit, 0 Integration, 0 linked tests.** 62 cases: 40 API-E2E,
+  1 Contract, 1 E2E and 20 Manual (all 20 of ours). `coverage_report`:
+  verified 0. The PR added `PrepareCellStringTest.php`, a Codeception
+  unit test that asserts the exact fix. A search for it in QA Service
+  found nothing.
+- **The pipeline could not write a Unit case.** The publish mapped
+  channel tags to `AE` / `E2E` / `M` only. A pure-function check (the
+  sanitising regex) could only become Manual.
+- **`teams: []`.** QA Service's importer created the suite without a
+  team; EP-55889 appended to it. The team rule covered `create_suite`
+  only, so it never fired. The analyzer's 🟡 "bare suite header"
+  repaired nothing.
+- **Wrong prefix and no Jira key.** Our 20 cases are `MEETING-EXPORT-*`
+  in a `MEXP` suite, against the existing "use the suite's prefix"
+  rule. `jiraKeys` was not set anywhere in the plugin, so a bug filed
+  from a failing case in the suite was related to no feature ticket.
+
+The user's direction: "we will run all QA Service can run and then add
+our own cases". QA Service keeps adding capabilities, and copying each
+rule into this plugin by hand always lags.
+
+**What changes — docs stage 3 is "QA Service first"**
+(`qa-pipeline-docs/references/qa-service-first.md`, new). The number
+was free since 0.40.0. It runs after grooming, before stage 4, behind
+its own confirmation and plan (`docs/<KEY>-qs-plan.json`):
+1. Suite and header. Every field is now set or filled on create AND on
+   append: `teams`, `jiraKeys` (added to the list, never replacing it),
+   `owner`, `summary`, `status`, `lastReviewed`, `priority`.
+   `displayName` / `category` stay human-owned.
+2. This ticket's requirements are created now, not at step 6, so
+   generation has something to read.
+3. `start_generate_test_cases`: `full` on an empty suite, `gaps`
+   otherwise. It only appends.
+4. `discover_tests` over the feature's module dirs and files, lazy first,
+   then preview, then apply. The scan flags are checked; a timeout or a
+   0-file scan becomes a To do plus a ledger row and never blocks.
+5. Export to `docs/<KEY>-qs-cases.md`: every case that traces to this
+   ticket's requirements, plus the current digests of QA Service's
+   `test-planning-and-design` and `test-case-review` skills.
+
+**What changes — stage 4 adopts, then fills:**
+- `qa-test-cases` reads the export. A QA Service case that verifies a
+  check is adopted (`Adopted: <stableId>`, content kept). A check no
+  case verifies is written as before. Every other QA Service case is
+  listed under "QA Service cases not adopted" with a reason
+  (`code-level (U)`, `duplicate of …`, `expected result not in the
+  requirements`, `outside this ticket`). The checks from decomposition
+  still decide coverage; QA Service decides only who wrote the case.
+- New `Level:` line (`qa-test-cases/references/test-levels.md`). It
+  mirrors QA Service's "lowest level that can verify it" rule at digest
+  `19d88114a5dd`. The channel tag still decides who runs the case here.
+  The level says where it should be proven, e.g. `Level: U + M` for the
+  EP-55889 regex.
+- Statistics gain "Written by: A adopted · W written here" and a level
+  histogram.
+
+**What changes — publish, code phase, analyzer:**
+- `qa-service-publish.md`:
+  - An adopted case is stamped, not re-created: `detail.ticket`,
+    `detail.pipelineId`, `detail.core`, and missing levels.
+  - A not-adopted case gets `detail.pipelineSkip = "<KEY>: <reason>"`
+    and is otherwise untouched.
+  - A `Level:` line wins over the channel mapping.
+  - The header section covers append.
+  - The verify step checks `jiraKeys`, the prefix and the
+    stamps/markers.
+  - `start_generate_test_cases` is listed as safe enrichment.
+    `start_collect_requirements` and `start_import_docs` stay out (the
+    0.47.0 analysis still holds).
+- `qa-pipeline-code` step 0: never runs a case marked `pipelineSkip` for
+  this ticket, nor a code-level-only case (`U` / `I` / `C` / `CFE` /
+  `Perf` / `worker`, which CI proves). Both are listed:
+  "K code-level (CI), J not adopted".
+- `qa-run-analyzer` § 4:
+  - 🔴 `teams: []` or `jiraKeys` without the ticket, on a created or
+    appended-to suite, with the fix call;
+  - 🟡 foreign prefix;
+  - 🟡 stage 3 did not run;
+  - 🟡 an exported case unaccounted for;
+  - 🟡 discovery did not finish;
+  - 🟡 [Pipeline] QA Service's test-design digest drifted from the
+    mirror, which is how the plugin keeps up without copying rules by
+    hand;
+  - 🟡 every case at `M` / `E2E` while a pure rule is among the
+    requirements.
+- `write-plans.md`, `data-locations.md`, README, MAINTAINERS: the new
+  step, file and plan. `evals/triggering.md`: two ❌ entries for direct
+  QA Service discovery or generation requests, which are not a pipeline
+  run.
+
+**Unchanged:** bug-fix mode, `qa-refinement`, publish-only mode, and a
+run without the connector (stage 3 skips in one line; stage 4 writes
+every case). The fixture smoke test runs without the connector, so its
+expected output is unchanged.
+
+**Done by hand on EP-55889, 2026-10-14:** `edit_suite` on `MEXP` set
+`teams: [Exhibitor]` (the user's call) and `jiraKeys: [EP-55889]`.
+Still open:
+- **The unit test is not registered.** `discover_tests` timed out
+  twice, then a scoped preview read 0 files on a path merged two days
+  earlier. `link_implemented_tests` (U, `landing: merged`) timed out and
+  did not land. QA Service's repo reads were not answering that day.
+  This is the failure mode stage 3's To-do rule covers.
+- **The `MEETING-EXPORT-*` → `MEXP-*` rename** is not done. It rewrites
+  ids that the EP-55889 runs and comments reference, so it needs the
+  user's go-ahead.
+
+**Not in this release:** the EP-58259 r1 🔴 [Pipeline] item (live
+session tokens written to `evidence/`; a redact-at-write rule and a
+pre-upload scan were requested). It still owes a CHANGELOG answer.
+
 ## 0.49.0 — 2026-10-13 — the developer's suite first, and the PR's tests registered
 
 **Trigger: a review of the company `sdlc` plugin (v1.2.0), 2026-10-13.**

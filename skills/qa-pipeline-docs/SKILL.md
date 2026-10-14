@@ -2,14 +2,15 @@
 name: qa-pipeline-docs
 description: >
   Orchestrator for the documentation half of the QA pipeline (stages
-  1, 2 and 4 — stage 3 folded into 4 in 0.40.0) plus publishing. Given
-  a Jira ticket, runs task-context, then requirements-grooming, then
-  qa-test-cases, runs the run-analyzer, then publishes: the QA Service suite with the
-  requirements, test cases and structural checks — the record the code
-  phase reads from — and a QA sub-task on the story as the human-facing
-  tracker (no file dumps into Jira). Auto-advances with default
-  decisions, pausing only to confirm the publish (say "interactive
-  mode" to get the grooming pause back). Use it
+  1-4) plus publishing. Given a Jira ticket, runs task-context, then
+  requirements-grooming, then lets QA Service generate cases and
+  discover the feature's existing tests, then qa-test-cases adopts what
+  fits and adds what is missing, runs the run-analyzer, then publishes:
+  the QA Service suite (requirements, test cases, structural checks —
+  the record the code phase reads) and a QA sub-task on the story as
+  the human-facing tracker. Auto-advances, pausing to confirm the QA
+  Service writes and the publish ("interactive mode" brings back the
+  grooming pause). Use it
   when the user says "run the QA docs pipeline", "build the test cases
   for a ticket", "groom and write test cases", "publish the test cases
   / add these cases to QA Service" (publish-only on existing files), or
@@ -96,7 +97,7 @@ findings are in time to act on; never block the run on status.
 
 ## How it runs
 
-Post one short line per stage boundary (`Stage <n>/5 done — <stage
+Post one short line per stage boundary (`Stage <n>/6 done — <stage
 name>`) and nothing more between stages.
 
 Execute each stage by reading its `SKILL.md` and following it **in
@@ -147,13 +148,28 @@ full** — do not summarise or shortcut it. Stages share the run folder
      settled — do not post those. If the user declines, include the
      draft in the stage-6 publish preview instead.
 
-3. *(retired in 0.40.0 — the checklist is now the first working step
-   of qa-test-cases; no file, no pause. Stage numbers 4+ are unchanged
-   so every cross-reference still holds.)*
+3. **QA Service first (0.50.0)** — per
+   **`references/qa-service-first.md`**. With the connector present,
+   QA Service authors before we do: the suite and its header (`teams`,
+   `jiraKeys` + the rest), this ticket's requirements, then
+   `start_generate_test_cases` (`full` on an empty suite, `gaps`
+   otherwise) and `discover_tests` over the feature's existing tests.
+   **REQUIRED PAUSE / CONFIRM** — its own preview and plan
+   (`docs/<ISSUEKEY>-qs-plan.json`), because it writes to shared data
+   before stage 4. Produces `<ISSUEKEY>-qs-cases.md`, the export stage 4
+   reads. No connector, or the user says no → skip in one line; stage 4
+   writes every case, as before. (Until 0.50.0 this number was retired:
+   the 0.40.0 checklist stage lives on as qa-test-cases' first working
+   step.)
 
 4. **qa-test-cases** — do not pause: build on what is written, note
    ambiguity as "needs clarification"; the grounding rule handles the
-   rest. Produces `<ISSUEKEY>-test-cases.md` — the test cases AND the
+   rest. With `<ISSUEKEY>-qs-cases.md` present it adopts the QA Service
+   cases that fit (`Adopted:` line), writes only what is missing, and
+   lists the rest under "QA Service cases not adopted" with a reason.
+   Every case may carry a `Level:` line (the lowest automation level
+   that can prove it, `U` first for a pure rule). Produces
+   `<ISSUEKEY>-test-cases.md` — the test cases AND the
    Structural checks section (the former checklist's `[UI]` presence /
    label / type lines, id `REQ-N/struct-k`), each group with its
    `Covers: AC-n` line.
@@ -175,7 +191,12 @@ full** — do not summarise or shortcut it. Stages share the run folder
    structural checks** — per **`references/qa-service-publish.md`**
    (field mapping, suite naming, re-run rules, the STRUCT cases). **(b)
    is the record the code phase reads from** — since 0.33.0 no fenced
-   copy of any file is posted to Jira. (b) is on whenever the connector
+   copy of any file is posted to Jira. When stage 3 ran, the suite, its
+   header and the requirements already exist: (b) edits the
+   requirements the user's answers changed, creates only the cases
+   written here, stamps the adopted ones and marks the not-adopted ones
+   (`qa-service-publish.md` → "Adopted cases" and "Cases stage 4 did
+   not adopt"). (b) is on whenever the connector
    is present; when it is absent or the user declines, publish (a) only
    and say so plainly in the final response: the code phase for this
    ticket can then run only on this machine, from
@@ -289,7 +310,9 @@ After publishing, report:
   — no tracker comment, no archive).
 - The QA Service suite path + requirement/case counts and the
   count-verification result (or "QA Service publish skipped —
-  connector not enabled").
+  connector not enabled"); the split "adopted from QA Service A ·
+  written here W · code-level K"; the tests discovery imported, or the
+  To do when discovery could not run.
 - The run-analyzer health verdict (🟢/🟡/🔴 per category) and any
   ⚠ SPECIAL ATTENTION items for the code phase.
 - The next step: run `qa-pipeline-code` on the Story key in a fresh

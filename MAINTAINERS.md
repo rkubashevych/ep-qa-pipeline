@@ -76,8 +76,11 @@ check 9 fails while a `.env*` or `runs/` is inside it.
 
 ## Pipeline order & channel routing
 
-`task-context → requirements-grooming → qa-test-cases` (docs; stage 3
-folded into 4 in 0.40.0, stage numbers kept) then `pr-summary →
+`task-context → requirements-grooming → QA Service first →
+qa-test-cases` (docs; the 0.40.0 checklist stage folded into 4, and
+since 0.50.0 number 3 is the orchestrator's QA Service step:
+generation + discovery, `qa-pipeline-docs/references/qa-service-first.md`)
+then `pr-summary →
 code-review → api-testing → web-testing` (code), with `qa-run-analyzer`
 at the end of each phase.
 

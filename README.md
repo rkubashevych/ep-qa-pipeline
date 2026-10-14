@@ -16,7 +16,8 @@ These skills were adapted for ExpoPlatform's stack:
 |---|-------|-------|--------|
 | 1 | `task-context` | Jira ticket key/URL | `<KEY>-context.md` |
 | 2 | `requirements-grooming` | `<KEY>-context.md` | `<KEY>-requirements.md` |
-| 4 | `qa-test-cases` | `<KEY>-requirements.md` | `<KEY>-test-cases.md` |
+| 3 | `qa-pipeline-docs` step 3 — QA Service first (0.50.0) | `<KEY>-requirements.md` + the QA Service connector | the suite's generated + discovered cases, exported to `<KEY>-qs-cases.md` |
+| 4 | `qa-test-cases` | `<KEY>-requirements.md` (+ `<KEY>-qs-cases.md`) | `<KEY>-test-cases.md` |
 | 5 | `pr-summary` | PR URL / branch | `<KEY>-pr-summary.md` |
 | 6 | `code-review` | test-cases + pr-summary | `<KEY>-code-review.md` |
 | 7 | `api-testing` | code-review + test-cases (+ `.env.qa-agents`) | `<KEY>-api-testing.md` |
@@ -25,7 +26,7 @@ These skills were adapted for ExpoPlatform's stack:
 | 10a | `qa-manual-walk` | `<KEY>-walk-plan.md` + the tester, live | `<KEY>-walk-results.md` (+ `-walk-state.json` for resume) |
 | 10b | `qa-manual-results` | walk results, or a completed runsheet (Result/Notes) | `<KEY>-manual-results.md` + Jira/suite write-back |
 
-> Stage 3 (`qa-checklist`) was folded into stage 4 in 0.40.0: the decomposition into checks is qa-test-cases' first working step, and the structural checks it yields are a section of the test-cases file. Stage numbers 4–10 are unchanged. Run each orchestrator (`qa-pipeline-docs`, `qa-pipeline-code`) with one model setting for the whole run — with subagent dispatch, heavy stages get fresh context anyway.
+> Stage 3 (`qa-checklist`) was folded into stage 4 in 0.40.0: the decomposition into checks is qa-test-cases' first working step, and the structural checks it yields are a section of the test-cases file. Stage numbers 4–10 are unchanged. Since 0.50.0 the number 3 belongs to **QA Service first**, a step of `qa-pipeline-docs`, not a skill: QA Service generates cases for the ticket's requirements and discovers the feature's existing tests (unit tests included), then stage 4 adopts what fits and writes only what is missing (`skills/qa-pipeline-docs/references/qa-service-first.md`). Run each orchestrator (`qa-pipeline-docs`, `qa-pipeline-code`) with one model setting for the whole run — with subagent dispatch, heavy stages get fresh context anyway.
 
 > **Stage 7 = `api-testing`.** Executes the `[API]` test cases directly against the ExpoPlatform REST API (curl / HTTP, no browser), so API cases are verified instead of routed out. Credentials are read at runtime from `~/.ep-qa/.env.qa-agents` — never hardcoded — and only hosts in its `ALLOWED_HOSTS` are called. Stage 8 (`web-testing`) then runs only `[UI]` cases; `[mobile]` / `[export/email]` remain routed out. See `skills/api-testing/references/api-testing-reference.md` for the full method (auth contexts, route discovery, write-safety, frontend/exhibitor-token cases).
 
@@ -65,7 +66,8 @@ These skills were adapted for ExpoPlatform's stack:
 
 1. **task-context** — pulls the Jira ticket (description, acceptance criteria, comments, attachments, links) and consolidates it into one enriched Markdown file: the single source of truth for everything downstream.
 2. **requirements-grooming** — reviews those requirements with a QA grooming eye (coverage, clarity, contradictions, risks, missing detail), numbers them, and produces a clean requirements file. Reads only the context file — no tracker, no internet.
-4. **qa-test-cases** — decomposes each numbered requirement into atomic checks (the former stage 3, now a working step), then writes the behavioural ones as concrete test cases (steps, inputs, expected results) and the structural ones (presence, label, type, default) as a Structural checks section. The check says *what* to verify; the test case says *how*.
+3. **QA Service first** (a `qa-pipeline-docs` step, 0.50.0) — with the QA Service connector, publishes the suite header and the requirements, lets QA Service generate cases (`gaps` on an existing suite) and discover the feature's existing tests, unit tests included, and exports them to `<KEY>-qs-cases.md`.
+4. **qa-test-cases** — decomposes each numbered requirement into atomic checks (the former stage 3, now a working step), adopts the QA Service cases that already verify a check, then writes the remaining behavioural ones as concrete test cases (steps, inputs, expected results) and the structural ones (presence, label, type, default) as a Structural checks section. The check says *what* to verify; the test case says *how*.
 5. **pr-summary** — reads the Bitbucket PR (or branch) and builds a navigation map of the changes for the reviewer.
 6. **code-review** — verifies each test case against the PR code and produces a compact pass/fail table with findings for failures.
 7. **api-testing** — executes the `[API]` cases (code-review QA/FAIL items) against the running REST API via curl using `.env` credentials; covers admin REST, legacy admin-panel, and exhibitor-token (frontend) cases. Read-only by default; any write snapshots-and-reverts or uses a throwaway entity. Pauses if `.env` / a per-event frontend host is missing.
