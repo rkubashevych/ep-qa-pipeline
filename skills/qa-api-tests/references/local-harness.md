@@ -21,6 +21,25 @@ the harness repo and this file disagree, the harness repo wins.
 On Windows the README keeps both repos inside WSL2: on `C:\` the suite
 runs 5–10× slower. Say so if the clone is on `C:\`; don't move it.
 
+**Git Bash (0.59.0).** MSYS rewrites `docker exec -w /var/www/html/...`
+into a Windows path ("Cwd must be an absolute path"). Prefix every
+`docker exec` and `./setup.sh` with `MSYS_NO_PATHCONV=1`. With that set,
+`setup.sh`'s last step, `curl -o /dev/null` (the superadmin login
+check), exits 23. Composer, migrations and swagger have already run, so
+run that login check by hand (`-o NUL`) instead of reading the exit 23
+as a failed setup.
+
+**API v2 cannot run here (0.59.0).** Every `api-public` v2 request writes
+an `api_public_log` item to DynamoDB in `afterExecuteRoute`
+(`LoggerPublicApi::logInsert`). The harness has no AWS credentials, so
+`putItem` throws and the request answers 500 with an empty body. The
+error handler then tries to log to DynamoDB again. All v2 folders in
+`api-public` are `@skip`ped for this reason ("API v2 segfaults in
+docker-local", EP-50537…50541; meetings export EP-50538/50539). A v2
+case is set aside with that reason, not reported as a missing harness.
+**v3 runs normally** (Bearer key; e.g. `Products/*V3Cest`,
+`Meetings/*V3Cest`).
+
 ## Running one test (what the batch loop executes)
 
 ```bash
@@ -48,9 +67,10 @@ it). A defect is never "fixed" by loosening an assertion.
 
 ## Conventions the QA Service plan does not set by itself
 
-- **Branch:** `qa/<KEY>-<short-slug>` off fresh `origin/alpha`. The
-  plan proposes `qa/ae-<suite-path>` without the ticket — pass
-  `targetBranch` to `plan_implement_tests`.
+- **Branch:** the one the plan names, `qa/<level>-<suite-path>` (e.g.
+  `qa/ae-meeting-export`), off fresh `origin/alpha`. Never pass
+  `targetBranch` to `plan_implement_tests`: QA Service takes it as the PR
+  base (0.59.0). The ticket key goes in the commit and the PR title.
 - **Commits:** `<KEY>: …` or `test(<scope>): …`.
 - **Case id:** `@testCaseId <ID>` in the METHOD docblock, one per test;
   method names `testCamelCase` (never `test_<ID>_…` in a new test).

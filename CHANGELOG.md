@@ -5,6 +5,46 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.59.0 — 2026-10-14 — qa-api-tests: lessons from the first full MEXP run
+
+**Trigger: the first qa-api-tests run that wrote tests end to end**
+(EP-55889, suite MEXP, 2026-10-14). 31 V3 meetings-list cases are now
+implemented in draft PR #5626, and all 31 links are verified. Four
+things in the skill were wrong or missing.
+
+**Changed.**
+- **`targetBranch` is the PR base, not the branch name.** Step 3 and
+  `local-harness.md` said to pass `targetBranch: "qa/<KEY>-<slug>"` so
+  the branch would carry the ticket key. QA Service reads it as the base:
+  the plan proposed branch `qa/ae-meeting-export` off a base that did
+  not exist on the remote. Now: never pass it. Use the planned
+  `qa/<level>-<suite-path>` off `alpha`, and put the key in the commit
+  and the PR title.
+- **Submit each batch when it is green.** A client run that has not
+  finished within about 30 minutes fails on the server. Job 9ff4ba83
+  failed because all 31 tests were written and run before batch 1 was
+  submitted. The fallback for a run that has already failed is
+  `link_implemented_tests` with landing `pr` + prBranch (head SHA) +
+  prNumber, verify true. It runs the same verification.
+- **Opening the PR locally.** The agent definition assumes a server-side
+  `BITBUCKET_TOKEN`. Locally, the push and the PR both go through the
+  user's git credential (Git Credential Manager), read in memory and
+  never printed. The Atlassian connector has no Bitbucket write
+  operation.
+- **Harness facts** (`local-harness.md`):
+  - Git Bash needs `MSYS_NO_PATHCONV=1` for `docker exec -w`.
+  - With that set, `setup.sh`'s `curl -o /dev/null` login check exits
+    23; that alone does not mean setup failed.
+  - **API v2 cannot run in docker-local:** every v2 public request logs
+    to DynamoDB (`LoggerPublicApi::logInsert`) and answers 500 without
+    AWS credentials. v2 cases are set aside for that reason; v3 runs
+    normally.
+
+**Not changed here:** the finding that `Account::beforeSave` drops an
+`account_attributes` value passed to the factory, so tests must write
+it with `updateInDatabase`. That is test-authoring knowledge, and it
+belongs in QA Service's authoring skill, not in this plugin.
+
 ## 0.58.0 — 2026-10-14 — teststone is frozen: never a home for links or test requests
 
 **Trigger: teststone's maintainer (Viktor Mikhalkin), 2026-10-14**, on
