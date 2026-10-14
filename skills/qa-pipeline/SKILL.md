@@ -74,7 +74,7 @@ the QA Service suite/run, then Jira (a Jira comment alone never decides).
 | `r<N>/` reports or a test run exist; newest summary ❌ or the user says the fix landed | **Retest mode** — `qa-pipeline-code` retest |
 | `-walk-plan.md` present, no `-walk-results.md` (or a `-walk-state.json` in progress) | **Guided walk** — `qa-manual-walk` (resume when state exists) |
 | Complete `-walk-results.md` not yet written back, or a filled sheet / TC-Result-Notes table in hand | **Ingestion** — `qa-manual-results` |
-| The user asks to automate / write the API tests, or a finished code phase whose API cases are still `planned` in the suite | **API automation** — `qa-api-tests` on the Story |
+| The user asks to automate / write the API tests, or a code phase finished before 0.52.0 (stage 10 now runs it as its step 6) whose API cases are still `planned` | **API automation** — `qa-api-tests` on the Story |
 | A phase stopped mid-way — e.g. stage reports written but no test run recorded, or a run left `running` with no results comment | **Resume** — re-enter the same skill at the step that never ran; it records into the existing run, never a new one |
 | Signals conflict or several apply | Present the observed state and the 2–3 plausible routes; the user picks |
 

@@ -5,6 +5,58 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.52.0 — 2026-10-14 — API automation is the last step of the code phase
+
+**Trigger: the user's question after the first `qa-api-tests` run
+(EP-57310): do the orchestrators know about the new step, or does it
+need its own orchestrator?** In 0.51.0 it was optional:
+- the dispatcher had a route for it;
+- `qa-pipeline-code` mentioned it in one line of its final response;
+- the docs phase did not know about it, which is correct, because tests
+  for an unbuilt feature cannot run green.
+
+The user chose to make it a real step of the code phase, not a new
+orchestrator.
+
+**What changes:**
+- `qa-manual-results` has a new **Step 6 — Automate the API cases**.
+  - It runs `qa-api-tests` in full, with its own preview and
+    confirmation; "skip" is a valid answer and is reported.
+  - It hands over the suite, the round folder, the filed bugs and the
+    open ledger rows, so blocked cases are set aside without being
+    re-read.
+  - Why there: stage 10 is where every code-phase mode ends (first
+    run, retest, bug-fix). By then the human verdicts are recorded, the
+    bugs filed and step 4d has registered the PR's own tests, so it is
+    the first point where it is known which API cases can be written as
+    passing tests. On EP-57310 that is how BUG-01 and BUG-05 were set
+    aside.
+  - It skips with one line when there is no connector, no suite or
+    nothing to do.
+  - Without the docker-local harness it still links existing tests and
+    files the frontend sub-task; only the Implement run becomes a To do.
+- `qa-api-tests` → Input: says when it runs and what it takes from
+  stage 10.
+- `qa-pipeline-code` final response: the 0.51.0 offer line now says
+  stage 10 runs it.
+- Dispatcher row: kept for direct requests and for code phases finished
+  before 0.52.0.
+- README note updated.
+- No skill description changed, so the trigger evals are unaffected.
+
+**First real run (EP-57310, 2026-10-14):**
+- **No new API test was needed.** 9 cases were already linked from
+  PR #5544. BUG-08 and BUG-10 were linked at level C to the same tests,
+  which assert the response fields; both were verified as implemented.
+- **Set aside:** BUG-01 (open question TMU-OQ-01) and BUG-05 (EP-58608).
+- **Frontend:** 8 E2E cases filed as **EP-58731** (unassigned, at the
+  user's choice). Neither `e2e-testing` nor `teststone` had them.
+- **Two lessons:**
+  - Jira refuses the Team field on a sub-task (it is inherited from the
+    parent). `qa-api-tests` Step 4 now says to retry once without it.
+  - Docker Desktop was off. It was started and set to start at sign-in
+    at the user's request (machine setting, not a skill change).
+
 ## 0.51.0 — 2026-10-14 — qa-api-tests: API cases implemented through QA Service, frontend cases to the frontend developer
 
 **Trigger: the user, after checking PR #5544 (EP-57310, suite TMU)

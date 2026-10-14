@@ -376,6 +376,31 @@ summary, description and the structured fields, with the dedupe prefix
 untouched. Its reporter stays the service account — say so in the final
 response rather than implying it was fixed.
 
+### Step 6 — Automate the API cases (0.52.0)
+
+The last step of the round, and of the code phase. By now the human
+verdicts are recorded, the bugs are filed and step 4d has registered the
+PR's own tests, so this is the first point where it is known which API
+cases can be written as passing tests and which are blocked.
+
+Run `../qa-api-tests/SKILL.md` on the Story, in full — its Steps 0–5,
+its own preview and its own confirmation (the user can answer "skip";
+say so in the final response). Pass along what this stage learned:
+the suite id, the round folder, the bugs filed in steps 4 and 5 (their
+cases are set aside), and the ledger rows still open (open questions
+set cases aside too).
+
+Skip with one line, not silently:
+- connector absent, or no suite → "API automation skipped — <reason>";
+- the ticket has no `AE` / `C` / `CFE` / `E2E` case without a link and
+  no frontend request to file → "API automation: nothing to do";
+- RC smoke runs (`qa-rc-smoke`) never reach this stage.
+
+A machine without the docker-local harness still runs qa-api-tests
+Steps 1, 2 and 4 (selection, linking existing tests, the frontend
+sub-task). Only the Implement run waits for the harness; it becomes a
+To do and a ledger row.
+
 ## Final response
 
 Report: the report path; counts (CONFIRMS / FILLS / RETRACTS /
@@ -385,5 +410,7 @@ to); bugs linked and bugs filed (run-filed keys from `run_defects` and
 template-filed keys, separately); the run id and its final status
 (`closed`, or why not); the ledger rows closed and the rows carried
 forward; the throwaway fixtures retired (or why not); the PR's tests
-registered, linked or left for after the merge (step 4d); and what is
-still untested.
+registered, linked or left for after the merge (step 4d); the API
+automation outcome (step 6: cases implemented, the PR, cases set aside,
+the frontend sub-task key — or why it was skipped); and what is still
+untested.

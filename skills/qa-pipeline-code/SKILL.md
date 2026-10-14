@@ -496,5 +496,5 @@ human-summary content rather than inventing a third format. Then, from
 step 9: the walk-plan path, cards the tester will walk (by kind) vs
 cases the machine settled, the reminder that the plan and testdata hold
 live credentials, and the hand-off line: "walk me through <STORY>"
-starts the session. Unlinked `AE` / `C` cases of this ticket → offer
-"automate the API cases for <STORY>" (`qa-api-tests`, 0.51.0).
+starts the session. API automation (`qa-api-tests`) runs at the end of
+stage 10 (`qa-manual-results` step 6, 0.52.0).

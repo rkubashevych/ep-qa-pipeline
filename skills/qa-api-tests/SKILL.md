@@ -53,6 +53,11 @@ re-read the work order.
 
 - A Story key (or its QA sub-task — use the parent). Optionally a
   narrower case list ("only TMU-BUG-02 and 03").
+- **When it runs:** as the last step of the code phase —
+  `qa-manual-results` step 6 invokes it after the human verdicts and
+  bugs are recorded (0.52.0) — or on its own when asked. Called from
+  stage 10, take the suite, round folder, filed bugs and open ledger
+  rows from it instead of re-reading them.
 - **Where to find inputs:** `../qa-pipeline/references/data-locations.md`.
   This skill writes into the ticket's newest round folder
   `runs/<KEY>/r<N>/` (or `docs/` when no code phase ran yet).
@@ -186,7 +191,9 @@ filed by QA Service's own request:
    default the assignee of the story's frontend dev sub-task; ask when
    there is none. Same confirmation as Step 3 when both run.
 5. `createJiraIssue` with its `create.args` + `description`, then
-   `createIssueLink` per `afterCreate`. If the user wants ONE frontend
+   `createIssueLink` per `afterCreate`. Jira refuses the Team field
+   (`customfield_10001`) on a sub-task — it is inherited from the parent
+   (EP-58731, 2026-10-14): retry once without it. If the user wants ONE frontend
    sub-task for both levels, file the first and add the second level's
    list to it as a comment.
 
