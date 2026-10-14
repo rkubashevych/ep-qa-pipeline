@@ -96,10 +96,25 @@ unchanged and still covers the sub-task and every case write.
      developer's spec mention; the module the feature lives in. Never
      the whole repo.
    - Preview with `pathPrefixes`. Before trusting it, check
-     `rateLimited`, `failedReads`, `truncated` and `scanned`. A merged
-     test the preview did not find (`scanned: 0` on a path that exists
-     — seen on EP-55889, 2026-10-14) means the service's tree snapshot
-     lags; do not apply a partial picture as if it were complete.
+     `rateLimited`, `failedReads`, `truncated` and `scanned`.
+   - **Before calling a miss a service fault, check the branch
+     yourself** when a local clone exists (`git cat-file -e
+     origin/<configured branch>:<path>` after a fetch). On EP-55889
+     (2026-10-14) a `scanned: 0` was correct: the unit test had been
+     deleted from `alpha` the day before (commit `639f8b5`), and the
+     fix it tested had changed with it.
+   - **Bitbucket's rate limit is reported as a missing file.** The same
+     day, discovery failed with "Bitbucket returned 429", and
+     `link_implemented_tests` then recorded 19 links as "file not found
+     at this ref" for files present on both `alpha` and `master`. A
+     link that comes back unresolved for a file the clone has is a
+     rate-limit casualty, not a stale ref: keep it, say so, and re-link
+     later. It counts toward nothing until it resolves.
+   - **A timed-out write may still land.** A `link_implemented_tests`
+     call that timed out on EP-55889 was written a few minutes later.
+     After any timeout on a write, re-read the target (`get_test_case`,
+     `get_suite`) before retrying or reporting it as failed — and
+     re-read again later, not only straight away.
    - Apply (`apply: true`, `refs`) only the tests that exercise this
      feature. `discoveredPerRequirement` far above 1 means the scope
      pulled in unrelated tests; narrow it.

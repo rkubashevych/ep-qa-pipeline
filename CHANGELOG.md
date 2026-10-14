@@ -5,6 +5,46 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.50.2 — 2026-10-14 — corrections from applying 0.50 to the Meeting Export suite
+
+**Trigger: applying the 0.50 flow by hand to `common/meeting-export`
+(MEXP), the same day.** Three statements in 0.50.0 were wrong or
+incomplete. `qa-service-first.md` → Procedure step 4 now says:
+- **The `scanned: 0` was correct.** 0.50.0 blamed a lagging tree
+  snapshot. In fact commit `639f8b5d9d9` (2026-10-13) deleted
+  `PrepareCellStringTest.php` from `alpha`, reverted the ExportHelper
+  regex, and moved the EP-58581 fix into `MeetingExportTask` with Cest
+  tests. New rule: check the branch in a local clone before calling a
+  miss a service fault.
+- **The 0.50.0 "link did not land" was wrong.** The timed-out
+  `link_implemented_tests` on MEXP-MAP-03 was written minutes later,
+  pointing at the deleted file. It was found and unlinked. New rule:
+  after a timed-out write, re-read the target, and re-read again
+  later, before retrying or reporting failure.
+- **QA Service reports Bitbucket's rate limit as a missing file.**
+  Discovery failed with "Bitbucket returned 429". Then 19 links came
+  back "file not found at this ref" for files present on both `alpha`
+  and `master`, `MeetingExportBufferCest` since August. Such a link is
+  kept and re-linked later, never treated as a stale ref.
+
+**What the MEXP application did** (user-confirmed choices: rename,
+note-don't-link the skipped API tests, include the buffer tests, review
+the whole suite):
+- 28 ids renamed `MEETING-EXPORT-*` → `MEXP-*`, through
+  `edit_requirement` and `rename_test_case`.
+- The stale Unit link on MAP-03 was removed.
+- Level `I` was added to 11 cases.
+- 9 new items: `MEXP-RPT-01..04`, `MEXP-BUF-01..04` and requirement
+  `MEXP-NFR-06` from EP-54800.
+- 19 developer tests linked (pending re-verification, see above).
+- `devTests` notes on 5 API cases whose tests are `@skip`ped because of
+  EP-50538 / EP-50539.
+- `gaps` generation added 17 cases (4 Unit, 4 Integration, 2 Contract,
+  7 API-E2E), and the prefix was untouched.
+- 68 requirements filed into 13 topic folders.
+- Header: priority and summary filled.
+- Tag proposal, and the review pass over the whole suite.
+
 ## 0.50.1 — 2026-10-14 — requirement folders and QA Service's review, filled too
 
 **Trigger: the user's question after 0.50.0, "we will use all QA
@@ -164,7 +204,7 @@ expected output is unchanged.
 **Done by hand on EP-55889, 2026-10-14:** `edit_suite` on `MEXP` set
 `teams: [Exhibitor]` (the user's call) and `jiraKeys: [EP-55889]`.
 Still open:
-- **The unit test is not registered.** `discover_tests` timed out
+- **The unit test is not registered** (corrected in 0.50.2: the test was deleted from `alpha`, and the link did land). `discover_tests` timed out
   twice, then a scoped preview read 0 files on a path merged two days
   earlier. `link_implemented_tests` (U, `landing: merged`) timed out and
   did not land. QA Service's repo reads were not answering that day.
