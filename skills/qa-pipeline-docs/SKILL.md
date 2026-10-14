@@ -97,6 +97,10 @@ findings are in time to act on; never block the run on status.
 
 ## How it runs
 
+**First task of the week → QA Service watch (0.53.0).** Before stage 1,
+`qs_watch.py due` (`../qa-service-watch/SKILL.md` → "When it runs");
+due → run that skill (read-only, ~1 min, ≤5 lines), then continue.
+
 Post one short line per stage boundary (`Stage <n>/6 done — <stage
 name>`) and nothing more between stages.
 

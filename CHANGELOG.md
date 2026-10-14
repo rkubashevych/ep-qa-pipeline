@@ -5,6 +5,71 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.53.0 — 2026-10-14 — qa-service-watch: a weekly check of what changed in QA Service
+
+**Trigger: the user, 2026-10-14:** "wire something to our qa pipeline
+so it checks qa service for updates regularly and checks what we can
+integrate or not so we won't miss a thing — maybe once every week on
+the first task." The need was proven the same day:
+- 0.50.0 discovered case generation, test discovery, requirement
+  folders and the review gate only by accident;
+- 0.51.0 found the Implement workflow, which had been there all along.
+
+QA Service publishes no changelog (its manual has no "what's new"
+page). It does describe itself, cheaply: tool names, `list_skills`
+with digests, `list_agent_actions` with MCP status and
+skill / agent / rule digests, `list_help_topics`.
+
+**What changes — new skill `qa-service-watch`:**
+- **Step 1:** four read-only reads, into `new.json`.
+- **Step 2:** `scripts/qs_watch.py diff` against the last dated
+  snapshot, naming the plugin files that mention each changed item.
+- **Step 3:** triage into five buckets:
+  - **Integrate**;
+  - **Refresh our copy** (a mirrored method changed, e.g.
+    `test-planning-and-design` → `test-levels.md`);
+  - **Already followed** (a method fetched at run time, e.g.
+    `qa-implement-tests`);
+  - **Breaks us** (a removed or renamed tool the plugin calls, 🔴);
+  - **Not relevant**.
+- **Step 4:** report `~/.ep-qa/qa-service-watch/<date>-report.md`, store
+  the snapshot (`--write` moves the clock), at most 5 chat lines.
+- **Read-only:** it never edits the plugin or QA Service. Proposed
+  changes ship as a normal release, after the task in hand.
+
+**The weekly trigger:**
+- `qa-pipeline` (Step 1), `qa-pipeline-docs` (How it runs) and
+  `qa-pipeline-code` (Step 0) start with `qs_watch.py due`.
+- 7+ days since the last check, or never checked → run the watch first,
+  then continue.
+- No shell → read `state.json`.
+- It never blocks the task: a failure is one line, and the clock does
+  not move.
+
+**Script:** `qs_watch.py` (`due` / `diff [--plugin-root] [--write]` /
+`show` / `--selftest`), stdlib only, added to `verify_plugin.py`'s
+self-tested scripts.
+
+**Wiring:**
+- README note;
+- MAINTAINERS layout;
+- `data-locations.md` (`$EP_QA_HOME/qa-service-watch/`);
+- evals (3 ✅ / 3 ❌);
+- plugin description.
+
+**Baseline taken 2026-10-14:** 142 tools, 32 skills, 6 agents, 1 rule,
+15 actions (13 available over MCP; `propose_requirement_grouping` and
+`commission_uat` planned), 31 manual pages. 80 of the 142 tools are
+never mentioned in the plugin. Most are administration. Candidates for
+the first triage:
+- `feature_signoff`: a sign-off report on the Jira ticket, against the
+  stage 10 human summary;
+- `feedback_draft` / `post_register_feedback`: review findings posted
+  to the product team's issue or page, against the grooming questions
+  comment;
+- `check_source_updates` / `resolve_source_impact`: QA Service's own
+  spec drift, against `source_tools.py drift`.
+
 ## 0.52.0 — 2026-10-14 — API automation is the last step of the code phase
 
 **Trigger: the user's question after the first `qa-api-tests` run

@@ -31,6 +31,11 @@ invoked orchestrator's own rules then apply in full.
 
 ## Step 1 — Read the state
 
+**First task of the week (0.53.0):** before anything else, run the
+QA Service watch when it is due (`../qa-service-watch/SKILL.md` →
+"When it runs"). It is read-only and never blocks the route; the
+orchestrator you hand off to then finds it already done this week.
+
 From the ticket key/URL (ask if the paste has none):
 1. `getJiraIssue` — issuetype, status, summary.
 2. Pipeline QA sub-task? `searchJiraIssuesUsingJql`:

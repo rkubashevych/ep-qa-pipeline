@@ -26,6 +26,8 @@ order and the pause when nothing is reachable. The checkout's own
 as the second line of defence.
 
 ```
+qa-service-watch/               the weekly QA Service check (0.53.0), not per ticket:
+  state.json · snapshot-<date>.json · <date>-report.md · new.json
 runs/<ISSUEKEY>/
   <ISSUEKEY>-open-items.md      the ledger — one per ticket, no round
   docs/                         stages 1–4 (re-run = overwrite in place):

@@ -62,6 +62,7 @@ written by the analyzer and stage 9, closed only by stage 10.
 
 ## Step 0 — Gather inputs
 
+First task of the week: `../qa-service-watch/SKILL.md` (0.53.0).
 **Establish the run folder — before any other read or write**
 (`../qa-pipeline/references/data-locations.md` → "The run folder";
 `runs/` is `$EP_QA_HOME/runs/`, resolved per
@@ -496,5 +497,4 @@ human-summary content rather than inventing a third format. Then, from
 step 9: the walk-plan path, cards the tester will walk (by kind) vs
 cases the machine settled, the reminder that the plan and testdata hold
 live credentials, and the hand-off line: "walk me through <STORY>"
-starts the session. API automation (`qa-api-tests`) runs at the end of
-stage 10 (`qa-manual-results` step 6, 0.52.0).
+starts the session. API automation: stage 10 step 6 (0.52.0).

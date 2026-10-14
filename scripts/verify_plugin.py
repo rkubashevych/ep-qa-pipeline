@@ -27,7 +27,7 @@ Checks (MAINTAINERS recipe step 6.4):
   6. vocabulary every status in status-vocabulary.md has its base token
                 in reconcile_counts.py STATUSES
   7. selftest   reconcile_counts.py, export_profile.py, source_tools.py,
-                plan_hash.py and skill_stamp.py --selftest pass
+                plan_hash.py, skill_stamp.py and qs_watch.py --selftest pass
   8. staged     `git diff --cached --name-only -z` has no run-artefact path
                 — judged on the first segment (`runs/`) and the BASENAME
                 only (EP-*, GS-*, build_*, repro_*, *-testdata*, *-runsheet*,
@@ -265,7 +265,8 @@ SELFTESTED_SCRIPTS = ("skills/qa-run-analyzer/scripts/reconcile_counts.py",
                       "skills/api-testing/scripts/export_profile.py",
                       "skills/qa-pipeline/scripts/source_tools.py",
                       "skills/qa-pipeline/scripts/plan_hash.py",
-                      "skills/qa-pipeline/scripts/skill_stamp.py")
+                      "skills/qa-pipeline/scripts/skill_stamp.py",
+                      "skills/qa-service-watch/scripts/qs_watch.py")
 
 
 def check_selftest(root, r):

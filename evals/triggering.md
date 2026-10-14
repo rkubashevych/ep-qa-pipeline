@@ -123,6 +123,15 @@ names who should handle it instead).
   proposes the RC smoke
 - ❌ "run the RC smoke for EP-57782" → qa-rc-smoke (mode named)
 
+## qa-service-watch (weekly QA Service change check)
+- ✅ "check QA Service for updates"
+- ✅ "what's new in QA Service?" / "did QA Service change anything we should use?"
+- ✅ (auto) first pipeline task of the week, via qa-pipeline / qa-pipeline-docs / qa-pipeline-code
+- ❌ "how does request_dev_tests work?" → QA Service `get_help_topic`, no skill
+- ❌ "update the plugin for the QA Service changes" → a maintainer release
+  (MAINTAINERS recipe), not this read-only check
+- ❌ "check the MEXP suite for gaps" → QA Service `coverage_report` / qa-run-analyzer
+
 ## qa-api-tests (API cases → implemented in QA Service)
 - ✅ "automate the API cases for EP-57310"
 - ✅ "write the API tests for this ticket and register them in QA Service"
