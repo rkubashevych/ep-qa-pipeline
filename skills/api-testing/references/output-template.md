@@ -121,6 +121,7 @@ Section rules:
 | PARTIAL | <N>  |
 | BLOCKED | <N>  |
 | BLOCKED (unverified) | <N> |
+| BLOCKED (quota) | <N> |
 | NOT EXECUTED | <N> |
 | NOT-TESTABLE | <N> |
 | NOT-TESTABLE (instrumentation) | <N> |
@@ -132,3 +133,27 @@ Rows with a zero count may be omitted; a status that occurs anywhere in
 Results must have its own row (`../../qa-run-analyzer/references/status-vocabulary.md`).
 
 Verdict: <API testing successful (all PASS / FAIL REJECTED) / unsuccessful — N FAIL, N FAIL CONFIRMED / incomplete — N BLOCKED>
+
+---
+
+## The evidence file — `<ISSUEKEY>-api-evidence.md`
+
+A separate file beside the report: one `§<n>` per PASS, FAIL, FAIL
+CONFIRMED, FAIL REJECTED and PARTIAL row, numbered in the order written;
+the row's Comment (PASS) or the finding's `Evidence:` line names it. The
+step-5 evidence audit rates each row from its section
+(`../../qa-pipeline-code/references/evidence-audit.md`). BLOCKED rows
+have no section — their `Probe:` is the evidence.
+
+```
+# <ISSUEKEY> - API evidence
+
+## §<n> — <TC id> · <verdict>
+
+Request: <METHOD> <path> · as <role / auth context — never the token>
+Body: <the keys that decide the case, or "none">
+Status: <HTTP status>
+Response (from `.data`, the part that decides the verdict):
+<excerpt, quoted verbatim; tokens and passwords redacted>
+Expected: <the case's expected result, one line>
+```

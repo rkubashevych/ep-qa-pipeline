@@ -74,8 +74,15 @@ The only place a credential lives. Variables (the api-testing reference
 | `ADMIN_BASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ORGANIZER_API_KEY`, `EVENT_ID`, `BASE_URL`, `BASE_PATH` | api-testing, stage 9 provisioning, the walk's AGENT-RUNS cards |
 | `RC_ADMIN_BASE_URL`, `RC_EVENT_ID`, `RC_FRONTEND_HOST` (hosts and event, not secrets); optional `RC_ADMIN_USERNAME`, `RC_ADMIN_PASSWORD`, `RC_ORGANIZER_API_KEY` | qa-rc-smoke only; the alpha block stays the default for every other stage. **The RC admin is the same account as alpha2** (confirmed 2026-09-29), so when `RC_ADMIN_USERNAME` / `RC_ADMIN_PASSWORD` are empty, `ADMIN_USERNAME` / `ADMIN_PASSWORD` are used against `RC_ADMIN_BASE_URL`. The organizer key does **not** carry over to portals: the alpha key is rejected on RC portals (EP-57431), and on RC admin REST it is untested (`qa-rc-smoke/references/rc-smoke-method.md`) |
 | `BB_API_TOKEN` (and the other Bitbucket variables in `pr-summary/references/bitbucket-access.md`) | pr-summary, code-review |
+| `FRONTEND_HOST` | the portal host of `EVENT_ID`'s event, when known (api-testing frontend cases, stage 9 portal logins). Per event: a case on another event needs its own host (`api-testing-reference.md` §11.1). Must be in `ALLOWED_HOSTS` |
 | `ALLOWED_HOSTS` | every stage that sends a request to a product host (below) |
 | `QA_OPERATOR_EMAIL` | qa-pipeline-docs publish (the QA sub-task assignee), qa-manual-results (the default tester principal) |
+
+There is **no variable for a visitor or exhibitor login**, on purpose:
+those accounts are test data — the case's `[data: …]`, or a throwaway
+account created under api-testing's write-safety rules (stage 9
+provisions them for the walk). A run that may not write marks such
+cases NOT EXECUTED with that reason.
 
 The e2e project's `.env` is **not** read any more: two files with the
 same variables gave two answers on which alpha was under test. Copy the

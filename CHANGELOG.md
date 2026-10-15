@@ -5,6 +5,53 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.69.0 — 2026-10-15 — gaps both versions hit in the 0.59.1 vs 0.68.0 comparison
+
+**Trigger:** an A/B dry run on EP-56001 (2026-10-15): the docs phase and
+the code phase through API testing, once with 0.59.1 and once with
+0.68.0, nothing written to Jira or QA Service. 0.68.0 showed no
+regression (same core findings; the "fix not on master" fact labelled
+by the rule, not over it; the "Open findings" section used, where
+0.59.1's run had to improvise one). Both runs hit the same gaps:
+
+- **`reconcile_counts.py` counted any `Covers:` line.** qa-test-cases
+  says an id is covered only on a group with a case or a structural
+  line; both runs saw "10/10 covered" while a risk REQ had no case. Now
+  only groups with a `### TC-` heading or a `REQ-N/struct-k` line count
+  (bug-fix mini files, which have no `## REQ-` groups, keep the plain
+  count). Two new self-test cases.
+- **A Bug in the docs phase had no rule.** Both runs turned the steps
+  to reproduce and the actual result into REQs of their own.
+  qa-pipeline-docs now says a Bug normally goes to bug-fix mode, and
+  when it does run here the QA sub-task goes under the Bug; grooming's
+  new "Bug tickets" rule makes the expected result the requirement and
+  folds the repro and the actual result into its case (their `JD-n` on
+  the same `source:` line).
+- **task-context's "ask once for the AC page" had no unattended path.**
+  With nobody to answer (auto-default, a subagent) it now skips the
+  ask; a Bug with no AC page is expected, not a gap.
+- **The wave-1 status line could be false.** "run <id> open" after a
+  recording that left no `not_run` row — the service had completed the
+  run. It now says `completed` then, and N is the roster (local-only
+  cases named separately).
+- **`check_source_updates` writes a baseline** but sat among the reads
+  (sources-of-record §9b). Now said, with the rule: a pass that must not
+  write skips it and says so.
+- **No visitor-login variable, `FRONTEND_HOST` undocumented.**
+  environment.md and the api-testing reference now list
+  `FRONTEND_HOST`, and say visitor / exhibitor logins are test data on
+  purpose — a run that may not write marks those cases NOT EXECUTED.
+- **`-api-evidence.md` had no template.** Added to api-testing's
+  output template (§n shape), with the missing `BLOCKED (quota)` row in
+  its statistics table.
+
+**Not changed, with the reason.**
+- `source_tools.py` taking a run-folder argument: it honours
+  `EP_QA_HOME`; the comparison only needed it because of its own
+  folder layout.
+- `QA_OPERATOR_EMAIL` missing from the user's `.env.qa-agents`: an
+  environment value, not plugin code (the walk asks once when absent).
+
 ## 0.68.0 — 2026-10-15 — the six gaps the 0.64.0 smoke test found
 
 **Trigger:** the "Open" list under 0.64.0. All six are closed here.

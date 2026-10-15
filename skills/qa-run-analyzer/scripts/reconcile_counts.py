@@ -271,12 +271,38 @@ def ledger_ids(text, line_re):
     return out
 
 
+GROUP_HEAD = re.compile(r"^## (?:REQ-(\d+[a-z]?)\b)?", re.M)
+STRUCT_REQ = re.compile(r"^- \[[ xX]\] REQ-(\d+[a-z]?)/struct-\d+\b", re.M)
+TC_HEAD = re.compile(r"^### TC-", re.M)
+
+
+def covered_ids(text):
+    """Ledger ids on Covers: lines of groups that verify something (0.69.0).
+
+    qa-test-cases: an id counts as covered only on a group with at least
+    one test case or structural line. A `## REQ-N` group whose Covers:
+    line has no `### TC-` heading under it and no `REQ-N/struct-k` line
+    anywhere names a criterion nothing checks. Files with no `## REQ-`
+    groups (bug-fix mini files) keep the plain Covers: count."""
+    heads = list(GROUP_HEAD.finditer(text))
+    if not any(h.group(1) for h in heads):
+        return ledger_ids(text, COVERS_LINE)
+    struct_reqs = set(STRUCT_REQ.findall(text))
+    out = set()
+    for i, h in enumerate(heads):
+        body = text[h.end():heads[i + 1].start() if i + 1 < len(heads) else len(text)]
+        req = h.group(1)
+        if TC_HEAD.search(body) or STRUCT_LINE.search(body) or (req and req in struct_reqs):
+            out |= ledger_ids(body, COVERS_LINE)
+    return out
+
+
 def ledger_report(context, requirements, test_cases):
     """Return the printable ledger lines for whatever files are present."""
     lines = []
     ctx = ledger_ids(context, CONTEXT_BULLET) if context else None
     req = ledger_ids(requirements, SOURCE_LINE) if requirements else None
-    tcs = ledger_ids(test_cases, COVERS_LINE) if test_cases else None
+    tcs = covered_ids(test_cases) if test_cases else None
     if ctx is not None:
         by = {k: sorted(i for i in ctx if i.startswith(k + "-")) for k in ("AC", "SB", "TS", "JD", "CM")}
         for k in ("SB", "TS"):
@@ -620,6 +646,14 @@ def check_ledger(errs):
     out = "\n".join(ledger_report(LEDGER_CTX, LEDGER_REQ, LEDGER_TC))
     if "MISSING: AC-3" not in out or "page 3/captured 3" not in out:
         errs.append(f"ledger: report text wrong:\n{out}")
+    # 0.69.0: a Covers: line on a group with no case and no structural line
+    # covers nothing; a structural line for that REQ makes it count again
+    empty = LEDGER_TC + "\n## REQ-3 — sorting  [UI]\n\nCovers: AC-3\nApplied techniques: none\n"
+    if "AC-3" in covered_ids(empty):
+        errs.append("ledger: a case-less REQ group's Covers: counted as coverage")
+    with_struct = empty + "\n## Structural checks  [UI]\n\n- [ ] REQ-3/struct-1 [UI] the sort control exists\n"
+    if "AC-3" not in covered_ids(with_struct):
+        errs.append("ledger: a REQ covered by a structural line not counted")
     # pre-0.42 files: no ids anywhere → say so, never crash
     out2 = "\n".join(ledger_report("## Requirements\n- plain bullet\n", "- REQ-1: x\n", "## REQ-1 — x\n"))
     if "pre-0.42" not in out2:

@@ -294,7 +294,8 @@ UI:
 1. `check_source_updates {suiteId}` — re-reads every document the
    suite's requirements cite. The first call on a suite records a
    baseline and reports nothing; say "QA Service source watch: baseline
-   recorded".
+   recorded". That baseline is a write to QA Service: a pass that must
+   not write (a read-only or rehearsal run) skips this step and says so.
 2. `list_source_impacts {suiteId}` — the open notices. Keep the ones on
    this ticket's requirements: `stale_quote` (the passage a requirement
    rests on was rewritten) and `new_material` (a paragraph no quote

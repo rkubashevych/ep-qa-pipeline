@@ -189,7 +189,10 @@ Merge and flag conflicts:
   names both ids.
 
 If no Confluence page is linked on the ticket:
-- Do not stop. Ask the user once for the Confluence URL (or page).
+- Do not stop. Ask the user once for the Confluence URL (or page) —
+  except when nobody can answer (an orchestrator's auto-default run, a
+  subagent): then skip the ask and continue as below. A Bug usually
+  has no AC page; that is expected, not a gap.
 - If they cannot provide one, note in the Requirements section:
   "⚠️ No Confluence acceptance-criteria page linked; requirements are
   derived from the Jira Description only", and flag it in the final

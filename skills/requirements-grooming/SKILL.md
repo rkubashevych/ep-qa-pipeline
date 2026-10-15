@@ -89,6 +89,13 @@ appear in the context file. A `JD-n` marked "conflicts with AC-n" is
 not numbered on its own: it is the other version of that AC's REQ,
 which cites both ids.
 
+**Bug tickets.** The expected result is the requirement. The steps to
+reproduce and the actual result are not requirements of their own:
+they become that REQ's case — the steps as its steps, the actual
+result as "must no longer occur" — so their `JD-n` ids go on that one
+REQ's `source:` line. Only a stated scope beyond the fix ("also on
+mobile", "same for exhibitors") is a REQ of its own.
+
 If during grooming a requirement contains several different things —
 split it into sub-items: REQ-5a, REQ-5b. The main number is kept,
 sub-items are added.

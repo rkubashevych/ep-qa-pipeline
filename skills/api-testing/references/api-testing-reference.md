@@ -42,6 +42,7 @@ PAUSE, never guess.
 | `ORGANIZER_API_KEY` | Sent as HTTP Basic auth on every REST call (`Authorization: Basic <key>`). Org/event-scoped. |
 | `EVENT_ID` | The event to select (sent as `x-sel-exhibition` on admin REST calls). |
 | `BASE_URL` / `BASE_PATH` | Visitor / exhibitor frontend host + path (for exhibitor-token calls). |
+| `FRONTEND_HOST` | The portal host of `EVENT_ID`'s event, when known (§11.1 — per event). Visitor / exhibitor *logins* are test data, not variables (`environment.md`). |
 | `ALLOWED_HOSTS` | Comma-separated hosts this stage may call; `*.suffix` allowed. Every host above and every per-event frontend host must match, checked **before the first request** (`load-env.sh --host-allowed HOST`); production (`*.expoplatform.com`) is refused even when listed — `environment.md` → `ALLOWED_HOSTS`. |
 
 **Shell-safety (passwords with `;` `?` `!` `$`…):** credentials may contain

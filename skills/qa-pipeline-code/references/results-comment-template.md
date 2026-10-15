@@ -18,6 +18,13 @@ Posted on the QA sub-task when the ticket has one, otherwise on the
 ticket under test. Agents-only wording; no verdicts visible to a human
 skimmer, nobody tagged. **Nothing else is posted in wave 1.**
 
+- **N** is the roster (the cases on the run), not the pass's working
+  list; when they differ (cases not on the suite), say so: `N cases on
+  the run (+ L local-only)`.
+- **"open"** only when `get_test_run` still reads `running` after the
+  recording. With no `not_run` row left the service auto-completes the
+  run: the line then reads `QA Service run <id> completed`.
+
 **Wave 2 (stage 10, after the manual round):** the human summary below,
 plus story notes / bug filings / decision requests — all on
 human-confirmed verdicts. Narrow wave-1 exception: runtime-confirmed +

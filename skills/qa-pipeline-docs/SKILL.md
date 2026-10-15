@@ -46,6 +46,11 @@ counted.
 
 - A Jira ticket key or URL (e.g. `EP-44730`). If the key is itself a
   sub-task, use its parent Story as the story for publishing.
+- **A Bug** normally goes to bug-fix mode (`qa-pipeline-code`), not
+  here. Run the docs phase on one only when the user asked for it or
+  the Bug carries real scope (new behaviour beyond the repro). Then
+  grooming treats it per its "Bug tickets" rule, and the QA sub-task is
+  created under the Bug itself.
 
 **After a refinement run.** When `runs/<ISSUEKEY>/docs/` already holds
 `qa-refinement` output (`-open-questions.md`, `-answers.md`,
