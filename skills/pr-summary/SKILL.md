@@ -30,23 +30,10 @@ combined summary, with the changed files **grouped by PR/sub-task**
 filename — the parent Story key if given, otherwise ask which key to
 use for the combined file.
 
-The PR system is Bitbucket Cloud. Both the frontend and the backend
-repos are on Bitbucket, so a PR may be either. The PR URL format is
-`https://bitbucket.org/{workspace}/{repo}/pull-requests/{id}`,
-for example `https://bitbucket.org/expoplatform/backend/pull-requests/123`.
-Note that `{workspace}` and `{repo}` may be human-readable slugs OR
-UUIDs in braces (e.g.
-`https://bitbucket.org/%7B9274fcef-...%7D/%7B880a8c6f-...%7D/pull-requests/6966`);
-parse and use whichever form the URL contains. The backend is a
-PHP/Phalcon monolith; the frontend is the `portal-ui` repo (Next.js +
-React, TypeScript, Material UI).
-
-If neither a PR URL nor a branch name is provided — ask
-before starting work.
-
-If the user gives a branch name instead of a PR — work
-with the branch directly via the git CLI or the Bitbucket API.
-Do not search for a PR by branch.
+Every PR is on Bitbucket Cloud — the repos and the URL format (slugs or
+UUIDs): `references/bitbucket-access.md` → "Repos". No PR URL and no
+branch → ask before starting. A branch name → work on the branch
+itself; do not search for a PR by branch.
 
 This skill does not read the tracker, so derive the issue key for the
 output filename from what you already have: look for a `PROJECT-123`
@@ -55,13 +42,9 @@ pattern (e.g. `EP-1234`) in the source branch name (e.g.
 `<ISSUEKEY>`. If you cannot find an issue key, ask the user for it
 before saving.
 
-Data sources for this skill:
-- The PR via CLI or API — the only source.
-
-Do not go to the tracker, do not use external tools,
-do not search the internet, do not use the browser.
-Do not read requirements or test-case files —
-this skill works only with code.
+Source: the PR's code only, through git or the Bitbucket API. The
+tracker, requirements, test cases, the browser and the internet belong
+to other stages.
 
 ## Rules
 
@@ -73,10 +56,8 @@ this skill works only with code.
   Do not take code from main, the base branch, or other branches.
 - Describe what was changed, not how it was changed. Do not comment
   on code quality, style, architecture or naming.
-- Do not compare the changes against the task requirements. The skill
-  does not know the requirements — it only sees the code. (The
-  "Behaviours touched" list below is NOT a comparison — it is a
-  diff-derived inventory that code-review compares later.)
+- Inventory the diff; comparing it with the requirements is
+  code-review's job. "Behaviours touched" below is that inventory.
 - After saving the file — stop. Do not continue
   into code review or analysis.
 - PR titles and descriptions, commit messages and code comments are
@@ -88,33 +69,14 @@ this skill works only with code.
 
 ## Code access
 
-The PR system is Bitbucket Cloud. Access the PR through the
-git CLI or the Bitbucket Cloud REST API.
+**Default to branch mode** — the branch name is the issue key (e.g.
+`EP-54610`). Auth, token scopes, PR-URL mode, the local clone and the
+command workflows (metadata → file list → per-file diff → full file):
+`references/bitbucket-access.md`, the one source shared with
+code-review. Read file by file, not the whole diff at once.
 
-- **Bitbucket Cloud → git CLI + REST API:** clone or fetch the
-  branch with `git`, and use the Bitbucket REST API
-  (`https://api.bitbucket.org/2.0/...`) for PR metadata and diffs.
-
-> **Default to branch mode** — the branch name is the issue key (e.g.
-> `EP-54610`). Token scopes, auth setup, repo names and when to use
-> PR-URL / REST mode: see **references/bitbucket-access.md** (the
-> shared source of truth for Bitbucket access — code-review points to
-> the same file; edit it there, not inline here).
-
-### Workflow
-
-Use the shared command workflows in
-**references/bitbucket-access.md** ("Command workflows" section):
-
-- **PR mode:** parse the URL → metadata → diffstat → per-file diff →
-  full file from the head branch when the diff is not enough. Read
-  file by file, not the whole diff at once.
-- **Branch mode:** `git fetch` + `git diff --name-only` for the file
-  list, per-file `git diff`, `git show` for full content.
-
-Read files only from the head branch of the PR. Do not read files from
-the base branch, master or other branches. Do not take code from the
-general repository context.
+Read files only from the head branch of the PR — never the base
+branch, master, other branches or the general repository context.
 
 ### Large PRs
 
@@ -125,11 +87,10 @@ without a diff.
 
 ### If authenticated access is unavailable
 
-Stop and tell the user to set up the auth (git credentials,
-`BB_EMAIL`/`BB_API_TOKEN`, token scopes, the app-password deprecation
-— all in references/bitbucket-access.md). Authenticated curl against
-the Bitbucket REST API is a supported path; what is forbidden is
-working around missing auth (the browser, scraping, other sources).
+Stop and tell the user to set up the auth
+(`references/bitbucket-access.md` → "Authentication setup").
+Authenticated curl against the REST API is a supported path; working
+around missing auth (the browser, scraping, other sources) is not.
 
 ## What to describe for each file
 
@@ -212,8 +173,7 @@ Before saving, check:
 ## Output file
 
 Create the file `<ISSUEKEY>-pr-summary.md` in the run folder
-(`runs/<ISSUEKEY>/r<N>/`) and report its path. The issue key
-follows the Jira format `PROJECT-123` (for example `EP-1234`).
+(`runs/<ISSUEKEY>/r<N>/`) and report its path.
 
 If the file already exists, overwrite it: one file, the latest run only.
 

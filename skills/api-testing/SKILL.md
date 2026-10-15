@@ -31,9 +31,8 @@ notifications / dashboards, and on every absence check.
 2. `<ISSUEKEY>-test-cases.md` — steps, test data, expected results.
 3. **Environment config** — read at runtime from
    `$EP_QA_HOME/.env.qa-agents` (resolution and variables:
-   `../qa-pipeline/references/environment.md`; `scripts/load-env.sh`): `ADMIN_BASE_URL`,
-   `ADMIN_USERNAME` / `ADMIN_PASSWORD`, `ORGANIZER_API_KEY`,
-   `EVENT_ID`, `BASE_URL` / `BASE_PATH`, **`ALLOWED_HOSTS`**.
+   `../qa-pipeline/references/environment.md`; `scripts/load-env.sh`),
+   including **`ALLOWED_HOSTS`** — the only hosts this stage may call.
 4. For any frontend / exhibitor-token case: the **per-event frontend
    host** and an **exhibitor login**. The frontend host is per-event
    and **not discoverable** — it must be supplied (reference §11.1).
@@ -46,8 +45,8 @@ Missing code-review or test-cases file — ask before starting. Missing
 unauthenticated. Missing frontend host / exhibitor login for a
 frontend case — pause and ask (reference §11.1).
 
-All input files are read-only. Do not go to the browser (that is
-web-testing) and do not inspect code (that is code-review).
+All input files are read-only. Instrument: HTTP only — the browser is
+web-testing's, the code is code-review's.
 
 ## Rules
 
@@ -161,17 +160,16 @@ test-cases order.
 3. Read the actual value from the response envelope (`.data`, §5) and
    compare to the expected result.
 4. Classify (below). Capture endpoint + observed field as evidence
-   (redact tokens) in the Results row. **Since 0.47.0, also write a
+   (redact tokens) in the Results row. **Also write a
    `§<n>` of `<ISSUEKEY>-api-evidence.md`** for every PASS, FAIL,
    FAIL CONFIRMED, FAIL REJECTED and PARTIAL row: the method + path +
    auth context (the role, never the token), the request body's
    relevant keys, the HTTP status, and the response excerpt that
    decides the verdict, quoted from `.data`. Name it in the row's
    Comment. The step-5 evidence audit rates the row from this section
-   (`../qa-pipeline-code/references/evidence-audit.md`). It can re-issue
-   a GET only when the call needs no login step, and the audit may run
-   where there is no shell; a write can never be re-issued. The
-   section is therefore the proof that survives the run.
+   (`../qa-pipeline-code/references/evidence-audit.md`); it can
+   re-issue only a GET that needs no login, never a write, so for
+   everything else this section is the proof that survives the run.
 
 ### Step 5 — Build the report
 Create `<ISSUEKEY>-api-testing.md` per `references/output-template.md`.

@@ -5,6 +5,50 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.65.0 — 2026-10-15 — code stages: Bitbucket text pointed, review checklist disclosed
+
+**Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,
+code-stage group. SKILL.md lines: pr-summary 230 → 189, code-review
+435 → 318, api-testing 267 → 263, web-testing 420 → 405. Status
+definitions stay inline (0.63.0, B8).
+
+**Moved / pointed.**
+- **Bitbucket access in pr-summary and code-review** — repos, URL
+  format with the UUID form, branch vs PR mode, auth, command
+  workflows — now point to `pr-summary/references/bitbucket-access.md`,
+  which says of itself "edit HERE, not in the skills". The rules a run
+  needs every time stay inline: default to branch mode, read file by
+  file, grade from the head branch only, never search for a PR by
+  branch, never work around missing auth.
+- **code-review "What to look for"** — the backend / frontend checklist,
+  of which each PR needs one half → new
+  `code-review/references/what-to-look-for.md`. The removals check
+  (both kinds) stays inline. The Understand / Locate / Assess /
+  Classify list (a no-op) is one sentence.
+- **Source lists stated positively** in all four ("Instrument: HTTP
+  only", "the browser only", "the PR's code only"). code-review now
+  names the tracker as a read-only source for source fidelity, where
+  it used to forbid it and then apologise for the exception.
+- web-testing: the evidence paragraph under the backends was a second
+  copy of Step 6 item 4 — now a pointer to it; the pre-0.40 checklist
+  file, the pre-0.39 navigation-memory location and two incident
+  narratives (code-review) are gone, rules kept.
+- api-testing: the variable list now lives only in `environment.md`
+  (`ALLOWED_HOSTS` stays named); the evidence rationale is one clause.
+
+**Kept on purpose.** api-testing's HTTP-export exception stays inline:
+`export-checks.md` is thinner (it lacks "read each named cell's
+expected value from the entity before exporting").
+
+**Verified.** No fixture exercises the code stages, so a fresh agent
+diffed the edit against 0.64.0: no rule lost, no broken pointer. It
+caught three soft spots, fixed before commit: web-testing's evidence
+item had lost its link to `evidence-audit.md` and the "a verdict
+without its reading is not recorded" rule (restored, step numbers now
+say whose step 5/6); api-testing claimed the audit rates a row "from
+this section alone" (it may re-issue a login-free GET); code-review
+dropped "authenticated curl is a supported path" (restored).
+
 ## 0.64.0 — 2026-10-15 — docs stages: rare branches disclosed, duplicates pointed
 
 **Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,

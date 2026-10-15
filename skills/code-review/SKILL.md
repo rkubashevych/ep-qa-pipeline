@@ -28,41 +28,18 @@ From the user you need:
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 — run folder, then the suite; a new chat is no reason to ask.
 
-The PR system is Bitbucket Cloud. Both the frontend and the backend
-repos are on Bitbucket, so a PR may be either. The PR URL format is
-`https://bitbucket.org/{workspace}/{repo}/pull-requests/{id}`,
-for example `https://bitbucket.org/expoplatform/backend/pull-requests/123`.
-Note that `{workspace}` and `{repo}` may be human-readable slugs OR
-UUIDs in braces (e.g.
-`https://bitbucket.org/%7B9274fcef-...%7D/%7B880a8c6f-...%7D/pull-requests/6966`);
-parse and use whichever form the URL contains. The backend is a
-PHP/Phalcon monolith; the frontend is the `portal-ui` repo (Next.js +
-React, TypeScript, Material UI). The issue key follows the Jira format
-`PROJECT-123` (for example `EP-1234`).
+Every PR is on Bitbucket Cloud — the repos and the URL format (slugs or
+UUIDs): `../pr-summary/references/bitbucket-access.md` → "Repos". No PR
+URL and no branch → ask. A branch name → work on the branch itself; do
+not search for a PR by branch.
 
-If any file is not provided — ask before starting.
-If neither a PR URL nor a branch name is provided — ask.
+Sources, all read-only: the test-cases file (the checks), the
+pr-summary file (navigation), the PR code via git or the API (the
+evidence) — and the tracker, read-only, for "Source fidelity" (below)
+only. The browser and the internet belong to other stages.
 
-If the user gives a branch name instead of a PR — work
-with the branch directly via the git CLI or the Bitbucket API.
-Do not search for a PR by branch.
-
-Data sources for this skill:
-- the test-cases file — the source of checks
-- the pr-summary file — navigation through the PR
-- the PR code via CLI or API — the source of evidence
-
-All files are read-only.
-Do not change, rewrite, or clean up their content.
-
-If the test-cases file is missing — stop and tell
-the user that the qa-test-cases skill must be run first.
-
-If the pr-summary file is missing — work without it.
-Look for the test-case implementations in the PR directly via CLI or API.
-
-Do not go to the tracker, do not use external tools,
-do not search the internet, do not use the browser.
+Test-cases file missing → stop: qa-test-cases must run first.
+Pr-summary missing → work without it, straight from the PR.
 
 ## Rules
 
@@ -93,83 +70,31 @@ do not search the internet, do not use the browser.
 
 ## Code access
 
-The PR system is Bitbucket Cloud. Access the PR and the code
-through the git CLI or the Bitbucket Cloud REST API.
+**Default to branch mode** — the branch name is the issue key (e.g.
+`EP-54610`). Auth, token scopes, PR-URL mode, the local clone and the
+command workflows: `../pr-summary/references/bitbucket-access.md`, the
+one source shared with pr-summary. No authenticated access → stop and
+tell the user to set it up (that file → "Authentication setup").
+Authenticated curl against the REST API is a supported path; working
+around missing auth (the browser, scraping) is not.
 
-- **Bitbucket Cloud → git CLI + REST API:** clone or fetch the
-  branch with `git`, and use the Bitbucket REST API
-  (`https://api.bitbucket.org/2.0/...`) for PR metadata and diffs.
-
-> **Default to branch mode** — the branch name is the issue key (e.g.
-> `EP-54610`). Token scopes, auth setup, repo names and when to use
-> PR-URL / REST mode: see
-> **`../pr-summary/references/bitbucket-access.md`** (the shared source
-> of truth for Bitbucket access — edit it there, not inline here).
-
-### Recommended flow
-
-Use the shared command workflows in
-**`../pr-summary/references/bitbucket-access.md`** ("Command
-workflows" section) — PR mode (metadata → per-file diff → full file)
-or branch mode (`git diff` / `git show`). In both modes, use the PR
-summary to determine where to look and read the diff or full file
-only for the files relevant to the test case at hand.
-
-Grade every case from the head branch of the PR. The base branch,
-master and the wider tree are read only for the two purposes in
-"Reads outside the diff" (below), and never decide a case.
-
-### The PR summary as navigation
-
-The PR summary shows which files were changed and what is in them.
-Use it to quickly find where in the PR a specific test case
-is implemented.
-
-If you cannot find the implementation of a test case
-in the files listed in the PR summary — look in the PR directly
-via CLI or API. The PR summary may be incomplete — that is
-not a reason to mark FAIL.
-
-### If authenticated access is unavailable
-
-Stop and tell the user to set up the auth (git credentials,
-`BB_EMAIL`/`BB_API_TOKEN`, token scopes, the app-password deprecation
-— all in `../pr-summary/references/bitbucket-access.md`).
-Authenticated curl against the Bitbucket REST API is a supported
-path; what is forbidden is working around missing auth (the browser,
-scraping, other sources).
-
-### Large PRs
-
-If more than 20 files were changed:
-- Use the PR summary as a navigation map —
-  do not read files blindly.
-- Group test cases by file: read a file once
-  and check all the test cases that touch it.
-  Do not re-read a file for each test case.
-- Configs, styles, tests — read only if there is
-  a direct test case for them.
+Use the PR summary to find where each case is implemented, and read the
+diff or full file only for those files. Not in the summary → look in
+the PR directly; an incomplete summary is never a reason to FAIL.
+Large PR (more than 20 files): group cases by file and read each file
+once; configs, styles and tests only when a case targets them.
 
 ## Review process
 
-For each test case (TC-REQ-X.Y):
-
-1. **Understand** — which scenario the test case describes:
-   precondition, steps, expected result.
-2. **Locate** — use the PR summary to determine which files
-   are relevant. Read the diff or the full file.
-3. **Assess** — whether the code implements the behavior
-   described in the test case. Compare the expected result
-   of each step with what the code does.
-4. **Classify** — assign a status.
+For each test case, locate its implementation, run the checks below,
+then classify it.
 
 ### Source fidelity — before judging the case, check the case is real
 
 The code phase reads DERIVED test cases, never the acceptance criteria.
 A requirement mis-derived upstream is therefore invisible to every
 later stage, and this stage is the last one that still holds the
-tracker. (Yes, this is a deliberate, bounded exception to "do not go to
-the tracker" — read-only, and only for the cases below.)
+tracker — read-only, and only for the cases below.
 
 The register the orchestrator built at step 0 (`<KEY>-sources.md`) is
 your source list — rules, precedence and the gate:
@@ -191,8 +116,7 @@ source of record:
    the front end, `DS` for the search service) says what the merged code
    does and what it deliberately does **not** do. A behaviour the
    as-built doc records as intended is not a defect, however wrong it
-   looks — and this is the check that was missing when a
-   documented-as-designed behaviour reached the bug-drafting step.
+   looks.
 4. Also read the IMPLEMENTING sub-task's own acceptance criteria (you
    already have them from the PR/branch derivation). A clause present
    in an early brief but absent from the sub-task that was built is the
@@ -226,49 +150,11 @@ are about to fail a build against exists.
 
 ### What to look for in the code
 
-ExpoPlatform splits a story into separate frontend and backend
-sub-tasks, each with its own Bitbucket PR. First determine which kind
-of PR you are reviewing — from the sub-task type, the repo, or the
-files in the PR summary (PHP/Phalcon vs frontend sources) — then apply
-the matching list. A PR may occasionally touch both.
-
-**Backend (PHP/Phalcon monolith):**
-- Presence of elements: controllers and actions, service methods,
-  model fields, Volt view variables/labels, response payload fields,
-  messages.
-- Conditional logic: if/else, switch, guard clauses, ACL/permission
-  checks, feature flags.
-- States: default, active, disabled, error, empty — as represented in
-  model attributes, status fields, or response flags.
-- Validations: Phalcon validators, rules, messages, triggers, boundary
-  values.
-- Data: model fields, column types, formats, mappings, API/response
-  contracts, DB migrations.
-- Binding: whether the logic is wired to the correct route, controller
-  action, DI service, model, or Volt template.
-
-**Frontend (`portal-ui` — Next.js + React, TypeScript, Material UI):**
-- Presence of elements: React components (incl. MUI components like
-  Button, TextField, Dialog), fields, labels, texts, messages,
-  tooltips, icons.
-- Conditional logic: conditional rendering (`&&`, ternaries), hooks
-  (`useState`, `useEffect`, `useMemo`), guards, permission/role checks,
-  feature flags.
-- States: default, active, disabled, error, loading, empty — as held
-  in component state, context, or props; check `disabled`/`readOnly`
-  props where behaviour depends on them.
-- Validations: react-hook-form rules and resolvers, validation
-  messages, triggers, boundary values.
-- Data: request/response field names and formats, API contracts,
-  mapping/transform logic (e.g. reading the correct key like
-  `settings.logo` vs `do_not_allow_logo`, inverting a boolean),
-  prepareData/transform helpers, TypeScript types.
-- Binding: whether the element is wired to the correct Next.js
-  route/page, component, and API endpoint.
-
-**Both:**
-- Removals: whether what should have been removed was actually removed
-  (e.g. an old field/key no longer read or written anywhere).
+The checklist per PR kind — backend (PHP/Phalcon) or frontend
+(`portal-ui`): elements, conditional logic, states, validations, data
+and binding — is in `references/what-to-look-for.md`; read the half
+that matches the PR. For both kinds, check removals: what should have
+been removed is no longer read or written anywhere.
 
 ### FAIL vs absence from the diff
 
@@ -301,8 +187,7 @@ FAIL on a case:
    the repo's default branch names (`git branch -r --contains <fix
    commit>`, or `git log origin/<line> -S'<hunk text>'`). Absent → a
    🔴 [Product] Risks entry "fix not on `<branch>`" with the commit ids,
-   never a case verdict. This is the `RISK-5018-2` finding ("`master`
-   still unfixed") made a sanctioned check.
+   never a case verdict.
 
 Still forbidden: grading a case against base-branch code; hunting for
 unrelated bugs; reading another ticket's branch.

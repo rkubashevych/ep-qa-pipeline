@@ -18,19 +18,16 @@ files. Output: a detailed per-case report.
 
 1. `<ISSUEKEY>-code-review.md` (from code-review).
 2. `<ISSUEKEY>-test-cases.md` (from qa-test-cases).
-3. The **Structural checks** section of `<ISSUEKEY>-test-cases.md`
-   (a separate `<ISSUEKEY>-checklist.md` on tickets run before 0.40.0)
-   — the `[UI]` structural checks (presence / type / label) that
-   deliberately have no test case. Since 0.33.0 each of them is also a
-   `-STRUCT-` case in the QA Service suite (step 0 rebuilds the section
-   from those, one `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] …`
-   line each), so the report's "Structural checks" table carries that
-   stableId in its `Case` column and uses the status vocabulary
-   (`PASS` / `FAIL` / `NOT EXECUTED — page not visited`): they are
-   roster cases and step 6 joins the verdict by that id. Execute
-   them for the pages you visit and report them in the "Structural
-   checks" section. If genuinely unavailable, note that in the report's
-   Notes line and continue with test cases only.
+3. The **Structural checks** section of `<ISSUEKEY>-test-cases.md` —
+   the `[UI]` presence / type / label checks that have no test case.
+   Each is a `-STRUCT-` roster case in the QA Service suite (line shape
+   `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] …`), so the report's
+   "Structural checks" table carries that stableId in its `Case` column
+   and uses the status vocabulary (`PASS` / `FAIL` / `NOT EXECUTED —
+   page not visited`); qa-pipeline-code step 6 joins the verdict by
+   that id. Execute them
+   for the pages you visit. Unavailable → say so in the Notes line and
+   continue with test cases only.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 — run folder, then the suite; a new chat is no reason to ask.
@@ -48,8 +45,7 @@ another. Never navigate first "to see if it loads".
 
 If the code-review or test-cases file is not provided — ask before
 starting. If any file is empty or corrupted — stop and notify the
-user. The issue key follows the Jira format `PROJECT-123` (e.g.
-`EP-1234`).
+user.
 
 ### Scope — the routing invariant
 
@@ -74,8 +70,9 @@ Data sources: the code-review file (QA/FAIL items), the test-cases
 file (steps, data, expected results, and its Structural checks
 section), the product UI via the browser backend,
 `navigation_paths.json` (navigation memory), and
-`references/login-config.md`. All input files are read-only. Do not go
-to the tracker, do not use external tools, do not inspect code.
+`references/login-config.md`. All input files are read-only.
+Instrument: the browser only — the tracker is task-context's and the
+code is code-review's.
 
 ## Rules
 
@@ -110,17 +107,13 @@ used in the report's header and in chat:
    executing any test case.
 
 Neither present → PAUSE and say so; never improvise a third backend.
-(Claude's built-in browser pane exists in some sessions; it is not a
-web-testing backend until rules for it are written — it has no
-scripted-login path and its profile persists logins across sessions,
-which changes what "fresh session" means for a test.)
+Claude's built-in browser pane is not a backend: no scripted login, and
+its profile keeps logins across sessions, so "fresh session" means
+nothing there.
 
 The workflow below is backend-neutral — "PAUSE for login" applies to
-the extension path only. Evidence on both backends: a
-`web-evidence.md §n` reading for every PASS, FAIL and FAIL CONFIRMED;
-a screenshot for every FAIL / FAIL CONFIRMED and every `[core]` PASS.
-The step-5 evidence audit re-reads them — a verdict without one is not
-recorded (`../qa-pipeline-code/references/evidence-audit.md`).
+the extension path only. Evidence rules for both backends: this
+skill's Step 6, item 4.
 
 ## Workflow
 
@@ -166,13 +159,11 @@ exist, create `{"navigation_paths": {}}`. If `TARGET_PAGE_NAME` has an
 entry, use its `url` / `login_required` / `navigation_steps`
 (`PATH_EXISTS = true`); otherwise `PATH_EXISTS = false`.
 
-> **Persistence note.** `navigation_paths.json` is cross-ticket memory, not a run
-> artefact, so it does NOT live in a ticket's run folder. It lives at
-> `$EP_QA_HOME/cache/navigation_paths.json` (`../qa-pipeline/references/environment.md`); a
-> copy under the checkout's `skills/web-testing/` is the pre-0.39
-> location — read it once, write the new one, never write the old.
-> Fall back to the session's scratch folder only when `$EP_QA_HOME` is
-> not reachable, and say so.
+> `navigation_paths.json` is cross-ticket memory, not a run artefact:
+> it lives at `$EP_QA_HOME/cache/navigation_paths.json`
+> (`../qa-pipeline/references/environment.md`), never in a run folder.
+> The session's scratch folder only when `$EP_QA_HOME` is not
+> reachable, and say so.
 
 ### Step 4 — Login (if needed)
 
@@ -246,14 +237,12 @@ For each test case in the scope:
    never a restatement of the expectation. Screenshot: every FAIL /
    FAIL CONFIRMED and every `[core]` PASS. The Results row's Comment
    (PASS) or the finding's `Evidence:` line (FAIL) names the section.
-   Why a PASS too: the step-5 evidence audit — a fresh reader who did
-   not run the case — decides from these whether the verdict can be
-   believed, and a PASS with nothing to read is held back from the run
-   and sent to the walk. A PASS taken on an expired session is exactly
-   the one whose reading shows a sign-in page. A FAIL REJECTED is a
-   pass claim, so it gets a reading too (the page showing the
-   behaviour working). No evidence section for BLOCKED: its `Probe:`
-   is the evidence. Structural checks: one `§n` per page lists the
+   The orchestrator's evidence audit (qa-pipeline-code step 5,
+   `../qa-pipeline-code/references/evidence-audit.md`) re-reads these:
+   a verdict without its reading is not recorded. That includes every
+   PASS (a PASS on an expired session is the one whose reading shows a
+   sign-in page) and every FAIL REJECTED, which is a pass claim. No
+   evidence section for BLOCKED: its `Probe:` is the evidence. Structural checks: one `§n` per page lists the
    labels and types read there.
 5. **Continue to the next case** without stopping.
 6. **Structural checks for the page:** after a page group's cases,
