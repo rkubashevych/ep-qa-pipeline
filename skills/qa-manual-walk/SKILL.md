@@ -24,13 +24,8 @@ A test session, not a document. The tester and the agent walk the
 walk plan together: one card at a time, in the order a person actually
 moves through the product, with every question answerable on the spot.
 
-This stage exists because the run sheet failed the person it was built
-for. A sheet has to carry everything in every cell — the account, the
-action, the pass condition, the machine's evidence, the caveats, the
-harness command — because nobody is there to answer a question. In a
-session the agent is there. So the card carries only what the tester
+The agent is there to answer, so the card carries only what the tester
 needs to act, and the rest stays backstage until it is asked for.
-
 Nothing here weakens a rule the pipeline paid for. Fresh fixtures,
 probed blockers, positive controls, half-observable honesty, the fail-
 by-fail confirm before any verdict is recorded — all still apply. They
@@ -89,8 +84,8 @@ cell.
 
 Both files sit beside the plan under `$EP_QA_HOME/runs/` and carry no
 credentials. The plan itself carries the throwaway accounts' passwords
-— it stays out of version control and Jira like the run sheet before
-it, and never holds a `.env` value.
+— it stays out of version control and Jira, and never holds a `.env`
+value.
 
 ## The session — how it runs
 
@@ -172,12 +167,8 @@ walk, not into the void.
 When the last card is answered (or the tester stops): write
 `<ISSUEKEY>-walk-results.md`, show the summary table (verdict per card,
 FAILs first with the tester's words), then invoke **`qa-manual-results`
-with that file as its input** — it reconciles against the run, shows
-every `fail` about to be recorded case by case, and on the tester's
-explicit yes records, finishes the run (`test-runs.md` → "Run
-lifecycle"), posts the first human-facing
-summary, closes ledger rows, and offers the bug filings. Nothing is
-written to any record before that yes.
+with that file as its input**. Nothing is written to any record before
+the tester's explicit yes there.
 
 ## Rules
 
@@ -204,11 +195,9 @@ written to any record before that yes.
   under `Case corrections` in the results file. Stage 10 applies it to
   the suite with the same confirm as the verdicts. Never edit the plan
   to make a case pass.
-- **The product is touched only by AGENT-RUNS cards**, and only within
-  `api-testing`'s write-safety rules (read-only by default; a write
-  snapshots-and-reverts or uses a throwaway fixture). The walk never
-  provisions — that is stage 9's job, and a fixture created mid-walk
-  has no verified baseline.
+- **The walk never provisions** — the product is touched only by
+  AGENT-RUNS cards (Step 3). A fixture created mid-walk has no verified
+  baseline; provisioning is stage 9's job.
 - **Mirror the tester's language in chat; files stay in English.**
 - **Do not rush, do not pad.** The one-line-per-stage brevity rule of
   the orchestrators does not apply inside the walk — but every turn is

@@ -32,17 +32,15 @@ cross-round memory it closes rows in:
 `../qa-pipeline/references/open-items-ledger.md`.
 
 The pipeline publishes automated verdicts at code-phase step 6 — before
-the human round. This stage exists so what the human
-found actually reaches the record. Without it, the truest verdicts of
-the run live in a spreadsheet nothing reads, and the system of record
-keeps asserting PASSes everyone knows are wrong.
+the human round. This stage makes what the human found reach the
+record.
 
 ## Input
 
 1. **The completed results — any of these forms:**
    - `<ISSUEKEY>-walk-results.md` written by `qa-manual-walk`
      (`../qa-manual-walk/references/walk-results-format.md`) — the
-     usual form since 0.31.0. It carries, per case, the verdict, the
+     usual form. It carries, per case, the verdict, the
      tester's words verbatim, evidence, the card kind and the
      `source` (`manual`, or `machine (witnessed)` for cards the agent
      executed), plus `Case corrections`, `Blocked reasons` and
@@ -65,11 +63,10 @@ keeps asserting PASSes everyone knows are wrong.
 3. Optional, for reconciliation: this run's verdict files
    (`<ISSUEKEY>-code-review.md`, `-api-testing.md`, `-web-testing.md`)
    from the run folder (`runs/<ISSUEKEY>/r<N>/`). **They exist only
-   there** (no archive is posted since 0.33.0) — on another machine
-   they will be missing: the QA Service run still gives every machine
-   verdict (`get_test_run`), so reconcile against the run and say the
-   report prose is unavailable, rather than reconciling against
-   nothing. Pre-0.33 tickets may carry legacy archive comments.
+   there** — on another machine they will be missing: the QA Service
+   run still gives every machine verdict (`get_test_run`), so reconcile
+   against the run and say the report prose is unavailable, rather than
+   reconciling against nothing.
 4. Optional: the QA Service suite (connector present) — the write-back
    target.
 
@@ -95,11 +92,10 @@ table; do not proceed on guesses.
   PASS.
 - **Honour the `source` column of a walk-results file.** A row marked
   `machine (witnessed)` was executed by the agent during the walk with
-  the tester watching: record it with `source: machine` and the
-  principal `ep-qa-pipeline agent (<KEY> walk, witnessed by <tester>)`,
-  and count it in the summary as machine-in-walk, never as
-  human-confirmed. Only `manual` rows carry the tester's e-mail. (The
-  0.30.0 rule against mislabelling the source cuts both ways.)
+  the tester watching: it is recorded as a machine verdict (Step 4
+  maps source and principal) and counted in the summary as
+  machine-in-walk, never as human-confirmed. Only `manual` rows carry
+  the tester's e-mail.
 - **A `Half` row is half a verdict.** The human PASS covers the
   visible half; the note names the machine verdict the rest rests on.
   Record the human verdict with that note; the summary's table shows it
@@ -252,8 +248,7 @@ so it is part of what the user is saying yes to. Then, on explicit yes:
   `close_test_run` is refused — report `completed`, call nothing; rows
   still `not_run` at the end of ingestion → `close_test_run` (`closed`),
   naming them; pass abandoned → `aborted`, only on the user's word.
-  Never change lifecycle `status`; write no run lines into notes (the
-  pre-0.30 `SUPERSEDES` / `⚠ CURRENT VERDICT:` forms are retired).
+  Never change lifecycle `status`; write no run lines into notes.
 - **Retraction comments** — one per ticket that published a now-retracted
   verdict, **on that ticket**, ≤ 6 lines (run id, `<case> — <old> →
   <new>`, reason, the ticket/run that established the new verdict). This
@@ -261,19 +256,15 @@ so it is part of what the user is saying yes to. Then, on explicit yes:
 - **Jira**: always post **the run's FIRST human-facing summary**
   (two-wave rule: the code phase posted only a one-line status
   comment) — to the QA sub-task when the ticket has one, otherwise to
-  the ticket under test. **No archive of any kind** (retired 0.33.0):
+  the ticket under test. **No archive of any kind**:
   `<ISSUEKEY>-manual-results.md` stays in the run folder and the run
   holds every verdict; a fenced dump on any ticket is a ❌. Write the
-  summary as the complete
-  picture, not a delta, in the template's shape: verdict
-  title, intro, the What / How / Result table, Bugs, **Retracted**
-  (old → new and reason), To do, Questions, Not tested, and the
-  footer with "Checked by hand: N of M". No earlier human summary
-  exists, so nothing can be left to one. Where the machine's verdict
-  and the human's disagree, the table shows the human's and the
-  Retracted line notes the machine's. (On older tickets where a
-  pre-two-wave summary WAS posted, the intro says "supersedes the
-  <date> summary for N cases".) Every still-open row of
+  summary as the complete picture, not a delta, in the template's
+  shape: verdict title, intro, the What / How / Result table, Bugs,
+  **Retracted** (old → new and reason), To do, Questions, Not tested,
+  and the footer with "Checked by hand: N of M". Where the machine's
+  verdict and the human's disagree, the table shows the human's and
+  the Retracted line notes the machine's. Every still-open row of
   `<ISSUEKEY>-open-items.md` appears once, in **To do** or
   **Questions**, so the reader sees what this round did *not* settle.
 - **The ledger** (`../qa-pipeline/references/open-items-ledger.md`):
@@ -345,38 +336,28 @@ account nobody deactivates is a live credential nobody rotates
 ### Step 4d — Register the PR's tests in QA Service
 
 QA Service counts a developer's test only once someone registers it.
-Nothing registers itself (`get_help_topic registering`). Read the
-"Tests in this PR" table in `<ISSUEKEY>-pr-summary.md`. If it says
-"None" or the connector is absent, skip this step and say so. Otherwise
-sort each test file into one of three cases:
+Read the "Tests in this PR" table in `<ISSUEKEY>-pr-summary.md`. If it
+says "None" or the connector is absent, skip this step and say so.
+Otherwise sort each test file into one of three cases — the calls, the
+`ref` / `landing` rules and how to read the response:
+`../qa-pipeline/references/linking-tests.md`.
 
 - **It declares a case id that exists in the product** (check with
-  `search`) → `link_implemented_tests {suiteId: <that case's suite>,
-  links: [{stableId, ref: "<path>::<method or test title>", level,
-  repo, landing, prBranch}], verify: true}`. Use `landing: "merged"`
-  when the branch is merged, else `"pr"` with `prBranch`. This works
-  before the merge. The ref names the method or test, never the file
-  alone.
-- **No declared id, and the branch is merged into the repo's
-  configured branch** → `discover_tests {suiteId: <the ticket's
-  suite>, pathPrefixes: [the files]}` first. That preview writes
-  nothing. Check `rateLimited`, `failedReads` and `truncated` before
-  trusting it. A changed test that `search` already finds as a case in
-  another suite belongs to that suite, so discover it there instead.
-  Then `apply: true` with `refs` for the tests the user picks.
-- **No declared id, and not merged yet** → it can't be registered now.
-  Discovery reads only the configured branch, and a pre-merge link
-  needs an id in the test. Put a To do in the summary, "Register <N>
-  tests from PR #<n> in QA Service after the merge (QA)", and append a
-  ledger row so the next round picks it up. Do the same for a test in a
-  repo the product can't discover (QA Service discovers one repo per
-  product).
+  `search`) → link it to that case's suite; before the merge with
+  `landing: "pr"` + `prBranch`.
+- **No declared id, and the branch is merged** → `discover_tests` on
+  the ticket's suite (preview first, then `apply`). A changed test that
+  `search` already finds as a case in another suite belongs to that
+  suite, so discover it there instead.
+- **No declared id, and not merged yet** — or in a repo the product
+  can't discover → it can't be registered now. Put a To do in the
+  summary, "Register <N> tests from PR #<n> in QA Service after the
+  merge (QA)", and append a ledger row so the next round picks it up.
 
 Show every call (suiteId, refs, landing) in one confirmation, from one
 plan, `r<N>/<ISSUEKEY>-tests-plan.json`
-(`../qa-pipeline/references/write-plans.md`). Read the response. A link that came back unverified doesn't count as
-coverage, so report it. Decide the To do lines before step 4 posts the
-summary.
+(`../qa-pipeline/references/write-plans.md`). Decide the To do lines
+before step 4 posts the summary.
 
 ### Step 5 — Offer to file unfiled bugs
 
@@ -394,8 +375,8 @@ when installed, else per
 `../qa-pipeline-code/references/bug-report-template.md` with duplicate
 search first. File only what the user confirms.
 
-**A ticket qa-service filed on an earlier run** (before 0.43.6, or from
-a `fail` recorded out of order) is corrected in place, never re-filed:
+**A ticket qa-service filed itself** (an older run, or a `fail`
+recorded out of order) is corrected in place, never re-filed:
 summary, description and the structured fields, with the dedupe prefix
 untouched. Its reporter stays the service account — say so in the final
 response rather than implying it was fixed.

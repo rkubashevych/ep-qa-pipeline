@@ -217,52 +217,20 @@ the whole product, ~190 KB) and report ONE of:
   cases beyond N test cases is in sync; S ≠ that count is the mismatch
   below.
 - 🟡 **archive posted** — any fenced `File: <name>` block found in a
-  comment written by this round on any ticket. Archives were retired
-  in 0.33.0; name the comment so it can be deleted.
+  comment written by this round on any ticket; name the comment so it
+  can be deleted.
 - 🟢 **not published yet** — no suite found AND this analyzer run is
   inside the docs orchestrator (publish is its step 6, which runs
   after this check — expected, not a failure).
 - 🔴 **publish incomplete / mismatch** — suite exists but counts or
   IDs diverge from the files: list the missing/extra stableIds.
-- **The run** (`../qa-pipeline/references/test-runs.md`) — code phase,
-  when run after step 6 (on-demand, or a later round's step 0; in the
-  orchestrated flow this analyzer runs BEFORE step 6, so the
-  orchestrator's **post-publish verification** does this check there):
-  `list_test_runs` on the suite, find this pass's run by title.
-  - 🔴 **no run** — verdicts exist in stage reports and none reached
-    the system of record; every "still stands" statement in this
-    ticket's history is about markdown files (EP-53978: five passes,
-    `verified: 0`).
-  - 🔴 **partition mismatch** — `get_test_run` `progress` does not
-    match the stage statistics under the mapping table (`pass` = PASS +
-    FAIL REJECTED, `blocked`, `skipped` = NOT EXECUTED + NOT-TESTABLE +
-    SPEC-DEFECT, `known_defect` = keyed FAIL CONFIRMED, `not_run` = the
-    FAIL / PARTIAL rows awaiting the human), or roster count ≠ scope.
-  - 🔴 **machine `fail` outside the narrow exception** — a `fail`
-    recorded with `source: machine` whose case is not runtime-confirmed
-    + evidenced + blocking: it filed a Jira defect before the human
-    round (`run_defects` shows the key).
-  - 🟡 **SPEC-DEFECT as `known_defect`**, or a human-executed row with
-    `source: machine`, or a machine verdict with a person as principal
-    — the two mapping errors the 2026-09-02 off-book run made.
-  - 🟡 **stale run** — status `running` (`stale: true`) with
-    `not_run` rows and no `<KEY>-manual-results.md`: the manual round
-    was never ingested; the ticket's verdicts are still provisional.
-    Same finding as §5's "manual results never ingested", seen from the
-    service side. `completed` and `closed` are both "done"
-    (`test-runs.md` → "Run lifecycle"): a `completed` run after stage
-    10 is correct, not a missed close.
-  - 🟡 **[Environment] no release for the fixVersion** — the ticket
-    carries a `fixVersion` and `list_releases` has no release for it, so
-    the run was created without `releaseId` and its verdicts cannot be
-    scoped by release. Name the fixVersion; the fix is upstream (a
-    release owner creates it), not in the pipeline.
-  - 🟡 **evidence links missing** — a `fail` / `blocked` /
-    `known_defect` row whose note names a Jira key or comment while its
-    `evidence[]` is empty (`test-runs.md` → evidence).
-  - `executed_coverage(suiteId[, releaseId])` is reported in the
-    findings summary as two numbers — machine and manual — never one
-    percentage.
+- **The run and the suite structure** — post-publish checks (no run,
+  partition mismatch, a machine `fail` outside the narrow exception,
+  mapping errors, stale run, missing release, missing evidence links;
+  zeroed buckets, collapsed kinds, zeroed levels, empty trace graph,
+  no owner, bare header, foreign prefix): read
+  `references/qa-service-sync-checks.md` in full and report every one
+  that applies.
 - **Requirement gaps — `coverage_report {suiteId}`, one call.** Its
   `gaps` list is the requirements no case proves, worst first
   (`uncovered` = no case at all, then `stale`, then `planned`), each
@@ -273,32 +241,9 @@ the whole product, ~190 KB) and report ONE of:
   said in one clause, an `fr` / `rule` / `invariant` uncovered is 🟡.
   The call also returns the executed tier, so it replaces a separate
   `executed_coverage` read when both are wanted.
-- 🔴 **zeroed status buckets** — every case-status bucket reads 0
-  against a non-zero total: the cases were written with a `status`
-  outside `planned/implemented/partial/deferred/na` (e.g. `draft`).
-  Fixable with a re-`edit_test_case` pass, not a re-publish.
-- 🔴 **collapsed requirement kinds** — 0 rules AND 0 invariants AND 0
-  risks among the suite's requirements: everything was filed as `fr`.
-  Fixable in place with `edit_requirement` (`kind` + corrected
-  `stableId`, which rewrites references).
-- 🔴 **zeroed level table** — `stats.byLevel` sums to 0 against a
-  non-zero case total: the cases were written without the `levels` code
-  array (`AE`/`E2E`/`M`/`U`/`I`/`C`…). Those cases are also invisible to
-  the implement workflow. Fixable with a re-`edit_test_case` pass.
-- 🟡 **empty trace graph** — `traceLinks` is `[]` while cases carry
-  `traceability`: the links never materialized; re-sending
-  `traceability` on a case rebuilds the suite's edges.
-- 🔴 **no owner / no ticket** — `teams: []` ("No team" in the web UI)
-  or `jiraKeys` without `<KEY>`, on a suite created OR appended to
-  (EP-55889, 0.50.0). Give the call: `edit_suite {suiteId, teams,
-  jiraKeys: [<existing…>, "<KEY>"]}`.
-- 🟡 **bare suite header** — no `summary` / `owner` / `status` /
-  `lastReviewed`. Fixable with `edit_suite`.
-- 🟡 **foreign prefix** — this ticket's stableIds not starting with the
-  suite's `prefix` (EP-55889: `MEETING-EXPORT-*` in `MEXP`); fix with
-  `edit_requirement` / `edit_test_case` `stableId`.
-- **QA Service first + publish completeness (0.50.0–0.50.1)** — export,
-  adoption, discovery, digest, folder and review checks: `references/qa-service-first-checks.md`.
+- **QA Service first + publish completeness** — export, adoption,
+  discovery, digest, folder and review checks:
+  `references/qa-service-first-checks.md`.
 
 This is the independent check on the QA Service publish — the publish
 step verifies itself, but this skill re-checks it with fresh
@@ -389,7 +334,7 @@ Audit against `../api-testing/references/absence-check-protocol.md`:
   HTTP verb, an endpoint, a status code, a curl line or a file path
   outside an AGENT-RUNS card's `run:` key, or a caveat / scope warning
   / machine verdict outside its backstage block
-  (`qa-manual-runsheet/references/walk-plan-format.md` → Voice rules).
+  (`../qa-manual-runsheet/references/walk-plan-format.md` → Voice rules).
   The plan is unreadable to the person it is for; name the cards.
 - 🟡 source mislabel in the walk: a `machine (witnessed)` row of
   `<KEY>-walk-results.md` recorded as `source: manual` on the run (or

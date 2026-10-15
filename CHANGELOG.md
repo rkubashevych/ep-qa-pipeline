@@ -5,6 +5,53 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.66.0 — 2026-10-15 — manual round: one home for test linking, analyzer §4 disclosed
+
+**Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,
+manual-round group. SKILL.md lines: qa-manual-walk 237 → 226,
+qa-manual-runsheet 459 → 441, qa-manual-results 441 → 421,
+qa-run-analyzer 498 → 443, qa-api-tests 333 → 313.
+
+**One home for linking existing tests.** `qa-manual-results` step 4d
+(the PR's tests) and `qa-api-tests` Step 2 (tests already in the
+backend repo) each wrote out the `link_implemented_tests` mechanics.
+They now share `qa-pipeline/references/linking-tests.md`: the call,
+`ref` names the method, `landing` pr → merged, `verify: true`, a link
+resolves only when the case id is in the file, `partial` counts for
+nothing, the 429 rate-limit reading, never a `@skip`ped test, and
+`discover_tests` (preview, the three flags, configured branch only).
+Each skill keeps its own part — which tests, and what to do with
+each (4d: three cases; qa-api-tests: a decision table).
+
+**qa-run-analyzer §4 disclosed.** The run checks and the
+suite-structure checks — post-publish checks, which the orchestrators'
+own verification runs in the orchestrated flow — moved to
+`qa-run-analyzer/references/qa-service-sync-checks.md`, with a pointer
+that names every check. The four sync outcomes, the coverage call and
+"when it actually runs" stay inline. The machine-`fail` check now
+names the SUFFICIENT audit rating too (0.62.0 A2).
+
+**History and duplicates out.** walk: the origin story, the retelling
+of stage 10's steps, a rule that repeated Step 3. runsheet: the 0.30 /
+0.31 history, the Non-goals section (the description and "Source of
+truth" say it), the sheet's column mapping (runsheet-format.md holds
+it). results: version asides, retired run-note forms, the pre-two-wave
+clause, the 0.30.0 aside.
+
+**Kept on purpose.** The runsheet's six card rules, its traps and its
+self-check; the walk's conversational rules; the analyzer's ledger
+rules. Each applies on every run, so each stays inline.
+
+**Verified.** A fresh agent diffed the edit against 0.65.0: nothing
+lost but two legacy-only notes (a pre-two-wave summary intro; pre-0.30
+run-outcome lines as a retest signal) — no such ticket is in flight
+(user, 2026-10-15). It caught the new sync-checks file calling the
+suite-structure checks post-publish: they run whenever the suite
+exists, including the code phase's analyzer run — fixed, the
+post-run label is on the run checks only. Also fixed: the `@skip`
+rule sat under "Reading the response" in linking-tests.md, and a
+pre-existing analyzer path to `walk-plan-format.md` lacked its `../`.
+
 ## 0.65.0 — 2026-10-15 — code stages: Bitbucket text pointed, review checklist disclosed
 
 **Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,

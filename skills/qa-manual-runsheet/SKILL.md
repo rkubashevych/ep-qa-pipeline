@@ -23,13 +23,10 @@ the same thing. "Call the public favourite-action endpoints and confirm
 none returns the private favourites" is a valid test case and a useless
 instruction — it names no account, no endpoint and no pass condition.
 
-Since 0.31.0 the deliverable is the **walk plan**
-(`references/walk-plan-format.md`), read by `qa-manual-walk` in a live
-session; the spreadsheet (`references/runsheet-format.md`) is an
-optional export generated from the plan. The reason is recorded in the
-plan format's first section: the sheet had to carry everything in every
-cell, and the tester could not concentrate on it. The plan keeps the
-card human and moves the rigour backstage, where the agent applies it.
+The deliverable is the **walk plan** (`references/walk-plan-format.md`),
+read by `qa-manual-walk` in a live session: the card stays human and
+the rigour moves backstage, where the agent applies it. The spreadsheet
+(`references/runsheet-format.md`) is an optional export from the plan.
 
 ## Source of truth — read this before anything else
 
@@ -53,8 +50,8 @@ suite. Consequences:
   you did. (Corrections found *during* the walk are collected by
   `qa-manual-walk` and applied by stage 10 under its confirm.)
 - **Run outcomes belong on the pass's QA Service test run, never in
-  `status`** (a lifecycle field) and — since 0.30.0 — no longer in
-  `detail` notes either (`../qa-pipeline/references/test-runs.md`). This
+  `status`** (a lifecycle field) or `detail` notes
+  (`../qa-pipeline/references/test-runs.md`). This
   stage records nothing on the run itself: the machine verdicts were
   recorded at step 6, the human verdicts are recorded by stage 10 when
   the sheet comes back. What this stage may write to the suite is a case
@@ -74,8 +71,7 @@ provisioning anything, check for evidence of a prior run:
   (`list_test_runs`) **other than the one this pass's step 6 just
   created** (the orchestrator hands you its id — ignore it here) —
   an older run still `running` with `not_run` rows means the previous
-  pass's manual round was never ingested; older suites may instead
-  carry pre-0.30 run-outcome lines in case notes
+  pass's manual round was never ingested
 - `<ISSUEKEY>-open-items.md` exists (the ledger only exists after a
   first round)
 - the QA sub-task's newest human summary or manual-results comment is
@@ -116,16 +112,6 @@ When it is a retest:
 - **Ask which fix landed.** If the user has not said, ask. A retest
   scoped to defects that were not actually fixed wastes the whole run.
 
-## Non-goals
-
-- Not a test-case authoring tool. Cases come from `qa-test-cases`; this
-  stage makes them executable, and reports back when one is wrong.
-- Not a results store. The suite holds outcomes; the plan is a working
-  surface.
-- Not the session itself. Presenting the cards and collecting verdicts
-  is `qa-manual-walk`; recording them is `qa-manual-results`.
-- Not an input to `api-testing`, `web-testing` or either orchestrator.
-
 ## Input
 
 1. The **QA Service suite** for the story, when one exists — primary.
@@ -165,12 +151,9 @@ authorisation is missing, PAUSE and ask — do not guess an event.
   `qa-manual-walk`.
 - **On request only** ("export the sheet", or a tester who will work
   from a file without the agent): `<ISSUEKEY>-runsheet.xlsx` generated
-  **from the plan** by `build_runsheet_<ISSUEKEY>.py` (format:
-  **references/runsheet-format.md**). Do = the card's Do; Expect = the
-  card's You should see followed by the backstage lines a tester
-  without an agent still needs (`say-first`, `wait`, `positive-control`,
-  `how-to`, and for AGENT-RUNS the `run` line). The sheet is a
-  rendering of the plan, never edited on its own.
+  **from the plan** by `build_runsheet_<ISSUEKEY>.py` (columns and
+  which backstage lines it carries: **references/runsheet-format.md**).
+  The sheet is a rendering of the plan, never edited on its own.
 
 ## The six rules that make a card usable
 

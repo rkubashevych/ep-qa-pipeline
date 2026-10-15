@@ -168,35 +168,16 @@ case's steps. Read the assertions, not only the title: a test that
 accepts "error **or** clamped" does not cover a case that requires an
 error (MEXP-VAL-04).
 
-**A link resolves only when the case id is IN the test file.** QA
-Service verifies a link by finding the stableId in the file at that
-ref; the test's own title and an older id do not count. All 40 MEXP
-links landed `partial`, "stableId … not found in the file"
-(2026-10-14). So a test found without the case id is either:
-- **linked and the id stamped** — a PR to that (live) repo putting `<ID>: ` at
-  the start of each test title (`it('FAV-TC-03: …')`; PHP:
-  `@testCaseId` in the method docblock), after the user's yes (it is
-  another repo's code); re-link with `landing: "pr"` + `prBranch`, then
-  `merged` after the merge; or
-- **left unlinked**, with the ref in `detail.devTests` and a To do
-  "stamp <N> case ids in <repo> (QA)".
-A link recorded before the id is in the file reads `partial` and counts
-toward nothing; say so instead of reporting the case as covered.
-- **Covers the case fully, not `@skip`ped, id in the file** →
-  `link_implemented_tests {suiteId, links: [{stableId, ref:
-  "<path>::<method or exact test title>", level, repo: <the home's
-  repoId, e.g. "main">, landing}], verify: true}` —
-  `landing: "merged"` on the configured branch, `"pr"` + `prBranch`
-  otherwise. Drop the case from Step 3.
-- **Partial** → keep it; hand the ref to the implementer in the plan
-  preview ("extend <ref>").
-- **`@skip`ped** → never linked. Note it on the case
-  (`detail.devTests`, a key of its own so `notes` stay intact) with the
-  skip reason.
-- A link that comes back unresolved for a file the checkout has is
-  Bitbucket rate-limiting QA Service (`429`, reported as "file not
-  found"): keep it, say so, re-link later
-  (`../qa-pipeline-docs/references/qa-service-first.md` → step 4).
+How to link — the call, `ref` / `landing`, the rule that a link
+resolves only when the case id is IN the test file, reading the
+response: `../qa-pipeline/references/linking-tests.md`. Per test found:
+
+| The test | Then |
+|---|---|
+| covers the case fully, not `@skip`ped, id in the file | link it; drop the case from Step 3 |
+| covers it fully, but the id is not in the file | either a PR to that (live) repo stamping the id, after the user's yes, then the link — or leave it unlinked, the ref in `detail.devTests`, a To do "stamp <N> case ids in <repo> (QA)" |
+| covers it partly | keep the case; hand the ref to the implementer in the plan preview ("extend <ref>") |
+| `@skip`ped | never linked; note it on the case (`detail.devTests`, a key of its own so `notes` stay intact) with the skip reason |
 
 ## Step 3 — Implement through QA Service
 
