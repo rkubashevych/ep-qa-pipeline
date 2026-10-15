@@ -94,9 +94,9 @@ Decide at the start of the run, by tool presence, and say which one is
 used in the report's header and in chat:
 
 1. **Playwright MCP — the default.** Used whenever its tools are in the
-   session. Own headless browser (no focus/interference breakage),
-   scripted login from `$EP_QA_HOME/.env.qa-agents` (no login pause), console
-   errors captured on every FAIL. Rules:
+   session. Own browser (no focus/interference breakage), one login
+   pause at the start — the user signs in by hand, the run is
+   unattended after it — console errors captured on every FAIL. Rules:
    **references/playwright-executor.md** — including where evidence can
    actually be written.
 2. **Claude in Chrome extension — the fallback.** Only when the
@@ -107,13 +107,12 @@ used in the report's header and in chat:
    executing any test case.
 
 Neither present → PAUSE and say so; never improvise a third backend.
-Claude's built-in browser pane is not a backend: no scripted login, and
+Claude's built-in browser pane is not a backend: no backend rules, and
 its profile keeps logins across sessions, so "fresh session" means
 nothing there.
 
-The workflow below is backend-neutral — "PAUSE for login" applies to
-the extension path only. Evidence rules for both backends: this
-skill's Step 6, item 4.
+The workflow below is backend-neutral, the login pause included (Step
+4). Evidence rules for both backends: this skill's Step 6, item 4.
 
 ## Workflow
 
@@ -142,6 +141,7 @@ is nothing for web testing and stop. Otherwise notify briefly:
 Scope: [N] test cases to execute in the browser.
 - QA (verify in the UI): [N]
 - FAIL (confirm the bug): [N]
+- Routed in (api-testing / RE-ROUTE [UI]): [N]
 Starting.
 ```
 
@@ -167,22 +167,30 @@ entry, use its `url` / `login_required` / `navigation_steps`
 
 ### Step 4 — Login (if needed)
 
-**Playwright backend:** log in scripted per
-references/playwright-executor.md ("Login") — ask the user only if the
-login fails. The rest of this step is the extension path.
+**The user signs in by hand — both backends.** Typing a password
+through a browser tool puts it in a tool-call argument, which is the
+transcript; reading `.env.qa-agents` from inside the browser process
+is refused as a containment escape. So there is no scripted login and
+no password in any tool call (the same rule as
+`../qa-pipeline/references/recon.md` and the RC smoke).
 
-Read `references/login-config.md`. It names the variables; the values
-come from `$EP_QA_HOME/.env.qa-agents` (`../qa-pipeline/references/environment.md` — in Cowork
-that means `~/.ep-qa` is mounted). Never ask the user to paste
-passwords into chat, and never print the values. If the file is not
-reachable, ask the user to log in manually in the browser tab and
-continue from the logged-in state.
+1. Open the admin panel URL from `references/login-config.md` →
+   "Admin panel" (on the host already checked against `ALLOWED_HOSTS`)
+   and **PAUSE**: ask the user to sign in in that browser window.
+   Never ask for a password in chat. A session left over from an
+   earlier run is fine — check the signed-in state and the event, then
+   carry on.
+2. Poll the page until it is signed in (no password field; the admin
+   page names the event) before the first case.
+3. Non-admin roles: the admin's "login as" impersonation, done in the
+   page, so no token or link is printed (login-config.md → Login).
+4. Session expired mid-run, or SSO / 2FA: pause once more the same way,
+   then continue from the current case.
 
-If login-config.md is filled in, perform the login per its
-instructions (rules: browser-rules.md → "Login"). If it still has
-placeholders or is missing, ask the user for the login URL, the
-fields, the submit button, and the credential source, then log in per
-their instructions.
+Backend specifics: Playwright — `references/playwright-executor.md` →
+"Login"; extension — `references/browser-rules.md` → "Login". If
+login-config.md still has placeholders or is missing, ask the user
+for the login URL and the success indicator.
 
 ### Step 5 — Navigate to the target page
 
@@ -411,11 +419,15 @@ Create `<ISSUEKEY>-web-testing.md` in the run folder (template:
 references/output-template.md) and report its path.
 If the file already exists — delete it and create a new one: a single
 coherent document with the latest run only, never merged or appended.
+**Exception — a quota resume** re-runs only the `BLOCKED (quota)` rows
+and merges them into the existing report
+(`../qa-pipeline-code/references/run-modes.md` → "Resume mode"); a
+plain overwrite there would drop every row the first pass finished.
 
 ## Final answer
 
-After saving, report: the file path; the PASS / FAIL / FAIL CONFIRMED /
-FAIL REJECTED / BLOCKED / OBSERVATION counters; the overall verdict
-(successful = all PASS and FAIL REJECTED); a brief list of any
-FAILs/FAIL CONFIRMED problems, OBSERVATIONs, and BLOCKED cases with
-reasons.
+After saving, report: the file path; the non-zero rows of the
+report's Statistics table; the Verdict line as the template defines it
+(successful / unsuccessful / incomplete); a brief list of any
+FAILs/FAIL CONFIRMED problems, SPEC-DEFECTs, OBSERVATIONs, and the
+PARTIAL / BLOCKED cases with reasons.

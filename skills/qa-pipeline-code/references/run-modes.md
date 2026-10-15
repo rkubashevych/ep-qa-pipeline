@@ -121,7 +121,13 @@ never let the step-6 preview count them as blocked cases. A stage
 killed by the limit may not have written its report at all. Then
 resume reads what exists: cases with no row in a partial report, or
 every case of a stage with no report, are the unreached rows. Say
-`quota stop inferred` once. Until 0.47.0
+`quota stop inferred` once. **The resumed stage merges, it does not
+overwrite (0.72.0):** it rewrites its report with the earlier rows kept
+as they were and the re-run rows replacing their `BLOCKED (quota)`
+rows, recomputes Scope, Statistics and `Completeness:`, and appends to
+the evidence file from the next free `§n` (earlier sections keep their
+numbers). A stage's "overwrite — latest run only" rule applies to a
+fresh run, never to this resume. Until 0.47.0
 such a stop surfaced as `BLOCKED — tool failed`, which read like the host
 was down.
 

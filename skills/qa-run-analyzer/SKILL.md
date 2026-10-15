@@ -1,16 +1,21 @@
 ---
 name: qa-run-analyzer
 description: >
-  Post-run health check for the QA pipeline. Reads whatever pipeline
-  output files are present (the docs-phase files, the stage reports,
-  the source register, the evidence file, the walk plan and results,
-  the manual results and the open-items ledger) and reports how the
-  run went: coverage/traceability gaps, weak inputs, signs a stage
-  misbehaved, and a findings digest. Writes a short run report and a
-  chat summary. Auto-called at the end of qa-pipeline-docs and
-  qa-pipeline-code; also run on demand. Use when the user says "analyze
-  the run", "run health check", "how did that run go", "what's worth
-  fixing", or after any pipeline phase.
+  Post-run health check of one ticket's QA pipeline run. Reads the
+  ticket's run-folder files and reports coverage/traceability gaps,
+  weak inputs, signs a stage misbehaved, and a findings digest; writes
+  a short run report and a chat summary, and updates the ticket's
+  open-items ledger (what the round left undecided). Auto-called at
+  the end of qa-pipeline-docs and qa-pipeline-code; also run on demand
+  after a docs, refinement or code pass. Use when the user says
+  "analyze the run for EP-1234", "run health check", "how did that run
+  go", "what's worth fixing from the EP-1234 run", or "what did the
+  last round leave open on EP-1234". Do NOT use to debug one failing
+  test (chat), to read a run's results (the report), for a suite's
+  coverage with no ticket (QA Service coverage_report), for a CI run
+  or a QA Service test run on its own (QA Service tools), or after an
+  RC smoke or the manual round — qa-rc-smoke and qa-manual-results
+  report their own outcome.
 ---
 
 # QA Run Analyzer

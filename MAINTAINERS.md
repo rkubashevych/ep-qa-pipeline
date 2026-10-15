@@ -104,7 +104,7 @@ The stages need different things, so they run in different places:
 | code-phase step 0 (case rebuild) | the **QA Service connector** — the suite is the record of the cases (no Jira archive is posted since 0.33.0); without it only this machine's `runs/<KEY>/docs/` can supply them, and no run can be written | wherever `qa-pipeline-code` starts |
 | 5–6 `pr-summary`, `code-review` | the code: a **backend/portal-ui repo clone** OR a Bitbucket **API token** (`BB_EMAIL`+`BB_API_TOKEN`) | **Claude Code** |
 | 7 `api-testing` | `~/.ep-qa/.env.qa-agents` (API creds, `ALLOWED_HOSTS`) + a per-event frontend host | **Claude Code** |
-| 8 `web-testing` | the **Playwright MCP** tools + `.env.qa-agents` for the scripted login (default); else a connected Chrome + logged-in test env (extension fallback) | **either** with Playwright; **Cowork** for the extension |
+| 8 `web-testing` | the **Playwright MCP** tools, headed — the user signs in by hand once (default); else a connected Chrome + logged-in test env (extension fallback) | **either** with Playwright; **Cowork** for the extension |
 | 9–10 `qa-manual-runsheet`, `qa-manual-walk`, `qa-manual-results` | QA Service connector (suite read/write-back) + `.env.qa-agents` for provisioning and for the walk's AGENT-RUNS cards | either, connector present (the walk needs the file only if the plan has AGENT-RUNS cards) |
 
 **Why:** Cowork has no repo clone and no `BB_API_TOKEN`, so 5–6 can't

@@ -290,7 +290,10 @@ as "None".
 Create the file `<ISSUEKEY>-code-review.md` in the run folder
 (`runs/<ISSUEKEY>/r<N>/`) and report its path.
 
-If the file already exists, overwrite it: one file, the latest run only.
+If the file already exists, overwrite it: one file, the latest run only
+— except a quota resume, which merges the re-run rows into the
+existing report (`../qa-pipeline-code/references/run-modes.md` →
+"Resume mode").
 
 The file structure template is in references/output-template.md.
 

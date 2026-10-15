@@ -129,9 +129,21 @@ before they run), or Claude names the stage's slash command — the
 
 ## qa-run-analyzer
 - ✅ "analyze the run", "how did that run go"
+- ✅ "analyze the run for EP-55123" (the `commands` table's phrase)
 - ✅ "run health check"
+- ✅ "what's worth fixing from the EP-55123 run"
+- ✅ "what did the last round leave open on EP-55123?" (the ledger)
+- ✅ (auto) step 5 of qa-pipeline-docs and qa-pipeline-code
 - ❌ "analyze this log file" → generic task, chat
 - ❌ "why did this test fail?" → diagnosing-bugs or chat
+- ❌ "review this PR — what's worth fixing?" → chat, or the slash
+  command `/ep-qa-pipeline:code-review` for a ticket's cases
+- ❌ "how did the CI run go for the monolith?" → QA Service
+  `ci_run_status`, no skill
+- ❌ "analyze QA Service test run 4812" (a run on its own, no ticket
+  pass) → QA Service `get_test_run`, no skill
+- ❌ (auto) after qa-rc-smoke or qa-manual-results — each reports its
+  own outcome; the analyzer does not run after stage 10
 
 ## qa-pipeline (dispatcher)
 - ✅ "qa this ticket EP-55123"
@@ -155,7 +167,8 @@ before they run), or Claude names the stage's slash command — the
 - ❌ "how does request_dev_tests work?" → QA Service `get_help_topic`, no skill
 - ❌ "update the plugin for the QA Service changes" → a maintainer release
   (MAINTAINERS recipe), not this read-only check
-- ❌ "check the MEXP suite for gaps" → QA Service `coverage_report` / qa-run-analyzer
+- ❌ "check the MEXP suite for gaps" → QA Service `coverage_report`
+  (a suite with no ticket — the analyzer needs a ticket's run folder)
 
 ## qa-api-tests (API cases → implemented in QA Service)
 - ✅ "automate the API cases for EP-57310"

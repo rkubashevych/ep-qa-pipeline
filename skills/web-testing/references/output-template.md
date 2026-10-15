@@ -16,9 +16,10 @@ Skill: <the line `skill_stamp.py web-testing` prints>
 
 ## Scope
 
-[UI] test cases executed in the browser: <N>
+Test cases executed in the browser: <N>
 - QA (verify in the UI): <N>
 - FAIL (confirm the bug): <N>
+- Routed in (api-testing "Route to web-testing" / code-review `RE-ROUTE [UI]`): <N>
 
 ## Not executed here
 > [mobile] / [export/email] test cases this browser-based skill cannot
@@ -94,6 +95,26 @@ Skill: <the line `skill_stamp.py web-testing` prints>
 - **Arrived as:** QA
 - **Reason:** <why it could not be executed>
 - **Page state:** <what the agent saw at the moment of blocking>
+- **Probe:** <what was tried to prove the blocker is real, verbatim, and what it showed>
+
+### BLOCKED (unverified): TC-REQ-3.2 — <scenario name>
+
+- **Arrived as:** QA
+- **Reason:** <why it could not be executed>
+- **Would verify it:** <the probe that was not possible here, and who can run it>
+
+### SPEC-DEFECT: TC-REQ-5.1 — <scenario name>
+
+- **Arrived as:** QA
+- **Case says:** <the premise or expected result as written>
+- **Spec / page says:** <what the source of record or the page actually shows, quoted>
+- **Correction:** <the case-correction line for the human summary's "To do">
+
+### PARTIAL: TC-REQ-5.2 — <scenario name>
+
+- **Arrived as:** QA
+- **Settled:** <the steps / surfaces read cleanly, with their `web-evidence §n`>
+- **Not settled:** <what could not be read, and why — the human walks this row>
 
 ---
 
@@ -107,7 +128,10 @@ Section rules:
   `Evidence:` line naming its `<ISSUEKEY>-web-evidence.md` section —
   both backends. No clause in any source → `OBSERVATION (no source checked)`.
 - Comment column: for PASS — its `web-evidence §n` (0.47.0: a PASS with no reading is held back by the step-5 evidence audit), plus any OBSERVATION. For FAIL — a short description. For BLOCKED — the reason. For FAIL CONFIRMED — a short description. For FAIL REJECTED — its `web-evidence §n` (a pass claim: the audit holds it back without one) plus a short description.
-- Findings — for FAIL, FAIL CONFIRMED, FAIL REJECTED and BLOCKED.
+- Findings — for FAIL, FAIL CONFIRMED, FAIL REJECTED, BLOCKED (every
+  variant but quota — its Comment carries the limit's error text),
+  SPEC-DEFECT and PARTIAL. A `RISK-CR-<n>` row that fails uses the FAIL
+  block, `Source:` + `Clause:` included.
 - PASS needs no Findings entry — its proof is the `web-evidence §n` reading the Comment names.
 - FAIL REJECTED also has a finding — so it is clear what exactly was refuted.
 - If there are no findings — the section is not created.
@@ -143,4 +167,8 @@ If there are no observations — the section is not created.
 Rows with a zero count may be omitted; a status that occurs anywhere in
 Results must have its own row (`../../qa-run-analyzer/references/status-vocabulary.md`).
 
-Verdict: <Web testing successful (all PASS and FAIL REJECTED) / Web testing unsuccessful — there are N FAIL, N FAIL CONFIRMED>
+Verdict: <one of —
+  Web testing successful (every row PASS or FAIL REJECTED, Completeness: complete) /
+  Web testing unsuccessful — N FAIL, N FAIL CONFIRMED /
+  Web testing incomplete — N rows left for the walk or a resume (PARTIAL, BLOCKED*, NOT EXECUTED, SPEC-DEFECT)>
+  — unsuccessful wins over incomplete when both apply; name both counts.

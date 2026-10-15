@@ -270,7 +270,9 @@ enumerate surfaces per role or cap at PARTIAL.
 ## Output file
 Create `<ISSUEKEY>-api-testing.md` in the run folder per
 `references/output-template.md`. If it already exists — delete it and
-create a new one (single latest run, no append).
+create a new one (single latest run, no append) — except a quota
+resume, which merges the re-run rows into the existing report
+(`../qa-pipeline-code/references/run-modes.md` → "Resume mode").
 
 ## Final answer
 After saving, report: the path; the PASS / FAIL / FAIL CONFIRMED /

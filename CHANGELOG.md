@@ -5,6 +5,68 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.72.0 — 2026-10-15 — the web-testing review; the analyzer's description
+
+**Trigger:** two skill-reviewer passes, both read-only: `web-testing`
+(full lens, 13 findings) and `qa-run-analyzer` (discoverability lens,
+8 findings). All implemented, none rejected.
+
+**web-testing — real defects.**
+- **The Playwright login put the password in the transcript.** The
+  executor said "scripted, no pause": fill username and password from
+  `.env.qa-agents`. Through an MCP tool the password is a tool-call
+  argument; reading the file from inside the browser process is
+  refused as a containment escape. Recon and the RC smoke had already
+  moved to a hand login (one copy fixed, one not). Now both backends
+  pause once for the user to sign in to admin by hand, roles are
+  reached by in-page impersonation, and the Playwright browser runs
+  headed. Also fixed in browser-rules' extension Login, the
+  orchestrator's stage-8 PAUSE line ("extension backend only"),
+  MAINTAINERS' stage table and README "Before you run".
+- **A quota resume wiped the finished rows.** Resume re-runs only the
+  `BLOCKED (quota)` rows, while the stage's output rule said "delete
+  it and create a new one … latest run only". `run-modes.md` → Resume
+  mode now says the resumed stage merges (earlier rows kept, Scope /
+  Statistics / Completeness recomputed, evidence appended from the next
+  `§n`); web-testing, api-testing and code-review carry the exception
+  on their overwrite line.
+- **Relative screenshot names** could land in this checkout before the
+  "path outside `$EP_QA_HOME`" check ran (EP-57927 r1 did). The
+  filename is now always absolute under `$EP_QA_HOME/evidence/`.
+
+**web-testing — references caught up with SKILL.md.**
+- `output-template.md`: the BLOCKED block gains `Probe:`, plus
+  BLOCKED (unverified), SPEC-DEFECT and PARTIAL blocks; RISK-CR rows use
+  the FAIL block; Scope (and the Step 1 chat notice) counts routed-in
+  cases, so Scope and Statistics agree; the Verdict is successful /
+  unsuccessful / incomplete, as api-testing's already was, and the
+  final answer reports the Statistics rows instead of six counters.
+- `browser-rules.md`: the absence method requires the positive control
+  and the second read; "2 attempts → BLOCKED" now points at the
+  escalation rule and requires a `Probe:`; an unverifiable expected
+  result is classified (PARTIAL / BLOCKED / SPEC-DEFECT), not
+  BLOCKED by default; Registration no longer registers users or keeps
+  credentials in context — it asks, as login-config says; the
+  date-picker note the executor cited now exists.
+- `playwright-executor.md`: the copied status list (already missing
+  `OBSERVATION (no source checked)`) is replaced by a pointer.
+
+**qa-run-analyzer — discoverability.**
+- Description rewritten: it now names the open-items ledger it writes,
+  drops the input-file inventory (the body's Input list is the one
+  copy), anchors "what's worth fixing" to a run, replaces "or after
+  any pipeline phase" with the phases it actually checks, and gains a
+  "Do NOT use" clause (one failing test, reading results, a suite with
+  no ticket, a CI or QA Service run on its own, after the RC smoke or
+  stage 10).
+- `evals/triggering.md`: new ✅ rows (keyed phrase, ledger question,
+  "worth fixing from the run") and ❌ rows (PR "worth fixing", CI run,
+  a lone QA Service run, no auto-run after RC smoke / stage 10); the
+  `qa-service-watch` redirect "coverage_report / qa-run-analyzer" now
+  names `coverage_report` only.
+- README: the analyzer gets a row in the stage table; the docs
+  orchestrator's chain names it too.
+
 ## 0.71.0 — 2026-10-15 — the qa-pipeline-docs review; both orchestrator descriptions
 
 **Trigger:** a skill-reviewer pass over `qa-pipeline-docs` (full lens,

@@ -92,7 +92,9 @@ Priority:
 If an element is not found on the first attempt:
 - `computer scroll` down and try `find` again.
 - `read_page` to check whether the page has loaded.
-- After 2 failed attempts — BLOCKED for that test case.
+- Still not found → SKILL.md → "Escalation rule" (three different
+  approaches, then reassess the assumption) — a BLOCKED needs its
+  recorded `Probe:`.
 
 ## Entering data
 
@@ -127,6 +129,8 @@ Material UI (MUI). Account for MUI's behaviour:
   then `find` and click the matching option from the popup.
 - **Toasts/snackbars** confirming success are transient — `find` the
   message promptly after the action.
+- **Date pickers** — type the date with the keyboard into the input;
+  clicking through the calendar popup is slow and flaky.
 
 ## Interpreting test-case steps
 
@@ -158,14 +162,17 @@ e. Record the result of the step: it matches or it does not match.
 
 ## Error handling
 
+Every BLOCKED below needs its recorded `Probe:` — what was tried and
+what it showed (SKILL.md → Classification); after three different
+failed approaches, follow SKILL.md → "Escalation rule".
+
 - The page did not load (timeout, 500, blank) — try reloading once
   via `navigate`. If it did not help — BLOCKED for all test cases of
-  that page.
-- Session expired during execution — repeat the login (per
-  login-config.md), continue from the current test case.
-- Element not found after 2 attempts (including scrolling) — BLOCKED
-  for that test case with a description of what was looked for and
-  where.
+  that page, the reload and its result as the probe.
+- Session expired during execution — pause for the user to sign in
+  again (SKILL.md → Step 4), continue from the current test case.
+- Element not found (after scrolling and the escalation rule) —
+  BLOCKED for that test case with what was looked for, where, and how.
 - An alert or dialog appears — read the text, record it, close it and
   continue. If the dialog blocks execution — BLOCKED.
 - The Chrome extension does not respond — stop, notify the user.
@@ -186,14 +193,20 @@ Methods for checking the expected result:
 
 4. **Absence of an element** — `find` returns
    an empty result. Or `get_page_text` and check
-   that the text is NOT present.
+   that the text is NOT present. **Only after the run's positive
+   control is visible on the same surface**
+   (`../../api-testing/references/absence-check-protocol.md`), and on
+   an analytics-backed surface after a second read past the ingestion
+   lag — a single immediate empty read is not a PASS. Record the
+   `Control:` line.
 
 5. **URL changed** — after navigation, check
    the current URL via `read_page` or `get_page_text`.
 
-If the expected result cannot be verified
-by any method — mark BLOCKED with a description of what exactly
-cannot be verified.
+If the expected result cannot be verified by any method — classify
+per SKILL.md → Classification rules: PARTIAL when part of the surface
+could not be read, BLOCKED (with its `Probe:`) when something stopped
+the check, SPEC-DEFECT when the expected result itself is the doubt.
 
 ## Screenshots
 
@@ -209,27 +222,21 @@ cannot be verified.
 
 ## Login
 
-The login sequence:
-1. `navigate` to the login URL from login-config.md.
-2. `find` the username/email field — wait for it.
-3. `form_input` or `computer type` — enter the username.
-4. `find` the password field.
-5. `form_input` or `computer type` — enter the password.
-6. `find` the login button.
-7. `computer left_click` on the button.
-8. `find` the element that confirms a successful login
-   (dashboard, welcome message, user avatar).
-
-Credentials are taken from `$EP_QA_HOME/.env.qa-agents` under the
-variable names login-config.md lists — never from chat.
+The user signs in by hand (SKILL.md → Step 4): never `form_input` or
+`computer type` a password — the value would sit in the tool call. On
+this backend:
+1. `navigate` to the admin panel URL from login-config.md.
+2. PAUSE: ask the user to sign in in that Chrome window.
+3. `find` the element that confirms a successful login (login-config.md
+   → success indicator) before the first case.
 
 ## Registration
 
-If a test case needs a new user:
-1. Read the registration instructions from login-config.md.
-2. Perform the registration steps.
-3. Save the new user's credentials in context
-   for later test cases.
+A non-admin role is reached by admin impersonation, not by a new
+account (login-config.md → Login). If a test case explicitly requires
+a brand-new user, ask the user how to provision one
+(login-config.md → Registration) — never register one on your own, and
+never hold a password in chat.
 
 ## New tabs
 

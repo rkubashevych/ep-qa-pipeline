@@ -263,8 +263,9 @@ story does not exhaust the orchestrator's context:
    (`../qa-run-analyzer/references/status-vocabulary.md`). Backend:
    Playwright MCP by default, Chrome extension only when its tools are
    absent (web-testing "Execution backends"); the report header names
-   the one used. **PAUSE** (extension backend only) for browser login
-   and any unknown navigation path. Produces `<STORY>-web-testing.md`
+   the one used. **PAUSE** for the browser login — the user signs in
+   by hand on both backends, no password in a tool call (web-testing
+   Step 4) — and for any unknown navigation path. Produces `<STORY>-web-testing.md`
    and `-web-evidence.md` §n per PASS/FAIL (+ `evidence/` screenshots).
 
 5. **Evidence audit, then qa-run-analyzer.** The audit: a FRESH
