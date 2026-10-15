@@ -314,7 +314,9 @@ story does not exhaust the orchestrator's context:
    human summary, the story note, the results table, any request
    for a product decision. **The narrow exception:** a finding may
    publish in wave 1 only if ALL of — confirmed at RUNTIME, evidence
-   attached, blocks the manual round. A code-read FAIL never qualifies.
+   attached and rated SUFFICIENT by the step-5 evidence audit, blocks
+   the manual round (`references/wave1-and-verification.md`). A
+   code-read FAIL never qualifies.
 
    - **Count gate first.** Where a shell is available run
      `reconcile_counts.py <STORY>` (self-test first) and compare with

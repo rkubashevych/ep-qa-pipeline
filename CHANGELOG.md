@@ -5,6 +5,46 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.62.0 — 2026-10-15 — six contract defects from the writing-for-agents review
+
+**Trigger: `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`**, a
+read-only review of all 19 skills against the `writing-for-agents`
+guide (mattpocock/skills). Besides pruning candidates (next releases),
+it found six places where a skill contradicts the pipeline's own
+rules. Each was checked by hand against the files.
+
+**Fixed.**
+- **A1 — web-testing's doubt rule contradicted the vocabulary.** "Do
+  not mark PASS if there is any doubt — prefer FAIL" against
+  status-vocabulary's "prefer BLOCKED / NOT-TESTABLE / QA over a
+  doubtful PASS" and "if you write the doubt, you must classify it".
+  No CHANGELOG entry backed "prefer FAIL". The rule now points to the
+  vocabulary; FAIL still needs a concrete discrepancy.
+- **A2 — the wave-1 narrow exception lost a condition.**
+  qa-pipeline-code listed runtime + evidence + blocks-the-round, but
+  not "rated SUFFICIENT by the step-5 evidence audit" (0.47.0), which
+  `wave1-and-verification.md` requires. Restored, with the pointer.
+- **A3 — task-context's "⚠️ Suspicious content" note had no home.**
+  The skill required it; its output template had no such section and
+  the skill forbids sections outside the template. The section is now
+  in the template (optional, omitted when empty).
+- **A4 — grooming read a missing context file as "task-context never
+  ran"**, the exact reading `data-locations.md` forbids (another
+  machine, unmounted folder). It now follows the resolution order.
+- **A5 — qa-manual-runsheet ran Step 2a before Step 2**, though the
+  selection uses Step 2's classification (VERIFY, settled). Step 2 now
+  comes first; names unchanged, so "step 2a" pointers still hold.
+- **A6 — `BLOCKED (quota)` was missing from api-testing's and
+  web-testing's status lists**, though the vocabulary (0.47.0) assigns
+  it to API and WEB. Added to both.
+
+**Decided (review questions).** No inline repetition was added on
+purpose, so the duplicates go as pointers (0.63.0+). No pre-0.52
+ticket is in flight: the dispatcher's "API cases still `planned`"
+route is sediment (0.63.0). The `link_implemented_tests` rules,
+written in both qa-manual-results Step 4d and qa-api-tests Step 2,
+move to one shared reference (later release).
+
 ## 0.61.0 — 2026-10-15 — single stages are slash-only; `/ep-qa-pipeline:commands`
 
 **Trigger: the same comparison as 0.60.0.** The user starts work with

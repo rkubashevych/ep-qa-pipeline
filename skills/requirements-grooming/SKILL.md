@@ -26,7 +26,9 @@ context-collection skill (task-context).
 **Where to find it:** the run folder, `runs/<ISSUEKEY>/docs/`
 (`../qa-pipeline/references/data-locations.md`) — a new chat is not a
 reason to ask for an upload. A context file never comes from the
-suite; if it is not in the run folder, task-context has not run.
+suite. Missing from the run folder means "not visible from here", not
+"task-context never ran": follow the resolution order in
+`data-locations.md` before re-running stage 1.
 
 Data sources for this skill:
 - the context file (source of truth), including ALL of its requirement

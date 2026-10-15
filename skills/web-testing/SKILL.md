@@ -313,6 +313,12 @@ statuses land there first. This stage emits:
   what would verify it. Wrong blockers keep being accepted: "no such
   setting" existed under another name, "no brand on this event" had
   ten.
+- `BLOCKED (quota)` — stopped by OUR tooling's limit (a Claude usage
+  or session limit, an MCP / connector rate limit, HTTP 429), not by
+  the product or the environment. Record the limit's error text
+  verbatim; the report is `Completeness: partial` and the stage
+  resumes after the reset for exactly these rows
+  (`../qa-run-analyzer/references/status-vocabulary.md`).
 - `OBSERVATION` — the case passed, but a defect or anomaly outside
   the requirements scope was noticed.
 - `OBSERVATION (no source checked)` — a real thing seen, with no clause
@@ -337,8 +343,10 @@ run already visits — same evidence rules as a FAIL case. Step 6 of the
 orchestrator proposes confirmed risk rows as permanent suite cases.
 
 Rules:
-- Do not mark PASS if there is any doubt — prefer FAIL with a
-  description. Do not mark FAIL without a concrete discrepancy.
+- PASS only on a clean reading. A doubt is classified, not rounded
+  to a verdict: BLOCKED / NOT-TESTABLE / QA over a doubtful PASS, and
+  SPEC-DEFECT when the case's wording is the doubt (status-vocabulary
+  → "Cross-stage rules"). FAIL needs a concrete discrepancy.
 - **Second observation before FAILing a shared element.** A FAIL on a
   page-level or shared element (header, nav, global styles, a
   component reused across pages) requires a second observation in a

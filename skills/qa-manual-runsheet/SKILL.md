@@ -254,6 +254,35 @@ target entities and their types, the precondition, and the pass
 condition. Group cases that can share a fixture — but never counter
 cases (rule 6).
 
+### Step 2 — Classify every case
+
+- **READY** — data can be provisioned; the human can run it.
+- **NEEDS FIXTURE** — requires something you cannot create (a differently
+  configured event, an ownerless entity, a log-group grant). Say exactly
+  what would unblock it and who can provide it.
+- **ALREADY SETTLED** — an existing verdict file answers it with
+  runtime-grade evidence (executed in stage 7/8 under the
+  absence-check protocol, and rated SUFFICIENT by the evidence audit
+  when one ran) AND the case's risk is Low/Medium. Carry the
+  verdict and its source so the human skips it.
+- **VERIFY (spot-check)** — the machine has a PASS, but it is exactly
+  the kind the creator's error model distrusts: a PASS on a
+  `[risk: High]` requirement, or ANY PASS whose only evidence is code
+  reading (code-review PASS, never executed). One SPOT-CHECK card:
+  same who / do / see, trimmed to the fastest action that would expose
+  a wrong PASS. Never mark these skipped — ~half of unverified machine
+  PASSes are historically wrong, and the High-risk ones are where that
+  hurts.
+- **AGENT-RUNS** — READY, but the case is a request (an `[API]` case
+  with no UI path, a harness line, anything with an HTTP verb). It gets
+  a card the *agent* executes during the walk, with the tester supplying
+  only the human-only input (a token from an email, a code from a
+  phone). This is what keeps curl out of the human's hands: on EP-56998
+  nine of eleven rows handed the tester a harness command.
+
+Probe every NEEDS FIXTURE reason against the live system before
+accepting it (rule 5).
+
 ### Step 2a — Select the manual set: minimum cards, full AC coverage
 
 The machine runs ALL cases (stages 6–8) and the QA Service suite keeps
@@ -308,35 +337,6 @@ the plan, one row in an exported sheet):
 A card's verdict applies to every case in its `covers:` list unless the
 tester singles one out — the walk names them when recording, and stage
 10 expands the list on ingestion.
-
-### Step 2 — Classify every case
-
-- **READY** — data can be provisioned; the human can run it.
-- **NEEDS FIXTURE** — requires something you cannot create (a differently
-  configured event, an ownerless entity, a log-group grant). Say exactly
-  what would unblock it and who can provide it.
-- **ALREADY SETTLED** — an existing verdict file answers it with
-  runtime-grade evidence (executed in stage 7/8 under the
-  absence-check protocol, and rated SUFFICIENT by the evidence audit
-  when one ran) AND the case's risk is Low/Medium. Carry the
-  verdict and its source so the human skips it.
-- **VERIFY (spot-check)** — the machine has a PASS, but it is exactly
-  the kind the creator's error model distrusts: a PASS on a
-  `[risk: High]` requirement, or ANY PASS whose only evidence is code
-  reading (code-review PASS, never executed). One SPOT-CHECK card:
-  same who / do / see, trimmed to the fastest action that would expose
-  a wrong PASS. Never mark these skipped — ~half of unverified machine
-  PASSes are historically wrong, and the High-risk ones are where that
-  hurts.
-- **AGENT-RUNS** — READY, but the case is a request (an `[API]` case
-  with no UI path, a harness line, anything with an HTTP verb). It gets
-  a card the *agent* executes during the walk, with the tester supplying
-  only the human-only input (a token from an email, a code from a
-  phone). This is what keeps curl out of the human's hands: on EP-56998
-  nine of eleven rows handed the tester a harness command.
-
-Probe every NEEDS FIXTURE reason against the live system before
-accepting it (rule 5).
 
 ### Step 3 — Provision
 

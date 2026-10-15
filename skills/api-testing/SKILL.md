@@ -199,6 +199,12 @@ or changed statuses land there first. This stage emits:
   plus its response. No probe possible → `BLOCKED (unverified)` with
   what would verify it (wrong blockers silently remove cases from
   testing; nine across two runs dissolved on a single probe each).
+- `BLOCKED (quota)` — stopped by OUR tooling's limit (a Claude usage
+  or session limit, an MCP / connector rate limit, HTTP 429), not by
+  the product or the environment. Record the limit's error text
+  verbatim; the report is `Completeness: partial` and the stage
+  resumes after the reset for exactly these rows
+  (`../qa-run-analyzer/references/status-vocabulary.md`).
 - `NOT-TESTABLE` — the ticket's endpoint mapping is wrong or
   ambiguous; record the correct endpoint and what it actually does
   (§11.3). (Older reports used `QA` for this — do not: `QA` is an
