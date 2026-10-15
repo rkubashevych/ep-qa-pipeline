@@ -1,5 +1,6 @@
 ---
 name: web-testing
+disable-model-invocation: true
 description: >
   Eighth stage of task processing. Takes the QA items and FAIL items
   from code review and the test cases, executes them in a browser it

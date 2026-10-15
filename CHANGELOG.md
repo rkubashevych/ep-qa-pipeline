@@ -5,6 +5,38 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.61.0 — 2026-10-15 — single stages are slash-only; `/ep-qa-pipeline:commands`
+
+**Trigger: the same comparison as 0.60.0.** The user starts work with
+the front door or a mode ("test this", "smoke test rc", "bugfix this
+task") and rarely starts a single stage alone, yet the seven stage
+descriptions (about 4.3k chars) loaded into every session. The user
+also asked for one place that lists the commands.
+
+**Changed.** `task-context`, `requirements-grooming`, `qa-test-cases`,
+`pr-summary`, `code-review`, `api-testing` and `web-testing` carry
+`disable-model-invocation: true`. Their descriptions stay out of the
+session; they still show in the `/` menu.
+- Checked first: `qa-pipeline-docs`, `qa-pipeline-code` and
+  `qa-refinement` run every stage by reading its SKILL.md, and the
+  dispatcher's route table names only modes. Nothing that chains
+  stages goes through the Skill tool, so nothing breaks.
+- Cost: a plain-words request for one stage ("run the API checks for
+  EP-1234") no longer starts that stage alone. It goes to the
+  dispatcher or `qa-pipeline-code`, which propose before they run, or
+  Claude names the slash command.
+
+**Added.** `commands`, a slash-only skill: `/ep-qa-pipeline:commands`
+prints one table of every command, what it does and what to type.
+`verify_plugin.py` check 4 now fails when a skill has no row there.
+
+**Docs.** `evals/triggering.md`: the seven stage sections are
+slash-only (✅ is the slash command; their old phrases are ❌ with the
+new route), every other section's arrow to a hidden stage is
+re-pointed, and `commands` has a section. MAINTAINERS recipe step 3
+adds the commands row and the slash-only rule; README says how to
+start a single stage; CLAUDE.md's skill count was stale (16 → 19).
+
 ## 0.60.0 — 2026-10-15 — shorter descriptions for the six longest skills
 
 **Trigger: comparing the plugin with `mattpocock/skills` (2026-10-15).**

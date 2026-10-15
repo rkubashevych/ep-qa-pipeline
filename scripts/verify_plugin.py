@@ -213,14 +213,19 @@ def check_text(root, r, no_git=False):
 def check_wiring(root, r):
     readme = read(root, "README.md")
     evals = read(root, "evals/triggering.md") if os.path.exists(os.path.join(root, "evals/triggering.md")) else ""
+    commands = read(root, "skills/commands/SKILL.md") if os.path.exists(os.path.join(root, "skills/commands/SKILL.md")) else ""
     for d in skill_dirs(root):
+        # backtick-closed or followed by a space: `:qa-pipeline` alone must not
+        # match `:qa-pipeline-docs`
+        if not re.search(rf"/ep-qa-pipeline:{re.escape(d)}[` ]", commands):
+            r.fail(f"wiring: skill {d} is not listed in skills/commands/SKILL.md")
         # backtick form only: `qa-pipeline` is a substring of `qa-pipeline-docs`,
         # so a plain `d in readme` test cannot notice a dropped mention
         if f"`{d}`" not in readme and f"skills/{d}" not in readme:
             r.fail(f"wiring: skill {d} is not named in README.md (as `{d}`)")
         if not re.search(rf"^## {re.escape(d)}\b", evals, re.M):
             r.fail(f"wiring: evals/triggering.md has no `## {d}` section")
-    r.ok("wiring: every skill named in README and evals")
+    r.ok("wiring: every skill named in README, evals and the commands list")
 
 
 REF_RE = re.compile(r"(?:(?:\.\./)*([\w-]+)/)?references/([\w\-.]+\.md)")

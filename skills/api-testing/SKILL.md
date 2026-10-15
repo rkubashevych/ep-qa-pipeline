@@ -1,5 +1,6 @@
 ---
 name: api-testing
+disable-model-invocation: true
 description: >
   Seventh stage of task processing. Takes the QA / FAIL / not-executed
   [API] test cases from code review and the test cases, executes them

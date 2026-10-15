@@ -67,6 +67,8 @@ These skills were adapted for ExpoPlatform's stack:
 
 > Two one-command orchestrators wrap these: **`qa-pipeline-docs`** (stages 1–4 + Jira publish) and **`qa-pipeline-code`** (stages 5 → 6 → 7 → 8 + `qa-run-analyzer` + Jira post + stage 9 walk plan, with the walk and the write-back run on demand when the tester is ready). And one front door wraps the orchestrators: **`qa-pipeline`** — give it any ticket ("qa this ticket EP-1234") and it reads the ticket's state, proposes the route (docs / code / bug-fix / retest / walk / ingest results), and invokes it on your confirmation. Direct invocation of any orchestrator or mode still works exactly as before.
 
+> **Commands = `commands` (0.61.0).** `/ep-qa-pipeline:commands` prints every command with what it does and what to type. Plain words start the front door, the modes and the checks. The seven single stages (`task-context` … `web-testing`) are slash-only (`disable-model-invocation`): their descriptions no longer load into every session, the orchestrators still run them, and you start one alone with its slash command, e.g. `/ep-qa-pipeline:api-testing EP-1234`.
+
 ## How the flow works
 
 1. **task-context** — pulls the Jira ticket (description, acceptance criteria, comments, attachments, links) and consolidates it into one enriched Markdown file: the single source of truth for everything downstream.

@@ -45,6 +45,7 @@ skills/
   qa-rc-smoke/                 # release-candidate mode: scope items on RC — code, served build, runtime smoke
   qa-pipeline-docs/            # orchestrator: stages 1, 2, 4 + publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
+  commands/                    # /ep-qa-pipeline:commands — the command table (0.61.0; slash-only)
 fixtures/EP-0000-context.md    # synthetic docs-phase smoke-test input (the one EP-* file that is tracked)
 docs/                          # reviews, retrospectives, specs, design prompts — history, not contract
 
@@ -179,6 +180,15 @@ carried between them; the QA Service run carries the verdicts anyway.
      — the input file list, the counts-reconcile check, and the
      findings-summary line.
    - `README.md` — the stage table + the "How the flow works" list.
+   - `skills/commands/SKILL.md` — its row in the command table
+     (`verify_plugin.py` fails without it).
+   - **Slash-only or not.** A stage that only ever runs inside an
+     orchestrator gets `disable-model-invocation: true` (0.61.0): its
+     description stays out of every session and the orchestrator still
+     runs it by reading the SKILL.md. Only skills a person starts in
+     plain words — the front door, the modes, the checks — stay
+     model-invocable. An orchestrator must keep running stages by
+     reading the SKILL.md, never through the Skill tool.
 4. **Smoke-test the docs stages** if you touched them: run
    `fixtures/EP-0000-context.md` (synthetic — the one `EP-*` file that
    is tracked, via the `.gitignore` negation) through grooming →

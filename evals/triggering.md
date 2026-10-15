@@ -9,69 +9,86 @@ discovery regression even if the skill body is perfect.
 Convention: ✅ = this skill must fire · ❌ = must NOT fire (the arrow
 names who should handle it instead).
 
-## task-context (stage 1)
-- ✅ "pull task context for EP-55123"
-- ✅ "prepare task context" (with a Jira key/URL)
+**Slash-only skills (0.61.0).** The seven single stages and `commands`
+carry `disable-model-invocation: true`: no phrase starts them, and
+their descriptions do not load into a session. Their ✅ is the slash
+command; the orchestrators still run them by reading the SKILL.md. A
+phrase that used to start one stage now goes to the dispatcher or the
+orchestrator that owns the stage (both propose before they run), or
+Claude names the stage's slash command — the "→" on each ❌ below.
+
+## task-context (stage 1) — slash only
+- ✅ `/ep-qa-pipeline:task-context EP-55123`
+- ✅ (auto) step 1 of qa-pipeline-docs and qa-refinement
+- ❌ "pull task context for EP-55123" → qa-pipeline (dispatcher)
 - ❌ "process the ticket EP-54990" → qa-pipeline (dispatcher) — it reads
   the ticket's state and picks the route
 - ❌ "what does ticket EP-55123 say?" → plain chat answer, no skill
 - ❌ "summarise this Jira ticket for my standup" → plain chat
 
-## requirements-grooming (stage 2)
-- ✅ "groom the requirements"
-- ✅ "review the ticket requirements through a QA lens"
-- ✅ (auto) after task-context inside qa-pipeline-docs
+## requirements-grooming (stage 2) — slash only
+- ✅ `/ep-qa-pipeline:requirements-grooming EP-55123`
+- ✅ (auto) after task-context inside qa-pipeline-docs and qa-refinement
+- ❌ "groom the requirements for EP-55123" → Claude names this slash
+  command; qa-refinement if the questions should be posted
 - ❌ "write requirements for a new feature" → not this pipeline; chat
 - ❌ "groom the backlog" → PM activity, no skill
 - ❌ "check the ticket for open questions before we estimate" →
   qa-refinement (grooming runs inside it, plus recon and the comment)
 
-
-## qa-test-cases (stage 4)
-- ✅ "write test cases from the requirements"
-- ✅ "build a checklist from the requirements" / "make the QA checklist"
-  (stage 3 folded in — the checks are this stage's first step)
+## qa-test-cases (stage 4) — slash only
+- ✅ `/ep-qa-pipeline:qa-test-cases EP-55123`
+- ✅ (auto) stage 4 of qa-pipeline-docs
+- ❌ "write test cases for EP-55123" / "make the QA checklist" →
+  qa-pipeline-docs (the full docs phase)
 - ❌ "make me a checklist for the release day" → generic list, chat
-- ✅ "generate test cases for the requirements"
 - ❌ "write unit tests for this function" → coding task, no skill
 - ❌ "add these cases to QA Service" → qa-pipeline-docs, publish-only
   mode (steps 5–6 on the files already in `runs/<KEY>/docs/`)
 
-## pr-summary (stage 5)
-- ✅ "read the PR and map the changes"
-- ✅ "PR summary for EP-54610"
-- ❌ "review this PR" (quality judgement) → code-review, and only
-  with test cases; a bare quality ask is /review-pr (backend) or chat
+## pr-summary (stage 5) — slash only
+- ✅ `/ep-qa-pipeline:pr-summary EP-54610`
+- ✅ (auto) stage 5 of qa-pipeline-code
+- ❌ "PR summary for EP-54610" → qa-pipeline-code or chat
+- ❌ "review this PR" (quality judgement) → /review-pr (backend) or chat
 - ❌ "summarise this GitHub PR" → outside Bitbucket workspace, chat
 
-## code-review (stage 6)
-- ✅ "code review against the test cases"
-- ✅ "check the implementation covers the cases"
+## code-review (stage 6) — slash only
+- ✅ `/ep-qa-pipeline:code-review EP-54610`
+- ✅ (auto) stage 6 of qa-pipeline-code
+- ❌ "check the implementation covers the cases" → qa-pipeline-code
 - ❌ "review my code style / architecture" → not this skill (needs
   the test-cases file; style is out of scope by rule)
 - ❌ "review the alpha branch PR comments" → review-pr skill
 
-## api-testing (stage 7)
-- ✅ "run the API checks"
-- ✅ "hit the endpoints for the QA cases"
+## api-testing (stage 7) — slash only
+- ✅ `/ep-qa-pipeline:api-testing EP-55123`
+- ✅ (auto) stage 7 of qa-pipeline-code
+- ❌ "run the API checks for EP-55123" → qa-pipeline-code
 - ❌ "test this public REST API for me" → generic task, chat/code
 - ❌ "run the API tests in the e2e repo" → that repo's own tooling
 
-## web-testing (stage 8)
-- ✅ "web testing", "test in the browser"
-- ❌ "run the QA checks" → qa-pipeline-code (the whole code phase, not
-  one stage)
-- ✅ "browser testing for EP-55123"
+## web-testing (stage 8) — slash only
+- ✅ `/ep-qa-pipeline:web-testing EP-55123`
+- ✅ (auto) stage 8 of qa-pipeline-code
+- ❌ "test in the browser for EP-55123" → qa-pipeline-code
+- ❌ "run the QA checks" → qa-pipeline-code (the whole code phase)
 - ❌ "manual testing" / "I'll test by hand, prepare it" →
   qa-manual-runsheet (9)
 - ❌ "walk me through EP-55123" / "let's test it together" →
   qa-manual-walk (10a) — a guided session, not an unattended run
 - ❌ "I finished testing, here are my results" → qa-manual-results (10b)
 
+## commands — slash only
+- ✅ `/ep-qa-pipeline:commands`
+- ❌ "what commands does the pipeline have?" → chat; may point to
+  `/ep-qa-pipeline:commands`
+
 ## qa-manual-runsheet (stage 9)
 - ✅ "prepare the manual tests", "make a run sheet", "build the walk plan"
 - ✅ "set up the data so I can just check the cases"
-- ❌ "run the manual tests yourself" → web-testing does browser runs
+- ❌ "run the manual tests yourself" → qa-pipeline-code (stage 8 does
+  the browser runs)
 - ❌ "walk me through EP-1234" → qa-manual-walk (the plan must already
   exist; if it does not, the walk says to run this stage first)
 - ❌ "the sheet is filled, update the results" → qa-manual-results
@@ -85,10 +102,11 @@ names who should handle it instead).
 - ✅ "I want to hand-test this with you instead of the spreadsheet"
 - ❌ "prepare the manual tests" / "build the walk plan" →
   qa-manual-runsheet (9) — the walk presents a plan, it does not build one
-- ❌ "test in the browser" → web-testing (8), unattended machine run
+- ❌ "test in the browser" → qa-pipeline-code (stage 8), unattended
+  machine run
 - ❌ "here's my filled sheet" / "ingest the results" → qa-manual-results
 - ❌ "walk me through the PR" / "walk me through the code" → not a test
-  session; pr-summary, code-review, or chat
+  session; chat, or `/ep-qa-pipeline:pr-summary`
 
 ## qa-manual-results (stage 10b)
 - ✅ "ingest the manual results"
@@ -137,11 +155,12 @@ names who should handle it instead).
 - ✅ "write the API tests for this ticket and register them in QA Service"
 - ✅ "make the API cases implemented in QA Service for EP-55889"
 - ✅ "create the frontend test sub-task for EP-57253"
-- ❌ "test the API for EP-1234" / "hit the endpoints" → api-testing
-  (executes cases on a test env, writes no test code)
+- ❌ "test the API for EP-1234" / "hit the endpoints" →
+  qa-pipeline-code (stage 7 executes cases on a test env, writes no
+  test code)
 - ❌ "register the tests from PR #5544" (already written and merged)
   → qa-manual-results step 4d, or the QA Service link tools
-- ❌ "write test cases for EP-1234" → qa-test-cases / qa-pipeline-docs
+- ❌ "write test cases for EP-1234" → qa-pipeline-docs
 - ❌ "implement the unit tests for visitor/meeting-request" (a suite,
   no ticket, not API) → QA Service's own qa-implement-tests flow
 
@@ -172,7 +191,8 @@ names who should handle it instead).
 - ❌ "generate test cases for the Exhibitor Favorites suite in QA
   Service" (no ticket) → QA Service `start_generate_test_cases`
   directly, not a pipeline run
-- ❌ "just groom the requirements" → requirements-grooming alone
+- ❌ "just groom the requirements" → Claude names
+  `/ep-qa-pipeline:requirements-grooming` (slash only)
 - ❌ "prepare EP-57799 for estimation — what questions do we have?" →
   qa-refinement (no test cases before the answers)
 
@@ -186,7 +206,8 @@ names who should handle it instead).
 - ❌ "the tester finished, here are the results" → qa-manual-results
   (test verdicts, not answers to grooming questions)
 - ❌ "build the test cases for EP-56227" → qa-pipeline-docs
-- ❌ "groom the requirements" (a file, no posting) → requirements-grooming
+- ❌ "groom the requirements" (a file, no posting) → Claude names
+  `/ep-qa-pipeline:requirements-grooming` (slash only)
 - ❌ "estimate this story in story points" (no QA context) → chat
 - ❌ "what does EP-56227 say?" → plain chat answer, no skill
 
@@ -196,5 +217,5 @@ names who should handle it instead).
 - ✅ "the fix landed, retest EP-55123" (retest mode)
 - ✅ "test the bugfix EP-56133" (bug-fix mode — Bug ticket, no docs
   phase; derives mini cases from the ticket's repro steps)
-- ❌ "review this PR" (alone) → pr-summary/code-review or review-pr
+- ❌ "review this PR" (alone) → review-pr or chat
 - ❌ "run all the tests" (in a repo context) → that repo's test runner

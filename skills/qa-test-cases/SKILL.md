@@ -1,5 +1,6 @@
 ---
 name: qa-test-cases
+disable-model-invocation: true
 description: >
   The last docs stage of task processing (stage 4; stage 3 — the
   standalone checklist — was folded into it in 0.40.0). Takes the

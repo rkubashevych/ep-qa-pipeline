@@ -1,5 +1,6 @@
 ---
 name: code-review
+disable-model-invocation: true
 description: >
   Sixth stage of task processing. Takes the test cases created by
   the qa-test-cases skill and the PR summary created by the

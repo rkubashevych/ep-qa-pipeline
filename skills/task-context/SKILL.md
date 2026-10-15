@@ -1,5 +1,6 @@
 ---
 name: task-context
+disable-model-invocation: true
 description: >
   Collects task data from the tracker, cross-references information
   from all fields (description, comments, attachments, acceptance

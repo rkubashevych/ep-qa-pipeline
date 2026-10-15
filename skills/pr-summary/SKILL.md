@@ -1,5 +1,6 @@
 ---
 name: pr-summary
+disable-model-invocation: true
 description: >
   Fifth stage of task processing. Reads a PR via CLI or API
   and builds a structured summary of the changes — a PR map

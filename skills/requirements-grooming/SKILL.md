@@ -1,5 +1,6 @@
 ---
 name: requirements-grooming
+disable-model-invocation: true
 description: >
   The second stage of task processing. Takes the context file created
   by the task-context skill, analyzes the requirements through a QA
