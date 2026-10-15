@@ -5,6 +5,32 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.60.0 — 2026-10-15 — shorter descriptions for the six longest skills
+
+**Trigger: comparing the plugin with `mattpocock/skills` (2026-10-15).**
+That set's descriptions cost about 660 tokens in total. Ours cost about
+3.6k (14,609 chars), and six sat at 997–1021 of the 1024-char cap.
+Every description loads in every session, QA work or not.
+
+**Changed.** Six descriptions now say what the skill does, its trigger
+phrases and the redirects that compete with a sibling skill. The
+mechanics moved out; each one was already in the skill body:
+
+| Skill | Before | After |
+|---|---|---|
+| qa-api-tests | 1021 | 600 |
+| qa-refinement | 1019 | 680 |
+| qa-manual-runsheet | 1015 | 578 |
+| qa-pipeline-docs | 1007 | 580 |
+| qa-pipeline-code | 997 | 647 |
+| qa-rc-smoke | 997 | 626 |
+
+All descriptions: 14,609 → 12,240 chars. `qa-manual-runsheet` now names
+retest as a redirect (`qa-pipeline-code` retest mode); the prior-run
+pause and fresh fixtures stay in its body. No trigger phrase was
+removed. `evals/triggering.md` was walked for the six skills and is
+unchanged.
+
 ## 0.59.1 — 2026-10-14 — V2 runs locally with s3.enabled = false; re-check the home before the push
 
 **Trigger: the user asked whether Viktor Mikhalkin had added tests to QA

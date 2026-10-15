@@ -1,23 +1,17 @@
 ---
 name: qa-refinement
 description: >
-  The QA pipeline's pre-estimation mode. Given a Jira Story (or its QA
-  sub-task), before test design: runs task-context and
-  requirements-grooming, answers the "how does it work today"
-  questions itself from the code and, with the user signed in, the
-  test environment (recon), posts ONE comment of case-blocking
-  questions on confirmation, and gives QA a sizing note (scope, rough
-  case count, effort range, blockers). Later it reads the answers and
-  follows up only on what was unclear. Writes no test cases, publishes
-  nothing to QA Service, creates no sub-task; the docs phase reuses
-  its run folder. Use when the user says "prepare for estimation",
-  "refinement for EP-1234", "what questions do we have for this
-  ticket", "check the ticket for open questions before we estimate",
-  "QA estimate / decomposition prep", or "check the answers to our
-  questions". Do NOT use for the full test-case set
-  (qa-pipeline-docs), grooming into a file without posting
-  (requirements-grooming), or story points / a whole-team estimate
-  (chat).
+  The QA pipeline's pre-estimation mode for a Jira Story: grooms the
+  ticket, answers "how does it work today" from the code and the test
+  env, posts ONE comment of case-blocking questions on confirmation,
+  and writes a QA sizing note; later reads the answers and follows up.
+  Writes no test cases. Use when the user says "prepare for
+  estimation", "refinement for EP-1234", "what questions do we have
+  for this ticket", "check the ticket for open questions before we
+  estimate", "QA estimate / decomposition prep", or "check the answers
+  to our questions". Do NOT use for the full test-case set
+  (qa-pipeline-docs), grooming into a file only
+  (requirements-grooming), or story points (chat).
 ---
 
 # QA Refinement — questions and sizing before estimation

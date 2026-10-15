@@ -1,21 +1,14 @@
 ---
 name: qa-pipeline-docs
 description: >
-  Orchestrator for the documentation half of the QA pipeline (stages
-  1-4) plus publishing. Given a Jira ticket, runs task-context, then
-  requirements-grooming, then lets QA Service generate cases and
-  discover the feature's existing tests, then qa-test-cases adopts what
-  fits and adds what is missing, runs the run-analyzer, then publishes:
-  the QA Service suite (requirements, test cases, structural checks —
-  the record the code phase reads) and a QA sub-task on the story as
-  the human-facing tracker. Auto-advances, pausing to confirm the QA
-  Service writes and the publish ("interactive mode" brings back the
-  grooming pause). Use it
-  when the user says "run the QA docs pipeline", "build the test cases
-  for a ticket", "groom and write test cases", "publish the test cases
-  / add these cases to QA Service" (publish-only on existing files), or
-  gives a ticket and wants the full test-case set without
-  invoking each stage by hand. Only questions and a QA estimate before
+  Orchestrator for the docs half of the QA pipeline (stages 1-4 plus
+  publish). Given a Jira ticket: task-context, requirements-grooming,
+  QA Service case generation and test discovery, qa-test-cases and the
+  run-analyzer, then publishes the QA Service suite and a QA sub-task,
+  pausing to confirm the writes. Use when the user says "run the QA
+  docs pipeline", "build the test cases for a ticket", "groom and
+  write test cases", or "publish the test cases / add these cases to
+  QA Service" (publish-only). Only questions and a QA estimate before
   estimation, no test cases → qa-refinement.
 ---
 

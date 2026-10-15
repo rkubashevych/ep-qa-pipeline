@@ -2,20 +2,15 @@
 name: qa-rc-smoke
 description: >
   The QA pipeline's release-candidate mode. Given the RC regression
-  ticket ("[Regression] RC release Prod <date>", auto-generated, its
-  scope items linked in the description) or a list of keys plus "are
-  these on RC", it checks each item on the RC environment at smoke
-  depth: the code is on the RC branch of each repo, the RC hosts serve
-  that build, and the item's core behaviour holds at runtime (guest
-  API first, admin UI with the user signed in, no saves). It records
-  one QA Service test run (env rc) over the cases it exercised, writes
-  <KEY>-rc-smoke.md and, on confirmation, one results comment on the
-  RC ticket. Never a sign-off. Use when the user says "smoke test the
-  RC", "check these items are on RC", "RC regression for EP-1234",
-  "are the release items deployed to rc", or pastes the RC regression
-  ticket. Do NOT use for a first run or retest of one ticket on alpha
-  (qa-pipeline-code), a full regression suite run (CI), or checking
-  production (refused — production is never a test target).
+  ticket ("[Regression] RC release Prod <date>") or a list of keys,
+  checks each item on RC at smoke depth (code on the RC branch, build
+  served, core behaviour at runtime, no saves), records one QA Service
+  test run and, on confirmation, one results comment. Never a
+  sign-off. Use when the user says "smoke test the RC", "check these
+  items are on RC", "RC regression for EP-1234", "are the release
+  items deployed to rc", or pastes the RC regression ticket. Do NOT
+  use for one ticket on alpha (qa-pipeline-code), a full regression
+  run (CI), or production (refused).
 ---
 
 # QA RC Smoke — is the release candidate carrying the release?

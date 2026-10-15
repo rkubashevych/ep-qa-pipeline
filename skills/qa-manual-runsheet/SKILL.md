@@ -1,21 +1,15 @@
 ---
 name: qa-manual-runsheet
 description: >
-  Stage 9 of task processing — the last automated step of
-  qa-pipeline-code. Takes the test cases and the automated verdicts
-  from stages 6-8, provisions and verifies fixture data on a throwaway
-  test event, then builds the manual walk plan — plain-language cards
-  grouped by login ("as <who>, do <this>, you should see <that>") with
-  the machine's evidence kept backstage — that qa-manual-walk presents
-  one card at a time. A run sheet (.xlsx) can be exported on request.
-  Use it when the user says "prepare the manual tests", "build the walk
-  plan", "make a run sheet", "prepare test data", "set up the data so I
-  can just check the cases", or after the automated code-phase stages
-  finish and before anyone tests by hand. Retest rounds reach it via
-  qa-pipeline-code retest mode, scoped to the fix's blast radius;
-  invoked bare on a story with prior artifacts it detects the prior run
-  and asks, and it always provisions fresh fixtures. Do NOT use to run
-  the session (qa-manual-walk) or to ingest results (qa-manual-results).
+  Stage 9 — the last automated step of qa-pipeline-code. Provisions
+  fixture data on a test event and builds the manual walk plan:
+  plain-language cards by login ("as <who>, do <this>, you should see
+  <that>") for what the machine could not settle; a .xlsx run sheet on
+  request. Use when the user says "prepare the manual tests", "build
+  the walk plan", "make a run sheet", "prepare test data", or "set up
+  the data so I can just check the cases". Do NOT use to run the
+  session (qa-manual-walk), to ingest results (qa-manual-results), or
+  to retest a fix (qa-pipeline-code retest mode).
 ---
 
 # QA Manual Run Sheet — fixtures and the walk plan

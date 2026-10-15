@@ -1,22 +1,16 @@
 ---
 name: qa-pipeline-code
 description: >
-  Orchestrator for the code + UI half of the QA pipeline (stages
-  5-9, handing off to stage 10). Given a Story key, reads the test cases from the QA Service
-  suite and derives the dev branches, then runs pr-summary, then
-  code-review, then api-testing, then web-testing, then run-analyzer,
-  records machine verdicts on a QA Service test run, builds the manual
-  walk plan for what the machine could not settle, verifies the
-  published state, and defers the human summary and the handback to
-  qa-manual-results (stage 10). Also:
-  retest mode ("retest <KEY>", "the fix landed") and bug-fix mode
-  ("test the bugfix EP-1234" — Bug ticket, no docs phase needed).
-  Auto-advances, pausing for the browser login, the Jira
-  write confirmation, and the test-event authorisation before any
-  fixture is provisioned. Use it when the user says "run the QA code
-  pipeline", "run the QA checks", "review the PRs and test in the
-  browser", "do code review and UI testing for a ticket". Run in a
-  FRESH chat after qa-pipeline-docs.
+  Orchestrator for the code half of the QA pipeline (stages 5-9). Given
+  a Story key: reads the cases from the QA Service suite, runs
+  pr-summary, code-review, api-testing, web-testing and the
+  run-analyzer, records machine verdicts on a QA Service test run, and
+  builds the manual walk plan; stage 10 does the handback. Also retest
+  mode ("retest <KEY>", "the fix landed") and bug-fix mode ("test the
+  bugfix EP-1234" — Bug ticket, no docs phase). Use when the user says
+  "run the QA code pipeline", "run the QA checks", "review the PRs and
+  test in the browser", or "do code review and UI testing for a
+  ticket". Run in a FRESH chat after qa-pipeline-docs.
 ---
 
 # QA Pipeline -- Code & UI (stages 5-9, then hands off to stage 10)

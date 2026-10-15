@@ -1,22 +1,16 @@
 ---
 name: qa-api-tests
 description: >
-  Turns a ticket's API cases from "planned" into "implemented" in QA
-  Service, and hands the frontend cases to the frontend developer.
-  Given a Story key, it selects this ticket's API-E2E and Contract cases
-  with no linked test, links the ones a test in the backend repo already
-  covers, then runs QA Service's own "Implement" workflow on this
-  machine: plan, confirm, batches executed with QA Service's agent and
-  authoring skill, tests run on the docker-local harness, a Bitbucket
-  PR that QA Service verifies. It then files a
-  frontend sub-task under the story for the Component-FE and E2E (UI)
-  cases through QA Service's request_dev_tests. Use when the user says
-  "automate the API cases for EP-1234", "write the API tests for this
-  ticket", "make the API cases implemented in QA Service", or "create
-  the frontend test sub-task". Do NOT use to execute cases on a test
-  environment (api-testing / web-testing), to write test cases
-  (qa-test-cases), or only to register tests a developer already merged
-  (qa-manual-results step 4d).
+  Turns a ticket's API-E2E and Contract cases from "planned" into
+  "implemented" in QA Service: links tests that already exist, runs QA
+  Service's Implement workflow for the rest (a Bitbucket PR), and files
+  a frontend sub-task for the Component-FE / E2E (UI) cases. Use when
+  the user says "automate the API cases for EP-1234", "write the API
+  tests for this ticket", "make the API cases implemented in QA
+  Service", or "create the frontend test sub-task". Do NOT use to
+  execute cases on a test env (api-testing), to write test cases
+  (qa-test-cases), or to register tests already merged
+  (qa-manual-results).
 ---
 
 # QA API tests — implemented in QA Service, not planned
