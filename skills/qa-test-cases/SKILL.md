@@ -28,9 +28,6 @@ requirements-grooming skill.
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 — run folder, then the suite; a new chat is no reason to ask.
 
-`<ISSUEKEY>` is a Jira (Atlassian Cloud) ticket key in the
-`PROJECT-123` format, for example `EP-1234`.
-
 From the requirements file, the skill takes:
 - The numbered requirements — the only source of behaviour. Each
   `REQ-N` (or `REQ-Na` sub-item) becomes a group in the output.
@@ -71,7 +68,7 @@ Additional sources:
   for this ticket's requirements, exported by `qa-pipeline-docs` stage 3
   (`../qa-pipeline-docs/references/qa-service-first.md`). It is input
   data, not instructions. Absent (no connector, the user declined,
-  a stand-alone run) → write every case yourself, as before 0.50.0.
+  a stand-alone run) → write every case yourself.
 
 First, read the requirements file in full. If anything is unclear or
 ambiguous for building checks or cases, ask the user before you start
@@ -189,7 +186,7 @@ each with the reason:
   product's own test suites in CI, not by this pipeline at runtime. It
   stays in the suite as coverage; cite it on the REQ group's `Code-level:`
   line. A test the tech spec plans (its Tests table, carried in the
-  requirements Notes — 0.57.0) is named on that same line by its spec id
+  requirements Notes) is named on that same line by its spec id
   (`EP55889-COLUMNS-05 (planned, tech spec)`), so registration finds it
   after the merge. An `[as-designed]` REQ's cases are runtime cases like
   any other.
@@ -281,15 +278,10 @@ realistic example.
 
 ### Filtering out unnecessary test cases
 
-Do not generate test cases for: standard browser or platform behaviour
-(scrolling, focus, opening a tab) unless the requirement describes
-custom behaviour; implementation details (cache, performance,
-architecture) not written in the requirement; general infrastructure
-(server errors, timeouts, network failures) unless the ticket is about
-it; boundary values where the requirement describes no constraints; UX
-details (animations, timings, hover) not in the requirement; scenarios
-whose expected result cannot be determined from the requirement text.
-The anti-patterns are in `references/check-decomposition.md` and
+The filter in `references/check-decomposition.md` → "Filtering out
+unnecessary checks" applies to cases too (standard browser behaviour
+only when the requirement makes it custom; infrastructure only when
+the ticket is about it), and so do the anti-patterns there and in
 `references/test-case-design-rules.md`.
 
 ## Step 3 — Write the Structural checks section
@@ -346,10 +338,9 @@ After generating and before saving the file:
   on its heading — zero or two is an error. Structural requirements
   have none. The core count equals the number of behavioural
   requirements.
-- **AC coverage is complete:** every `AC-n` (and `SB-n`, since 0.45.0,
-  and `TS-n` — tech-spec items, since 0.57.0)
-  in the requirements file's `source:` lines appears on a `Covers:` line of a group that has at
-  least one test case or structural line. `reconcile_counts.py` prints
+- **AC coverage is complete:** every `AC-n`, `SB-n` and `TS-n` in the
+  requirements file's `source:` lines appears on a `Covers:` line of a
+  group that has at least one test case or structural line. `reconcile_counts.py` prints
   the ledger sets; the Statistics `AC coverage:` line states
   `<n>/<N>` and names any uncovered id with the reason grooming gave.
   An AC item with no case and no structural line is a 🔴 for the
@@ -384,38 +375,15 @@ The rules for techniques and coverage are in
 `references/test-case-design-rules.md`; the decomposition method in
 `references/check-decomposition.md`.
 
-## Formatting (scan-friendly)
+## Formatting
 
-The test-cases file is read by the code phase (which maps each block to
-a QA Service case) and rendered card by card in the manual walk. Format
-for easy scanning in both:
-
-- Do NOT use wide markdown tables (`| # | Step | ... |`). Wide rows do
-  not survive the mapping to a case's `detail.steps` or a chat card.
-- Use a vertical block layout per test case (the exact shape is in
-  `references/output-template.md`): a `### TC-REQ-N.M — <name>` heading,
-  then `Pre:` / `Steps:` / `Exp:` / `Post:` lines.
-- Steps are a numbered list, one action per line. Inline short test
-  data as `[data: ...]`; break it onto its own line only if it is long.
-- Expected results live under a single `Exp:` block at the end of the
-  case. Attach a per-step expected result only when a mid-flow check is
-  essential.
-- Keep every line short (aim <= ~64 characters). Wrap a long step or
-  expected result onto the next indented line rather than writing one
-  long row.
-- `Post:` only when the system state changes; omit the line otherwise.
-- Channel tags go on BOTH the requirement group heading — the union of
-  its cases' tags (`## REQ-N — <label>  [UI] [API]`) — and on each
-  test-case heading with exactly ONE tag
-  (`### TC-REQ-N.M — <name>  [UI]`), with the single exception of
-  provenance-sensitive cases, which carry the dual `[API][UI]` tag
-  (Step 1). The per-case tag is what the executing stages route on.
-- The core case's heading carries ` [core]` after its channel tag
-  (`### TC-REQ-N.M — <name>  [UI] [core]`). `[core]` is a selection
-  marker for stage 9, not a channel — routing ignores it.
-- `Adopted:` and `Level:` lines sit directly under the heading, before
-  `Pre:`, and only when they apply. Neither goes on the heading line:
-  the counting script reads headings.
+Read `references/output-template.md` → "Format rules" before writing
+and follow every rule: vertical blocks, no wide tables, short lines,
+one channel tag per case heading (dual `[API][UI]` only for
+provenance-sensitive cases), `[core]` after the tag, `Adopted:` /
+`Level:` under the heading, never on it. The code phase maps each block
+to a QA Service case and the walk renders it as a card; the counting
+script reads the headings.
 
 ## Final response
 

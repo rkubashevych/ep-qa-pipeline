@@ -36,9 +36,13 @@ lines**.
   carries ` [core]` after its channel tag
   (`### TC-REQ-1.1 — Filtering by state  [UI] [core]`). Stage 9
   always walks core cases; routing ignores the marker.
-- **Structural checks are lines, not cases** (since 0.40.0 — the
-  former checklist file is gone). They sit in their own section after
-  the last requirement group, one line each, id `REQ-N/struct-k`.
+- **`Adopted:` and `Level:` sit under the heading**, before `Pre:`,
+  and only when they apply — never on the heading line: the counting
+  script (`reconcile_counts.py`) reads headings.
+- **`Post:` only when the system state changes**; omit it otherwise.
+- **Structural checks are lines, not cases.** They sit in their own
+  section after the last requirement group and before Statistics, one
+  line each, id `REQ-N/struct-k`.
 
 ---
 

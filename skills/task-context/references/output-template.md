@@ -40,6 +40,16 @@ AC items on the page: <N> · captured: <N><; not readable: <what and why — omi
 ## Additional requirements (from comments)
 - CM-1 (comment <YYYY-MM-DD>): <requirement found in comments that is not in the main requirements>
 
+## Tech spec (as-designed — <file>, <YYYY-MM-DD>)
+> Only when the ticket has a developer's tech spec
+> (`../../qa-pipeline/references/tech-spec.md`). What the developer
+> intends to build, not what product asked for.
+- TS-1 (Tech spec §<n>, <file>): <statement a test could check, verbatim>
+
+<the spec's Tests table, verbatim>
+
+<the spec's AC-trace table, verbatim>
+
 ## Sub-tasks
 > Only when the input is a parent Story with sub-tasks. Lists the
 > sub-tasks so later stages know which PRs and surfaces exist.
@@ -92,6 +102,7 @@ Section rules:
 - Goal, Scope, Requirements — always present. If there is no data — "Not specified in the tracker".
 - Requirements — every bullet carries an `AC-n` / `JD-n` id with its origin; the section ends with the `AC items on the page … captured …` count line (both numbers, and what was not readable when they differ). With no Confluence page: no `AC-n` bullets, only `JD-n`, and the ⚠️ no-page warning.
 - ⚠️ Conflicts to resolve — only when the Confluence acceptance criteria and the Jira Description actually disagree. Omit the section entirely if there are no conflicts.
+- Tech spec — only when a tech spec is attached. With none, the Requirements section carries the line `Tech spec: none attached` and this section is omitted.
 - Sub-tasks — only when the input is a parent Story that has sub-tasks. Omit otherwise.
 - Additional requirements (from comments) — only when there are relevant comments with new requirements.
 - Related context — only when there are real linked issues in the tracker. Comments from the current task are not related context.

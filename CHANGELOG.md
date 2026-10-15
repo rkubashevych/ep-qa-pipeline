@@ -5,6 +5,76 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.64.0 — 2026-10-15 — docs stages: rare branches disclosed, duplicates pointed
+
+**Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,
+docs-stage group. SKILL.md lines: task-context 480 → 326,
+requirements-grooming 459 → 423, qa-test-cases 426 → 393. No rule was
+deleted; each moved text now lives in exactly one file.
+
+**Moved.**
+- **task-context's two background scans** (impact scan; existing /
+  developer's QA Service suite) → new `task-context/references/background-scans.md`.
+  They never block a run and are never a source of requirements. The
+  SCOUT `ALLOWED_HOSTS` check stays in the SKILL.md as well, as flow
+  step 7: it is a guardrail.
+- **The tech spec, both halves** (task-context: find, fetch, `TS-n`
+  items; grooming: how each `TS-n` is groomed) → new shared
+  `qa-pipeline/references/tech-spec.md`. The rule never to print the
+  download link's token stays inline in task-context. Grooming tells
+  the reader to read §4 in full before grooming TS items.
+
+**Pointed, not restated.**
+- task-context: saved-sources naming and fence command
+  (`sources-of-record.md` §8 holds both); the field map and the
+  mandatory Description (`field-maps.md`); the ticket-key format
+  (a no-op).
+- requirements-grooming: the chat-format block wrote the finding line
+  shape five times; it now names the categories and gives the shape
+  once. The rubric-provenance line is gone.
+- qa-test-cases: "Formatting" duplicated the template's "Format rules"
+  → a pointer, after the one fact only the SKILL.md had (`Adopted:` /
+  `Level:` stay off the heading because `reconcile_counts.py` reads
+  headings) and the `Post:` rule moved into the template. The
+  case-filter list → `check-decomposition.md` "Filtering out
+  unnecessary checks". Remaining version asides removed.
+
+**Fixed (same class as 0.62.0 A3).** task-context writes a
+`## Tech spec (as-designed …)` section, but its output template had no
+such section and the skill forbids sections outside the template. The
+template now has it (optional), and says where `Tech spec: none
+attached` goes.
+
+**Smoke test: PASS.** `fixtures/EP-0000-context.md` → grooming →
+test-cases, run by a fresh agent from this checkout's SKILL.md files
+(auto-default mode, no network). All ten fixture expectations hold:
+6 REQs (5 + CM-1), the badge conflict raised as CONTRADICTS, BVA at
+9/10/11, `[API]` only on the `featured` field, toggle presence and
+default as two structural lines, one `[core]` per REQ (`Core cases:
+6`), `AC coverage: 5/5`. `reconcile_counts.py EP-0000`: AC 5/5
+captured, 6 of 6 mapped and covered, 13 cases, core=6, struct=2.
+
+**Open — found by the smoke test, older than this release** (for a
+later release; none is a regression of 0.64.0):
+- `test-cases-example.md` lags the rules: no `Skill:` header and no
+  `Levels:` statistics line; both badge versions in one case where the
+  SKILL.md says one case per version; the happy path as REQ-1's core
+  where the core rule puts the denial path first; a 2-value BVA called
+  3-value; a structural line ("not in a tooltip") no AC states.
+- A conflict's Jira-side version has no ledger id: the context quotes
+  the Description inside the conflict, but writes no `JD-n` bullet, so
+  version B has no `source:` id and `JD 0/0` hides it.
+- Run standalone, grooming's findings live only in chat: the output
+  template has no findings section, and `-open-questions.md` is
+  written only by the orchestrators.
+- `Level:` — the SKILL.md says no line means the channel's default;
+  `test-levels.md` requires a lower level for business rules verified
+  only through the UI. One of the two should yield.
+- The template's ~64-character line target cannot hold for case
+  headings or structural lines.
+- `reconcile_counts.py` on a docs-only run prints `run folder: .` and
+  may read a legacy root `EP-*` file before the run folder's copy.
+
 ## 0.63.0 — 2026-10-15 — plugin-wide sweeps from the writing-for-agents review
 
 **Trigger:** Part B of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`.

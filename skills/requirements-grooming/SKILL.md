@@ -119,30 +119,12 @@ repeated in the Notes. `reconcile_counts.py <KEY>` computes the same
 sets for the analyzer; a mismatch is a 🔴.
 
 **Tech-spec items — `TS-n`, only when the context has a
-`## Tech spec` section.** They are mapped like SB items: every `TS-n`
-appears on at least one `source:` line, and the coverage line gains
-` · TS <n>/<N>`. For each one:
-- **It restates an AC / SB rule more precisely** (a limit, a default,
-  the field a column reads) → add the `TS-n` to that REQ's `source:` and
-  fold the precise value into the REQ text, marked `(tech spec)`.
-- **It adds observable behaviour no AC states** (the 32,767-character
-  cut, a translation-map fallback, an empty-map rule) → a new REQ, kind
-  `rule` / `fr`, with ` [as-designed]` after the risk marker, so a
-  reader knows product never asked for it — it is what the developer
-  built.
-- **It puts a surface out of scope** ("the Custom meetings report is
-  unchanged") → a REQ that the named surface does NOT change, so a
-  regression case guards it.
-- **It contradicts an AC / SB rule** → the REQ keeps the spec-of-record
-  version, and grooming raises a Contradiction finding, SPEC class,
-  quoting both: the spec of record wins until the owner says otherwise
-  (`../qa-pipeline/references/sources-of-record.md` §1).
-- **An AC item the spec's own AC-trace table does not mention** → a
-  finding "AC-n not addressed by the tech spec", BEHAVIOUR class: recon
-  or the developer can say whether it was simply left out of the table.
-- The spec's **Tests table** (planned developer tests) is not a source of
-  requirements; carry it to the Notes so stage 4 can name those tests on
-  the `Code-level:` line and registration can find them later.
+`## Tech spec` section.** Mapped like SB items: every `TS-n` appears on
+at least one `source:` line, and the coverage line gains
+` · TS <n>/<N>`. Read `../qa-pipeline/references/tech-spec.md` §4 in
+full before grooming them: it decides, per item, between folding into
+an existing REQ, a new ` [as-designed]` REQ, an out-of-scope guard REQ,
+and a Contradiction finding.
 
 ## Grooming method
 
@@ -307,9 +289,6 @@ be omitted on the other categories.
   (`../qa-pipeline-code/references/jira-writing-style.md` → "Grooming
   open-questions comment").
 
-The codes are borrowed from qa-service's `requirement-review` rubric,
-which puts severity as a consequence in the same way.
-
 ## Risk rating
 
 Rate each requirement's product risk — **High / Medium / Low** —
@@ -401,25 +380,11 @@ Restraint, in order of how often it is got wrong:
    problem — briefly: the essence of the problem and what is needed to
    resolve it. Do not mention covered requirements.
 
-   Chat format:
-
-   ### Questions
-   - REQ-3 AMBIGUOUS (SPEC): <essence of the problem> — a tester reading this
-     would <consequence> → <what is needed to resolve it>
-
-   ### Contradictions
-   - REQ-5 CONTRADICTS: <essence> — a tester reading this would <…> → <what is needed>
-
-   ### Potential bugs
-   - REQ-7 INCOMPLETE: <essence> — a tester reading this would <…> → <what is needed>
-
-   ### Uncovered requirements
-   - REQ-9 UNTESTABLE: <essence> — a tester reading this would <…> → <what is needed>
-
-   ### Risks
-   - REQ-7 INCOMPLETE: <essence> — a tester reading this would <…> → <what is needed>
-
-   Do not write empty categories.
+   Chat format: one `###` heading per non-empty category, in the
+   order above (Questions, Contradictions, Potential bugs, Uncovered
+   requirements, Risks), each finding in the "Finding codes" line
+   shape, e.g. `- REQ-3 AMBIGUOUS (SPEC): <essence> — a tester reading
+   this would <consequence> → <what is needed>`.
 8. Wait for the user's answers, align on the decisions. If the user
    cannot answer or says to skip — leave the requirement as is, without
    changes. For an unresolved conflict, keep BOTH versions in the

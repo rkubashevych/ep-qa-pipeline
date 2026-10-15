@@ -23,10 +23,6 @@ source of truth for the next skills in the chain.
 From the user you need:
 1. The task URL or key in the tracker
 
-The ticket key format is `PROJECT-123`: an uppercase project prefix, a
-dash, then a number (for example `EP-1234`). A task URL looks like
-`https://expoplatform.atlassian.net/browse/EP-1234`.
-
 ## Rules
 
 - All communication with the user and all handoff content — in English.
@@ -52,8 +48,7 @@ dash, then a number (for example `EP-1234`). A task URL looks like
 The tracker is Jira (Atlassian Cloud). The skill pulls issue data
 through the connected Atlassian MCP tools — use `getJiraIssue` with a
 specific list of fields and `responseContentFormat: "markdown"`, and
-`searchJiraIssuesUsingJql` when you need to look up related issues. The
-skill should pull issue data via the Atlassian connector.
+`searchJiraIssuesUsingJql` when you need to look up related issues.
 
 Acceptance Criteria live on Confluence, not in a Jira field — see the
 dedicated section below. Fetching the linked Confluence page is a
@@ -84,120 +79,24 @@ Status — per references/field-maps.md) and use
 6. Related issues — read them for context via
    `searchJiraIssuesUsingJql` or the linked-issues data, but process
    only the data of the current task.
-7. Run the impact scan (see "Related functionality & bug history"
-   below).
-8. Pull the existing QA Service suite for the touched feature (see
-   "Existing QA Service suite" below).
-9. Save every source you fetched, verbatim and fenced (see "Saved
+7. Run the two background scans — the impact scan and the feature's
+   existing QA Service suite — per `references/background-scans.md`.
+   Both are background, never a source of requirements, and never block
+   the run. The impact scan's SCOUT host must be in `ALLOWED_HOSTS`
+   (`../qa-pipeline/references/environment.md`); not listed → the
+   connector fallback, never a call anyway.
+8. Save every source you fetched, verbatim and fenced (see "Saved
    sources" below) — the quote check and the code phase's drift check
    read them.
 
 ## Saved sources
 
-Each body this stage fetched as requirements material is saved **as
-returned** — not tidied, not summarised — to
-`runs/<ISSUEKEY>/docs/sources/`, one file per source:
-`confluence-<pageId>.md` (the AC page), `jira-<ISSUEKEY>-description.md`,
-`jira-<ISSUEKEY>-comments.md` (all comments, each with its author and
-date), `jira-<SUBKEY>-description.md` per sub-task read. Fence each
-(`../qa-pipeline/references/untrusted-content.md`): write the body, then
-`python3 <plugin>/skills/qa-pipeline/scripts/source_tools.py fence
---label '<kind>:<id> "<title>" · fetched <date>' <file> --out <file>`
-(no shell → the two fence lines by hand). A re-run replaces the folder
-with the new fetch, like the context file.
-
-Why: the `AC-n` bullets are verbatim, but nothing could prove it, and
-the code phase had no copy of the page as it stood when the cases were
-written. The saved text is what `source_tools.py quotes` checks every
-`Clause:` against and what `source_tools.py drift` compares a later
-re-fetch with (`../qa-pipeline/references/sources-of-record.md` §8–§9).
-The impact scan and the QA Service suite are background, not sources —
-they are not saved.
-
-## Related functionality & bug history (impact scan)
-
-The ticket says what changes; this scan says what else might be
-affected. It feeds grooming's dependency questions and risk ratings.
-
-1. Derive 1–2 keyword queries from the feature/entity the ticket
-   touches (e.g. "exhibitor logo", "session registration").
-2. **Primary — knowledge-base skill installed:** run its Step 1
-   "SCOUT — Search" primary endpoint with those keywords (read that
-   skill's SKILL.md for the current URL/token contract — do not copy
-   it here, it rotates). Take the top 3–5 documentation hits.
-   **Check the host first:** a stage may call only the hosts in
-   `ALLOWED_HOSTS` (`../qa-pipeline/references/environment.md`). When
-   the SCOUT host is not listed, skip straight to the fallback and write
-   `Source: connector fallback (SCOUT host not in ALLOWED_HOSTS)`. Never
-   call it anyway. (EP-56227, 2026-09-29: the endpoint had moved to a
-   host the list did not carry.)
-3. **Fallback — SCOUT fails, its host is not allowed, or knowledge-base
-   is not installed:** use the
-   Atlassian connector directly: `searchConfluenceUsingCql` on the
-   ExpoDoc space (`text ~ "<keywords>"`), and `searchJiraIssuesUsingJql`
-   for EP bugs, open and closed (`project = EP AND issuetype = Bug AND
-   text ~ "<keywords>"`), top 5 each.
-4. Write the results into the "Related functionality & bug history"
-   section of the output file: which other surfaces/features the
-   entity appears in (one line per doc hit, with link), and a bug
-   history line (N open / M closed bugs in this area, notable
-   recurring ones by key).
-
-Rules: this is background, NEVER a source of requirements — the
-anti-invention prohibitions apply unchanged. Keep it ≤10 lines. If
-both paths fail, write "Impact scan unavailable" and continue — do not
-block the run on it. Internal-only content stays internal.
-
-## Existing QA Service suite (established test design)
-
-If the QA Service MCP connector is present in the session, pull the
-feature's established requirements so grooming can check the ticket
-against them instead of re-deriving from scratch:
-
-0. **Look for the developer's suite first.** A developer
-   using the `sdlc` plugin registers the ticket's requirements in QA
-   Service before QA does (`sdlc-qa`, stage 2). Check two places:
-   - **The ticket.** A `qa-service.expoplatform.com/…/test-suites/…`
-     URL in the story, its sub-tasks, their comments or remote links.
-     A pipeline QA sub-task's description doesn't count, because the
-     pipeline wrote it.
-   - **The repo.** A spec file `docs/specs/<KEY>-*.md` (sdlc names it
-     `<TICKET>-YYYY-MM-DD-<slug>.md`) with a `## Register — QA Service`
-     section. That section names the product, the suite, its prefix and
-     the requirement IDs the ticket owns. Look on the branches named
-     after the story and its dev sub-tasks in each repo, then on each
-     repo's default branch. Use the local clone if there is one, else
-     the Bitbucket `src` endpoint
-     (`../pr-summary/references/bitbucket-access.md`). If there's no
-     branch yet or no access, skip this source and say so.
-   Found → `get_suite` with `productId` to confirm it exists, write the
-   section as in step 2 with the `Developer's suite: yes …` line on
-   top, and skip step 1. Not found → write `Developer's suite: none
-   found (<sources checked>)` and continue with step 1 as usual.
-1. `search {query: "<feature words>", kinds: ["suite"], productId:
-   "expoplatform"}` with the same keywords as the impact scan (two or
-   three calls with different word sets are fine — each answer is ~1 KB;
-   `search` matches suite titles and prefixes, not summaries). Match the
-   suite whose role/feature path corresponds to what the ticket touches.
-   Nothing found → `list_suites` once, as the fallback only (it returns
-   the whole product, ~190 KB). Still no match → write "No existing QA
-   Service suite found" in the section and continue.
-2. On a match, `get_suite` and write the "Existing QA Service suite"
-   section of the output file:
-   - suite path, title, requirement/case counts, one-line summary;
-   - the requirements as one line each: `stableId — title (kind)`.
-     If the suite has more than ~40, list ALL of kind `risk`, `oq`,
-     `discrepancy`, `invariant` plus the `fr`/`rule` items matching
-     the ticket's keywords, and close with "+N more not listed";
-   - any cases whose notes reference open bug keys (known-bug areas),
-     one line each.
-3. Connector absent → omit the section entirely. Never block on this.
-
-Rules: like the impact scan, this is background and comparison
-material, NEVER a source of requirements for the current ticket — the
-anti-invention prohibitions apply unchanged. Grooming (next stage) uses
-it to detect contradictions between the ticket and the established
-requirements.
+Each body fetched as requirements material is saved **as returned** to
+`runs/<ISSUEKEY>/docs/sources/`, one fenced file per source — names,
+the fence command and why:
+`../qa-pipeline/references/sources-of-record.md` §8. A re-run replaces
+the folder, like the context file. The background scans are not sources
+and are not saved.
 
 ## Sub-tasks (when the input is a parent Story)
 
@@ -256,18 +155,9 @@ Requirements section is not a merged paraphrase; it is a ledger:
   `SB-1 (Confluence §3, spec body): <the rule, verbatim>`. SB items
   are not counted in the page/captured line. A rule the AC restates
   gets no SB bullet, because the `AC-n` already carries it.
-- **Tech-spec statements** — only when the ticket has a tech
-  spec (see "Attachments → The tech spec"). Each statement in it that a
-  test could check from outside — a data mapping, a limit, a default, an
-  empty / null rule, an in-scope or out-of-scope surface, an effect on a
-  consumer — becomes
-  `TS-1 (Tech spec §2, <file>): <the statement, verbatim>`. Not a TS
-  item: implementation internals no test can see (a helper's name, a
-  file, "no migration"), the spec's own Tests table and AC-trace table
-  (copy those two verbatim under the section, as they are). A statement
-  the AC already makes gets no TS bullet; one that adds to it, narrows it
-  or contradicts it does. TS items are mapped like SB items and are not
-  counted on the page/captured line.
+- **Tech-spec statements** — `TS-n`, only when the ticket has a tech
+  spec (see "Attachments → The tech spec"); what counts as one and
+  where it goes: `../qa-pipeline/references/tech-spec.md` §3.
 - Items only the Jira Description states: `JD-1 (Jira Description): …`.
   Items only a comment states go to "Additional requirements (from
   comments)" as `CM-1 (comment <date>): …`.
@@ -303,41 +193,13 @@ If no Confluence page is linked on the ticket:
   derived from the Jira Description only", and flag it in the final
   response. Downstream skills then know the input is weaker than ideal.
 
-## Task types and fields
+## Fields
 
-The project uses Jira's standard issue types — Story, Task, Bug, Epic,
-Sub-task. Determine the type from the issue's `issuetype` field in the
-Jira response.
-
-1. Determine the task type from the tracker response.
-2. Read the field map in references/field-maps.md — one table for all
-   types; the type only decides what the Description holds.
-3. Read only the fields listed in the map. Ignore other fields.
-4. Do not reopen the field maps every time — they are fixed for your
-   project.
-
-## Empty fields
-
-The mandatory field to process is the task description
-(per references/field-maps.md).
-
-The mandatory field per task type is:
-- Story/Task/Sub-task: Description
-- Bug: Description (steps to reproduce / bug description)
-- Epic: Description (the epic summary / goal)
-
-If the mandatory field is empty or missing — stop and tell the user
-there is nothing to process and a description must be added to the
-ticket.
-
-Acceptance Criteria are the primary source of truth but live on
-Confluence, not in a Jira field — they are handled by the "Acceptance
-Criteria (primary source — Confluence)" section above, including what to
-do when no Confluence page is linked.
-
-All other fields are optional. Collect everything that is filled, skip
-the empty ones. The full list of fields per task type is in
-references/field-maps.md.
+Read only the fields in `references/field-maps.md` — one table for
+every issue type (`issuetype` decides only what the Description holds).
+Collect every filled field, skip the empty ones. The Description is
+mandatory: empty or missing → stop and tell the user a description must
+be added to the ticket.
 
 ## Attachments
 
@@ -363,35 +225,12 @@ Flow:
 
 ### The tech spec
 
-Developers now attach a tech spec to the story — a Markdown file
-(EP-55889: `EP-58436-tech-spec.md`, written on the spec sub-task
-EP-58436): data mapping, limits, scope, what is out of scope, the dev
-tests they plan, and their own AC trace. It is the one document that
-says what the build will do beyond the acceptance criteria, and on
-EP-55889 three of its rules reached no case (the translation-map
-fallback, the empty map, "the Custom meetings report does not change").
-
-1. **Find it.** `getJiraIssue {fields: ["attachment"]}` on the story and
-   on each sub-task whose summary names a spec ("Spec", "Tech spec",
-   "Technical design"). A tech spec is an `.md` / `.markdown` attachment
-   whose name contains `tech-spec` / `tech_spec` / `techspec` / `spec`,
-   or whose first heading starts with "Tech Spec". Several → take each;
-   say which is newest.
-2. **Fetch it yourself — no upload needed.** The Atlassian connector's
-   `downloadJiraIssueAttachment` (run with `executeRead`) returns a
-   short-lived, single-file download command. Run it once, saving to
-   `runs/<KEY>/docs/sources/<file>`. The link carries a token: never
-   print it, never put it in a file; report the saved path only.
-   (Fallback when the operation is unavailable: ask for the upload, as
-   for any attachment.)
-3. **Write it into the context** under `## Tech spec (as-designed —
-   <file>, <date>)`: the `TS-n` ledger items (Requirements → the AC
-   ledger, above), then the spec's Tests table and AC-trace table
-   verbatim. Its status is **as-designed documentation**: it says what
-   the developer intends to build, not what product asked for
-   (`../qa-pipeline/references/sources-of-record.md` §1).
-4. **No tech spec** → write `Tech spec: none attached` and change
-   nothing else; the docs phase runs as before.
+A developer's tech spec attached to the story or a spec sub-task is
+found, fetched and written into the context's `## Tech spec` section
+per `../qa-pipeline/references/tech-spec.md` §1–§3. Its download link
+carries a token: never print it, never put it in a file; report the
+saved path only. No tech spec → `Tech spec: none attached`, nothing
+else changes.
 
 ## Collecting and cross-referencing data
 
