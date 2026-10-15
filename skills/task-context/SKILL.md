@@ -2,16 +2,9 @@
 name: task-context
 disable-model-invocation: true
 description: >
-  Collects task data from the tracker, cross-references information
-  from all fields (description, comments, attachments, acceptance
-  criteria, etc.), and produces a single enriched Markdown context —
-  the source of truth for the next skills in the chain. Use it when the
-  user provides a task URL or key and wants processed context, or when
-  they say "pull task context" or "prepare task context". Do NOT use
-  to merely read or summarise a ticket in chat, and not for "process
-  the ticket" / "qa this ticket" — that is the dispatcher's route —
-  use it only when the enriched context FILE is needed as pipeline
-  input (stage 1 of the QA pipeline).
+  Stage 1 of the QA pipeline: the Jira ticket and its linked AC pages
+  → one enriched context file (<KEY>-context.md). Usually run by
+  qa-pipeline-docs or qa-refinement.
 ---
 
 # Task Context
@@ -99,7 +92,7 @@ Status — per references/field-maps.md) and use
    sources" below) — the quote check and the code phase's drift check
    read them.
 
-## Saved sources (0.47.0)
+## Saved sources
 
 Each body this stage fetched as requirements material is saved **as
 returned** — not tidied, not summarised — to
@@ -161,7 +154,7 @@ If the QA Service MCP connector is present in the session, pull the
 feature's established requirements so grooming can check the ticket
 against them instead of re-deriving from scratch:
 
-0. **Look for the developer's suite first (0.49.0).** A developer
+0. **Look for the developer's suite first.** A developer
    using the `sdlc` plugin registers the ticket's requirements in QA
    Service before QA does (`sdlc-qa`, stage 2). Check two places:
    - **The ticket.** A `qa-service.expoplatform.com/…/test-suites/…`
@@ -241,7 +234,7 @@ ticket — not in a Jira field. Always fetch them:
 3. Treat the Confluence acceptance criteria as the primary requirements
    for the task. The Jira Description is supporting context.
 
-**The AC ledger — every item keeps its identity (0.42.0).** Nothing
+**The AC ledger — every item keeps its identity.** Nothing
 downstream can prove "the acceptance criteria are 100% covered" unless
 each criterion is still recognisable after this stage. So the
 Requirements section is not a merged paraphrase; it is a ledger:
@@ -254,7 +247,7 @@ Requirements section is not a merged paraphrase; it is a ledger:
   item genuinely holds two independent rules, keep it as ONE `AC-n`
   and let grooming split it into REQ-Na / REQ-Nb (the ledger id stays
   the page's unit).
-- **Spec-body rules (0.45.0).** Many AC pages carry a "What needs to
+- **Spec-body rules.** Many AC pages carry a "What needs to
   be done" or spec section (§1…§n) above the acceptance-criteria
   heading. Its rules are page content but not criteria, and the ones
   NOT repeated under the AC heading were lost or relabelled by hand
@@ -263,7 +256,7 @@ Requirements section is not a merged paraphrase; it is a ledger:
   `SB-1 (Confluence §3, spec body): <the rule, verbatim>`. SB items
   are not counted in the page/captured line. A rule the AC restates
   gets no SB bullet, because the `AC-n` already carries it.
-- **Tech-spec statements (0.57.0)** — only when the ticket has a tech
+- **Tech-spec statements** — only when the ticket has a tech
   spec (see "Attachments → The tech spec"). Each statement in it that a
   test could check from outside — a data mapping, a limit, a default, an
   empty / null rule, an in-scope or out-of-scope surface, an effect on a
@@ -368,7 +361,7 @@ Flow:
 6. If the user skips the upload — record the attachments in the context
    as present but not processed.
 
-### The tech spec (0.57.0)
+### The tech spec
 
 Developers now attach a tech spec to the story — a Markdown file
 (EP-55889: `EP-58436-tech-spec.md`, written on the spec sub-task
@@ -471,13 +464,7 @@ before saving.
 Create the file `<ISSUEKEY>-context.md` in the run folder
 (`runs/<ISSUEKEY>/docs/`) and report its path.
 
-The file stays in the run folder — the next skill in the same
-chat picks it up automatically.
-
-If the file already exists — delete it completely and create a new one.
-The output is always a single file with the result of the latest run.
-Do not merge with the previous version, do not append, do not keep data
-from the previous write.
+If the file already exists, overwrite it: one file, the latest run only.
 
 Before finishing, check:
 - One top-level heading

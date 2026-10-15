@@ -211,8 +211,8 @@ the whole product, ~190 KB) and report ONE of:
   per-feature suite also holds other tickets' items — never count
   those; account for deliberately skipped duplicates listed in the
   publish preview). Pre-0.34 suites carry no markers: fall back to the
-  legacy tracker-line ids. **`-STRUCT-` cases are expected extras**
-  (0.33.0): their count must equal the Structural checks lines in the
+  legacy tracker-line ids. **`-STRUCT-` cases are expected extras**:
+  their count must equal the Structural checks lines in the
   test-cases file (`reconcile_counts.py` → `struct=`) — S structural
   cases beyond N test cases is in sync; S ≠ that count is the mismatch
   below.
@@ -312,7 +312,7 @@ present a step-5 run as having verified the publish.
 
 ### 5. Evidence quality (Pipeline) — can the verdicts be believed?
 
-**The evidence audit (0.47.0)** — `../qa-pipeline-code/references/evidence-audit.md`:
+**The evidence audit** — `../qa-pipeline-code/references/evidence-audit.md`:
 
 - 🔴 **no audit** on a code-phase pass with runtime PASS rows (and no
   skip line saying why).

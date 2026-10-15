@@ -2,14 +2,8 @@
 name: pr-summary
 disable-model-invocation: true
 description: >
-  Fifth stage of task processing. Reads a PR via CLI or API
-  and builds a structured summary of the changes — a PR map
-  for the code-review skill. Use when the user says "read the PR",
-  "look at the PR", "PR summary", "what's in the PR", or after
-  the test cases are finished and before code review. Do NOT use to
-  review, judge, or approve code quality (that is code-review's job,
-  and only against test cases), and not for repos outside the
-  ExpoPlatform Bitbucket workspace.
+  Stage 5 of the QA pipeline: a map of the PR / branch changes for
+  code review (<KEY>-pr-summary.md). Usually run by qa-pipeline-code.
 ---
 
 # PR Summary
@@ -183,7 +177,7 @@ Derive it from the per-file descriptions you already wrote (it is
 mostly a regrouping); if the PR touches nothing user-observable, write
 "None".
 
-## Tests in this PR (required section, 0.49.0)
+## Tests in this PR (required section)
 
 QA Service doesn't register a developer's tests by itself; it reads
 the repo only when asked. So list every automated test file the PR adds
@@ -221,10 +215,7 @@ Create the file `<ISSUEKEY>-pr-summary.md` in the run folder
 (`runs/<ISSUEKEY>/r<N>/`) and report its path. The issue key
 follows the Jira format `PROJECT-123` (for example `EP-1234`).
 
-The file stays in the run folder — the next skill
-in the same chat picks it up automatically.
-
-If the file already exists — delete it completely and create a new one.
+If the file already exists, overwrite it: one file, the latest run only.
 
 The file structure template is in references/output-template.md.
 

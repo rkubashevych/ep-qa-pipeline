@@ -31,7 +31,7 @@ invoked orchestrator's own rules then apply in full.
 
 ## Step 1 — Read the state
 
-**First task of the week (0.53.0):** before anything else, run the
+**First task of the week:** before anything else, run the
 QA Service watch when it is due (`../qa-service-watch/SKILL.md` →
 "When it runs"). It is read-only and never blocks the route; the
 orchestrator you hand off to then finds it already done this week.
@@ -60,9 +60,7 @@ From the ticket key/URL (ask if the paste has none):
    evidence of a run in flight.
 
 **Where to find inputs:** `references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 ## Step 2 — Propose the route
 
@@ -79,7 +77,7 @@ the QA Service suite/run, then Jira (a Jira comment alone never decides).
 | `r<N>/` reports or a test run exist; newest summary ❌ or the user says the fix landed | **Retest mode** — `qa-pipeline-code` retest |
 | `-walk-plan.md` present, no `-walk-results.md` (or a `-walk-state.json` in progress) | **Guided walk** — `qa-manual-walk` (resume when state exists) |
 | Complete `-walk-results.md` not yet written back, or a filled sheet / TC-Result-Notes table in hand | **Ingestion** — `qa-manual-results` |
-| The user asks to automate / write the API tests, or a code phase finished before 0.52.0 (stage 10 now runs it as its step 6) whose API cases are still `planned` | **API automation** — `qa-api-tests` on the Story |
+| The user asks to automate / write the API tests (stage 10 runs it as its step 6 otherwise) | **API automation** — `qa-api-tests` on the Story |
 | A phase stopped mid-way — e.g. stage reports written but no test run recorded, or a run left `running` with no results comment | **Resume** — re-enter the same skill at the step that never ran; it records into the existing run, never a new one |
 | Signals conflict or several apply | Present the observed state and the 2–3 plausible routes; the user picks |
 

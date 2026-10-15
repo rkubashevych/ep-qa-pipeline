@@ -2,16 +2,8 @@
 name: code-review
 disable-model-invocation: true
 description: >
-  Sixth stage of task processing. Takes the test cases created by
-  the qa-test-cases skill and the PR summary created by the
-  pr-summary skill, checks each test case against the PR code and
-  builds a compact results file with statuses and findings for the
-  problem items. Use when the user says "code review",
-  "check the implementation", "go through the code", or after the
-  PR summary is finished. Do NOT use for general code-quality, style,
-  or architecture review of arbitrary code or diffs — this stage
-  verifies TEST CASES against a PR and requires the pipeline's
-  test-cases file as input.
+  Stage 6 of the QA pipeline: each test case checked against the PR
+  code (<KEY>-code-review.md). Usually run by qa-pipeline-code.
 ---
 
 # Code Review
@@ -34,9 +26,7 @@ From the user you need:
    cover several PRs grouped by sub-task; use it as the navigation map.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 The PR system is Bitbucket Cloud. Both the frontend and the backend
 repos are on Bitbucket, so a PR may be either. The PR URL format is
@@ -414,10 +404,7 @@ as "None".
 Create the file `<ISSUEKEY>-code-review.md` in the run folder
 (`runs/<ISSUEKEY>/r<N>/`) and report its path.
 
-The file stays in the run folder — the next skill
-in the same chat picks it up automatically.
-
-If the file already exists — delete it completely and create a new one.
+If the file already exists, overwrite it: one file, the latest run only.
 
 The file structure template is in references/output-template.md.
 

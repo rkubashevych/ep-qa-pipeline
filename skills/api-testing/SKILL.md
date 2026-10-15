@@ -2,14 +2,9 @@
 name: api-testing
 disable-model-invocation: true
 description: >
-  Seventh stage of task processing. Takes the QA / FAIL / not-executed
-  [API] test cases from code review and the test cases, executes them
-  directly against the ExpoPlatform REST API (curl / HTTP — no browser),
-  checks the expected results, and builds a detailed report. Use when
-  the user says "api testing", "test the API", "run the API checks",
-  "hit the endpoints", or after code review and before web testing.
-  Covers admin REST, legacy admin-panel, and exhibitor/visitor-token
-  (frontend) cases. Credentials come from .env — never hardcoded.
+  Stage 7 of the QA pipeline: the [API] cases run against the test
+  environment over HTTP (<KEY>-api-testing.md). Usually run by
+  qa-pipeline-code.
 ---
 
 # API Testing
@@ -44,9 +39,7 @@ notifications / dashboards, and on every absence check.
    and **not discoverable** — it must be supplied (reference §11.1).
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 Missing code-review or test-cases file — ask before starting. Missing
 `.env.qa-agents` values — **pause and ask**; never guess, never proceed

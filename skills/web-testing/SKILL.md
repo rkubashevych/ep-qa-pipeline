@@ -2,17 +2,9 @@
 name: web-testing
 disable-model-invocation: true
 description: >
-  Eighth stage of task processing. Takes the QA items and FAIL items
-  from code review and the test cases, executes them in a browser it
-  drives itself — Playwright MCP by default, the Claude in Chrome
-  extension as the fallback — checks the expected results, and builds
-  a detailed report. Use when the user says "web testing",
-  "test in the browser", "browser testing",
-  "run the cases yourself in the browser", or after code review is
-  finished. NOT for hand-testing by the user: fixtures and the walk
-  plan are qa-manual-runsheet (stage 9), the guided hand-test session
-  is qa-manual-walk (stage 10a), and ingesting the human's results is
-  qa-manual-results (stage 10b).
+  Stage 8 of the QA pipeline: the [UI] cases run in a browser it
+  drives itself (<KEY>-web-testing.md). Usually run by
+  qa-pipeline-code.
 ---
 
 # Web Testing
@@ -41,9 +33,7 @@ files. Output: a detailed per-case report.
    Notes line and continue with test cases only.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 Optional: a per-task **base URL / test host**. Many tasks are tested
 on a task-specific alpha host (e.g. an `*alphanext*.expoplatform.net`
@@ -101,7 +91,7 @@ to the tracker, do not use external tools, do not inspect code.
   `[test data]` examples are used as given. Do not invent test data.
 - After saving the file — stop. Do not continue into later skills.
 
-## Execution backends — default and one fallback (0.35.0)
+## Execution backends — default and one fallback
 
 Decide at the start of the run, by tool presence, and say which one is
 used in the report's header and in chat:
@@ -126,7 +116,7 @@ scripted-login path and its profile persists logins across sessions,
 which changes what "fresh session" means for a test.)
 
 The workflow below is backend-neutral — "PAUSE for login" applies to
-the extension path only. Evidence on both backends (0.47.0): a
+the extension path only. Evidence on both backends: a
 `web-evidence.md §n` reading for every PASS, FAIL and FAIL CONFIRMED;
 a screenshot for every FAIL / FAIL CONFIRMED and every `[core]` PASS.
 The step-5 evidence audit re-reads them — a verdict without one is not
@@ -247,8 +237,8 @@ For each test case in the scope:
    block).
 3. **Classify** per the "Classification" section.
 4. **Record the evidence — every PASS, FAIL, FAIL CONFIRMED and FAIL
-   REJECTED**
-   (0.47.0). Write the next `§<n>` of `<ISSUEKEY>-web-evidence.md`
+   REJECTED**.
+   Write the next `§<n>` of `<ISSUEKEY>-web-evidence.md`
    (format in references/playwright-executor.md → Evidence — the same
    file for both backends): the URL, the role you are signed in as,
    the step, and **the page's own text quoted** — the reading that

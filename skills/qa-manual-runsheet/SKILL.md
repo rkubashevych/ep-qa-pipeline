@@ -148,9 +148,7 @@ When it is a retest:
    target an event that carries real client data.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 If the test-cases file is missing, ask for it. If the event id or the
 authorisation is missing, PAUSE and ask — do not guess an event.
@@ -294,7 +292,7 @@ the plan, one row in an exported sheet):
 
 1. **Must-walk (never reducible):** every case with no runtime-verified
    machine verdict — QA, FAIL claims, routed-in, unresolved BLOCKED,
-   NOT EXECUTED, and (0.47.0) every PASS, FAIL REJECTED and
+   NOT EXECUTED, and every PASS, FAIL REJECTED and
    structural PASS the evidence audit (`<ISSUEKEY>-evidence-audit.md`)
    rated INSUFFICIENT or UNVERIFIABLE,
    in full form, its remediation line as the backstage `why:` — plus the VERIFY spot-checks (High-risk or

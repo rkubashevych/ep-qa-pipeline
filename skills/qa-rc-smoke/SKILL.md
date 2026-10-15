@@ -33,11 +33,6 @@ keeps them apart:
    branch is not code on the host.
 3. **Runtime** — the item's core cases, re-run on RC at smoke depth.
 
-It exists because it was run by hand three times, each time without a
-record anywhere but a local file and a Jira comment: EP-53978
-(2026-09-04), EP-57431 (2026-09-18) and EP-57782 (2026-09-29). The
-third one is the method below (CHANGELOG 0.46.0).
-
 ## Input
 
 - **The RC regression ticket** (a Jira Task whose summary starts

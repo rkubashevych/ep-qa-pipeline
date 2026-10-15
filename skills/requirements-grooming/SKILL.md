@@ -2,14 +2,9 @@
 name: requirements-grooming
 disable-model-invocation: true
 description: >
-  The second stage of task processing. Takes the context file created
-  by the task-context skill, analyzes the requirements through a QA
-  grooming lens: checks coverage, clarity, contradictions, risks, and
-  missing details in the requirements. Numbers the requirements and
-  produces a processed-requirements file as input for the next skills.
-  Use it when the user says "groom the requirements", "analyze the
-  requirements", "review the ticket requirements", "requirements
-  grooming", or after task-context completes.
+  Stage 2 of the QA pipeline: the context file → numbered requirements
+  with QA findings and open questions (<KEY>-requirements.md). Usually
+  run by qa-pipeline-docs or qa-refinement.
 ---
 
 # Requirements Grooming
@@ -100,9 +95,9 @@ These IDs are permanent — they do not change across all the next skills
 in the chain. REQ-5 in the grooming file is the same REQ-5 in the
 test cases (and their structural lines), in the code review, and onward.
 
-**Every REQ names the ledger items it comes from — mandatory (0.42.0).**
+**Every REQ names the ledger items it comes from — mandatory.**
 The context file's bullets carry `AC-n` / `JD-n` / `CM-n` ids — and
-`SB-n` for rules in the AC page's spec body (0.45.0) — which make up the
+`SB-n` for rules in the AC page's spec body — which make up the
 AC ledger (task-context SKILL.md). Each `REQ-N` gets a `source:` line
 listing the ids it is built from — usually one (`source: AC-3`),
 sometimes several when grooming merged a criterion with the Description
@@ -123,7 +118,7 @@ numbers come from counting the ids, and any AC item missing from every
 repeated in the Notes. `reconcile_counts.py <KEY>` computes the same
 sets for the analyzer; a mismatch is a 🔴.
 
-**Tech-spec items — `TS-n` (0.57.0), only when the context has a
+**Tech-spec items — `TS-n`, only when the context has a
 `## Tech spec` section.** They are mapped like SB items: every `TS-n`
 appears on at least one `source:` line, and the coverage line gains
 ` · TS <n>/<N>`. For each one:
@@ -280,7 +275,7 @@ messages", "handle", "support".
   - things that are obvious from the task or product context — do not
     re-ask what is already clear
 
-### Finding codes (0.47.0)
+### Finding codes
 
 Every finding carries exactly one code, and its consequence is stated
 from a tester's seat: the finding line contains "a tester reading this
@@ -448,10 +443,7 @@ Restraint, in order of how often it is got wrong:
 Create the file `<ISSUEKEY>-requirements.md` in the run folder
 (`runs/<ISSUEKEY>/docs/`) and report its path.
 
-The file stays in the run folder — the next skill in the same
-chat picks it up automatically.
-
-If the file already exists — delete it completely and create a new one.
+If the file already exists, overwrite it: one file, the latest run only.
 
 The template is in references/output-template.md.
 

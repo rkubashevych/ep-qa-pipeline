@@ -5,6 +5,52 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.63.0 — 2026-10-15 — plugin-wide sweeps from the writing-for-agents review
+
+**Trigger:** Part B of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`.
+Text only; no rule changed. SKILL.md lines: −213 / +97 across 17 files.
+
+**Done.**
+- **B1 — "Where to find inputs"**, the same 4-line paragraph in 9
+  skills with the pre-0.33 Jira-archive history, is one pointer line to
+  `data-locations.md` ("run folder, then the suite; a new chat is no
+  reason to ask"). The full order, ask-the-user-last included, stays
+  in that file.
+- **B3 — arrival tags** (`(0.47.0)` and the like) stripped from 39
+  headings, labels and sentences. Tags inside a rule's own reasoning
+  ("CHANGELOG 0.43.5", "pre-0.34 suites") stay.
+- **B4 — origin stories** cut to one clause each, the rule kept:
+  qa-refinement (EP-56227 origin, baseline numbers), qa-rc-smoke
+  (three hand runs), qa-service-watch (0.50/0.51 discovery),
+  qa-api-tests (EP-57310 origin; MEXP stories now cite CHANGELOG
+  0.56.0 / 0.59.0 / 0.59.1).
+- **B5 — the overwrite boilerplate** ("delete it completely… do not
+  merge… do not append…" + "the next skill in the same chat picks it
+  up") is one line in 5 stages: "If the file already exists, overwrite
+  it: one file, the latest run only."
+- **B6 — slash-only stage descriptions** (0.61.0) are one sentence each:
+  stage, input → output file, which orchestrator runs it. They are
+  what the `/` menu shows; no trigger phrases needed.
+- **Dispatcher** — the route for "a code phase finished before 0.52.0"
+  is gone: no such ticket is in flight (user, 2026-10-15).
+
+**Rejected, with the reason.**
+- **B2 — the per-skill "Tool names" notes stay.** They map each tool to
+  its connector, deliberately (the MCP-tool disambiguation entry
+  above), and this install has several Atlassian connectors. Each list
+  differs per skill, so a shared pointer would lose the mapping.
+- **B7 — no shared "three-strikes" rule.** Two copies of five lines do
+  not earn a new reference file.
+- **B8 — status definitions stay inline** in code-review, api-testing
+  and web-testing. The guide's own test: inline what every branch
+  needs. Every run classifies, and stages 5–7 run as subagents reading
+  only their SKILL.md, so a pointer would put the verdict rules one
+  hop away on every case. `status-vocabulary.md` stays canonical.
+
+**Not run:** the EP-0000 docs smoke test. The docs-stage edits here
+are pointers, tags and descriptions; the smoke test runs with the
+Part C releases, which move content.
+
 ## 0.62.0 — 2026-10-15 — six contract defects from the writing-for-agents review
 
 **Trigger: `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`**, a

@@ -27,11 +27,6 @@ first half with a different ending. There are no test cases and no
 publish. It ends with a questions-only comment on the ticket and a
 sizing note for QA.
 
-It exists because the docs phase ran this way by hand on EP-56227
-(2026-09-29): stages 1–2, then recon, then the comment, then an
-estimate. Standalone grooming had no recon, no posting step and no
-sizing (CHANGELOG 0.45.0).
-
 ## Input
 
 - A Jira key or URL. **If it is a sub-task, work on its parent Story.**
@@ -168,10 +163,6 @@ since.
 5. Tell the user which REQs are now unblocked and which still wait,
    and whether the docs phase can start. It can start once no
    remaining question blocks a High-risk REQ.
-
-The measured baseline, EP-56227 (2026-09-29): 15 questions → 9
-answered cleanly or loosely, 1 answered a different question, 2 not
-clear, 3 not needed. The follow-up carried 2.
 
 ## Rules
 

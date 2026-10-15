@@ -18,14 +18,10 @@ description: >
 
 # QA Service watch — what changed since last week
 
-QA Service keeps adding tools and changing its methods; the pipeline
-learns about them only when someone happens to notice (0.50.0: the
-pipeline had never used case generation, test discovery, requirement
-folders or the review gate; 0.51.0: the Implement workflow had been
-there all along). QA Service publishes no changelog, but it describes
-itself, and that description is cheap to read and to compare. This skill
-does the comparison once a week, so nothing ships unnoticed for longer
-than that.
+QA Service publishes no changelog, but it describes itself, and that
+description is cheap to read and to compare. This skill compares it
+once a week, so a new tool or method goes unnoticed for a week at
+most.
 
 ## When it runs
 

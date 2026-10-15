@@ -77,9 +77,7 @@ If no Result data is provided at all — ask for the completed sheet or
 table; do not proceed on guesses.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 ## Hard rules
 
@@ -164,7 +162,7 @@ and the bug-key table.
 
 ### Step 4 — Write back (REQUIRED PAUSE / CONFIRM)
 
-**QA Service sign-off check (0.54.0) — read-only, inside this step.**
+**QA Service sign-off check — read-only, inside this step.**
 After the verdicts are recorded and before the summary is posted, call
 `feature_signoff {jiraKey: <STORY>, suiteIds: [<the suite>]}`. It judges
 the WHOLE feature suite (SO-RULE-02 no register, -03 a requirement not
@@ -267,7 +265,7 @@ so it is part of what the user is saying yes to. Then, on explicit yes:
   `<ISSUEKEY>-manual-results.md` stays in the run folder and the run
   holds every verdict; a fenced dump on any ticket is a ❌. Write the
   summary as the complete
-  picture, not a delta, in the template's shape (0.48.0): verdict
+  picture, not a delta, in the template's shape: verdict
   title, intro, the What / How / Result table, Bugs, **Retracted**
   (old → new and reason), To do, Questions, Not tested, and the
   footer with "Checked by hand: N of M". No earlier human summary
@@ -344,7 +342,7 @@ account nobody deactivates is a live credential nobody rotates
   coming); say so in the final response — the next round's stage 9
   provisions fresh ones regardless.
 
-### Step 4d — Register the PR's tests in QA Service (0.49.0)
+### Step 4d — Register the PR's tests in QA Service
 
 QA Service counts a developer's test only once someone registers it.
 Nothing registers itself (`get_help_topic registering`). Read the
@@ -402,7 +400,7 @@ summary, description and the structured fields, with the dedupe prefix
 untouched. Its reporter stays the service account — say so in the final
 response rather than implying it was fixed.
 
-### Step 6 — Automate the API cases (0.52.0)
+### Step 6 — Automate the API cases
 
 The last step of the round, and of the code phase. By now the human
 verdicts are recorded, the bugs are filed and step 4d has registered the

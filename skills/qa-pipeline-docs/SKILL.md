@@ -29,9 +29,7 @@ reimplement them.
 ## Input
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 **Where this phase writes:** `runs/<ISSUEKEY>/docs/` under
 `$EP_QA_HOME` (`../qa-pipeline/references/environment.md`; nothing
@@ -51,7 +49,7 @@ counted.
 - A Jira ticket key or URL (e.g. `EP-44730`). If the key is itself a
   sub-task, use its parent Story as the story for publishing.
 
-## After a refinement run — reuse, don't redo (0.45.0)
+## After a refinement run — reuse, don't redo
 
 When `runs/<ISSUEKEY>/docs/` already holds `qa-refinement` output
 (`-open-questions.md`, `-answers.md`, `-recon.md`, `-sizing.md`), say so
@@ -90,7 +88,7 @@ findings are in time to act on; never block the run on status.
 
 ## How it runs
 
-**First task of the week → QA Service watch (0.53.0).** Before stage 1,
+**First task of the week → QA Service watch.** Before stage 1,
 `qs_watch.py due` (`../qa-service-watch/SKILL.md` → "When it runs");
 due → run that skill (read-only, ~1 min, ≤5 lines), then continue.
 
@@ -145,7 +143,7 @@ full** — do not summarise or shortcut it. Stages share the run folder
      settled — do not post those. If the user declines, include the
      draft in the stage-6 publish preview instead.
 
-3. **QA Service first (0.50.0)** — per
+3. **QA Service first** — per
    **`references/qa-service-first.md`**. With the connector present,
    QA Service authors before we do: the suite and its header (`teams`,
    `jiraKeys` + the rest), this ticket's requirements, then
@@ -171,7 +169,7 @@ full** — do not summarise or shortcut it. Stages share the run folder
    label / type lines, id `REQ-N/struct-k`), each group with its
    `Covers: AC-n` line.
 
-   **The AC ledger runs through all three stages (0.42.0):** stage 1
+   **The AC ledger runs through all three stages:** stage 1
    writes one `AC-n` bullet per criterion and the page/captured count,
    stage 2 maps every REQ to its ids, stage 4 carries them on `Covers:`.
    Before the publish, run `reconcile_counts.py <ISSUEKEY>` and read its
@@ -224,8 +222,8 @@ full** — do not summarise or shortcut it. Stages share the run folder
        "Superseded by <NEW-KEY> (newer pipeline run)" and offer to
        close it. The code phase already prefers the newest; humans
        need the pointer.
-     - **Exception — adopt a QA sub-task a human already created
-       (0.45.0).** When the story has a QA sub-task WITHOUT the pipeline
+     - **Exception — adopt a QA sub-task a human already created.**
+       When the story has a QA sub-task WITHOUT the pipeline
        label — typically created at estimation, before the pipeline ran
        (EP-57799 on EP-56227) — creating a second one splits the
        tracker. Find candidates with `parent = <KEY>` and a summary

@@ -39,9 +39,7 @@ The detail this file used to carry lives in `references/`:
   api-testing pauses and asks if missing.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
-(run folder first — a new chat is not a reason to ask for an
-upload; then the suite; asking the user is the last resort, not the
-first — Jira archive comments are legacy, read only on pre-0.33 tickets).
+— run folder, then the suite; a new chat is no reason to ask.
 
 **Sources of record:** `../qa-pipeline/references/sources-of-record.md`
 — the register this phase builds at step 0 and the gate every finding
@@ -56,7 +54,7 @@ written by the analyzer and stage 9, closed only by stage 10.
 
 ## Step 0 — Gather inputs
 
-First task of the week: `../qa-service-watch/SKILL.md` (0.53.0).
+First task of the week: `../qa-service-watch/SKILL.md`.
 **Establish the run folder — before any other read or write**
 (`../qa-pipeline/references/data-locations.md` → "The run folder";
 `runs/` is `$EP_QA_HOME/runs/`, resolved per
@@ -140,7 +138,7 @@ Otherwise, using the Atlassian connector and the Story key:
      formats"). Never the whole suite. Never run a case whose
      `detail.pipelineSkip` names `<STORY>`, nor a code-level one
      (`levels` only `U`/`I`/`C`/`CFE`/`Perf`/`worker` — CI proves it):
-     list both (0.50.0). Report "suite holds N cases;
+     list both. Report "suite holds N cases;
      M + S in scope; K code-level (CI), J not adopted" (M behavioural,
      S structural — both on the roster); local ids from
      `detail.pipelineId`. Then `register_review_status` (0.50.1,
@@ -493,4 +491,4 @@ human-summary content rather than inventing a third format. Then, from
 step 9: the walk-plan path, cards the tester will walk (by kind) vs
 cases the machine settled, the reminder that the plan and testdata hold
 live credentials, and the hand-off line: "walk me through <STORY>"
-starts the session. API automation: stage 10 step 6 (0.52.0).
+starts the session. API automation: stage 10 step 6.
