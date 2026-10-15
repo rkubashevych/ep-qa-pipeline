@@ -379,8 +379,10 @@ preview so the user can redirect:
    target per "Suite selection" above — append to the feature's existing
    suite by default; a new suite only when the feature has none. New
    suite → `get_suite_tree` for the `folderId` (Config → Folder).
-2. **New suite needed** → `create_suite` (title, productId, prefix,
-   folderId if a sibling folder was found). **Existing suite (the
+2. **New suite needed** → `create_suite` (title, productId, prefix
+   and every header field — `teams`, `jiraKeys`, `owner`, `summary`,
+   `status`, `lastReviewed`, `folderId` if a sibling folder was found,
+   `priority`; "Suite header" above). **Existing suite (the
    default: feature-extension story, bug, or re-run)** → do NOT create
    a duplicate; append
    only requirements/cases that are new or changed (compare stableIds
@@ -532,9 +534,12 @@ suite — not any local file — is the source of truth for case
 CONTENT (the team may have fixed cases in the web UI between phases):
 
 1. Locate the suite: the `QA Service suite:` line in the QA sub-task
-   description; fall back to `search {query, kinds: ["suite"]}` on the
-   feature words / prefix, and to `list_suites` only when that finds
-   nothing.
+   description — the only source. No line → no suite: the code phase
+   reads `runs/<STORY>/docs/` (`qa-pipeline-code` step 0). Never find
+   one by `search`: when stage 3 ran and the publish was declined, the
+   feature's suite holds this ticket's requirements and generated cases
+   with no `detail.ticket`, and a search would run them as team-added
+   (0.71.0).
 2. `get_suite`; **scope = the cases whose `detail.ticket` is this run's
    key**, plus any case tracing to one of this run's requirements
    (`sources` with `kind: jira, label: <KEY>`) that lacks the marker
@@ -746,7 +751,9 @@ The step-6 preview shown to the user must also state:
   **appending** N requirements / M cases to existing suite
   `<path>` (K duplicates skipped) — or **creating** suite `<path>`
   (prefix `<PREFIX>`) because the feature has no suite yet — or
-  "skipped (connector not enabled)".
+  "skipped (connector not enabled)". When stage 3 ran, also what it
+  already wrote, which a "no" leaves in the suite (SKILL.md step 6 →
+  "Declined after stage 3 wrote").
 - When stage 3 ran (0.50.0): "A adopted from QA Service (stamped, not
   re-created) · W written here (created) · J not adopted (marked
   `pipelineSkip`, reasons listed) · K code-level", and any header field

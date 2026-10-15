@@ -1,15 +1,18 @@
 ---
 name: qa-pipeline-docs
 description: >
-  Orchestrator for the docs half of the QA pipeline (stages 1-4 plus
-  publish). Given a Jira ticket: task-context, requirements-grooming,
-  QA Service case generation and test discovery, qa-test-cases and the
-  run-analyzer, then publishes the QA Service suite and a QA sub-task,
-  pausing to confirm the writes. Use when the user says "run the QA
-  docs pipeline", "build the test cases for a ticket", "groom and
-  write test cases", or "publish the test cases / add these cases to
-  QA Service" (publish-only). Only questions and a QA estimate before
-  estimation, no test cases → qa-refinement.
+  Docs half of the QA pipeline (stages 1-4 plus publish) for a Jira
+  ticket: gathers the ticket and its AC page, grooms the requirements
+  and posts the open questions, lets QA Service generate cases and
+  import the feature's existing tests, writes the missing test cases,
+  health-checks the run, then publishes the QA Service suite and a QA
+  sub-task, pausing to confirm the writes. Use when the user says "run
+  the QA docs pipeline", "build the test cases for EP-1234", "groom
+  and write test cases", or "publish the test cases / add these cases
+  to QA Service" (publish-only). Do NOT use before estimation for
+  questions and a QA estimate only (qa-refinement), once cases are
+  published (qa-pipeline-code), or for QA Service work with no ticket —
+  generating or importing tests for a suite (QA Service tools directly).
 ---
 
 # QA Pipeline -- Docs (stages 1-4 + publish)
@@ -34,18 +37,24 @@ then publishes to the QA Service suite and a QA sub-task on the story.
 reachable → PAUSE, never the plugin checkout) — create it before
 stage 1 and print it once (`Run folder: ~/.ep-qa/runs/EP-1234/docs`). Every
 stage 1–4 file and this phase's run report go there; a re-run
-overwrites in place. Nothing is written to the repo root.
+overwrites in place — except the files that outlive a run:
+`-open-questions.md` and `-recon.md` are appended to, never replaced
+(step 2; `../qa-pipeline/references/recon.md` → "Reuse"), and
+refinement's `-answers.md` / `-sizing.md` are only read here. Nothing is written to the repo root.
 
 **Publish-only mode.** When the user asks only to publish ("add these
 cases to QA Service", "publish the test cases for EP-1234") and
 `runs/<ISSUEKEY>/docs/<ISSUEKEY>-test-cases.md` already exists, skip
-stages 1–4: run step 5 (the analyzer and its count gate) and step 6
-(publish) on the files that are there. A missing stage file → name it
+stages 1–4: run step 5 (the analyzer) and step 6 (its count gate,
+then the publish) on the files that are there. A missing stage file → name it
 and offer the full run; never publish a file the analyzer has not
 counted.
 
-- A Jira ticket key or URL (e.g. `EP-44730`). If the key is itself a
-  sub-task, use its parent Story as the story for publishing.
+- A Jira ticket key or URL (e.g. `EP-44730`). **If it is a sub-task,
+  work on its parent Story throughout** — stages 1–4, the run folder
+  (`runs/<STORY>/docs/`) and the publish; the code phase looks for the
+  Story's folder. Remember the sub-task's key: a QA sub-task is the one
+  step 6 offers to adopt (`references/special-cases.md` §2).
 - **A Bug** normally goes to bug-fix mode (`qa-pipeline-code`), not
   here. Run the docs phase on one only when the user asked for it or
   the Bug carries real scope (new behaviour beyond the repro). Then
@@ -69,7 +78,8 @@ the findings are in time to act on; never block the run on status.
 due → run that skill (read-only, ~1 min, ≤5 lines), then continue.
 
 Post one short line per stage boundary (`Stage <n>/6 done — <stage
-name>`) and nothing more between stages.
+name>`) and nothing more between stages — the step-2 findings and its
+one question are the only exception.
 
 Execute each stage by reading its `SKILL.md` and following it **in
 full** — do not summarise or shortcut it. Stages share the run folder
@@ -107,10 +117,15 @@ full** — do not summarise or shortcut it. Stages share the run folder
      in the shape of `../qa-pipeline-code/references/jira-writing-style.md`
      → "Grooming open-questions comment" (read it in full: questions
      only, every name checked in its `## Names` table), save it as
-     `<ISSUEKEY>-open-questions.md`, show it, and ask ONE quick yes/no:
-     "post these open questions to <KEY> now?". On yes, post before
-     stage 4 — an answer arriving while stages 3–4 run can still fix
-     the cases; the run continues either way. Items already answered in
+     `<ISSUEKEY>-open-questions.md` — when that file already exists
+     (refinement, an earlier run), append the new questions under a
+     dated `## Added <date>` section and keep its `Comment:` line: the
+     answers pass keys on that id. Show it, and ask ONE quick yes/no:
+     "post these open questions to <KEY> now?". Asking ends your turn:
+     wait for the answer (it is the one stop before stage 3's pause,
+     CHANGELOG W4 — the PM clock starts here). On yes, post before
+     stage 3 — an answer arriving while stages 3–4 run can still fix
+     the cases; on no the run continues all the same. Items already answered in
      chat are settled — do not post those. If the user declines,
      include the draft in the stage-6 publish preview instead.
 
@@ -122,7 +137,9 @@ full** — do not summarise or shortcut it. Stages share the run folder
    otherwise) and `discover_tests` over the feature's existing tests.
    **REQUIRED PAUSE / CONFIRM** — its own preview and plan
    (`docs/<ISSUEKEY>-qs-plan.json`), because it writes to shared data
-   before stage 4. Produces `<ISSUEKEY>-qs-cases.md`, the export stage 4
+   before stage 4. On a new suite the discovery apply is a second,
+   smaller confirmation after its dry run (`qa-service-first.md` →
+   "The confirmation"). Produces `<ISSUEKEY>-qs-cases.md`, the export stage 4
    reads. No connector, or the user says no → skip in one line; stage 4
    writes every case.
 
@@ -164,6 +181,18 @@ full** — do not summarise or shortcut it. Stages share the run folder
    and say so plainly in the final response: the code phase for this
    ticket can then run only on this machine, from
    `runs/<ISSUEKEY>/docs/`. Never block (a) on (b).
+   - **Declined after stage 3 wrote.** The suite already holds stage
+     3's writes: the header edit, this ticket's requirements, the
+     generated and discovered cases — none carrying `detail.ticket`.
+     The preview's QA Service line and the final response say exactly
+     that ("declined — stage 3 left in `<suite>`: N requirements, G
+     generated / D discovered cases"), never "connector not enabled".
+     Then offer ONE smaller write, its own plan
+     `docs/<ISSUEKEY>-qs-cleanup-plan.json` and its own yes:
+     `detail.pipelineSkip` on every case stage 4 did not adopt, per
+     `qa-service-publish.md` → "Cases stage 4 did not adopt". Declined
+     too → list those cases in the final response as a To do. Nothing
+     is deleted or retired either way.
 
    - **Count gate — do not publish a number you did not derive.**
      Before the preview, run `python3
@@ -185,7 +214,8 @@ full** — do not summarise or shortcut it. Stages share the run folder
      what will be posted, and the QA Service line (new suite path +
      requirement / case / structural-check counts, or "appending to
      existing suite", or "skipped — connector not enabled: code phase
-     will read runs/<ISSUEKEY>/docs/ on this machine only"). Proceed
+     will read runs/<ISSUEKEY>/docs/ on this machine only"; when stage 3
+     ran, what it already wrote — the line a "no" leaves true). Proceed
      only after an explicit yes. The writes are one plan,
      `docs/<ISSUEKEY>-publish-plan.json`
      (`../qa-pipeline/references/write-plans.md`): `make` before the
@@ -246,12 +276,14 @@ After publishing, report:
   — no tracker comment, no archive).
 - The QA Service suite path + requirement/case counts and the
   count-verification result (or "QA Service publish skipped —
-  connector not enabled"); the split "adopted from QA Service A ·
+  connector not enabled", or "declined — stage 3 left …" with the
+  cleanup write's outcome); the split "adopted from QA Service A ·
   written here W · code-level K"; the tests discovery imported, or the
   To do when discovery could not run; the review pass: its verdicts if
   it finished, else "running — job <id>".
 - The run-analyzer health verdict (🟢/🟡/🔴 per category) and any
   ⚠ SPECIAL ATTENTION items for the code phase.
-- The next step: run `qa-pipeline-code` on the Story key in a fresh
+- The next step: run `qa-pipeline-code` on the Story key (the Bug key
+  when a Bug went through this phase) in a fresh
   chat. Do NOT run `qa-manual-runsheet` here — the walk plan needs the
   automated verdicts to know what is left for the human.

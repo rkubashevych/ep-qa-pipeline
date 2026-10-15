@@ -22,8 +22,9 @@ Rules:
   at run time; never cache an accountId in this file — identities are
   configuration, not documentation.
 - The issue-type id is instance-specific. If `createJiraIssue` rejects
-  the type, list the project's issue types via
-  `getJiraProjectIssueTypesMetadata` and update this table. ⚠ The
+  the type, re-resolve it from `getJiraProjectIssueTypesMetadata` (the
+  Issue type row) and retry with what the project lists now — never
+  write a name back into this table. ⚠ The
   connector does NOT say "unknown issue type" — on 2026-09-17 a request
   for the non-existent `QA sub-task` came back as "You don't have
   permission to connect from this IP address" and then "a security
@@ -35,5 +36,7 @@ Rules:
   transitions, do only the reassignment + comment. Transition names are workflow-specific —
   verify with `getTransitionsForJiraIssue` before relying on them.
 - The label must stay in sync with `qa-pipeline-code` Step 0, which
-  searches `parent = <STORY> AND issuetype = "QA sub-task"` and prefers
-  the newest sub-task with this label.
+  searches `parent = <STORY> AND labels = "qa-pipeline"` and takes the
+  newest match — on the label, never on the issue type (a type filter
+  returns silently empty in the wrong project, CHANGELOG 0.43.5; a
+  typed name fails with HTTP 400, 0.47.2).

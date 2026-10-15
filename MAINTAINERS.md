@@ -196,7 +196,8 @@ carried between them; the QA Service run carries the verdicts anyway.
 4. **Smoke-test the docs stages** if you touched them: run
    `fixtures/EP-0000-context.md` (synthetic — the one `EP-*` file that
    is tracked, via the `.gitignore` negation) through grooming →
-   test-cases (skip the publish), compare with
+   test-cases (skip stage 3 and the publish — both write to QA
+   Service), compare with
    `skills/qa-test-cases/references/test-cases-example.md` (the
    fixture's expected output) and check the expectations listed at the
    bottom of the fixture still hold; then `reconcile_counts.py` on the

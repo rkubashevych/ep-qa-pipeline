@@ -46,8 +46,19 @@ ONE preview, ONE yes, one plan file `docs/<ISSUEKEY>-qs-plan.json`
 - the generation mode (`full` or `gaps`), with the warning that `gaps`
   also authors for other tickets' uncovered requirements in the same
   suite (list them by stableId — `coverage_report` names them);
-- the discovery scope (the module dirs or files) or "no discovery —
-  <reason>".
+- discovery: the exact `refs` to import, or "no discovery —
+  <reason>". A plan holds exactly the arguments it sends
+  (`write-plans.md`), and the refs are only known after a dry run, so:
+  - **existing suite** → run the discovery dry run (step 4 without
+    `apply` — it writes nothing) BEFORE this preview; the plan carries
+    the chosen refs and the preview lists them;
+  - **new suite** → the dry run needs a `suiteId`, so discovery is not
+    in this plan. After step 3, dry-run, then show a second small
+    preview with its own plan `docs/<ISSUEKEY>-qs-discovery-plan.json`
+    (the refs, one `discover_tests` apply) and its own yes. A "no"
+    there is a To do (step 4's last bullet), not a stopped run.
+  - Narrowing the scope after the preview means a new dry run and a
+    new plan, shown again — never an apply with refs nobody saw.
 
 On "no", skip the stage as above. The step-6 publish confirmation is
 unchanged and still covers the sub-task and every case write.
@@ -116,7 +127,9 @@ unchanged and still covers the sub-task and every case write.
      `get_suite`) before retrying or reporting it as failed — and
      re-read again later, not only straight away.
    - Apply (`apply: true`, `refs`) only the tests that exercise this
-     feature. `discoveredPerRequirement` far above 1 means the scope
+     feature, and only from an approved plan ("The confirmation" — the
+     stage-3 plan on an existing suite, the discovery plan on a new
+     one). `discoveredPerRequirement` far above 1 means the scope
      pulled in unrelated tests; narrow it.
    - A timeout, a zero scan or a refused read → a To do in the final
      response ("Register the existing tests for <feature> in QA Service

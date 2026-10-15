@@ -82,5 +82,6 @@ AC items on the page: 5 · captured: 5
    If any of that breaks after a skill edit, the edit regressed
    the pipeline.
 
-Do NOT publish this fixture to Jira (skip the publish step of
-`qa-pipeline-docs`) — EP-0000 does not exist.
+Do NOT publish this fixture to Jira or QA Service — skip stage 3 (QA
+Service first, which writes to the shared suite before stage 4) and
+the publish step of `qa-pipeline-docs`. EP-0000 does not exist.

@@ -202,6 +202,8 @@ before they run), or Claude names the stage's slash command — the
   `/ep-qa-pipeline:requirements-grooming` (slash only)
 - ❌ "prepare EP-57799 for estimation — what questions do we have?" →
   qa-refinement (no test cases before the answers)
+- ❌ "run the QA checks for EP-55123" (cases already published) →
+  qa-pipeline-code
 
 ## qa-refinement (pre-estimation mode)
 - ✅ "I need to prepare EP-57799 for estimation and decomposition —
@@ -224,5 +226,14 @@ before they run), or Claude names the stage's slash command — the
 - ✅ "the fix landed, retest EP-55123" (retest mode)
 - ✅ "test the bugfix EP-56133" (bug-fix mode — Bug ticket, no docs
   phase; derives mini cases from the ticket's repro steps)
+- ✅ "check the implementation covers the cases for EP-55123",
+  "hit the endpoints for EP-55123" (the whole phase, which proposes
+  before it runs — no single-stage scoping)
+- ✅ "continue the code run for EP-55123" (resume mode — partial run)
 - ❌ "review this PR" (alone) → review-pr or chat
 - ❌ "run all the tests" (in a repo context) → that repo's test runner
+- ❌ "build the test cases for EP-55123" (none published yet) →
+  qa-pipeline-docs
+- ❌ "write the API tests for EP-55123" → qa-api-tests
+- ❌ "smoke test the RC for EP-57782" → qa-rc-smoke
+- ❌ "let's test EP-55123 together" → qa-manual-walk

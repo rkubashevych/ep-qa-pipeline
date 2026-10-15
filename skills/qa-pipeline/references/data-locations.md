@@ -30,10 +30,13 @@ qa-service-watch/               the weekly QA Service check (0.53.0), not per ti
   state.json · snapshot-<date>.json · <date>-report.md · new.json
 runs/<ISSUEKEY>/
   <ISSUEKEY>-open-items.md      the ledger — one per ticket, no round
-  docs/                         stages 1–4 (re-run = overwrite in place):
+  docs/                         stages 1–4 (re-run = overwrite in place, except
+                                -open-questions / -recon: appended, never replaced):
     <ISSUEKEY>-context.md · -requirements.md · -recon.md ·
     -open-questions.md · -answers.md · -sizing.md (qa-refinement, 0.45.0) ·
     -qs-cases.md · -qs-plan.json (docs stage 3, 0.50.0) ·
+    -qs-discovery-plan.json (stage 3 on a new suite, 0.71.0) ·
+    -qs-cleanup-plan.json (stage 3 left, publish declined, 0.71.0) ·
     -test-cases.md · -run-report.md · sources/ ·
     -publish-plan.json · -questions-plan.json (0.47.0)
     (-checklist.md on tickets run before 0.40.0 — read-only)

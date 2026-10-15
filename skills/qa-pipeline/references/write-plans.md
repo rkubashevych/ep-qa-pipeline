@@ -108,6 +108,8 @@ nothing checks it mechanically.
 | Pause | Plan file |
 |---|---|
 | `qa-pipeline-docs` step 3: the suite header, the requirements, case generation and test discovery (0.50.0) | `docs/<KEY>-qs-plan.json` |
+| `qa-pipeline-docs` step 3 on a NEW suite: the discovery apply, after its dry run (0.71.0) | `docs/<KEY>-qs-discovery-plan.json` |
+| `qa-pipeline-docs` step 6 declined after stage 3 wrote: `pipelineSkip` on the cases stage 4 did not adopt (0.71.0) | `docs/<KEY>-qs-cleanup-plan.json` |
 | `qa-pipeline-docs` step 6: the sub-task + the suite publish | `docs/<KEY>-publish-plan.json` |
 | `qa-refinement`: the questions comment (and a re-run's in-place edit) | `docs/<KEY>-questions-plan.json` |
 | `qa-pipeline-code` step 6 (a): the run + its verdicts | `r<N>/<KEY>-run-plan.json` |

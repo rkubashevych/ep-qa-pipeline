@@ -27,7 +27,10 @@ carry each file forward:
     with no answer) is listed in the publish preview as "still open
     since <date>", not re-posted;
   - only items grooming raises for the first time go into a new
-    comment, in the same shape.
+    comment, in the same shape;
+  - the file itself is never overwritten: new questions go under a
+    dated `## Added <date>` section and the `Comment:` line stays — the
+    answers pass finds the original comment by it.
 - **Publish adopts the QA sub-task** named on `-sizing.md`'s
   `QA sub-task:` line (§2).
 

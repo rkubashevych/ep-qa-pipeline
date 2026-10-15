@@ -5,6 +5,64 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.71.0 — 2026-10-15 — the qa-pipeline-docs review; both orchestrator descriptions
+
+**Trigger:** a skill-reviewer pass over `qa-pipeline-docs` (full lens,
+read-only; verify_plugin 18 ok, fixture counts reconcile exactly) and a
+description tune of `qa-pipeline-code`. Six findings and six polish
+items; all implemented, none rejected.
+
+**Descriptions.**
+- `qa-pipeline-code` and `qa-pipeline-docs` no longer name slash-only
+  stages by bare name (the session cannot see them — the 0.70.0 rule);
+  each says what the phase does in plain words, states its
+  precondition (cases published / a Jira ticket) and gains a "Do NOT
+  use" clause naming the visible neighbours. Code adds the eval
+  phrases it was missing ("check the implementation covers the
+  cases", "hit the endpoints") and resume mode; docs adds the
+  no-ticket negative its eval rows already expected.
+  `evals/triggering.md` walked; new ✅/❌ rows added.
+
+**Real defects.**
+- **Stale sub-task JQL** — `publish-config.md` still said the code
+  phase searches by `issuetype = "QA sub-task"` (0.43.5 and 0.47.2
+  fixed the other copies); now the label. Its "update this table" on
+  a rejected type now says re-resolve at run time.
+- **Declined publish after stage 3 wrote.** The preview and final
+  response said "connector not enabled" while the suite already held
+  stage 3's requirements and generated cases with no `detail.ticket`,
+  and `qa-service-publish.md`'s code-phase copy fell back to `search`,
+  which would run them as team-added. Now: the preview and final
+  response name what stage 3 left; one smaller cleanup write
+  (`-qs-cleanup-plan.json`) stamps `pipelineSkip` on the cases stage 4
+  did not adopt; the code phase locates the suite from the sub-task
+  line only, matching `qa-pipeline-code` step 0.
+- **A re-run overwrote `-open-questions.md`**, refinement's record of
+  the `Comment:` id the answers pass keys on. "Overwrite in place" now
+  excludes it and `-recon.md` (SKILL.md, `data-locations.md`); new
+  questions are appended under a dated section, `special-cases.md` §1
+  says so too.
+- **A sub-task key built the run folder under the sub-task**, so the
+  code phase on the Story could not find it. The docs phase now works
+  on the parent Story throughout, like `qa-refinement` and the
+  dispatcher.
+- **Stage 3's plan could not hold the discovery refs** (chosen after a
+  dry run that needs a `suiteId`). Existing suite → dry-run before the
+  stage-3 preview, refs in the plan; new suite → the apply is its own
+  small plan (`-qs-discovery-plan.json`) and yes. Narrowing means a new
+  dry run and plan.
+- **Procedure's `create_suite` copy** listed no `teams` / `jiraKeys`
+  (the EP-55889 "No team" shape); it now names every header field.
+
+**Polish.** Publish-only puts the count gate in step 6, where it is;
+the step-2 questions yes/no now says it ends the turn and waits (W4's
+intent kept: the PM clock starts there), and the "nothing between
+stages" line names it as the exception; the final next-step names the
+Bug key when a Bug went through docs; the fixture and MAINTAINERS
+smoke test skip stage 3 as well as the publish (both write to QA
+Service). Not done: trimming `qa-service-publish.md`'s code-phase
+sections into `test-runs.md` — a larger move, left for its own release.
+
 ## 0.70.0 — 2026-10-15 — the regression review: one copy fixed, every copy fixed
 
 **Trigger:** `docs/reviews/REGRESSION-REVIEW-0.59.1-to-0.69.0-2026-10-15.md`

@@ -1,16 +1,20 @@
 ---
 name: qa-pipeline-code
 description: >
-  Orchestrator for the code half of the QA pipeline (stages 5-9). Given
-  a Story key: reads the cases from the QA Service suite, runs
-  pr-summary, code-review, api-testing, web-testing and the
-  run-analyzer, records machine verdicts on a QA Service test run, and
-  builds the manual walk plan; stage 10 does the handback. Also retest
-  mode ("retest <KEY>", "the fix landed") and bug-fix mode ("test the
-  bugfix EP-1234" — Bug ticket, no docs phase). Use when the user says
-  "run the QA code pipeline", "run the QA checks", "review the PRs and
-  test in the browser", or "do code review and UI testing for a
-  ticket". Run in a FRESH chat after qa-pipeline-docs.
+  Code half of the QA pipeline (stages 5-9), for a Story whose test
+  cases are published in QA Service: summarises the ticket's PRs,
+  reviews the code against the cases, runs the API cases on the test
+  env and the UI cases in a browser, records machine verdicts on a QA
+  Service test run, and builds the manual walk plan. Also retest mode
+  ("the fix landed, retest EP-1234"), bug-fix mode ("test the bugfix
+  EP-1234" — a Bug, no docs phase) and resuming a partial run. Use when
+  the user says "run the QA code pipeline", "run the QA checks",
+  "review the PRs and test in the browser", "do code review and UI
+  testing for EP-1234", "check the implementation covers the cases",
+  or "hit the endpoints for EP-1234". Start in a fresh chat. Do NOT use
+  when no cases exist yet (qa-pipeline-docs), to write automated tests
+  (qa-api-tests), for RC items (qa-rc-smoke), to hand-test with the
+  user (qa-manual-walk), or to review a lone PR (review-pr or chat).
 ---
 
 # QA Pipeline -- Code & UI (stages 5-9, then hands off to stage 10)
