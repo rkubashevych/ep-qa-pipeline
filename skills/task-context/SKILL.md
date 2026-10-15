@@ -183,8 +183,10 @@ Merge and flag conflicts:
 - Apply the same anti-loss prohibitions (below) to the Confluence
   content: keep exact values, names, conditions, and branches verbatim.
 - Conflicting versions of one criterion are still ONE `AC-n` — the
-  bullet carries the Confluence wording, and the "⚠️ Conflicts to
-  resolve" entry names the `AC-n` it concerns.
+  bullet carries the Confluence wording. The Jira wording gets its own
+  `JD-n` bullet, `JD-1 (Jira Description, conflicts with AC-2): …`, so
+  both versions are traceable, and the "⚠️ Conflicts to resolve" entry
+  names both ids.
 
 If no Confluence page is linked on the ticket:
 - Do not stop. Ask the user once for the Confluence URL (or page).

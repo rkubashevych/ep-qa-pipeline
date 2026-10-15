@@ -43,6 +43,11 @@ From the requirements file, the skill takes:
   acceptance-criteria page linked" warning or unresolved-conflict
   flags) — copy it into the test-cases file's Notes line so a manual
   tester knows the input was weaker than ideal.
+- The "Open findings" section — grooming's unsettled findings. Not
+  requirements and never a source of cases; read it only to know which
+  REQs carry an open question. An open finding alone does not put a REQ
+  under "needing clarification" — that count is for unresolved
+  conflicts and REQs marked "(needs clarification)".
 - A requirement marked "(unresolved conflict)" with two contradictory
   versions — decompose and write each version separately, labelled
   ("version A — Confluence" / "version B — Jira"), and count the
@@ -206,11 +211,13 @@ what is covered, and QA Service's cases decide only who wrote it.
 Every case may carry a `Level:` line under its heading: the QA Service
 level at which the behaviour should be proven in the product's test
 suites (`references/test-levels.md` — the lowest level that can verify
-it). The channel tag still decides who runs it in THIS pipeline. Write
-the line whenever the right level is not the one the channel implies,
-above all when a pure rule (parser, validator, sanitiser, formatter,
-calculation) is verified here through the UI or a file: then the level
-starts with `U`. No `Level:` line = the channel's default level.
+it). The channel tag still decides who runs it in THIS pipeline. No
+`Level:` line = the channel's default level. Write the line whenever
+the right level is not that default — and always when business logic
+would otherwise be covered only through the UI or a file (an `E2E` or
+`M` case): add the lower level too, `U` for a pure rule (parser,
+validator, sanitiser, formatter, calculation), `I` / `AE` for wiring
+(`test-levels.md` → "Two invariants").
 
 ### Numbering
 

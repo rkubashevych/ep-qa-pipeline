@@ -29,13 +29,14 @@ Sources saved: docs/sources/ — <N> files
 - AC-3 (Confluence §<section>): <criterion, verbatim>
 - SB-1 (Confluence §<n>, spec body): <rule from the page's spec body that the AC heading does not restate — omit when none>
 - JD-1 (Jira Description): <requirement stated only in the Description>
+- JD-2 (Jira Description, conflicts with AC-<n>): <the Description's version of that criterion, verbatim>  — only for a conflict
 
 AC items on the page: <N> · captured: <N><; not readable: <what and why — omit when equal>>
 
 ## ⚠️ Conflicts to resolve
 > Only when the Confluence acceptance criteria and the Jira Description
 > disagree. List each conflict with both versions so a human decides.
-- AC-<n> <topic>: Confluence says "<X>"; Jira Description says "<Y>".
+- AC-<n> / JD-<m> <topic>: Confluence says "<X>"; Jira Description says "<Y>".
 
 ## Additional requirements (from comments)
 - CM-1 (comment <YYYY-MM-DD>): <requirement found in comments that is not in the main requirements>

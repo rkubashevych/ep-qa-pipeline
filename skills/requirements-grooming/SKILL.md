@@ -85,7 +85,9 @@ the "Requirements" items first, then continue the sequence through the
 "Additional requirements (from comments)" items.
 
 The numbering is sequential, with no gaps, in the order the items
-appear in the context file.
+appear in the context file. A `JD-n` marked "conflicts with AC-n" is
+not numbered on its own: it is the other version of that AC's REQ,
+which cites both ids.
 
 If during grooming a requirement contains several different things —
 split it into sub-items: REQ-5a, REQ-5b. The main number is kept,
@@ -101,7 +103,9 @@ The context file's bullets carry `AC-n` / `JD-n` / `CM-n` ids — and
 AC ledger (task-context SKILL.md). Each `REQ-N` gets a `source:` line
 listing the ids it is built from — usually one (`source: AC-3`),
 sometimes several when grooming merged a criterion with the Description
-clause that completes it (`source: AC-3, JD-1`), and a split REQ-5a /
+clause that completes it (`source: AC-3, JD-1`) or a REQ carries both
+versions of an unresolved conflict (`source: AC-2, JD-1`, the `JD-n`
+marked "conflicts with AC-2" in the context), and a split REQ-5a /
 REQ-5b both carry the same `AC-n`. Then the rule: **every `AC-n` and
 every `SB-n` in the context file appears on at least one `source:`
 line.** (`reconcile_counts.py` holds JD and CM ids to the same set
@@ -284,7 +288,8 @@ be omitted on the other categories.
 - What the code adds is comparability: the analyzer and the next round
   can count `AMBIGUOUS` findings instead of re-reading prose.
 - **The codes stay internal.** They appear in chat, in the findings
-  pause and in `<ISSUEKEY>-open-questions.md`. They never appear in the
+  pause, in the requirements file's "Open findings" section and in
+  `<ISSUEKEY>-open-questions.md`. They never appear in the
   posted questions comment, which uses the words on the screen
   (`../qa-pipeline-code/references/jira-writing-style.md` → "Grooming
   open-questions comment").
@@ -401,7 +406,9 @@ Restraint, in order of how often it is got wrong:
    its risk rating (see "Risk rating"). Copy the "Goal" section from
    the context file unchanged — the next skills need it to understand
    the context.
-10. Save one file — a clean numbered list of finished requirements.
+10. Save one file — a clean numbered list of finished requirements,
+    closed by the "Open findings" section (template): every finding
+    the user did not settle, so it outlives the chat.
 
 ## Output file
 

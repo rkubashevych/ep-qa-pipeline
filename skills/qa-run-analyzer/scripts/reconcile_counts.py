@@ -9,8 +9,8 @@ Reads whichever of <KEY>-test-cases/code-review/api-testing/web-testing
 .md exist. Where to look (data-locations.md → "The run folder",
 environment.md → EP_QA_HOME): when no dir is given, `runs/<KEY>/` is
 resolved under `$EP_QA_HOME`, else `~/.ep-qa`, else (legacy) the cwd;
-inside it the newest pass folder `r<N>/` wins, falling back to the cwd
-itself for pre-0.32 tickets. The test-cases file is looked up in the
+inside it the newest pass folder `r<N>/` wins, then `docs/` on a
+docs-only run, falling back to the cwd itself for pre-0.32 tickets. The test-cases file is looked up in the
 pass folder first, then `runs/<KEY>/docs/` (where the docs phase writes
 it), then the given dir — so a retest round reconciles against its case
 list without being told twice. Pass an explicit dir (e.g.
@@ -223,6 +223,10 @@ def resolve_run_dir(key, d=None):
                 rounds.append(int(name[1:]))
     if rounds:
         return os.path.join(base, f"r{max(rounds)}"), docs
+    # docs-only run (no code phase yet): the docs folder IS the run folder.
+    # Without this the cwd came first and a stray root EP-* file won.
+    if os.path.isdir(docs):
+        return docs, docs
     legacy = os.path.join(runs, "legacy")
     if os.path.exists(os.path.join(legacy, f"{key}-test-cases.md")):
         return legacy, docs
@@ -514,6 +518,17 @@ def check_run_folder(errs):
             d, _ = resolve_run_dir(key)
             if d != os.path.join("runs", "legacy"):
                 errs.append(f"run-folder: runs/legacy not resolved, gave {d!r}")
+            # docs-only run: docs/ is the run folder, and a stale file of
+            # the same name in the cwd must not shadow it (0.68.0)
+            k1 = "EP-1"
+            os.makedirs(os.path.join("runs", k1, "docs"))
+            open(os.path.join("runs", k1, "docs", f"{k1}-context.md"), "w").write("docs")
+            open(f"{k1}-context.md", "w").write("root")
+            d1, docs1 = resolve_run_dir(k1)
+            if d1 != os.path.join("runs", k1, "docs"):
+                errs.append(f"run-folder: docs-only run gave {d1!r}, want docs/")
+            if read_docs_file(k1, "context", d1, docs1) != "docs":
+                errs.append("run-folder: a cwd file shadowed the docs/ copy")
             # rounds: r1, r2, r10 → r10 (numeric, not lexical)
             for r in ("r1", "r2", "r10"):
                 os.makedirs(os.path.join("runs", key, r))

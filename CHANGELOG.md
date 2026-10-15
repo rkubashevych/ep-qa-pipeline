@@ -5,6 +5,65 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.68.0 — 2026-10-15 — the six gaps the 0.64.0 smoke test found
+
+**Trigger:** the "Open" list under 0.64.0. All six are closed here.
+
+1. **`reconcile_counts.py` on a docs-only run** resolved the run folder
+   to the cwd, and the cwd came first in the lookup, so a stray root
+   `EP-*` file shadowed the run folder's copy. With no `r<N>/` yet, the
+   ticket's `docs/` folder is now the run folder. New self-test case: a
+   decoy file in the cwd must not win. On the real EP-0000 run it now
+   prints `run folder: …\runs\EP-0000\docs`.
+2. **A conflict's Jira side gets a ledger id.** task-context wrote the
+   Jira wording only inside the conflict entry, so version B had no id
+   for `source:` and `JD 0/0` hid it. It is now a `JD-n` bullet marked
+   `(conflicts with AC-n)`, the conflict entry names both ids, and
+   grooming cites both on the REQ (`source: AC-2, JD-1`). The fixture
+   carries `JD-1`; its expectations read `JD 1/1`.
+3. **Grooming's findings outlive the chat.** Run on its own, they lived
+   only in chat. The requirements file now closes with an "Open
+   findings" section (finding-code line shape, internal — codes never
+   reach the posted comment); qa-test-cases reads it only to know which
+   REQs carry an open question, never as a source of cases.
+4. **`Level:` wording aligned.** qa-test-cases said "a pure rule …
+   then `U`"; test-levels.md says business logic is never covered only
+   through the UI. Not a contradiction, but the narrower wording read as
+   one: the SKILL.md now says "always when business logic would
+   otherwise be covered only through the UI or a file", `U` for a pure
+   rule, `I` / `AE` for wiring.
+5. **Line length.** The ~64-character target is for step and `Exp:`
+   lines; headings and structural lines are single lines that never
+   wrap and may run longer.
+6. **`test-cases-example.md` rewritten to the current rules:** a
+   `Skill:` header and a `Levels:` statistics line; one case per
+   conflict version (`Covers: AC-2, JD-1`); core cases by the core
+   selection rule (REQ-1's denial path, not its happy path); a real
+   3-value BVA with the 9th case; `Level:` lines on the sort order and
+   the limit; the structural line no criterion states is gone. Its
+   numbers were re-derived with `reconcile_counts.py`: 12 cases, [UI] 11
+   · [API] 1, core 6, struct 2, ledger 7 of 7.
+
+**Smoke test (second run, on this release): PASS**, all twelve
+expectations, including REQ-2 citing `AC-2, JD-1` with one case per
+version, core cases by the rule, `AC coverage: 5/5 · JD 1/1 · CM 1/1`,
+and the "Open findings" section. `reconcile_counts.py` resolved the run
+folder to `docs/` (item 1, on a real run). It also caught five things,
+fixed before commit:
+- the example itself broke four rules: a High-risk REQ with no
+  extended technique and no reason; no `Level:` on the permission
+  gate (`AE + E2E`) or on the boolean field (`C + AE`, a Contract);
+  `Pre:` lines leaning on other cases (the independence rule) — all
+  now set up their own data; a wrapped Notes line;
+- grooming's numbering rule would have made a conflict's `JD-n` a REQ
+  of its own: it is now the other version of the AC's REQ;
+- the fixture's 9/10/11 expectation silently assumed REQ-5 at High: it
+  now says so (Medium → 10/11);
+- "needing clarification" now excludes a REQ whose only issue is an
+  open finding.
+Left as judgement calls, not rules: list ordering as `U` or `I`; whether
+"badge when ON" also implies "no badge when OFF".
+
 ## 0.67.0 — 2026-10-15 — orchestrators: rare branches disclosed, step 0 points to its reference
 
 **Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,

@@ -17,8 +17,10 @@ lines**.
 - **No wide tables.** Do NOT use the `| # | Step | Test data | Expected |`
   table layout — wide rows do not survive the mapping to a case's
   `detail.steps` or a chat card. Use the vertical block layout below.
-- **Keep every line short** (aim <= ~64 characters). Wrap long steps or
-  expected results onto the next indented line rather than one long row.
+- **Keep step and `Exp:` lines short** (aim <= ~64 characters). Wrap a
+  long step or expected result onto the next indented line rather than
+  one long row. Headings and structural-check lines are single lines
+  that never wrap — keep them tight, but they may run longer.
 - **One step per line**, numbered. Inline short test data as
   `[data: ...]`; only break it onto its own line if it is long.
 - **Steps are actions; results live in `Exp:`.** Put the expected

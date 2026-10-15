@@ -30,12 +30,14 @@ sort above non-featured ones.
 - AC-5 (Confluence §3): A maximum of 10 exhibitors can be featured per
   event; switching the 11th toggle ON shows the validation message
   "Featured limit reached (10 per event)" and the toggle stays OFF.
+- JD-1 (Jira Description, conflicts with AC-2): The badge on a featured
+  exhibitor's card reads "★ Featured".
 
 AC items on the page: 5 · captured: 5
 
 ## ⚠️ Conflicts to resolve
-- AC-2 badge label: Confluence says the badge text is "Featured"; the
-  Jira Description says "★ Featured".
+- AC-2 / JD-1 badge label: Confluence says the badge text is
+  "Featured"; the Jira Description says "★ Featured".
 
 ## Additional requirements (from comments)
 - CM-1 (comment 2026-07-01): the badge must also appear in the exhibitor
@@ -54,21 +56,23 @@ AC items on the page: 5 · captured: 5
 
 1. Copy this file to `~/.ep-qa/runs/EP-0000/docs/EP-0000-context.md`
    (the run folder — `skills/qa-pipeline/references/data-locations.md`).
-   It is already in the stage-1 output shape: the `AC-n` / `CM-n` ids
-   and the page/captured count line are what task-context writes; the
-   `§` section numbers are synthetic, like the ticket.
-2. Run `requirements-grooming` → `qa-test-cases` on it (stage 3 is
-   folded into 4 since 0.40.0).
+   It is already in the stage-1 output shape: the `AC-n` / `JD-n` /
+   `CM-n` ids and the page/captured count line are what task-context
+   writes; the `§` section numbers are synthetic, like the ticket.
+2. Run `requirements-grooming` → `qa-test-cases` on it.
 3. Expect: ~6 REQs (5 + 1 from comments); the badge-label conflict
-   raised as a Contradiction; the limit-of-10 producing BVA cases at
-   9/10/11; channel tags splitting `[UI]` (badge, toggle, sorting) from
+   raised as a Contradiction, REQ-2 citing `AC-2, JD-1` and written as
+   one case per version; the limit-of-10 producing BVA cases at
+   9/10/11 (REQ-5 rated High — the limit gates a core organiser
+   flow; at Medium the depth is 10/11); channel tags splitting `[UI]` (badge, toggle, sorting) from
    `[API]` (the `featured` field); the toggle's presence and default
    OFF as Structural checks lines, not cases; REQ-ID traceability
    intact end to end; exactly ONE `[core]`-marked case per behavioural
-   REQ, with a matching `Core cases:` line in the test-cases statistics
-   block; every REQ carrying a `source:` id from the fixture's
-   `AC-1…AC-5` / `CM-1` bullets, every group a `Covers:` line,
-   `AC coverage: 5/5` — compare with
+   REQ, chosen by the core selection rule, with a matching `Core
+   cases:` line in the test-cases statistics block; every REQ carrying
+   a `source:` id from the fixture's `AC-1…AC-5` / `JD-1` / `CM-1`
+   bullets, every group a `Covers:` line, `AC coverage: 5/5 · JD 1/1 ·
+   CM 1/1` — compare with
    `skills/qa-test-cases/references/test-cases-example.md`, which is
    this fixture's expected output, and run `reconcile_counts.py
    EP-0000` on the result.

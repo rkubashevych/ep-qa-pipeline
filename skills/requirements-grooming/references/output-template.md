@@ -35,3 +35,13 @@ Skill: <the line `skill_stamp.py requirements-grooming` prints>
   - mitigated by: REQ-4
 
 AC coverage: <n>/<N> AC items mapped< · SB <n>/<N> — only when the context has SB-n items> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
+
+## Open findings
+> The findings the user did not settle (skipped, or auto-default mode),
+> one line each in the "Finding codes" line shape, grouped under the
+> chat categories. Not requirements: stage 4 reads them only to mark
+> "needs clarification". Omit the section when every finding was
+> settled.
+
+### Questions
+- REQ-3 AMBIGUOUS (SPEC): <essence> — a tester reading this would <consequence> → <what is needed>
