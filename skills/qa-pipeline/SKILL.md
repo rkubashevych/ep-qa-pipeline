@@ -41,14 +41,13 @@ From the ticket key/URL (ask if the paste has none):
 2. Pipeline QA sub-task? `searchJiraIssuesUsingJql`:
    `parent = <KEY> AND labels = "qa-pipeline"` (newest wins). **Match
    on the label, never on the issue type** — the type differs per
-   project and a type filter returns silently empty in the wrong one:
-   HV has a `QA sub-task` type, EP does not (verified 2026-09-17), so
-   every EP pipeline sub-task is a plain `Sub-task`. The label is the
-   one thing the pipeline sets itself, so it holds in both.
+   project and a type filter returns silently empty in the wrong one
+   (CHANGELOG 0.43.5); the label is the one thing the pipeline sets
+   itself.
 3. On that sub-task, when it exists: a QA Service suite line? a
    code-phase status comment? a human summary? (The stage reports are
-   local-only — Jira carries no archive since 0.33.0, so their absence
-   on the ticket says nothing about whether the code phase ran; check
+   local-only, so their absence on the ticket says nothing about
+   whether the code phase ran; check
    the run folder and `list_test_runs` on the suite. Find the suite with
    `search {query: <feature words or prefix>, kinds: ["suite"]}` — never
    `list_suites` first: it returns the whole product, ~190 KB. A run in
@@ -103,7 +102,5 @@ orchestrator's step 0 doesn't re-discover it.
   proposing a fresh docs run.
 - If the user's message already names a mode, this skill should not
   have fired — hand over silently to the named skill.
-- A QA sub-task given as input is not a docs-phase target on its own:
-  route on its parent Story. A human-created one (no pipeline label)
-  usually means estimation is next, so refinement is the default
-  proposal. Carry its key forward so the docs phase can adopt it later.
+- A QA sub-task given as input: route on its parent Story, and carry
+  its key forward so the docs phase can adopt it later.

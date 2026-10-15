@@ -5,6 +5,62 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.67.0 — 2026-10-15 — orchestrators: rare branches disclosed, step 0 points to its reference
+
+**Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,
+orchestrator group — the last of the four. SKILL.md lines: qa-pipeline
+111 → 106, qa-pipeline-docs 320 → 243, qa-pipeline-code 494 → 452,
+qa-refinement 194 → 178, qa-rc-smoke 147 → 141.
+
+**qa-pipeline-docs.** "After a refinement run" and "Adopt a QA sub-task
+a human already created" — branches most runs never take — moved to the
+new `qa-pipeline-docs/references/special-cases.md`, each with a pointer
+that names what it decides. The retired archive (0.33.0) and checkbox
+tracker (0.34.0) sections, 40 lines of history, are now one positive
+rule: Jira gets the description only; the suite holds cases,
+requirements, STRUCT checks, scope and the id map. The two pre-publish
+count checks (AC ledger; headings, tags, core) are one gate. The
+open-questions comment points to `jira-writing-style.md` for its
+shape instead of restating it.
+
+**qa-pipeline-code.** Step 0's suite-first extraction restated
+`qa-service-publish.md` → "Code phase — suite as the case source"
+almost line for line. It is now a core of what every run needs (scope
+to `detail.ticket`, never the whole suite, pipelineSkip and code-level
+cases listed not run, the rebuild, the report line, the no-suite
+fallback) plus "read the reference in full". The separate
+"reconciliation" paragraph folded into it. "Split runs" moved to
+`references/run-modes.md` (MAINTAINERS pointer updated). Post-publish
+verification names the reference's list instead of a looser copy of
+it — the copy lacked the held-back and quota rows.
+
+**qa-refinement, qa-rc-smoke, qa-pipeline.** The four question rules
+and the sizing sections point to the files that hold them; the "never
+ask about environment, dates or owners" list stays inline (the user's
+standing preference for that comment). rc-smoke's instrument rule,
+written twice, is once, in Step 4. The dispatcher drops the per-project
+issue-type detail (CHANGELOG 0.43.5 keeps it; 0.47.2 had made it stale)
+and the archive history.
+
+**Verified.** A fresh agent diffed the edit against 0.66.0 with the
+orchestrators held to a strict bar. No major rule lost; six catches,
+all fixed before commit:
+- the STRUCT line shape — step 6's join key — had moved behind a
+  pointer that no longer named "Structural checks": restored inline;
+- two edge fallbacks were dropped (no STRUCT cases → legacy block or
+  say so; no requirements file anywhere → say traceability cannot be
+  re-verified): restored;
+- the docs phase described a human-created QA sub-task but no longer
+  said to look for one: it now looks, per special-cases.md §2;
+- "recon is read-only" lost the one restored setting flip recon.md
+  allows: restored;
+- the count gate said "before the preview" but sat after it: moved
+  ahead of the PAUSE, and its no-shell fallback now counts tags, core
+  markers and ledger ids too;
+- stale text: the `QA sub-task` issue type (gone since 0.47.2),
+  run-modes' "three modes" intro, refinement's pointer one hop short
+  of §2.
+
 ## 0.66.0 — 2026-10-15 — manual round: one home for test linking, analyzer §4 disclosed
 
 **Trigger:** Part C of `docs/reviews/WRITING-FOR-AGENTS-REVIEW-2026-10-15.md`,

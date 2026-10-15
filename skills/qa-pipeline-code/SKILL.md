@@ -124,41 +124,35 @@ Otherwise, using the Atlassian connector and the Story key:
    per project and a type filter returns silently empty in the wrong
    one (CHANGELOG 0.43.5).
 
-   **Source order — suite first** (the docs phase posts no fenced copy
-   of any file since 0.33.0; the suite is the record). Full rules:
+   **Source order — suite first; the suite wins on divergence** (cases
+   may have been fixed in the web UI between phases). Read
    `../qa-pipeline-docs/references/qa-service-publish.md` → "Code phase
-   — suite as the case source" and "Structural checks".
+   — suite as the case source" and "Structural checks" in full before
+   extracting: scope, reconciliation, the STRUCT and AC-ledger rebuild,
+   legacy suites. The core, every run:
    - Sub-task names a **QA Service suite** + connector present →
      `get_suite` (then `get_test_case` per in-scope id when the response
-     carries no `detail`) and rebuild `<STORY>-test-cases.md`: the
-     authoritative copy. **Scope it to THIS run** — a suite is per
-     FEATURE: execute only cases whose `detail.ticket` is `<STORY>`,
-     plus team-added cases tracing to this run's requirements (flag
-     them); pre-0.34 suites: the legacy tracker-line ids ("Legacy
-     formats"). Never the whole suite. Never run a case whose
-     `detail.pipelineSkip` names `<STORY>`, nor a code-level one
-     (`levels` only `U`/`I`/`C`/`CFE`/`Perf`/`worker` — CI proves it):
-     list both. Report "suite holds N cases;
-     M + S in scope; K code-level (CI), J not adopted" (M behavioural,
-     S structural — both on the roster); local ids from
-     `detail.pipelineId`. Then `register_review_status` (0.50.1,
-     `qa-service-publish.md` → Procedure step 7).
-   - Rebuild the **Structural checks** section from the `-STRUCT-`
-     cases, the stableId on each line
-     (`- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check>`) — roster
-     cases stage 8 reports by that id and step 6 records. No STRUCT
-     cases (pre-0.33) → the legacy `(structural checks only)` block if
-     present, else say so and skip them.
-   - Rebuild **`<STORY>-requirements.md`** from the suite's
-     requirements (`detail.pipelineId` → REQ-N; each REQ's `source:` and
-     each case group's `Covers:` line from `detail.ac` — absent =
-     pre-0.42 suite, say so once) — without them the analyzer's
-     traceability and AC-ledger checks cannot run in a fresh chat. No
-     suite → the docs-phase copy in `runs/<STORY>/docs/`; neither → say
-     once that upstream traceability cannot be re-verified.
+     carries no `detail`) and rebuild `<STORY>-test-cases.md` — with
+     its Structural checks section from the `-STRUCT-` cases, one line
+     each, `- [ ] REQ-N/struct-k · <PREFIX>-STRUCT-NN [UI] <check>`
+     (the stableId is the key stage 8 reports by and step 6 records
+     on; no STRUCT cases → the legacy block if present, else say so and
+     skip them) — and **`<STORY>-requirements.md`**
+     (`source:` / `Covers:` lines from `detail.ac`; without them the
+     analyzer's AC-ledger checks cannot run in a fresh chat). **Scope it
+     to THIS run** — a suite is per FEATURE: only cases whose
+     `detail.ticket` is `<STORY>`, plus team-added cases tracing to this
+     run's requirements (flagged). Never the whole suite. Never run a
+     case whose `detail.pipelineSkip` names `<STORY>`, nor a code-level
+     one (CI proves it): list both. Report "suite holds N cases; M + S
+     in scope; K code-level (CI), J not adopted" (M behavioural, S
+     structural — both on the roster). Then `register_review_status`
+     (`qa-service-publish.md` → Procedure step 7).
    - No suite or no connector → **`runs/<STORY>/docs/`** on this
-     machine (pre-0.33: legacy archive comments via
-     `scripts/extract_archive.py`). Neither → offer: re-run
+     machine; skip the later write-back and say once in the final
+     response that the run leaves no durable per-case record. No
+     requirements file there either → say once that upstream
+     traceability cannot be re-verified. Neither → offer: re-run
      `qa-pipeline-docs`, attach the files, or — Bug ticket — bug-fix
      mode.
 
@@ -171,16 +165,6 @@ Otherwise, using the Atlassian connector and the Story key:
    roster; stages 5–8 run unchanged; the manual round shrinks to a
    handful of cards or a one-line verdict. Full rules:
    `references/run-modes.md` → "Bug-fix mode".
-
-   **QA Service reconciliation:** whenever the sub-task names a suite
-   AND the connector is present, reconcile the extracted cases against
-   the suite — the suite wins on divergence (cases may have been fixed
-   in the web UI between phases); rules:
-   `../qa-pipeline-docs/references/qa-service-publish.md` → "Code
-   phase — suite as the case source". No suite line or no connector →
-   the local docs-phase files are all there is; skip reconciliation and
-   the later write-back and say so once in the final response — the
-   run will leave no durable per-case record.
 
    **Resume mode** — the run folder first (reports, ledger,
    `-manual-results.md` which SUPERSEDES stage reports), then the QA
@@ -225,19 +209,9 @@ Otherwise, using the Atlassian connector and the Story key:
    clone costs: `../pr-summary/references/bitbucket-access.md` →
    "Local clone".
 
-## Split runs (Claude Code ↔ Cowork)
-
-Stages 5–7 need repo/API creds (Claude Code); stage 8 needs a browser
-backend — Playwright MCP by default (Claude Code too, one environment),
-the Chrome extension as the fallback (Cowork). When the current
-environment cannot run everything: run what it can, post the step-6
-status line marked **PARTIAL** (name the pending stages), then start a
-fresh chat in the other environment with the same Story key — resume
-mode restores the finished reports from the run folder, and the last
-environment posts the final status line as a NEW comment. What bridges
-the two is `$EP_QA_HOME/runs/<STORY>/r<N>/` (Cowork mounts `~/.ep-qa`,
-Claude Code has it on disk); if they cannot share it, the run cannot be
-split — say so before starting.
+**Split runs.** When this environment cannot run every stage (Claude
+Code ↔ Cowork), run what it can and hand over:
+`references/run-modes.md` → "Split runs".
 
 ## How it runs
 
@@ -302,8 +276,8 @@ story does not exhaust the orchestrator's context:
    — N cases, M settled by machine, K for manual — QA Service run <id>
    open. Results published after the manual round.`) on the QA sub-task
    when the ticket has one, otherwise on the ticket under test. **That
-   is all wave 1 writes to Jira.** No archive comments (retired 0.33.0
-   — a fenced file dump on ANY ticket is a ❌), no prose summary of the
+   is all wave 1 writes to Jira.** No archive comment (a fenced file
+   dump on ANY ticket is a ❌), no prose summary of the
    reports, no description overwrite; the one sanctioned cross-ticket
    comment is stage 10's retraction (`test-runs.md` → "Retraction target
    rule").
@@ -431,32 +405,21 @@ story does not exhaust the orchestrator's context:
      by kind, cases settled without a card, anything not provisionable.
    Skip only if the user says they are not hand-testing this ticket.
 
-   **Post-publish verification — always the last action of the run**
-   (`references/wave1-and-verification.md` → the list). The analyzer
-   ran at step 5, BEFORE steps 6–9; verify the final state now: the
-   write-back landed (`get_test_run` roster == scope, `progress`
-   partition == the reports under the `test-runs.md` mapping,
-   `executed_coverage` moved); every FAIL has a card, a bug key or a
-   "not carried" line; exactly one wave-1 comment on the right ticket
-   and nothing else (no dump, no early summary); every report on disk;
-   walk-plan outputs exist and pass the voice check; everything under
-   `runs/<STORY>/r<N>/`, nothing in the checkout. Append
-   `## Post-publish verification` (✅/❌ per item) to
+   **Post-publish verification — always the last action of the run.**
+   The analyzer ran at step 5, BEFORE steps 6–9. Verify the final state
+   now against EVERY item of `references/wave1-and-verification.md` →
+   "Post-publish verification" (the write-back partition with held-back
+   and quota rows, the audit honoured, every FAIL carried, one wave-1
+   comment, reports on disk, walk-plan outputs, nothing outside the run
+   folder). Append `## Post-publish verification` (✅/❌ per item) to
    `<STORY>-run-report.md`; a ❌ is a real finding — fix it or tell the
    user, never bury it.
 
 10. **The human round — `qa-manual-walk` then `qa-manual-results`
-    (stage 10, deferred).** It happens after this orchestrator finishes,
-    often days later, in another chat: the tester says "walk me through
-    <STORY>" and `qa-manual-walk` presents the plan one card at a time
-    (records nothing; writes `<STORY>-walk-results.md`); then
-    `qa-manual-results` joins by TC id, reconciles against the machine
-    record, and on the tester's yes writes back with explicit
-    retractions, posts the FIRST human-facing summary, files the
-    surviving bugs and makes the handback offers. End THIS run by
-    saying plainly: nothing human-facing has been published yet; the
-    walk is next; stage 10's write-back is where the team hears the
-    result.
+    (stage 10, deferred)**, often days later, in another chat. End THIS
+    run by saying plainly: nothing human-facing has been published yet;
+    the walk is next ("walk me through <STORY>"); stage 10's write-back
+    is where the team hears the result.
 
 ## Between stages
 

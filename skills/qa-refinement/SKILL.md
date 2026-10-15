@@ -83,19 +83,12 @@ and following it **in full**.
       belong in the sizing note's "Blocks execution" list, not in a
       question.
 
-      Write each question by the four rules in that section:
-      - one decision, with the outcomes a user would see;
-      - every setting named by where it lives and what it does today;
-      - a concrete example for any mismatch;
-      - the words on the screen, not the code's.
-
-      The file also carries the `## Names` table (`jira-writing-style.md`
-      → "Every name in the comment is a checked name"). Each page,
-      path, toggle, tab or message the draft names gets a row whose
-      source is `screen` or `label`, never the spec. Do not show the
-      draft while any row still says `spec only`. On EP-55996 four
-      such names reached the first draft, and an EM had to ask "which
-      screen?".
+      Write each question by the four rules in that section (read it in
+      full). The file also carries the `## Names` table
+      (`jira-writing-style.md` → "Every name in the comment is a checked
+      name"): every page, path, toggle, tab or message the draft names
+      has a row whose source is `screen` or `label`, never the spec. Do
+      not show the draft while any row still says `spec only`.
 
       Next to each question in the file, note the REQ it blocks and
       its grooming finding code (`AMBIGUOUS`, `INCOMPLETE`, … —
@@ -122,16 +115,8 @@ and following it **in full**.
      references.
 
 5. **Sizing note** — write `<STORY>-sizing.md` per
-   **`references/sizing-template.md`** and give its table in chat. It
-   covers:
-   - the scope matrix;
-   - the rough case count, with its arithmetic;
-   - the effort range per activity;
-   - what blocks execution: backend not deployed, no test environment,
-     questions that gate specific REQs;
-   - any estimate already on the ticket, compared with this one.
-
-   It stays in the run folder and the chat. It goes to Jira only when
+   **`references/sizing-template.md`** (every section of it) and give
+   its table in chat. It stays in the run folder and the chat. It goes to Jira only when
    the user asks, and then as the user's own estimate, in their words.
 
 ## Answers pass — when the ticket answers back
@@ -190,4 +175,4 @@ since.
   in: `run the QA docs pipeline on <STORY>`. Also say "adopt
   <QA-SUBTASK> at publish" when a human-created QA sub-task exists.
   The docs phase offers the adoption in its publish preview
-  (`../qa-pipeline-docs/SKILL.md` step 6).
+  (`../qa-pipeline-docs/references/special-cases.md` §2).

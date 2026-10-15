@@ -86,8 +86,11 @@ it before step 1.
    user signed in by hand** in the Playwright browser. No saves:
    dialogs are cancelled and pages are left unsaved. A precondition
    that needs a setting changed follows "Setting changes" in the method.
-   A mocked response counts only once a positive control has shown that
-   the instrument can see what it is looking for.
+   **The instrument proves itself first:** a mocked response counts
+   only once a positive control has shown that the instrument can see
+   what it is looking for. An unproven instrument is no result, never a
+   pass (EP-57782: a mocked 401/500 on an SSR-rendered listing produced
+   no toast even in the control cases).
 5. **Record** — one QA Service test run over exactly the cases step 4
    exercised (`../qa-pipeline/references/test-runs.md`, with the RC
    specifics in the method: title, `env: rc`, release, catalogue ids,
@@ -115,10 +118,6 @@ it before step 1.
   (runtime) are separate columns. An item whose runtime check could
   not tell pass from fail is reported as present with runtime
   inconclusive, never as a pass.
-- **The instrument proves itself first.** On EP-57782 a mocked 401/500
-  on an SSR-rendered listing produced no toast, even in the control
-  cases. That result meant nothing. Recording it as "no toast = pass"
-  would have been a false pass.
 - **Never print a URL's query string from an admin page.** The admin-ui
   iframe `src` carries a session `token`. It was echoed on EP-57509 and
   again on EP-57782. Read `frame.url()` only after stripping the query

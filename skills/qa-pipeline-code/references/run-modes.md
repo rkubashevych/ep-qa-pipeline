@@ -1,12 +1,11 @@
 # Run modes — bug-fix, resume, retest (qa-pipeline-code step 0)
 
-**Contents:** Which mode · Bug-fix mode · Resume mode · Retest mode
+**Contents:** Which mode · Bug-fix mode · Resume mode · Retest mode · Split runs
 
 Step 0 of `qa-pipeline-code` decides the mode before anything else runs.
-This file holds the full rules for the three non-default modes; the
-SKILL.md keeps only the entry conditions and the one-line summary of
-each. Everything here was in the SKILL.md until 0.41.0 and moved
-verbatim — the rules did not change, only their address.
+This file holds the full rules for the three non-default modes and for
+splitting a run across environments; the SKILL.md keeps only the entry
+conditions and a one-line summary of each.
 
 ## Which mode
 
@@ -195,3 +194,17 @@ published (`test-runs.md` → "Retraction target rule"); verified
 bugs get a closing comment offered on their tickets. Everything else
 keeps its verdicts — say so in the summary. Stage 10 ingests the
 retest walk results (or an exported sheet) like a first run.
+
+## Split runs (Claude Code ↔ Cowork)
+
+Stages 5–7 need repo/API creds (Claude Code); stage 8 needs a browser
+backend — Playwright MCP by default (Claude Code too, one environment),
+the Chrome extension as the fallback (Cowork). When the current
+environment cannot run everything: run what it can, post the step-6
+status line marked **PARTIAL** (name the pending stages), then start a
+fresh chat in the other environment with the same Story key — resume
+mode restores the finished reports from the run folder, and the last
+environment posts the final status line as a NEW comment. What bridges
+the two is `$EP_QA_HOME/runs/<STORY>/r<N>/` (Cowork mounts `~/.ep-qa`,
+Claude Code has it on disk); if they cannot share it, the run cannot be
+split — say so before starting.

@@ -120,7 +120,7 @@ stage needs to write.
 status line marked PARTIAL, then resume in Cowork with the same Story
 key — `qa-pipeline-code` Step 0 restores the finished stage reports
 from the run folder `~/.ep-qa/runs/<KEY>/r<N>/` (see "Split runs" in
-its SKILL.md). Both environments see `~/.ep-qa`, so no files need to be
+`skills/qa-pipeline-code/references/run-modes.md`). Both environments see `~/.ep-qa`, so no files need to be
 carried between them; the QA Service run carries the verdicts anyway.
 
 ## Where things live
