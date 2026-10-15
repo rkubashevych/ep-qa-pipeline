@@ -23,10 +23,10 @@ Skill: <the line `skill_stamp.py qa-run-analyzer` prints>
 > "Connector absent — not checked."
 
 - Suite: `<path>` (<N> requirements / <M> cases) — or "no suite found"
-- Verdict: <in sync / not published yet (docs run, pre-publish) /
+- Verdict: <in sync / not published yet (docs run, pre-publish; suite holds the stage-3 items: R requirements, G generated cases) /
   mismatch: missing <stableIds>, extra <stableIds>>
 - Run (code phase, after step 6): `<title>` `<id>` — status <running /
-  closed>; partition pass <N> · fail <N> · blocked <N> · known_defect
+  completed / closed>; partition pass <N> · fail <N> · blocked <N> · known_defect
   <N> · skipped <N> · not_run <N> vs stage statistics <match / mismatch:
   …>; executed coverage: machine <N> · manual <N> · never executed <N>
   — or "no run for this pass" / "analyzer ran before step 6".

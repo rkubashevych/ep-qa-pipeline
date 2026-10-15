@@ -78,7 +78,9 @@ The only place a credential lives. Variables (the api-testing reference
 | `ALLOWED_HOSTS` | every stage that sends a request to a product host (below) |
 | `QA_OPERATOR_EMAIL` | qa-pipeline-docs publish (the QA sub-task assignee), qa-manual-results (the default tester principal) |
 
-There is **no variable for a visitor or exhibitor login**, on purpose:
+### No variable for a visitor or exhibitor login
+
+There is none, on purpose:
 those accounts are test data — the case's `[data: …]`, or a throwaway
 account created under api-testing's write-safety rules (stage 9
 provisions them for the walk). A run that may not write marks such

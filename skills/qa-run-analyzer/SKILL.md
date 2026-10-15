@@ -34,26 +34,41 @@ Reads whichever of these exist — resolved per
 `../qa-pipeline/references/data-locations.md` (run folder first;
 asking the user is the last resort):
 `<ISSUEKEY>-context.md`, `<ISSUEKEY>-requirements.md`,
-`<ISSUEKEY>-qs-cases.md` (docs stage 3's QA Service export, 0.50.0 —
+`<ISSUEKEY>-qs-cases.md` (docs stage 3's QA Service export —
 § 4 checks it), `<ISSUEKEY>-test-cases.md` (with its Structural checks section;
 `<ISSUEKEY>-checklist.md` only on tickets run before 0.40.0),
 `<ISSUEKEY>-pr-summary.md`, `<ISSUEKEY>-code-review.md`,
 `<ISSUEKEY>-api-testing.md`, `<ISSUEKEY>-web-testing.md`,
 `<ISSUEKEY>-web-evidence.md` and `<ISSUEKEY>-api-evidence.md` (the
 evidence sections § 5 checks), `<ISSUEKEY>-evidence-audit.md` (the
-step-5 audit, 0.47.0), the saved `sources/` folders (§ 7),
+step-5 audit), the saved `sources/` folders (§ 7),
 `<ISSUEKEY>-sources.md` (the source register § 7 checks against),
 `<ISSUEKEY>-recon.md`, `<ISSUEKEY>-open-questions.md`,
 `<ISSUEKEY>-answers.md` and `<ISSUEKEY>-sizing.md` (qa-refinement's
 files; informational, except that a question classed "not clear to
 them" or "not needed" in `-answers.md` is a 🟡 on how the question was
 written),
+`<ISSUEKEY>-retest-scope.md` (retest mode's confirmed scope, § 8),
+`<ISSUEKEY>-human-summary.md` (the DRAFT the post-publish check reads),
+`<ISSUEKEY>-api-tests.md` and `<ISSUEKEY>-claim-review.json`
+(qa-api-tests' report and its claim review —
+`references/qa-service-first-checks.md`),
 `<ISSUEKEY>-walk-plan.md` (stage 9's plan — for the voice check and
-the coverage map), `<ISSUEKEY>-walk-results.md` (the walk's verdicts),
-`<ISSUEKEY>-manual-results.md`,
-`<ISSUEKEY>-remaining-cases-triage.md`, and any tester results table
+the coverage map), `<ISSUEKEY>-testdata.json` (stage 9's fixtures,
+§ 5 — never printed), `<ISSUEKEY>-walk-state.json` (a walk in
+progress, § 5), `<ISSUEKEY>-walk-results.md` (the walk's verdicts),
+`<ISSUEKEY>-manual-results.md`, `<ISSUEKEY>-open-items.md` (the
+ledger, § 8), `<ISSUEKEY>-remaining-cases-triage.md`, and any tester results table
 (`<ISSUEKEY>-preserved-entries.tsv` or similar TC/Result/Notes file).
-The last four carry post-publication corrections: when present, they
+Not read: `<ISSUEKEY>-run-report.md` (this skill's own output),
+`<ISSUEKEY>-*-plan.json` (write plans — `plan_hash.py check` verifies
+them at write time), `<ISSUEKEY>-runsheet.xlsx` and
+`<ISSUEKEY>-testdata-notes.md` (renderings of the walk plan and the
+fixtures; the plan and `-testdata.json` are read instead) —
+`verify_plugin.py` check 5e fails when a skill names a run file this
+paragraph does not.
+`-walk-results.md`, `-manual-results.md`, `-remaining-cases-triage.md`
+and the tester table carry post-publication corrections: when present, they
 are MORE current than the stage reports — a stage-report PASS
 contradicted there is a retracted verdict, not a pass. **Match them to
 the round first:** a walk-results or manual-results file whose `Run:`
@@ -111,7 +126,11 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   readable); an `AC-n` is on no `source:` line (grooming dropped a
   criterion); an `AC-n` is on no `Covers:` line of a group with a case
   or structural line (a criterion reached no test). A `JD-n` / `CM-n`
-  gap is 🟡. Name the id and the criterion text in the finding. Files
+  gap is 🟡. Not a gap: an id the script lists as "risk carried to the
+  ledger, no case by rule" — a `Risk:` REQ with no observable
+  consequence gets no case (qa-test-cases → Risk requirements); it is
+  a ledger row, reported under §8. Name the id and the criterion text
+  in the finding. Files
   from before 0.42.0 carry no ids — say so once and fall back to the
   count + ordering comparison of context bullets vs REQ-N.
 - REQ-ID traceability is intact across requirements -> test-cases
@@ -172,10 +191,16 @@ Severity: use 🔴 blocker, 🟡 warning, 🟢 ok.
   for regression risk, not a failure of the run.
 
 ### 2. Input quality (Input)
-- Missing-AC warning present (no Confluence acceptance criteria)?
+- Missing-AC warning present (no Confluence acceptance criteria)? A
+  Bug's `Bug: no AC page expected` line is not one — never a finding.
 - Any "(unresolved conflict)" left in requirements?
 - "Requirements needing clarification" > 0 in test-cases stats?
-- Grooming findings that were left as-is / skipped by the user.
+- Grooming findings that were left as-is / skipped by the user — the
+  requirements file's "Open findings" section (grooming's template);
+  one line with the count by category, and a 🟡 for a BEHAVIOUR
+  finding still listed there after `<ISSUEKEY>-recon.md` answered it
+  (the orchestrator folds recon answers into the file; a settled
+  finding left in the section is stale).
 
 ### 3. Skill / process malfunctions (Pipeline/skill)
 - A stage produced no output or a malformed file (missing the sections
@@ -219,9 +244,16 @@ the whole product, ~190 KB) and report ONE of:
 - 🟡 **archive posted** — any fenced `File: <name>` block found in a
   comment written by this round on any ticket; name the comment so it
   can be deleted.
-- 🟢 **not published yet** — no suite found AND this analyzer run is
-  inside the docs orchestrator (publish is its step 6, which runs
-  after this check — expected, not a failure).
+- 🟢 **not published yet** — this analyzer run is inside the docs
+  orchestrator (its step 5; the publish is step 6). Since 0.50.0 stage
+  3 has usually already created the suite, its header, this ticket's
+  requirements and the generated cases — so "suite exists but stage
+  4's cases are not in it" is the EXPECTED state here, not a mismatch.
+  Report `🟢 not published yet (suite <path> holds the stage-3 items:
+  R requirements, G generated cases)` and run no count comparison and
+  no run check; the suite-structure checks still run on what exists.
+  With no suite at all (no connector, user declined stage 3) the same
+  outcome, without the parenthesis.
 - 🔴 **publish incomplete / mismatch** — suite exists but counts or
   IDs diverge from the files: list the missing/extra stableIds.
 - **The run and the suite structure** — post-publish checks (no run,
@@ -250,10 +282,13 @@ step verifies itself, but this skill re-checks it with fresh
 instructions in a later stage/chat, so a silently skipped or partial
 publish surfaces here. **When it actually runs:** in the orchestrated
 docs flow the analyzer is step 5 and the publish is step 6, so at that
-point there is nothing to sync against — report `🟢 not published yet`
-and stop; the real check happens at the code phase's step 0 (which
-reads the suite) and on any on-demand run after the publish. Do not
-present a step-5 run as having verified the publish.
+point the suite holds only stage 3's items and the count comparison
+has nothing to compare against — report `🟢 not published yet` as
+above and skip the comparison and the run check; the real check
+happens in the orchestrator's own post-publish verification, at the
+code phase's step 0 (which reads the suite) and on any on-demand run
+after the publish. Do not present a step-5 run as having verified the
+publish.
 
 ### 5. Evidence quality (Pipeline) — can the verdicts be believed?
 

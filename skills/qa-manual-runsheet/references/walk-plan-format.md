@@ -112,7 +112,7 @@ the tester sees none unless they ask or a rule says to volunteer one.
 |---|---|
 | `kind` | WALK · SPOT-CHECK · AGENT-RUNS · BLOCKED · DEVICE (below) |
 | `machine` | the stage 6 / 7 / 8 verdicts, one per stage, verbatim status names from `status-vocabulary.md` — e.g. `CR PASS · API — · WEB NOT EXECUTED`; `—` for a stage that did not hold the case |
-| `why-walked` | the selection reason from step 2a: must-walk / `[core]` / VERIFY (High-risk or code-reading-only PASS) / risk extra / SPECIAL ATTENTION |
+| `why-walked` | the selection reason from step 2a: must-walk / `[core]` / VERIFY (High-risk or code-reading-only PASS) / risk extra / SPECIAL ATTENTION — for a row the evidence audit held back, the audit's remediation line is appended after ` · ` |
 | `source` | the ledger id, register row and verbatim clause the expectation rests on (`AC-<n> · REQ-N clause "…" (<document §>)`; `sources-of-record.md`) — or `OBSERVATION (no source checked)`. A tester who asks "which AC is this?" gets the id. |
 | `positive-control` | for absence checks: the visible fact that proves the state existed |
 | `half-observable` | `no`, or which half the tester sees and which machine verdict owns the rest |

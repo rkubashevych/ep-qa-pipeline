@@ -90,9 +90,15 @@ what the templates and `reconcile_counts.py` parse:
 A routed case that appears in none of web-testing's sections is a
 coverage hole, not a pass (analyzer: routing integrity).
 
-Cross-stage rules that live with the vocabulary:
-- Prefer BLOCKED / NOT-TESTABLE / QA over a doubtful PASS — a false
-  pass is worse than a failure because nobody investigates it.
+## Cross-stage rules
+
+Rules that live with the vocabulary:
+- Prefer a doubt status over a doubtful PASS — a false pass is worse
+  than a failure because nobody investigates it. Each stage picks the
+  doubt status from its own column above: code review QA; api-testing
+  BLOCKED / NOT-TESTABLE / PARTIAL; web-testing BLOCKED / PARTIAL /
+  SPEC-DEFECT (never NOT-TESTABLE or QA — a WEB row in either leaves
+  the walk roster unnoticed).
 - **The stage that ran a case does not grade its own proof** (0.47.0).
   Runtime verdicts pass the step-5 evidence audit before they are
   recorded; the audit file supersedes the reports for the rows it holds

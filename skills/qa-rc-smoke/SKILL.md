@@ -7,7 +7,7 @@ description: >
   served, core behaviour at runtime, no saves), records one QA Service
   test run and, on confirmation, one results comment. Never a
   sign-off. Use when the user says "smoke test the RC", "check these
-  items are on RC", "RC regression for EP-1234", "are the release
+  items are on RC", "are these on RC", "RC regression for EP-1234", "are the release
   items deployed to rc", or pastes the RC regression ticket. Do NOT
   use for one ticket on alpha (qa-pipeline-code), a full regression
   run (CI), or production (refused).

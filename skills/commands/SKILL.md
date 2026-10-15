@@ -1,9 +1,11 @@
 ---
 name: commands
-disable-model-invocation: true
 description: >
-  Lists every ep-qa-pipeline command: what it does and what to type.
-  Prints a fixed table; runs nothing.
+  Lists every ep-qa-pipeline command — modes, checks and the seven
+  slash-only single stages — what each does and what to type. Prints
+  a fixed table; runs nothing. Use when the user asks "what commands
+  does the pipeline have", "how do I run just one stage", "what is the
+  slash command for grooming / code review / web testing".
 ---
 
 # ep-qa-pipeline commands

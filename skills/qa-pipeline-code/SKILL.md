@@ -34,9 +34,10 @@ The detail this file used to carry lives in `references/`:
 - Optional: a per-task test host (alpha host) for the UI stage — use
   it if the QA sub-task names one.
 - For stage 7: the `.env.qa-agents` variables and, for exhibitor-token
-  cases, the per-event frontend host + an exhibitor login (per-event,
-  not discoverable — must be supplied; must be in `ALLOWED_HOSTS`).
-  api-testing pauses and asks if missing.
+  cases, the per-event frontend host — `FRONTEND_HOST` from the file,
+  or supplied when it is empty (must be in `ALLOWED_HOSTS`); api-testing
+  pauses only for a host it has neither way. An exhibitor login is test
+  data, never a pause (`environment.md`).
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 — run folder, then the suite; a new chat is no reason to ask.
@@ -249,7 +250,8 @@ story does not exhaust the orchestrator's context:
 3. **api-testing (stage 7)** — on the code-review + test-cases.
    Executes the `[API]` QA/FAIL cases via curl with `.env.qa-agents`
    credentials. **PAUSE** if values are missing or a host is not in
-   `ALLOWED_HOSTS`. Produces `<STORY>-api-testing.md`.
+   `ALLOWED_HOSTS`. Produces `<STORY>-api-testing.md` and
+   `-api-evidence.md` §n per PASS / FAIL / PARTIAL.
 
 4. **web-testing (stage 8)** — on the code-review + test-cases (its
    Structural checks section supplies the `[UI]` structural checks).
@@ -274,7 +276,10 @@ story does not exhaust the orchestrator's context:
    here, closed by stage 10 — `../qa-pipeline/references/test-runs.md`)
    and ONE status comment with no verdicts (`QA automated pass complete
    — N cases, M settled by machine, K for manual — QA Service run <id>
-   open. Results published after the manual round.`) on the QA sub-task
+   open. Results published after the manual round.`; `open` only while
+   `get_test_run` still reads `running` — with no `not_run` row left
+   the service auto-completes the run and the line says `completed`,
+   per the template) on the QA sub-task
    when the ticket has one, otherwise on the ticket under test. **That
    is all wave 1 writes to Jira.** No archive comment (a fenced file
    dump on ANY ticket is a ❌), no prose summary of the
@@ -322,13 +327,22 @@ story does not exhaust the orchestrator's context:
    - **After the yes to (a), in this order:** (1) `create_test_run` on the
      in-scope suite case ids; (2) `record_case_result` per row, `source:
      machine`, exactly per the `test-runs.md` mapping — FAIL / PARTIAL
-     rows stay `not_run`, the run stays `running` for stage 10, a run
+     rows stay `not_run` and keep the run `running` for stage 10 (a
+     pass with no such row auto-completes the run; the walk still
+     runs and stage 10 reopens it — `test-runs.md` → "A clean pass
+     completes the run before the walk"), a run
      that already exists for this pass (resume) is recorded into, never
      duplicated, lifecycle `status` never overwritten, no run lines in
      notes; (3) write `<STORY>-human-summary.md` per the template with
      `Status: DRAFT — awaiting stage 10` — stage 10's picture to
      reconcile against, NOT posted; (4) yes to (b) only: post the status
      comment (`addCommentToJiraIssue`), quoting the run id from (1).
+   - **Improvised coverage becomes permanent** in the same preview:
+     confirmed risk rows (`RISK-CR-<n>`) are proposed as suite cases and
+     put on the roster; SPEC-DEFECT verdicts get their `discrepancy:`
+     line — `../qa-pipeline-docs/references/qa-service-publish.md` →
+     "Improvised coverage becomes permanent". The stage reports say
+     "step 6 proposes it"; this is where.
    - Connector absent → no run; say so in the final response, which names
      the report paths (`runs/<STORY>/r<N>/`) — the only copy of the evidence.
 

@@ -1,6 +1,7 @@
 # <ISSUEKEY> - Requirements
 
 Context: <path to the context file>
+Ticket type: <Story | Task | Bug | Sub-task — from the context file's Fields section>
 Generated: <YYYY-MM-DD>
 Skill: <the line `skill_stamp.py requirements-grooming` prints>
 
@@ -34,14 +35,17 @@ Skill: <the line `skill_stamp.py requirements-grooming` prints>
   - source: CM-5
   - mitigated by: REQ-4
 
-AC coverage: <n>/<N> AC items mapped< · SB <n>/<N> — only when the context has SB-n items> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
+AC coverage: <n>/<N> AC items mapped< · SB <n>/<N> — only when the context has SB-n items>< · TS <n>/<N> — only when it has TS-n items> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
 
 ## Open findings
 > The findings the user did not settle (skipped, or auto-default mode),
 > one line each in the "Finding codes" line shape, grouped under the
-> chat categories. Not requirements: stage 4 reads them only to mark
-> "needs clarification". Omit the section when every finding was
-> settled.
+> chat categories. Not requirements and never a source of cases: stage
+> 4 reads them only to know which REQs carry an open question (its
+> Notes line). An open finding alone does NOT make a REQ "needing
+> clarification" — that count is for unresolved conflicts and REQs
+> marked "(needs clarification)" above. Omit the section when every
+> finding was settled.
 
 ### Questions
 - REQ-3 AMBIGUOUS (SPEC): <essence> — a tester reading this would <consequence> → <what is needed>

@@ -8,8 +8,8 @@ description: >
   the user says "automate the API cases for EP-1234", "write the API
   tests for this ticket", "make the API cases implemented in QA
   Service", or "create the frontend test sub-task". Do NOT use to
-  execute cases on a test env (api-testing), to write test cases
-  (qa-test-cases), or to register tests already merged
+  execute cases on a test env (qa-pipeline-code, stage 7), to write
+  test cases (qa-pipeline-docs), or to register tests already merged
   (qa-manual-results).
 ---
 
@@ -66,7 +66,8 @@ re-read the work order.
    `expo-qa-server`, a Postgres with an alpha snapshot). Run the checks
    in `references/local-harness.md` — harness clone, backend clone,
    containers, hosts, one smoke run. Missing any → say what is missing,
-   skip Step 3, and still do Steps 2 and 4 (they need no harness).
+   skip Step 3, and still do Steps 1, 1b, 2 and 4 (selection, the claim
+   review, linking, the frontend sub-task — none needs the harness).
 
 ## Step 1 — Select this ticket's API cases
 
@@ -119,7 +120,7 @@ digest recorded in the report:
 | `VERIFIED` | continue | continue |
 | `DRIFT` | **a possible product defect, never a case edit.** The case is set aside from Step 3 (its test would be red); the code / spec difference goes to the ledger and the bug offer, quoted from both sides | **the case is wrong.** Propose the correction: `edit_test_case` with a `correction` key (old claim → what the code does, `file:line`, commit); `edit_requirement` with the code as `sources` (`kind: context`); `status: retired` for a requirement the code contradicts outright, with the reason |
 | `DRIFT` that looks unintended (a silent fallback, an unvalidated range) | as above | correct the case to the as-built behaviour AND create an `oq` requirement asking whether it is intended (MEXP-OQ-06 / OQ-07) |
-| `DRIFT` on an `[as-designed]` requirement (from the developer's tech spec, `detail.basis` — 0.57.0) | — | **a question to the developer**, not a case edit and not a defect: their spec or their code is wrong. Ledger row + a line in the human summary's Questions; the case is set aside until they answer |
+| `DRIFT` on an `[as-designed]` requirement (from the developer's tech spec, `detail.basis`) | — | **a question to the developer**, not a case edit and not a defect: their spec or their code is wrong. Ledger row + a line in the human summary's Questions; the case is set aside until they answer |
 | `GAP` | keep, list in the report | keep, list in the report |
 | `CONFLICT` | an `oq` requirement naming both oracles | same |
 

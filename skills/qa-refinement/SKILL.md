@@ -10,8 +10,8 @@ description: >
   for this ticket", "check the ticket for open questions before we
   estimate", "QA estimate / decomposition prep", or "check the answers
   to our questions". Do NOT use for the full test-case set
-  (qa-pipeline-docs), grooming into a file only
-  (requirements-grooming), or story points (chat).
+  (qa-pipeline-docs), grooming into a file only (the slash-only stage
+  /ep-qa-pipeline:requirements-grooming), or story points (chat).
 ---
 
 # QA Refinement — questions and sizing before estimation
@@ -47,8 +47,9 @@ nothing else between steps. Execute each stage by reading its SKILL.md
 and following it **in full**.
 
 1. **task-context** — produces `<STORY>-context.md`, including the AC
-   ledger and `SB-n` spec-body rules. It pauses only for its own
-   blockers: an unreachable AC page, or attachments to upload.
+   ledger and `SB-n` spec-body rules. Run it inline, not as a
+   subagent: it pauses only for its own blockers — an unreachable or
+   unlinked AC page (one ask for the URL), or attachments to upload.
    Unreadable attachments are recorded, never a reason to stop.
 
 2. **requirements-grooming** in auto-default mode, with no wait for

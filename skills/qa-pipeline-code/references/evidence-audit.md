@@ -111,7 +111,7 @@ Coverage is mandatory. End the table with `Rows audited: N of N`.
   artifact that would settle it, in words a tester can act on ("open
   the exhibitor list as the visitor account and look for the Featured
   badge on exhibitor 'Acme'"). It becomes the walk card's backstage
-  `why:` line.
+  `why-walked:` line (the plan's selection-reason key).
 
 Be a hard grader. A plausible story is not evidence. A feature can work
 perfectly and still be insufficiently evidenced; say exactly that when
@@ -158,7 +158,7 @@ exactly as `-manual-results.md` supersedes them for human verdicts.
 | Claimed | Audit | Recorded in wave 1 (`../../qa-pipeline/references/test-runs.md`) | Stage 9 |
 |---|---|---|---|
 | PASS / FAIL REJECTED / structural PASS | SUFFICIENT | `pass`, per the mapping | settled or VERIFY, as before |
-| PASS / FAIL REJECTED / structural PASS | INSUFFICIENT or UNVERIFIABLE | **nothing — stays `not_run`** | **must-walk** (a WALK card in full form, never "settled"); the remediation line is its backstage `why:` |
+| PASS / FAIL REJECTED / structural PASS | INSUFFICIENT or UNVERIFIABLE | **nothing — stays `not_run`** | **must-walk** (a WALK card in full form, never "settled"); the remediation line is appended to its backstage `why-walked:` |
 | FAIL CONFIRMED with an open Jira key (the mapping's `known_defect` row) | SUFFICIENT | `known_defect`, per the mapping | card as before |
 | FAIL CONFIRMED with an open Jira key | INSUFFICIENT or UNVERIFIABLE | **nothing — stays `not_run`**: the bug is open, but this pass did not show it again | card; backstage says so |
 | FAIL / FAIL CONFIRMED / PARTIAL | SUFFICIENT | `not_run` (unchanged); eligible for the narrow wave-1 exception | card as before |

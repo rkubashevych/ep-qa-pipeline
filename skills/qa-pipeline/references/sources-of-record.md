@@ -231,7 +231,7 @@ source, fenced (`untrusted-content.md`):
 
 | Folder | Written by | Files |
 |---|---|---|
-| `runs/<KEY>/docs/sources/` | `task-context` | `confluence-<pageId>.md` (the AC page), `jira-<KEY>-description.md`, `jira-<KEY>-comments.md`, `jira-<SUBKEY>-description.md` per sub-task it read |
+| `runs/<KEY>/docs/sources/` | `task-context` | `confluence-<pageId>.md` (the AC page), `jira-<KEY>-description.md`, `jira-<KEY>-comments.md` (**all** comments, each with its author and date — never a digest; `CM-n` quotes and §9's drift check read it), `jira-<SUBKEY>-description.md` per sub-task it read |
 | `runs/<KEY>/r<N>/sources/` | `qa-pipeline-code` step 0 | one file per register row, same naming (`confluence-<pageId>.md` for the brief and the as-built doc, `jira-<SUBKEY>-description.md` for the implementing sub-task) — **plus, always, the story's `jira-<STORY>-description.md` and `jira-<STORY>-comments.md`** (one `getJiraIssue` call), so the `JD-n` / `CM-n` ledger items are re-checked too, not only the AC page |
 
 Write the body with the Write tool, then fence it:
@@ -241,8 +241,11 @@ python3 <plugin>/skills/qa-pipeline/scripts/source_tools.py fence \
   --label 'confluence:<id> "<title>" · fetched <date>' <raw> --out <file>
 ```
 
-With no shell, write the fence lines by hand. The same file name
-across folders is what lets §9 compare them.
+The label is `<kind>:<id> "<title>" · fetched <date>` for every kind
+(`jira:EP-1234 description`, `jira:EP-1234 comments`, `bitbucket:…` —
+the Label bullet in `untrusted-content.md`). With no shell, write the
+fence lines by hand. The same file name across folders is what lets
+§9 compare them.
 
 **The check.**
 

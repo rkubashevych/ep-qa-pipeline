@@ -72,7 +72,10 @@ AC items on the page: 5 · captured: 5
    cases:` line in the test-cases statistics block; every REQ carrying
    a `source:` id from the fixture's `AC-1…AC-5` / `JD-1` / `CM-1`
    bullets, every group a `Covers:` line, `AC coverage: 5/5 · JD 1/1 ·
-   CM 1/1` — compare with
+   CM 1/1`; in auto-default mode the requirements file ends with an
+   "Open findings" section listing the badge conflict (and the
+   test-cases statistics count `Requirements needing clarification:
+   1` — the conflict, not the open findings) — compare with
    `skills/qa-test-cases/references/test-cases-example.md`, which is
    this fixture's expected output, and run `reconcile_counts.py
    EP-0000` on the result.

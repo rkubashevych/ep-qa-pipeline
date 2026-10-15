@@ -241,7 +241,7 @@ Report each case as PASS / FAIL / PARTIAL / BLOCKED, with the endpoint + observe
 - [ ] Category / exhibitor ids in a ticket are often from another env — resolve real ids on the target event (§7).
 - [ ] Frontend `/profile/...` cases need the **exhibitor's own** token, not the admin token.
 - [ ] Never hardcode secrets — read from `.env`.
-- [ ] The **frontend host is per-event and not discoverable via the API/admin/DB** — it must be supplied (see §11).
+- [ ] The **frontend host is per-event and not discoverable via the API/admin/DB** — read `FRONTEND_HOST` first, else it must be supplied (see §11.1).
 - [ ] Ticket endpoint names can be **wrong**, not just shorthand — verify what an endpoint actually writes before trusting a test case (see §11, `photoSave`).
 
 ---
@@ -251,12 +251,15 @@ Report each case as PASS / FAIL / PARTIAL / BLOCKED, with the endpoint + observe
 The `[API]` cases that hit `/profile/...` (upload logo, `isLogoEditable`, etc.) run against the
 **event's frontend host** with the **exhibitor's own** token — the admin token is rejected there.
 
-### 11.1 Finding the frontend host (must be supplied)
+### 11.1 Finding the frontend host (`FRONTEND_HOST`, else supplied)
 
 The frontend domain is **per-event** and is **not** exposed by the API, the admin panel, or the
 events list (`GET /api/v1/exhibitions/list` returns events but **no domain field**), and the
-database is not reachable from where the agent runs. So the agent must be **given** the
-portal URL per event — and that host must be in `ALLOWED_HOSTS` before it is used. Example:
+database is not reachable from where the agent runs. Read it first from `FRONTEND_HOST` in
+`.env.qa-agents` — the portal host of `EVENT_ID`'s event, kept there once known. When it is
+empty, or the case runs on another event, the agent must be **given** the portal URL — and
+either way that host must be in `ALLOWED_HOSTS` before it is used. `BASE_URL` is the API-side
+base for exhibitor-token calls and is not a substitute for the portal host. Example:
 event `3551` → `https://ennies-alpha2.expoplatform.net`.
 
 > Wrong host symptom: exhibitor login returns `400 "Incorrect login and/or password"` even with

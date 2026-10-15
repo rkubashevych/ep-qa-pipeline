@@ -242,8 +242,11 @@ so it is part of what the user is saying yes to. Then, on explicit yes:
   PASS / FAIL / BLOCKED / SKIPPED → `pass` / `fail` / `blocked` /
   `skipped`; non-standard entries are not recorded. A case the machine
   already recorded is simply re-recorded — the service supersedes and
-  keeps both; that IS the retraction. If the run is `completed`, call
-  `reopen_test_run` first. **Ending the run** (`test-runs.md` → "Run
+  keeps both; that IS the retraction. If the run is `completed` — the
+  normal state after a clean machine pass, not a sign the round was
+  already ingested (`test-runs.md` → "A clean pass completes the run
+  before the walk") — call `reopen_test_run` first. **Ending the run**
+  (`test-runs.md` → "Run
   lifecycle"): every row recorded → the service auto-completes it and
   `close_test_run` is refused — report `completed`, call nothing; rows
   still `not_run` at the end of ingestion → `close_test_run` (`closed`),
@@ -402,8 +405,8 @@ Skip with one line, not silently:
 - RC smoke runs (`qa-rc-smoke`) never reach this stage.
 
 A machine without the docker-local harness still runs qa-api-tests
-Steps 1, 2 and 4 (selection, linking existing tests, the frontend
-sub-task). Only the Implement run waits for the harness; it becomes a
+Steps 1, 1b, 2 and 4 (selection, the claim review, linking existing
+tests, the frontend sub-task). Only the Implement run waits for the harness; it becomes a
 To do and a ledger row.
 
 ## Final response

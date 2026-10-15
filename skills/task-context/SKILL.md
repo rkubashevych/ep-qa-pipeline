@@ -188,11 +188,32 @@ Merge and flag conflicts:
   both versions are traceable, and the "⚠️ Conflicts to resolve" entry
   names both ids.
 
+### Bug tickets — ledger the three parts
+
+A Bug's Description is steps
+to reproduce, an actual result and an expected result, not a spec. Write
+each as its own `JD-n` bullet, tagged so the later stages can tell them
+apart: `JD-1 (Jira Description, bug: steps): …` (the numbered steps
+verbatim, in one bullet), `JD-2 (Jira Description, bug: actual): …`,
+`JD-3 (Jira Description, bug: expected): …`. A part the Description
+does not state gets `not stated` as its text, never a guess. Grooming
+makes the expected result the requirement and cites all three ids on
+it; qa-test-cases writes the case from the `bug: steps` bullet
+(`../requirements-grooming/SKILL.md` → "Bug tickets";
+`../qa-test-cases/SKILL.md` → "Additional sources", the Bug bullet).
+
 If no Confluence page is linked on the ticket:
-- Do not stop. Ask the user once for the Confluence URL (or page) —
-  except when nobody can answer (an orchestrator's auto-default run, a
-  subagent): then skip the ask and continue as below. A Bug usually
-  has no AC page; that is expected, not a gap.
+- Do not stop. Ask the user once for the Confluence URL (or page).
+  This ask is the one pause the orchestrators expect from this stage
+  (`qa-pipeline-docs` step 1, `qa-refinement` step 1), whatever
+  grooming's mode is — "auto-default" is grooming's setting, not a
+  reason to skip the ask. Skip it only when this stage was dispatched
+  as a **subagent** (nobody can answer): then continue as below and
+  name the missing page in the returned summary so the orchestrator
+  can ask. A Bug usually has no AC page: do not ask for one on a Bug
+  — write the note below without the ⚠️, as "Bug: no AC page expected;
+  requirements from the Description" — and the analyzer does not count
+  it as an input gap.
 - If they cannot provide one, note in the Requirements section:
   "⚠️ No Confluence acceptance-criteria page linked; requirements are
   derived from the Jira Description only", and flag it in the final

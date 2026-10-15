@@ -20,7 +20,7 @@ with QA Service").
   the implement workflow. It does not change who runs the case here.
 
 A case without a `Level:` line gets the level its channel implies
-(`qa-service-publish.md` → "channel tag → level"), exactly as before
+(`qa-service-publish.md` → "Test cases → `create_test_case`", the `channel tag → level` row), exactly as before
 0.50.0.
 
 ## The rule
@@ -40,7 +40,7 @@ the thing being tested**: Unit < Integration < API-E2E < E2E (UI).
 | `Perf` | Performance | a latency, throughput or memory budget stated in the requirement |
 | `M` | Manual | past the limit of automation: visual judgement, a real device, a real mailbox, a downloaded file read by eye |
 
-Two invariants on top:
+## Two invariants
 
 - **Business logic is never covered only through the UI.** A rule whose
   only case is `E2E` or `M` gets a lower level as well.

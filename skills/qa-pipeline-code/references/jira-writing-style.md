@@ -132,7 +132,9 @@ the pipeline knew.
    context. Q9 said "free-text custom locations" and was answered as a
    question about something else.
 
-**Every name in the comment is a checked name (0.47.1).** Rules 2 and
+### Every name in the comment is a checked name
+
+Rules 2 and
 4 say to use the words on the screen. Without a check, a draft still
 borrows names from the spec, the code or an RFC. On EP-55996
 (2026-10-06), the first draft of the re-validated comment had four

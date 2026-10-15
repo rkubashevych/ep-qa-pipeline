@@ -75,8 +75,10 @@ Execute each stage by reading its `SKILL.md` and following it **in
 full** — do not summarise or shortcut it. Stages share the run folder
 (`runs/<KEY>/docs/`); pass each output file to the next automatically.
 
-1. **task-context** — pause only if it needs you (attachments to
-   upload, a Confluence access / missing-AC issue). Produces
+1. **task-context** — run inline, not as a subagent, so its one ask
+   can reach you: it pauses only if it needs you (attachments to
+   upload, a Confluence access issue, no AC page linked on a
+   Story/Task — it asks once for the URL; never on a Bug). Produces
    `<ISSUEKEY>-context.md`.
 
 2. **requirements-grooming** — produces `<ISSUEKEY>-requirements.md`.
@@ -95,7 +97,8 @@ full** — do not summarise or shortcut it. Stages share the run folder
      to a human until observation has been tried: run recon per
      **`../qa-pipeline/references/recon.md`** — read-only except the
      one narrow, restored setting flip that file allows; folded back
-     into the requirements file as "Resolved by observation (recon)".
+     into the requirements file as "Resolved by observation (recon)",
+     and the settled finding removed from its "Open findings" section.
      No env access / user declines → skip, and BEHAVIOUR items go to
      the ticket like everything else.
    - **Open items → ticket NOW, not at publish (shift-left is a
@@ -169,7 +172,10 @@ full** — do not summarise or shortcut it. Stages share the run folder
      markers and the `source:` / `Covers:` ids directly):
      - its "AC ledger" lines: an uncovered `AC-n` or a page/captured
        mismatch is fixed before anything is published — a suite that
-       misses a criterion is the one thing this phase exists to prevent;
+       misses a criterion is the one thing this phase exists to prevent
+       (an id the script lists as "risk carried to the ledger, no case
+       by rule" is not uncovered: it is a `Risk:` REQ with no observable
+       consequence, and the preview names it as such);
      - headings, channel tags and `[core]` markers: a statistics block
        that disagrees is fixed in the test-cases file first, and the
        core count must equal the number of behavioural requirements.

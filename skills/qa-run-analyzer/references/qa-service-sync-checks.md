@@ -20,9 +20,16 @@ them here on an on-demand analysis or a later round's analysis.
   `verified: 0`).
 - 🔴 **partition mismatch** — `get_test_run` `progress` does not
   match the stage statistics under the mapping table (`pass` = PASS +
-  FAIL REJECTED, `blocked`, `skipped` = NOT EXECUTED + NOT-TESTABLE +
-  SPEC-DEFECT, `known_defect` = keyed FAIL CONFIRMED, `not_run` = the
-  FAIL / PARTIAL rows awaiting the human), or roster count ≠ scope.
+  FAIL REJECTED **minus the rows the evidence audit held back**,
+  `blocked`, `skipped` = NOT EXECUTED + NOT-TESTABLE + SPEC-DEFECT,
+  `known_defect` = keyed FAIL CONFIRMED the audit rated SUFFICIENT,
+  `not_run` = the FAIL / PARTIAL rows awaiting the human **+ the
+  held-back rows + any `BLOCKED (quota)` rows**), or roster count ≠
+  scope. A held-back or quota row showing as `not_run` is correct,
+  not a mismatch — never "fix" it by recording it (the same list as
+  `../../qa-pipeline-code/references/wave1-and-verification.md` →
+  "Post-publish verification"; read `<KEY>-evidence-audit.md` for the
+  held-back rows before comparing).
 - 🔴 **machine `fail` outside the narrow exception** — a `fail`
   recorded with `source: machine` whose case is not runtime-confirmed
   + evidenced + rated SUFFICIENT + blocking: it filed a Jira defect
@@ -35,8 +42,12 @@ them here on an on-demand analysis or a later round's analysis.
   was never ingested; the ticket's verdicts are still provisional.
   Same finding as §5's "manual results never ingested", seen from the
   service side — report it once, under §5. `completed` and `closed`
-  are both "done" (`test-runs.md` → "Run lifecycle"): a `completed`
-  run after stage 10 is correct, not a missed close.
+  are both "done" only together with a `-manual-results.md`
+  (`-walk-results.md` alone = ingestion pending; `test-runs.md` → "Run
+  lifecycle"): a `completed`
+  run after stage 10 is correct, not a missed close; a `completed` run
+  with a walk plan and no results file is a clean machine pass whose
+  human round is still open — say so, never "written back".
 - 🟡 **[Environment] no release for the fixVersion** — the ticket
   carries a `fixVersion` and `list_releases` has no release for it, so
   the run was created without `releaseId` and its verdicts cannot be

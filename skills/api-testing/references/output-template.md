@@ -42,15 +42,15 @@ Skill: <the line `skill_stamp.py api-testing` prints>
 
 | TC | Name | Arrived as | Status | Endpoint | Comment |
 |----|------|--------|--------|----------|---------|
-| TC-REQ-2.2 | <scenario name> | QA | PASS | GET /api/v1/exhibitorCategories/get | data.settings.logo.enabled = true |
-| TC-REQ-24.2 | <scenario name> | QA | FAIL | GET /api/v1/exhibitorSettings/get/{id} | expected logo.enabled=false, got true |
+| TC-REQ-2.2 | <scenario name> | QA | PASS | GET /api/v1/exhibitorCategories/get | api-evidence §1 · data.settings.logo.enabled = true |
+| TC-REQ-24.2 | <scenario name> | QA | FAIL | GET /api/v1/exhibitorSettings/get/{id} | api-evidence §2 · expected logo.enabled=false, got true |
 | TC-REQ-32.2 | <scenario name> | QA | PARTIAL | GET /api/v2/exhibitor/get | parent suppressed, child not |
 | TC-REQ-22.1 | <scenario name> | QA | NOT-TESTABLE | POST /profile/photoSave | endpoint mapping wrong — see Findings |
 | TC-REQ-37.1 | <scenario name> | QA | NOT-TESTABLE (instrumentation) | — | instrumented surface + API-created precondition — see Route to web-testing |
 | TC-REQ-30.1 | <scenario name> | QA | BLOCKED | — | precondition unreachable |
 | TC-REQ-13.1 | <scenario name> | PASS(code) | NOT EXECUTED | — | no BM endpoint reachable on the supplied hosts |
 | TC-REQ-35.1 | <scenario name> | QA | SPEC-DEFECT | POST /api/v1/... | case premise wrong — see Findings (feeds the summary's "To do") |
-| RISK-CR-2 | <risk name — no covering case> | code-review risk 2 | FAIL CONFIRMED | POST /api/v1/... | risk confirmed at runtime — see Findings |
+| RISK-CR-2 | <risk name — no covering case> | code-review risk 2 | FAIL CONFIRMED | POST /api/v1/... | api-evidence §3 · risk confirmed at runtime — see Findings |
 
 ## Findings
 > For every FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL / BLOCKED / NOT-TESTABLE. PASS needs no entry — its proof is its `api-evidence §n`, named in the row's Comment.

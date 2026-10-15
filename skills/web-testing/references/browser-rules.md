@@ -201,7 +201,7 @@ cannot be verified.
   and, since 0.47.0, for every `[core]` PASS — the step-5 evidence
   audit re-opens them (`../../qa-pipeline-code/references/evidence-audit.md`).
   Every PASS, `[core]` or not, also gets its `web-evidence.md §n`
-  reading (SKILL.md step 4).
+  reading (SKILL.md Step 6, item 4).
 - Do not take screenshots for BLOCKED, FAIL REJECTED, OBSERVATION, or
   a non-core PASS.
 - Do not show screenshots to the user in the chat — they are

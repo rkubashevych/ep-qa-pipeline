@@ -118,6 +118,7 @@ reporter ("File the ticket FIRST, then record the `fail`", below).
 | `OBSERVATION`, `OBSERVATION (no source checked)` | none on its own (a case that passed is `pass`; the observation goes in its note, labelled) | `… OBSERVATION (no source checked): <question form>` |
 | `QA`, `N/A`, `RE-ROUTE [UI]` (CR) | none — input statuses; the executing stage's verdict is recorded | — |
 | human `PASS` / `FAIL` / `BLOCKED` / `SKIPPED` (stage 10) | `pass` / `fail` / `blocked` / `skipped`, **`source: manual`** | the tester's Notes verbatim, bug key if any |
+| an AGENT-RUNS card the agent executed in the walk and the tester witnessed (stage 10) | the same four, **`source: machine`**, principal `ep-qa-pipeline agent (<KEY> walk, witnessed by <tester e-mail>)` | the card's observed result, the tester's words if any |
 | human non-standard entry ("N/A — premise false") | none — listed for a human decision, never coerced | — |
 
 `flaky` is never written by the pipeline: a verdict that changed between
@@ -153,10 +154,37 @@ false PASS".
 `not_run` is the honest state: **no confirmed verdict exists yet.** It
 is what the run sheet already means by "the human must walk this row",
 and `get_test_run`'s `currentCaseId` is where the tester resumes. The
-run therefore stays `running` after wave 1 whenever any FAIL / PARTIAL
-row exists, and the wave-1 status comment says so
+run therefore stays `running` after wave 1 whenever any FAIL / PARTIAL /
+held-back / quota row exists, and the wave-1 status comment says so
 (`… K for manual — QA Service run <id> open`). Stage 10 finishes it —
 see "Run lifecycle" below for what "finished" means.
+
+### A clean pass completes the run before the walk
+
+This is normal. When wave 1 leaves no `not_run` row (every case PASS and rated
+SUFFICIENT, nothing held back, no quota cut), the service auto-completes
+the run the moment the last verdict lands (EP-56001, 2026-10-15). The
+status comment then says `QA Service run <id> completed` — and the
+manual round still happens: stage 9 builds the walk plan on every
+ticket (the `[core]` of every REQ, the VERIFY spot-checks), so the
+walk starts on a `completed` run. **The rule every reader follows:**
+
+- `completed` + `<KEY>-walk-plan.md` present + no `<KEY>-walk-results.md`
+  → the manual round is still OPEN. The walk starts or resumes; stage
+  10 calls `reopen_test_run` before its first `record_case_result`
+  (below). Nothing stops on `completed` alone.
+- `<KEY>-walk-results.md` present, no `<KEY>-manual-results.md` → the
+  walk is finished and the write-back is pending (the dispatcher's
+  Ingestion row), whatever the run reads.
+- `completed` or `closed` + `<KEY>-manual-results.md` present → DONE;
+  a second walk needs `reopen_test_run` by stage 10, never a silent
+  continuation.
+- `running` + `stale: true` + `not_run` rows + no manual-results file →
+  manual results never ingested (the analyzer / dispatcher flag).
+
+The dispatcher's state table, the walk's start and resume checks and
+the analyzer's §4 read the run status only together with the walk
+files; the status alone never says whether the human round happened.
 
 The machine's evidence for those rows is not lost: it is in the stage
 report (in the run folder — the only copy since 0.33.0) and in the
@@ -172,8 +200,9 @@ service supersedes and keeps both, each with its own principal and
 timestamp. If the run's status is `completed` (every row had a verdict),
 call `reopen_test_run` first; it edits nothing.
 
-**Run lifecycle — `completed` and `closed` are both terminal.** The
-service marks a run `completed` on its own the moment its last `not_run`
+### Run lifecycle — `completed` and `closed` are both terminal
+
+The service marks a run `completed` on its own the moment its last `not_run`
 row receives a verdict; `close_test_run` on such a run is **refused**
 (EP-55950, 2026-09-11: "the service had already auto-completed the run").
 `close_test_run` exists for the other ending — rows still `not_run` when
@@ -192,7 +221,11 @@ Never leave a fully-ingested run `running`: `running` + `stale: true`
 with `not_run` rows and no `<KEY>-manual-results.md` is what the analyzer
 and the dispatcher flag as "manual results never ingested". Every reader
 (analyzer §4, dispatcher state table, results step 4) treats `completed`
-and `closed` alike as "done".
+and `closed` alike as "done" **only when the manual-results file
+exists** (walk-results alone = ingestion pending) — a `completed` run
+with a walk plan and no results is a clean machine pass whose human
+round is still open
+(see "A clean pass completes the run before the walk" above).
 
 A human `fail` files the defect (deduplicated per case: an open issue
 already referencing the stable id is linked, not duplicated —
@@ -293,11 +326,14 @@ history and the run is the current truth.
 
 - `get_test_run`: roster count == the scope count step 0 confirmed;
   the `progress` partition matches the stage reports' statistics under
-  the mapping above (`pass` = PASS + FAIL REJECTED, `blocked` = BLOCKED
-  + BLOCKED (unverified), `skipped` = NOT EXECUTED + NOT-TESTABLE +
-  SPEC-DEFECT, `known_defect` = keyed FAIL CONFIRMED, `not_run` = the
-  FAIL / PARTIAL rows awaiting the human). A mismatch is a count-gate
-  failure — fix before the run is left.
+  the mapping above (`pass` = PASS + FAIL REJECTED minus the rows the
+  evidence audit held back, `blocked` = BLOCKED + BLOCKED (unverified),
+  `skipped` = NOT EXECUTED + NOT-TESTABLE + SPEC-DEFECT, `known_defect`
+  = keyed FAIL CONFIRMED the audit rated SUFFICIENT, `not_run` = the
+  FAIL / PARTIAL rows awaiting the human + the held-back rows + any
+  `BLOCKED (quota)` rows). A held-back or quota row showing as
+  `not_run` is correct, never "fixed" by recording it. Any other
+  mismatch is a count-gate failure — fix before the run is left.
 - `executed_coverage(suiteId[, releaseId])`: `neverExecuted` fell by
   the number of rows recorded; `machine` and `manual` are reported as
   separate numbers, never one percentage.

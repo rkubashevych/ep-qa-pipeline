@@ -34,16 +34,25 @@ notifications / dashboards, and on every absence check.
    `../qa-pipeline/references/environment.md`; `scripts/load-env.sh`),
    including **`ALLOWED_HOSTS`** — the only hosts this stage may call.
 4. For any frontend / exhibitor-token case: the **per-event frontend
-   host** and an **exhibitor login**. The frontend host is per-event
-   and **not discoverable** — it must be supplied (reference §11.1).
+   host** and an **exhibitor login**. The host is per-event and not
+   discoverable by API: take `FRONTEND_HOST` from `.env.qa-agents`
+   when it is set for `EVENT_ID`'s event (it must be in
+   `ALLOWED_HOSTS`); only when it is empty, or the case is on another
+   event, must it be supplied (reference §11.1). The login is test
+   data, never a variable (`environment.md` → "No variable for a
+   visitor or exhibitor login"): the case's `[data: …]`, else a
+   throwaway created under the write-safety rules (§12), else — when
+   this run may not write — the case is NOT EXECUTED with that reason.
 
 **Where to find inputs:** `../qa-pipeline/references/data-locations.md`
 — run folder, then the suite; a new chat is no reason to ask.
 
 Missing code-review or test-cases file — ask before starting. Missing
 `.env.qa-agents` values — **pause and ask**; never guess, never proceed
-unauthenticated. Missing frontend host / exhibitor login for a
-frontend case — pause and ask (reference §11.1).
+unauthenticated. Frontend host for a frontend case: `FRONTEND_HOST`
+empty and none supplied — pause and ask (reference §11.1). Exhibitor
+login: never a pause — test data, a throwaway, or NOT EXECUTED (input
+4 above).
 
 All input files are read-only. Instrument: HTTP only — the browser is
 web-testing's, the code is code-review's.
@@ -56,7 +65,13 @@ web-testing's, the code is code-review's.
   hardcode, never echo a token/password/API key into chat, the report,
   or a file. Redact tokens in any pasted response.
 - **Scope:** run only `[API]` test cases (and `[API]`-verifiable
-  frontend-restriction cases). `[mobile]` / `[export/email]` go to
+  frontend-restriction cases). A dual-tagged `[API][UI]` case is
+  provenance-sensitive (`status-vocabulary.md` → Routing invariant):
+  run its API half. A concrete API-side discrepancy is a FAIL (or
+  FAIL CONFIRMED) like any other. An API half that behaves is never a
+  PASS here — the verdict is web-testing's: the row is `NOT-TESTABLE
+  (instrumentation)` with the API reading in its Comment, and the
+  case is listed under "Route to web-testing" either way. `[mobile]` / `[export/email]` go to
   "Not executed here"; `[UI]` cases are web-testing's.
   - Exception: an `[export/email]` case whose artifact is fetchable
     over HTTP (an XLS/CSV export endpoint) MAY be executed here —
@@ -126,7 +141,8 @@ Read `.env.qa-agents` (reference §0). Confirm `ADMIN_BASE_URL`,
 `ORGANIZER_API_KEY` and `EVENT_ID` match the target environment — if
 they point at a different alpha, pause and confirm. **Allow-list
 check, before the first request:** every host this run will call
-(`ADMIN_BASE_URL`, `BASE_URL`, the per-event frontend host) must
+(`ADMIN_BASE_URL`, `BASE_URL`, `FRONTEND_HOST` or the supplied
+per-event frontend host) must
 match `ALLOWED_HOSTS` (`load-env.sh --host-allowed HOST`; rule in
 `../qa-pipeline/references/environment.md`). Not listed, list missing, or a production host →
 **PAUSE** naming the host; never add it yourself, never "just read".

@@ -30,6 +30,7 @@ Sources saved: docs/sources/ — <N> files
 - SB-1 (Confluence §<n>, spec body): <rule from the page's spec body that the AC heading does not restate — omit when none>
 - JD-1 (Jira Description): <requirement stated only in the Description>
 - JD-2 (Jira Description, conflicts with AC-<n>): <the Description's version of that criterion, verbatim>  — only for a conflict
+- JD-1 (Jira Description, bug: steps): <the numbered steps to reproduce, verbatim>  — Bug tickets only: one bullet each for `bug: steps`, `bug: actual`, `bug: expected` (`not stated` when the Description lacks the part)
 
 AC items on the page: <N> · captured: <N><; not readable: <what and why — omit when equal>>
 
@@ -101,7 +102,7 @@ AC items on the page: <N> · captured: <N><; not readable: <what and why — omi
 
 Section rules:
 - Goal, Scope, Requirements — always present. If there is no data — "Not specified in the tracker".
-- Requirements — every bullet carries an `AC-n` / `JD-n` id with its origin; the section ends with the `AC items on the page … captured …` count line (both numbers, and what was not readable when they differ). With no Confluence page: no `AC-n` bullets, only `JD-n`, and the ⚠️ no-page warning.
+- Requirements — every bullet carries an `AC-n` / `JD-n` id with its origin; the section ends with the `AC items on the page … captured …` count line (both numbers, and what was not readable when they differ). With no Confluence page: no `AC-n` bullets, only `JD-n`, and the ⚠️ no-page warning — on a Bug the line `Bug: no AC page expected; requirements from the Description` instead (no ⚠️).
 - ⚠️ Conflicts to resolve — only when the Confluence acceptance criteria and the Jira Description actually disagree. Omit the section entirely if there are no conflicts.
 - Tech spec — only when a tech spec is attached. With none, the Requirements section carries the line `Tech spec: none attached` and this section is omitted.
 - Sub-tasks — only when the input is a parent Story that has sub-tasks. Omit otherwise.

@@ -298,6 +298,14 @@ statuses land there first. This stage emits:
   verbatim; the report is `Completeness: partial` and the stage
   resumes after the reset for exactly these rows
   (`../qa-run-analyzer/references/status-vocabulary.md`).
+- `PARTIAL` — some steps or surfaces pass, others do not or could
+  not be read (an "anywhere" claim with unenumerated roles, a doubt
+  no other status fits). Comment says which; the row stays `not_run`
+  and the human walks it.
+- `NOT EXECUTED` — in scope but not attempted, for a stated
+  environmental reason (no such page / event / host on this env).
+  Distinct from BLOCKED, which means tried. Counts toward
+  `Completeness: partial`.
 - `OBSERVATION` — the case passed, but a defect or anomaly outside
   the requirements scope was noticed.
 - `OBSERVATION (no source checked)` — a real thing seen, with no clause
@@ -323,9 +331,15 @@ orchestrator proposes confirmed risk rows as permanent suite cases.
 
 Rules:
 - PASS only on a clean reading. A doubt is classified, not rounded
-  to a verdict: BLOCKED / NOT-TESTABLE / QA over a doubtful PASS, and
-  SPEC-DEFECT when the case's wording is the doubt (status-vocabulary
-  → "Cross-stage rules"). FAIL needs a concrete discrepancy.
+  to a verdict, and only into a status this stage may emit
+  (`status-vocabulary.md`, WEB column): BLOCKED with its `Probe:`
+  when something stopped the check, PARTIAL when part of the surface
+  could not be read, SPEC-DEFECT when the case's wording is the doubt,
+  FAIL when there is a concrete discrepancy. Never NOT-TESTABLE (an
+  API status) or QA (code-review's input status) — a doubt written
+  as one of those leaves the walk roster. If none fits, the row is
+  PARTIAL with the doubt in its Comment: it stays `not_run` and the
+  human walks it.
 - **Second observation before FAILing a shared element.** A FAIL on a
   page-level or shared element (header, nav, global styles, a
   component reused across pages) requires a second observation in a

@@ -28,9 +28,13 @@ from message one.
 ## Verify commands
 
 - **Before every commit:** `python3 scripts/verify_plugin.py` — versions,
-  descriptions ≤ 1024, LF/newline, wiring, references, vocabulary,
-  self-test, no run artefact staged, and no `.env*` / `runs/` inside
-  the checkout. FAIL = do not commit.
+  descriptions ≤ 1024, LF/newline, wiring, references, heading
+  pointers, per-stage status rows, the example's `Skill:` stamp, the
+  analyzer's input list, vocabulary, self-test, no run artefact staged,
+  and no `.env*` / `runs/` inside the checkout. FAIL = do not commit.
+- **When you fix a rule, grep for its other copies first.** Six of the
+  sixteen findings of the 0.59.1 → 0.69.0 review were one copy fixed,
+  one copy not (`docs/reviews/REGRESSION-REVIEW-0.59.1-to-0.69.0-2026-10-15.md`).
 - Counting script: `python3 skills/qa-run-analyzer/scripts/reconcile_counts.py --selftest`
 - Docs-stage smoke test: run `fixtures/EP-0000-context.md` through
   grooming → test-cases (expectations at the fixture's foot; expected

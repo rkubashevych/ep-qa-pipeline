@@ -51,7 +51,12 @@ From the ticket key/URL (ask if the paste has none):
    the run folder and `list_test_runs` on the suite. Find the suite with
    `search {query: <feature words or prefix>, kinds: ["suite"]}` — never
    `list_suites` first: it returns the whole product, ~190 KB. A run in
-   status `completed` or `closed` is done; `running` with `stale: true`
+   status `completed` or `closed` is done only when `-manual-results.md`
+   exists for it (`-walk-results.md` alone → ingestion pending, the row
+   below); `completed` with a walk plan
+   and no results is a clean machine pass whose walk is still to come
+   (`references/test-runs.md` → "A clean pass completes the run before
+   the walk"); `running` with `stale: true`
    is a pass whose manual results were never ingested.)
 4. Run folder: `<KEY>-walk-plan.md`, `<KEY>-walk-state.json`
    (a walk in progress), `<KEY>-walk-results.md`, `<KEY>-runsheet.xlsx`,
@@ -74,7 +79,7 @@ the QA Service suite/run, then Jira (a Jira comment alone never decides).
 | No run folder, no suite, no QA sub-task; ticket is a Bug | **Bug-fix mode** — `qa-pipeline-code`, cases derived from the ticket |
 | Suite exists (or a QA sub-task carries its suite line); no `r<N>/` reports, no test run | **Code phase** — `qa-pipeline-code` (fresh chat recommended if this one already ran the docs phase) |
 | `r<N>/` reports or a test run exist; newest summary ❌ or the user says the fix landed | **Retest mode** — `qa-pipeline-code` retest |
-| `-walk-plan.md` present, no `-walk-results.md` (or a `-walk-state.json` in progress) | **Guided walk** — `qa-manual-walk` (resume when state exists) |
+| `-walk-plan.md` present, no `-walk-results.md` (or a `-walk-state.json` in progress) — whatever the run's status, `completed` included | **Guided walk** — `qa-manual-walk` (resume when state exists) |
 | Complete `-walk-results.md` not yet written back, or a filled sheet / TC-Result-Notes table in hand | **Ingestion** — `qa-manual-results` |
 | The user asks to automate / write the API tests (stage 10 runs it as its step 6 otherwise) | **API automation** — `qa-api-tests` on the Story |
 | A phase stopped mid-way — e.g. stage reports written but no test run recorded, or a run left `running` with no results comment | **Resume** — re-enter the same skill at the step that never ran; it records into the existing run, never a new one |

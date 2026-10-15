@@ -86,7 +86,8 @@ once; configs, styles and tests only when a case targets them.
 
 ## Review process
 
-For each test case, locate its implementation, run the checks below,
+For each test case, locate its implementation, compare the expected
+result of each step with what the code does, run the checks below,
 then classify it.
 
 ### Source fidelity — before judging the case, check the case is real

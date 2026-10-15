@@ -45,7 +45,7 @@ skills/
   qa-rc-smoke/                 # release-candidate mode: scope items on RC — code, served build, runtime smoke
   qa-pipeline-docs/            # orchestrator: stages 1, 2, 4 + publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post
-  commands/                    # /ep-qa-pipeline:commands — the command table (0.61.0; slash-only)
+  commands/                    # /ep-qa-pipeline:commands — the command table (0.61.0; model-invocable again 0.70.0)
 fixtures/EP-0000-context.md    # synthetic docs-phase smoke-test input (the one EP-* file that is tracked)
 docs/                          # reviews, retrospectives, specs, design prompts — history, not contract
 
@@ -138,7 +138,8 @@ carried between them; the QA Service run carries the verdicts anyway.
   mode uses the branch = issue key.
 - **Code repos** — Bitbucket `expoplatform` workspace: backend monolith
   = `expoplatform-main-ira`, frontend = `portal-ui`, admin = `admin-ui`.
-- **Per-event frontend host** — not discoverable; supply it per event
+- **Per-event frontend host** — not discoverable by API; `FRONTEND_HOST` in
+  `.env.qa-agents` for the default event, supplied for any other
   (see `skills/api-testing/references/api-testing-reference.md` §11.1).
 - **Pipeline output files** (`<KEY>-context.md` … `<KEY>-run-report.md`)
   — written to the **run folder** `~/.ep-qa/runs/<KEY>/…`
@@ -186,9 +187,12 @@ carried between them; the QA Service run carries the verdicts anyway.
      orchestrator gets `disable-model-invocation: true` (0.61.0): its
      description stays out of every session and the orchestrator still
      runs it by reading the SKILL.md. Only skills a person starts in
-     plain words — the front door, the modes, the checks — stay
-     model-invocable. An orchestrator must keep running stages by
-     reading the SKILL.md, never through the Skill tool.
+     plain words — the front door, the modes, the checks, `commands` —
+     stay model-invocable. An orchestrator must keep running stages by
+     reading the SKILL.md, never through the Skill tool. **A visible
+     description never redirects to a slash-only stage by bare name**
+     (0.70.0): the session cannot see that name — point at the
+     orchestrator that owns the stage, or write the full slash command.
 4. **Smoke-test the docs stages** if you touched them: run
    `fixtures/EP-0000-context.md` (synthetic — the one `EP-*` file that
    is tracked, via the `.gitignore` negation) through grooming →
@@ -226,7 +230,11 @@ carried between them; the QA Service run carries the verdicts anyway.
       chars and every name matches its folder, every tracked text file
       is LF with a trailing newline, every skill is wired into README
       and the evals, every `references/*.md` link resolves, every
-      status in the vocabulary is in `reconcile_counts.py`, the
+      `file.md → "Heading"` pointer names a real heading, every status
+      the vocabulary assigns to a stage has a statistics row in that
+      stage's template, the example's `Skill:` stamp is this version,
+      every run file a skill names is in the analyzer's Input list,
+      every status in the vocabulary is in `reconcile_counts.py`, the
       self-test passes, and **nothing staged is a run artefact**. A
       FAIL means do not commit. Each check exists because its defect
       class has shipped at least once.
@@ -299,8 +307,8 @@ carried between them; the QA Service run carries the verdicts anyway.
   `data-locations.md` resolution step 2; `reconcile_counts.py` reads it
   when a ticket has no `r<N>/` folder) when convenient.
 - **api-testing pauses** if `.env.qa-agents` is unreachable, a host is
-  not in `ALLOWED_HOSTS`, or a per-event frontend host is missing (the
-  frontend host is per-event and not discoverable).
+  not in `ALLOWED_HOSTS`, or a frontend case has no host (`FRONTEND_HOST`
+  empty and none supplied — the host is per-event and not discoverable).
 - **One hook, and it is a gate, not a bell.** `hooks/hooks.json` runs
   `scripts/git_guard.py` before every Bash call in Claude Code and
   refuses `git add -A` / `--all` / `.` / wildcard pathspecs (exit 2 +

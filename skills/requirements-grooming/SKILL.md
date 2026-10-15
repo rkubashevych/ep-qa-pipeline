@@ -44,7 +44,10 @@ The context file may contain warning notes from the context-collection
 skill (for example "⚠️ No Confluence acceptance-criteria page linked").
 Read them: a missing acceptance-criteria source means coverage is weaker
 than ideal, so groom more aggressively for uncovered requirements and
-carry the warning into the final file's Goal/notes.
+carry the warning into the final file's Goal/notes. The Bug form of the
+note (`Bug: no AC page expected …`) is not a warning: a Bug's
+requirement is its expected result (the "Bug tickets" rule below), and
+no AC page is missing.
 
 Do not go to the tracker, do not use external tools, do not search the
 internet. The context file is the only source of truth.
@@ -89,12 +92,19 @@ appear in the context file. A `JD-n` marked "conflicts with AC-n" is
 not numbered on its own: it is the other version of that AC's REQ,
 which cites both ids.
 
-**Bug tickets.** The expected result is the requirement. The steps to
-reproduce and the actual result are not requirements of their own:
-they become that REQ's case — the steps as its steps, the actual
-result as "must no longer occur" — so their `JD-n` ids go on that one
-REQ's `source:` line. Only a stated scope beyond the fix ("also on
-mobile", "same for exhibitors") is a REQ of its own.
+### Bug tickets
+
+The context file carries the Bug's three parts as
+tagged bullets — `JD-n (Jira Description, bug: steps | actual |
+expected)` (task-context → "Bug tickets"). The `bug: expected` bullet
+is the requirement: write the REQ from it, and put all three ids on
+that one REQ's `source:` line (`source: JD-3, JD-1, JD-2`), expected
+first. The steps and the actual result are not requirements of their
+own and are not rewritten here: qa-test-cases reads them by their ids
+and builds the case — the steps as its steps, the actual result as
+"must no longer occur". A part ledgered as `not stated` is a finding
+(AMBIGUOUS, SPEC) on that REQ. Only a stated scope beyond the fix
+("also on mobile", "same for exhibitors") is a REQ of its own.
 
 If during grooming a requirement contains several different things —
 split it into sub-items: REQ-5a, REQ-5b. The main number is kept,

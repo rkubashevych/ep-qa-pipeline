@@ -24,6 +24,15 @@ Checks (MAINTAINERS recipe step 6.4):
                 names exists — same-skill, `<skill>/references/` and
                 `../<skill>/references/` forms; write cross-skill
                 references in one of the last two so this can check them
+  5b headings   every `file.md → "Heading"` pointer names a heading the
+                target file has (0.70.0 — four pointers landed on body text)
+  5c statuses   every status the vocabulary assigns to api-testing /
+                web-testing / code-review has a row in that stage's
+                output-template Statistics table (0.70.0)
+  5d stamp      test-cases-example.md's `Skill: qa-test-cases <v>` equals
+                plugin.json (0.70.0 — the expected output lagged a release)
+  5e inputs     every `<KEY>-<file>` a skill names is in qa-run-analyzer's
+                Input list or its "Not read" line (0.70.0)
   6. vocabulary every status in status-vocabulary.md has its base token
                 in reconcile_counts.py STATUSES
   7. selftest   reconcile_counts.py, export_profile.py, source_tools.py,
@@ -250,6 +259,151 @@ def check_references(root, r):
         r.ok("references: every referenced references/*.md exists")
 
 
+# 0.70.0 — four checks for the defect classes the 0.60–0.69 burst produced
+# (docs/reviews/REGRESSION-REVIEW-0.59.1-to-0.69.0-2026-10-15.md §6):
+# heading-level pointers, per-stage status legality, the example's
+# Skill: stamp, and the analyzer's input list.
+
+# `<file>.md` [§n] → "Heading"  — a pointer to a heading in another file
+HEADING_PTR = re.compile(r"`([\w\-./]+\.md)`(?:\s*§\s*[\w.]+)?\s*(?:→|->)\s*\"([^\"]{3,80})\"")
+HEADING_LINE = re.compile(r"^#{1,4}\s+(.+?)\s*$", re.M)
+
+
+def _norm(s):
+    s = re.sub(r"[`*_]", "", s)
+    s = re.sub(r"\s*\(.*?\)\s*", " ", s)
+    return re.sub(r"\s+", " ", s).strip().lower()
+
+
+def _status_key(s):
+    """A status token with its `(qualifier)` kept and its `[tag]` dropped:
+    `BLOCKED (quota)` and `BLOCKED (unverified)` are different rows."""
+    s = re.sub(r"[`*_]", "", s)
+    s = re.sub(r"\s*\[.*?\]", "", s)
+    return re.sub(r"\s+", " ", s).strip().lower()
+
+
+def check_headings(root, r):
+    """Every `file.md → "Heading"` pointer names a heading the target has.
+
+    The 0.64–0.67 moves left four pointers at body text ("Two invariants",
+    "Cross-stage rules", "Run lifecycle", …) that check 5 could not see:
+    it resolves files, not headings. The quoted text must be a substring
+    of a heading (normalised), so a pointer may quote the start of a long
+    heading; the reverse is not accepted."""
+    by_name = {}
+    for dirpath, _, files in os.walk(os.path.join(root, "skills")):
+        for f in files:
+            if f.endswith(".md"):
+                by_name.setdefault(f, []).append(os.path.join(dirpath, f))
+    bad = []
+    n = 0
+    for d in skill_dirs(root):
+        sdir = os.path.join(root, "skills", d)
+        for dirpath, _, files in os.walk(sdir):
+            for f in files:
+                if not f.endswith(".md"):
+                    continue
+                src = os.path.join(dirpath, f)
+                text = open(src, encoding="utf-8-sig").read()
+                for ref, heading in HEADING_PTR.findall(text):
+                    base = os.path.basename(ref)
+                    cands = [os.path.normpath(os.path.join(dirpath, ref))] if "/" in ref else []
+                    cands = [c for c in cands if os.path.exists(c)] or by_name.get(base, [])
+                    if not cands:
+                        continue  # check 5 reports a missing file
+                    n += 1
+                    want = _norm(heading)
+                    hit = False
+                    for c in cands:
+                        heads = [_norm(h) for h in HEADING_LINE.findall(open(c, encoding="utf-8-sig").read())]
+                        if any(want in h for h in heads if h):
+                            hit = True
+                            break
+                    if not hit:
+                        rel = os.path.relpath(src, root).replace(os.sep, "/")
+                        bad.append(f"{rel}: `{ref}` → \"{heading}\" is not a heading there")
+    for b in bad:
+        r.fail(f"headings: {b}")
+    if not bad:
+        r.ok(f"headings: {n} `file.md → \"Heading\"` pointers resolve to a heading")
+
+
+STAGE_COLUMNS = {"api-testing": "API", "web-testing": "WEB", "code-review": "CR"}
+
+
+def check_statuses(root, r):
+    """Every status the vocabulary assigns to a stage has a row in that
+    stage's statistics table (status-vocabulary.md: "a status that exists
+    in only some of those places is a defect"). web-testing shipped without
+    `PARTIAL` / `BLOCKED (quota)` rows for eleven releases."""
+    vocab = read(root, "skills/qa-run-analyzer/references/status-vocabulary.md")
+    rows = re.findall(r"^\| `([^`]+)` \| ([^|]+) \|", vocab, re.M)
+    bad = []
+    for skill, col in STAGE_COLUMNS.items():
+        tpl_rel = f"skills/{skill}/references/output-template.md"
+        if not os.path.exists(os.path.join(root, tpl_rel)):
+            continue
+        tpl = read(root, tpl_rel)
+        m = re.search(r"^## Statistics\n(.*?)(?=^## |\Z)", tpl, re.M | re.S)
+        table = set(_status_key(x) for x in re.findall(r"^\| ([^|]+?)\s*\|", m.group(1), re.M)) if m else set()
+        for status, stages in rows:
+            if not re.search(rf"\b{col}\b", re.sub(r"\(.*?\)", "", stages)):
+                continue
+            if _status_key(status) not in table:
+                bad.append(f"{tpl_rel}: no Statistics row for `{status}` (vocabulary assigns it to {col})")
+    for b in bad:
+        r.fail(f"statuses: {b}")
+    if not bad:
+        r.ok("statuses: every stage's vocabulary statuses have a statistics row")
+
+
+def check_example_stamp(root, r):
+    """The smoke test's expected output carries this version's Skill: stamp."""
+    import json
+    pv = json.loads(read(root, ".claude-plugin/plugin.json"))["version"]
+    ex = read(root, "skills/qa-test-cases/references/test-cases-example.md")
+    m = re.search(r"^Skill: qa-test-cases (\d+\.\d+\.\d+)", ex, re.M)
+    if not m:
+        r.fail("stamp: test-cases-example.md has no `Skill: qa-test-cases <version>` line")
+    elif m.group(1) != pv:
+        r.fail(f"stamp: test-cases-example.md says {m.group(1)}, plugin.json says {pv}")
+    else:
+        r.ok(f"stamp: test-cases-example.md Skill: line is {pv}")
+
+
+RUN_FILE = re.compile(r"(?<![\w-])(?:jira-)?<(?:KEY|ISSUEKEY|STORY)>-([a-z0-9][a-z0-9-]*\.(?:md|json|xlsx|tsv))")
+
+
+def check_analyzer_inputs(root, r):
+    """Every run file a skill names is in the analyzer's Input list or its
+    "Not read" line — the list fell six files behind the stages (0.70.0)."""
+    an = read(root, "skills/qa-run-analyzer/SKILL.md")
+    m = re.search(r"^## Input\n(.*?)(?=^## )", an, re.M | re.S)
+    inputs = m.group(1) if m else ""
+    known = set(RUN_FILE.findall(inputs))
+    bad = set()
+    for dirpath, _, files in os.walk(os.path.join(root, "skills")):
+        for f in files:
+            if not f.endswith(".md"):
+                continue
+            rel = os.path.relpath(os.path.join(dirpath, f), root).replace(os.sep, "/")
+            text = open(os.path.join(dirpath, f), encoding="utf-8-sig").read()
+            for mm in re.finditer(r"(jira-)?<(?:KEY|ISSUEKEY|STORY)>-([a-z0-9][a-z0-9-]*\.(?:md|json|xlsx|tsv))", text):
+                if mm.group(1):
+                    continue  # jira-<KEY>-description.md — a saved source, under sources/
+                name = mm.group(2)
+                if re.match(r"retest\d+-", name):
+                    continue  # legacy flat names quoted as history
+                if name in known or (name.endswith("-plan.json") and "*-plan.json" in inputs):
+                    continue
+                bad.add(f"{name} (named in {rel})")
+    for b in sorted(bad):
+        r.fail(f"analyzer inputs: `<KEY>-{b}` is not in qa-run-analyzer's Input list or its \"Not read\" line")
+    if not bad:
+        r.ok(f"analyzer inputs: every run file the skills name is in the analyzer's Input list ({len(known)} names)")
+
+
 def check_vocabulary(root, r):
     vocab = read(root, "skills/qa-run-analyzer/references/status-vocabulary.md")
     script = read(root, "skills/qa-run-analyzer/scripts/reconcile_counts.py")
@@ -370,7 +524,8 @@ def main():
     no_git = "--no-git" in args
     r = Report()
     for check in (check_versions, check_skills, check_text, check_wiring,
-                  check_references, check_vocabulary, check_selftest, check_tree):
+                  check_references, check_headings, check_statuses, check_example_stamp,
+                  check_analyzer_inputs, check_vocabulary, check_selftest, check_tree):
         try:
             if check is check_text:
                 check(root, r, no_git)

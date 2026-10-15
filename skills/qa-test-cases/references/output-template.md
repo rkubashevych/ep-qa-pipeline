@@ -53,7 +53,7 @@ lines**.
 ```
 ## REQ-N — <requirement label>  [risk: <High|Medium|Low>] [<channel tag(s)>]
 
-Covers: <AC-n[, SB-n, JD-n, CM-n] — the ids from the requirement's source: line>
+Covers: <AC-n[, SB-n, TS-n, JD-n, CM-n] — the ids from the requirement's source: line>
 Applied techniques: <technique(s) — once per requirement group>
 Code-level: <QA Service code-level cases for this REQ, e.g. MEXP-EX-03 (U, implemented); omit the line if none>
 
@@ -87,10 +87,14 @@ group — its lines are in the section below.
 - [ ] REQ-N/struct-1 [UI] <element + the property it must have>
 - [ ] REQ-N/struct-2 [UI] <…>
 - [ ] REQ-M/struct-1 [UI] <…>
+Covers: <the source: ids of every REQ that has lines here and no group above, e.g. AC-7 (REQ-M)>
 ```
 
 Lines are grouped by requirement in requirement order; `k` counts
-from 1 under each REQ. After the publish, the code phase rebuilds each
+from 1 under each REQ. The section's closing `Covers:` line carries the
+ids of every structural-only REQ (one with lines here and no `## REQ-`
+group), so `reconcile_counts.py` sees them covered; omit it when every
+REQ with lines here also has a group. After the publish, the code phase rebuilds each
 line with its suite id: `- [ ] REQ-N/struct-1 · <PREFIX>-STRUCT-01 [UI] <…>`.
 Omit the whole section only when the ticket has no structural check.
 
@@ -119,7 +123,7 @@ Close the file with:
 - Written by: <A> adopted from QA Service · <W> written here (A + W = total; omit the line when no qs-cases file existed)
 - Levels: <code> <N> · <code> <N> … (from `Level:` lines, channel default where absent)
 - Structural checks: <S> (not in the total)
-- AC coverage: <n>/<N> AC items covered< · SB <n>/<N> — only when SB-n items exist> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
+- AC coverage: <n>/<N> AC items covered< · SB <n>/<N> — only when SB-n items exist>< · TS <n>/<N> — only when TS-n items exist> · JD <n>/<N> · CM <n>/<N><; uncovered: AC-<k> — <reason>>
 - Total number of test cases: <N>
 
 Every number is re-derivable with

@@ -1,8 +1,8 @@
 # <ISSUEKEY> - Manual Results
 
 Source: <walk-results.md (walk <start>→<end>, tester <e-mail>) / runsheet.xlsx / TSV paste / triage file — list all used>
-Automated record read from: <QA Service run <id> / verdict files in runs/<KEY>/r<N>/ / legacy archive comment (pre-0.33 ticket)>
-QA Service run: <id> — <status after this stage: closed / running (why)> · recorded <N> manual verdicts + <N> agent-run witnessed verdicts (<N> supersede a machine verdict)
+Automated record read from: <QA Service run <id> / verdict files in runs/<KEY>/r<N>/>
+QA Service run: <id> — <status after this stage: completed (every row recorded) / closed (rows left unrun, named below) / running (why — never for a fully ingested run)> · recorded <N> manual verdicts + <N> agent-run witnessed verdicts (<N> supersede a machine verdict)
 Case corrections applied to the suite: <N> (table below) · Observations carried as questions: <N>
 Date: <YYYY-MM-DD>
 Skill: <the line `skill_stamp.py qa-manual-results` prints>
@@ -63,7 +63,8 @@ Skill: <the line `skill_stamp.py qa-manual-results` prints>
 | Bug | Cases | Status |
 |-----|-------|--------|
 | EP-55691 | TC-REQ-1.1 | linked from Notes |
-| EP-56912 | TC-REQ-4.2 | filed by the run (`fail` recorded, `created: true`) |
+| EP-56912 | TC-REQ-4.2 | filed first, then the `fail` linked it (`created: false`) |
+| EP-56930 | TC-REQ-4.3 | ⚠ `created: true` — the service filed a second ticket: the prefix missed; consolidated with <KEY> / To do |
 | <new> | RISK-CR-2 | filed this session via template / offered, declined |
 
 ## Case corrections applied

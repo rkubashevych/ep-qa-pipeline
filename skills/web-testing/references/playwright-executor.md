@@ -19,8 +19,9 @@ evidence capture (screenshots, console, traces).
 Everything in SKILL.md except the executor is unchanged: same inputs
 (code-review + test-cases with its Structural checks section), same scope rule (SKILL.md →
 Scope: the routing invariant — routed-in, dual-tag and RE-ROUTE cases
-included), same classification (PASS / FAIL / FAIL CONFIRMED / FAIL
-REJECTED / BLOCKED / OBSERVATION), same escalation rule, same output
+included), same classification (the full WEB set in SKILL.md → "Classification": PASS / FAIL / FAIL CONFIRMED / FAIL REJECTED / PARTIAL /
+BLOCKED / BLOCKED (unverified) / BLOCKED (quota) / NOT EXECUTED /
+SPEC-DEFECT / OBSERVATION), same escalation rule, same output
 template. Only the "how a step is executed" changes.
 
 ## Mode
@@ -52,7 +53,7 @@ listbox portals; date pickers need keyboard entry).
    credentials from `$EP_QA_HOME/.env.qa-agents`
    (`../../qa-pipeline/references/environment.md`). Never print the
    values. The host was already checked against `ALLOWED_HOSTS` in
-   the Scope step; do not navigate anywhere else.
+   the Input section (SKILL.md → Input, the test-host paragraph); do not navigate anywhere else.
 2. Perform the login with Playwright (fill username/password, submit,
    wait for the post-login page). This REPLACES the extension path's
    "PAUSE for browser login" — do not ask the user unless the login
@@ -69,8 +70,23 @@ PASS a screenshot (`<ISSUEKEY>-r<N>-<TC-ID>-pass.png`): the step-5
 evidence audit re-reads them (`../../qa-pipeline-code/references/evidence-audit.md`).
 A PASS reading is short — URL, signed-in role, the quoted text or
 aria excerpt that satisfies the case's expected result, timestamp; no
-console lines unless something was logged. On every FAIL / FAIL
-CONFIRMED record, in this order of preference:
+console lines unless something was logged. **The file's shape** (both
+backends, every round — the audit's "Evidence cited" column assumes
+it): `# <ISSUEKEY> - Web evidence` as the first line, then one section
+per reading, numbered in the order written and never renumbered on
+resume:
+
+```
+## §<n> — <TC id> · <verdict>
+
+URL: <page URL> · as <signed-in role / account label — never the password>
+Seen: <the quoted text or aria excerpt that decides the verdict, verbatim>
+Expected: <the case's expected result, one line>
+Screenshot: <evidence/<ISSUEKEY>-r<N>-<TC-ID>-pass|fail.png, or "none">
+At: <timestamp>
+```
+
+On every FAIL / FAIL CONFIRMED record, in this order of preference:
 
 1. **The screenshot, straight into `$EP_QA_HOME/evidence/`.** The
    Playwright MCP server writes only inside its output directory, so the

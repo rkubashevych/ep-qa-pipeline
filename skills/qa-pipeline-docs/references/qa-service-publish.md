@@ -54,7 +54,9 @@ invoking the pipeline; honour that for the run without arguing.
 | Jira keys | `jiraKeys` on the suite (0.50.0) — the ticket key, added to the existing list (`edit_suite` REPLACES the list: send existing + ours). A bug filed from a failing case in the suite is related to these tickets; with none, it lands on no feature ticket |
 | Web UI base URL | `https://qa-service.expoplatform.com` — suite detail page: `<base>/<productId>/test-suites/<suite path>` (verified, e.g. `/expoplatform/test-suites/exhibitor/exhibitor-favorites`). Test run page: `<base>/<productId>/test-runs/<runId>` (verified 2026-09-29 on the EP-57907 run). |
 
-**Writing the suite link into Jira — bare URL only.** The Atlassian
+### Writing the suite link into Jira — bare URL only
+
+The Atlassian
 connector's markdown→ADF conversion drops/mangles `[text](url)`
 hyperlinks, so a markdown link arrives in Jira as unclickable text.
 Always write the **full bare URL on its own**, which Jira auto-links:
@@ -278,7 +280,9 @@ Rule: the pipeline never calls it, and never advises the user to click
 those buttons on a suite it published. Pipeline-authored requirement
 text is authoritative — a generated label is not an improvement over it.
 
-**Post-publish enrichment that IS safe:** "Auto-tag untagged" /
+### Post-publish enrichment that IS safe
+
+"Auto-tag untagged" /
 `apply_auto_tags` (additive, touches only tag links). **Case generation
 is safe too (0.50.0)**: `start_generate_test_cases` only appends cases —
 `full` runs only on a suite with no cases, `gaps` authors only for

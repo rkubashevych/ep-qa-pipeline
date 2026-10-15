@@ -9,13 +9,17 @@ discovery regression even if the skill body is perfect.
 Convention: ✅ = this skill must fire · ❌ = must NOT fire (the arrow
 names who should handle it instead).
 
-**Slash-only skills (0.61.0).** The seven single stages and `commands`
-carry `disable-model-invocation: true`: no phrase starts them, and
-their descriptions do not load into a session. Their ✅ is the slash
-command; the orchestrators still run them by reading the SKILL.md. A
-phrase that used to start one stage now goes to the dispatcher or the
-orchestrator that owns the stage (both propose before they run), or
-Claude names the stage's slash command — the "→" on each ❌ below.
+**Slash-only skills (0.61.0).** The seven single stages carry
+`disable-model-invocation: true`: no phrase starts them, and their
+descriptions do not load into a session — so no visible description
+may redirect to them by bare name (0.70.0): a redirect names the
+orchestrator that owns the stage, or the full slash command. Their ✅
+is the slash command; the orchestrators still run them by reading the
+SKILL.md. A phrase that used to start one stage now goes to the
+dispatcher or the orchestrator that owns the stage (both propose
+before they run), or Claude names the stage's slash command — the
+"→" on each ❌ below. `commands` is model-invocable (0.70.0) so
+"what commands are there?" can be answered.
 
 ## task-context (stage 1) — slash only
 - ✅ `/ep-qa-pipeline:task-context EP-55123`
@@ -30,7 +34,8 @@ Claude names the stage's slash command — the "→" on each ❌ below.
 - ✅ `/ep-qa-pipeline:requirements-grooming EP-55123`
 - ✅ (auto) after task-context inside qa-pipeline-docs and qa-refinement
 - ❌ "groom the requirements for EP-55123" → Claude names this slash
-  command; qa-refinement if the questions should be posted
+  command (it is written into qa-refinement's description and the
+  `commands` table); qa-refinement if the questions should be posted
 - ❌ "write requirements for a new feature" → not this pipeline; chat
 - ❌ "groom the backlog" → PM activity, no skill
 - ❌ "check the ticket for open questions before we estimate" →
@@ -79,10 +84,12 @@ Claude names the stage's slash command — the "→" on each ❌ below.
   qa-manual-walk (10a) — a guided session, not an unattended run
 - ❌ "I finished testing, here are my results" → qa-manual-results (10b)
 
-## commands — slash only
+## commands
 - ✅ `/ep-qa-pipeline:commands`
-- ❌ "what commands does the pipeline have?" → chat; may point to
-  `/ep-qa-pipeline:commands`
+- ✅ "what commands does the pipeline have?", "how do I run just the
+  grooming stage?", "what's the slash command for web testing?"
+- ❌ "run the QA checks for EP-1234" → qa-pipeline-code (a run, not
+  the list)
 
 ## qa-manual-runsheet (stage 9)
 - ✅ "prepare the manual tests", "make a run sheet", "build the walk plan"

@@ -1,6 +1,6 @@
 # Background scans — impact scan and the existing QA Service suite
 
-Read by `task-context` (stage 1), flow steps 7–8. Both scans fill
+Read by `task-context` (stage 1), flow step 7. Both scans fill
 background sections of the context file. Neither is a source of
 requirements: the anti-invention prohibitions in the SKILL.md apply
 unchanged, and neither ever blocks the run.

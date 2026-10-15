@@ -6,16 +6,16 @@ description: >
   (stage 9), presents each case as a plain-language card ("as <who>,
   do <this>, you should see <that>"), asks what happened, answers
   questions from the card's backstage notes, runs the API / harness
-  cards itself while the tester supplies only what a human can (an
-  email token, a phone), keeps a resumable state file, and hands the
-  verdicts to qa-manual-results for the confirmed write-back. Use when
+  cards itself, keeps a resumable state file, and hands the verdicts
+  to qa-manual-results for the confirmed write-back. Use when
   the user says "walk me through EP-1234", "let's test EP-1234
   together", "start the manual walk", "continue the walk", "next
   case", or wants to hand-test a ticket with the agent instead of a
   spreadsheet. Do NOT use to build the plan (qa-manual-runsheet), to
-  run cases unattended (web-testing), to ingest a filled sheet
-  (qa-manual-results), or to explain a PR or code ("walk me through
-  the PR" → pr-summary; "…the code" → code-review).
+  run cases unattended (qa-pipeline-code, stage 8), to ingest a filled
+  sheet (qa-manual-results), or to explain a PR or code ("walk me
+  through the PR" / "…the code" → chat, or the slash-only stages
+  /ep-qa-pipeline:pr-summary and /ep-qa-pipeline:code-review).
 ---
 
 # QA Manual Walk
@@ -59,7 +59,8 @@ cell.
    resume it (see "Resume"), never start over silently.
 4. The pass's QA Service test run (connector present) — for the roster
    and the machine verdicts the cards were built against; used
-   read-only here.
+   read-only here. It may already read `completed` (a clean machine
+   pass auto-completes it): that is not a reason to stop — see Resume.
 5. `<ISSUEKEY>-open-items.md` — the ledger; retest history for cards.
 6. `$EP_QA_HOME/.env.qa-agents` (`../qa-pipeline/references/environment.md`)
    — only for AGENT-RUNS cards; their hosts must match its `ALLOWED_HOSTS`.
@@ -211,9 +212,15 @@ the tester's explicit yes there.
 
 "Continue the walk for EP-1234" → read `<ISSUEKEY>-walk-state.json`,
 show one progress line, re-confirm the environment in one clause, and
-present the next card. If the state file's run id no longer matches an
-open run (`get_test_run` → `completed` or `closed`), say so and stop: the round was
-already written back, and a second walk on the same run needs
+present the next card. The run's status alone never decides whether
+the round happened (`../qa-pipeline/references/test-runs.md` → "A
+clean pass completes the run before the walk"): a `completed` run with
+no `<ISSUEKEY>-walk-results.md` is a clean machine pass whose human
+round is still open — continue, and stage 10 reopens the run at
+write-back. Stop only when `<ISSUEKEY>-walk-results.md` already
+exists for this run id: say so — the walk is finished (written back
+when `-manual-results.md` exists too, else ingestion is pending:
+`qa-manual-results`), and a second walk on the same run needs
 `reopen_test_run` by stage 10, not a silent continuation.
 
 ## Final response

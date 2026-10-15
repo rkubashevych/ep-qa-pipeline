@@ -5,6 +5,152 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.70.0 — 2026-10-15 — the regression review: one copy fixed, every copy fixed
+
+**Trigger:** `docs/reviews/REGRESSION-REVIEW-0.59.1-to-0.69.0-2026-10-15.md`
+— a cold rule-by-rule diff of 0.59.1 against 0.69.0 by four
+independent readers, every CHANGELOG claim of 0.60–0.69 checked against
+the files. Its verdict: nothing was lost in the moves; the regressions
+were in the fixes — each fixed one copy of a rule and left the others,
+or added a rule without its producer or consumer. All sixteen findings
+(F1–F16) and the seventeen nits are implemented here; none rejected.
+
+**🔴 Run outcome regressions.**
+- **F1 — a clean machine pass completes the run, and the walk refused
+  to start.** 0.69.0 taught only the status-line template that the
+  service auto-completes a run with no `not_run` row. Now
+  `test-runs.md` has the rule as a heading ("A clean pass completes
+  the run before the walk"): the run status alone never says whether
+  the human round happened; `completed` + walk plan + no
+  `-walk-results.md` = the round is still open; `-walk-results.md`
+  alone = ingestion pending; done only with `-manual-results.md`.
+  Followers: the walk's Input and Resume (stops only on an existing
+  walk-results file), the dispatcher's step 3 and walk row,
+  `qa-pipeline-code` step 6 (the
+  inline "open" quote is now conditional; "the run stays `running`"
+  qualified), `qa-manual-results` (reopen is the normal path),
+  `qa-service-sync-checks.md` (stale-run outcome).
+- **F2 — task-context's AC-page ask.** "Skip when nobody can answer"
+  now means "dispatched as a subagent", full stop; both orchestrators
+  run stage 1 inline and expect the one ask (Story/Task only). A Bug
+  writes `Bug: no AC page expected; requirements from the Description`
+  instead of the ⚠️ — grooming and the analyzer read it as not a gap.
+- **F3 — web-testing's doubt rule** named NOT-TESTABLE (API) and QA
+  (CR). It now lists its own legal set — BLOCKED with `Probe:`,
+  PARTIAL, SPEC-DEFECT, FAIL with a discrepancy; the vocabulary's
+  cross-stage rule says "a doubt status from your own column".
+- **F4 — `reconcile_counts.py` vs the Risk rule.** A `Risk:` REQ
+  carried to the ledger ("no observable consequence") has no case by
+  rule; its `Covers:` ids were MISSING since 0.69.0. The script now
+  reports them on their own line ("risk carried to the ledger, no case
+  by rule: …") — never MISSING, and not counted as covered either
+  (nothing checks them); the match needs `Risk:` and the phrase on the
+  group heading, a Notes line does not qualify. Two self-test cases
+  (the carry, and a decoy); the analyzer §1 and the docs count gate
+  name the exemption.
+- **F5 — "needing clarification"** was defined two ways in 0.68.0.
+  Grooming's template now says what qa-test-cases says: an open finding
+  alone does not count; conflicts and "(needs clarification)" do.
+- **F6 — the Bug rule had no producer and no consumer.** task-context
+  ledgers a Bug's three parts as `JD-n (Jira Description, bug: steps |
+  actual | expected)` (template row added; `not stated` when missing);
+  grooming makes the `bug: expected` bullet the REQ and cites all three
+  ids; qa-test-cases reads those bullets (only those) and builds the
+  case — steps verbatim, `Exp:` = expected, plus "<actual> must no
+  longer occur". Design: ledger in task-context (user, 2026-10-15).
+
+**🟡 Contradictions and gaps.**
+- **F7 — `FRONTEND_HOST` wired.** api-testing reads it first and asks
+  only when it is empty or the case is on another event; §11.1 and the
+  §10 checklist say so, and §11.1 separates it from `BASE_URL`; an exhibitor login is never a
+  pause (test data, throwaway, or NOT EXECUTED — the environment.md
+  rule, now a heading the stage points to). Orchestrator input line
+  and MAINTAINERS follow. Design: read the file first (user).
+- **F8 — analyzer §4 "not published yet"** is reachable again: at docs
+  step 5 the suite holds stage 3's items (since 0.50.0), so that state
+  is the expected one — report it with the stage-3 counts, skip the
+  comparison and the run check, still run the suite-structure checks.
+- **F9 — the partition check's other two copies** (`qa-service-sync-checks.md`,
+  `test-runs.md` → Verification) now carry the held-back and quota
+  rows 0.67.0 gave the orchestrator's copy.
+- **F10 — web-testing's statistics table** gains `PARTIAL` and
+  `BLOCKED (quota)`; its "This stage emits" list gains `PARTIAL` and
+  `NOT EXECUTED` (the two WEB statuses it never defined);
+  `playwright-executor.md` lists the full WEB set.
+- **F11 — redirects to invisible names.** `disable-model-invocation`
+  hides a skill's name from the session, so no visible description
+  redirects to a slash-only stage by bare name any more
+  (qa-refinement, qa-api-tests, qa-manual-walk → the owning
+  orchestrator or the full slash command). `commands` is
+  model-invocable again, with a one-line description, so "what
+  commands does the pipeline have?" can be answered — the rule is in
+  MAINTAINERS step 3 and `evals/triggering.md`. qa-manual-walk's
+  description lost its "the tester supplies only what a human can"
+  clause to stay under the 1024-char cap; the body keeps it.
+- **F12 — the analyzer's Input list** names `-retest-scope.md`,
+  `-human-summary.md`, `-api-tests.md`, `-claim-review.json`,
+  `-testdata.json`, `-walk-state.json`, `-open-items.md`, and a "Not
+  read" line (own report, write plans, the sheet and the fixture
+  notes); §2 reads the "Open findings" section and 🟡s a BEHAVIOUR
+  finding recon already answered; `qa-pipeline-docs` removes settled
+  findings from the section when it folds recon in.
+- **F13** — stage 9 and the audit append the remediation line to
+  `why-walked:`; there is no `why:` key.
+- **F14** — the results template's header admits `completed`; its
+  example shows `created: false` as the normal path and `created:
+  true` as the duplicate to consolidate; the analyzer's template too.
+- **F15** — FAIL REJECTED has an `Evidence:` line in web-testing's
+  finding block, a `§n` in its Comment and in the header's list.
+- **F16** — `sources-of-record.md` §8 says the comments file holds
+  all comments with author and date, and gives the generic label.
+
+**Nits.** background-scans "step 7" (N3); `test-levels.md` "Two
+invariants", the vocabulary's "Cross-stage rules" and six other
+pointer targets are headings (N4);
+api-evidence `§n` in the example rows (N5); `-web-evidence.md` has a
+file shape (N6); two stale step pointers in web-testing's references
+(N7); code-review compares each step's expected result again (N8); one
+harness-less list — Steps 1, 1b, 2, 4 (N9); the witnessed principal is
+a row of the verdict mapping (N10); arrival tags and a legacy mention
+(N11); `TS-n` in the `Covers:` and coverage-line shapes (N12); a
+`Covers:` line closes the Structural checks section for
+structural-only REQs (N13); step 6 names the risk-row promotion (N14);
+the stage-7 brief names `-api-evidence.md` (N15); "are these on RC"
+restored (N16); api-testing states the dual `[API][UI]` rule — a
+real API-side discrepancy is still a FAIL; a behaving API half is
+`NOT-TESTABLE (instrumentation)`, never PASS (N17). The requirements
+file header gains `Ticket type:` so stage 4 knows a Bug without
+inferring it (F6).
+The example's `Skill:` stamp is this release's (N2); the fixture
+expects the "Open findings" section and `needing clarification: 1`
+(N1).
+
+**Gate.** `verify_plugin.py` gains 5b headings (every `file.md →
+"Heading"` pointer is a substring of a real heading in the target —
+on 0.69.0 it fails eight pointers at six body-text targets), 5c
+statuses (every status the vocabulary assigns to api-testing /
+web-testing / code-review has a statistics row, qualifiers kept — on
+0.69.0 it names web-testing's missing `PARTIAL` and `BLOCKED
+(quota)`), 5d stamp (the example's `Skill:` line equals plugin.json),
+5e inputs (every `<KEY>-<file>` a skill names is in the analyzer's
+Input list or its "Not read" line — found `-open-items.md`). CLAUDE.md
+and MAINTAINERS step 6.4 list them; CLAUDE.md adds "when you fix a
+rule, grep for its other copies first".
+
+**Verified.** `verify_plugin.py --no-git`: 17 ok · 0 warn · 0 fail;
+all six self-tests pass. A fresh agent then diffed the edit against
+0.69.0 with the sixteen findings as its checklist and found ten
+things, all fixed before this entry was closed: four one-copy-not-fixed
+residues of its own (F3/F10's emit list, F7's §10 checklist, F11's
+MAINTAINERS layout line, N4's "Cross-stage rules"); the first
+`reconcile_counts.py` carry logic matched the phrase anywhere in a
+group and counted the ids as covered; check 5c stripped `(quota)` and
+so could not see the row it was written for; check 5b accepted a
+heading that was a substring of the pointer; an unclosed code fence in
+`playwright-executor.md`; "done" conflated walk-finished with
+written-back; and the dual-tag rule forced an API-side FAIL into
+`NOT-TESTABLE`. The review file itself is in `docs/reviews/`.
+
 ## 0.69.0 — 2026-10-15 — gaps both versions hit in the 0.59.1 vs 0.68.0 comparison
 
 **Trigger:** an A/B dry run on EP-56001 (2026-10-15): the docs phase and

@@ -32,7 +32,7 @@ From the requirements file, the skill takes:
 - The numbered requirements — the only source of behaviour. Each
   `REQ-N` (or `REQ-Na` sub-item) becomes a group in the output.
 - Each requirement's `source:` line — the AC-ledger ids (`AC-n` /
-  `SB-n` / `JD-n` / `CM-n`) it was built from. Copy them onto the group's
+  `SB-n` / `TS-n` / `JD-n` / `CM-n`) it was built from. Copy them onto the group's
   `Covers:` line, so every test case and structural line is traceable
   to the acceptance criterion it verifies, and the Statistics block can
   state `AC coverage` mechanically.
@@ -66,8 +66,21 @@ From the requirements file, the skill takes:
   clarification". It is not an uncovered requirement and the analyzer
   does not count it as an orphan.
 
-Additional sources:
+### Additional sources
+
 - The user's answers to questions asked before generation.
+- **Bug tickets only** (`Ticket type: Bug` in the requirements file's
+  header): `<ISSUEKEY>-context.md` in the same run folder — its
+  `JD-n (Jira Description, bug: steps | actual | expected)` bullets, by the ids on the REQ's
+  `source:` line (`../requirements-grooming/SKILL.md` → "Bug tickets").
+  Read only those bullets — the rest of the context file stays out
+  of bounds. The case for that REQ is built from them: the `bug: steps`
+  bullet's steps verbatim as the case steps (the Grounding rule does
+  not apply to them — the ticket wrote them), the `bug: expected`
+  text as `Exp:`, and one more `Exp:` line "<the `bug: actual` text>
+  must no longer occur". A part ledgered `not stated` → the case says
+  so on that line and the REQ counts under "needing clarification".
+  The ids go on the group's `Covers:` line like any other.
 - `<ISSUEKEY>-qs-cases.md` in the same run folder, when it exists:
   the cases QA Service generated, discovered or already held
   for this ticket's requirements, exported by `qa-pipeline-docs` stage 3
@@ -304,7 +317,10 @@ The id is what the publish step writes as the STRUCT case's
 `detail.pipelineId` and what the code phase rebuilds the line from
 (`../qa-pipeline-docs/references/qa-service-publish.md` → "Structural
 checks"). The text is the check verbatim — element + expected property,
-no scenario. Omit the section only when there is not one structural
+no scenario. A REQ that has lines here and no `## REQ-` group above
+(structural-only) gets its `source:` ids on the section's closing
+`Covers:` line (template → Structural checks), so the count gate sees
+them covered. Omit the section only when there is not one structural
 check in the whole ticket; say so in the final response.
 
 ## Verification before saving

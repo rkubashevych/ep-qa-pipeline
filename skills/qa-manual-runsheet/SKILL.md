@@ -278,7 +278,7 @@ the plan, one row in an exported sheet):
    NOT EXECUTED, and every PASS, FAIL REJECTED and
    structural PASS the evidence audit (`<ISSUEKEY>-evidence-audit.md`)
    rated INSUFFICIENT or UNVERIFIABLE,
-   in full form, its remediation line as the backstage `why:` — plus the VERIFY spot-checks (High-risk or
+   in full form, its remediation line appended to the backstage `why-walked:` — plus the VERIFY spot-checks (High-risk or
    code-reading-only machine PASSes), plus the `[core]` case of every
    behavioural REQ even when machine-settled. A machine-settled clean
    PASS on a Low/Medium-risk core case enters in short form

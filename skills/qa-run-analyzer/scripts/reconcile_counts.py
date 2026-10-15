@@ -274,26 +274,43 @@ def ledger_ids(text, line_re):
 GROUP_HEAD = re.compile(r"^## (?:REQ-(\d+[a-z]?)\b)?", re.M)
 STRUCT_REQ = re.compile(r"^- \[[ xX]\] REQ-(\d+[a-z]?)/struct-\d+\b", re.M)
 TC_HEAD = re.compile(r"^### TC-", re.M)
+# 0.70.0: a `Risk:` REQ whose consequence is not observable gets no case
+# by rule (qa-test-cases → Risk requirements): the group HEADING carries
+# `Risk: … — no observable consequence, carried to the ledger`. Its
+# Covers: ids are accounted for by that decision — reported on their own
+# line, never as MISSING, and never counted as covered either (nothing
+# checks them). Both conditions sit on the heading line: a `Risk:` label
+# AND the phrase; a Notes line mentioning the phrase does not qualify.
+# Case-sensitive on purpose: `[risk: Low]` is the risk TAG, not the label.
+# The phrase is the one qa-test-cases → "Risk requirements" prescribes; an
+# edit to that wording must change this regex too.
+RISK_CARRIED = re.compile(r"\bRisk:.*no observable consequence")
 
 
-def covered_ids(text):
+def covered_ids(text, carried=None):
     """Ledger ids on Covers: lines of groups that verify something (0.69.0).
 
     qa-test-cases: an id counts as covered only on a group with at least
     one test case or structural line. A `## REQ-N` group whose Covers:
     line has no `### TC-` heading under it and no `REQ-N/struct-k` line
-    anywhere names a criterion nothing checks. Files with no `## REQ-`
-    groups (bug-fix mini files) keep the plain Covers: count."""
+    anywhere names a criterion nothing checks — unless the group is a
+    `Risk:` REQ carried to the ledger (0.70.0): then its ids go into
+    `carried` (a set the caller passes), reported separately, and are
+    NOT in the returned covered set. Files with no `## REQ-` groups
+    (bug-fix mini files) keep the plain Covers: count."""
     heads = list(GROUP_HEAD.finditer(text))
     if not any(h.group(1) for h in heads):
         return ledger_ids(text, COVERS_LINE)
     struct_reqs = set(STRUCT_REQ.findall(text))
     out = set()
     for i, h in enumerate(heads):
+        head_line = text[h.start():text.find("\n", h.start()) if "\n" in text[h.start():] else len(text)]
         body = text[h.end():heads[i + 1].start() if i + 1 < len(heads) else len(text)]
         req = h.group(1)
         if TC_HEAD.search(body) or STRUCT_LINE.search(body) or (req and req in struct_reqs):
             out |= ledger_ids(body, COVERS_LINE)
+        elif req and RISK_CARRIED.search(head_line) and carried is not None:
+            carried |= ledger_ids(body, COVERS_LINE)
     return out
 
 
@@ -302,7 +319,8 @@ def ledger_report(context, requirements, test_cases):
     lines = []
     ctx = ledger_ids(context, CONTEXT_BULLET) if context else None
     req = ledger_ids(requirements, SOURCE_LINE) if requirements else None
-    tcs = covered_ids(test_cases) if test_cases else None
+    carried = set()
+    tcs = covered_ids(test_cases, carried) if test_cases else None
     if ctx is not None:
         by = {k: sorted(i for i in ctx if i.startswith(k + "-")) for k in ("AC", "SB", "TS", "JD", "CM")}
         for k in ("SB", "TS"):
@@ -320,9 +338,11 @@ def ledger_report(context, requirements, test_cases):
                      f"{len(base)} mapped on source: lines"
                      + (f" · MISSING: {', '.join(miss)}" if miss else ""))
     if tcs is not None:
-        miss = sorted(base - tcs)
+        miss = sorted(base - tcs - carried)
         lines.append(f"AC ledger (test-cases): {len(tcs & base)} of {len(base)} covered on Covers: lines"
-                     + (f" · MISSING: {', '.join(miss)}" if miss else ""))
+                     + (f" · MISSING: {', '.join(miss)}" if miss else "")
+                     + (f" · risk carried to the ledger, no case by rule: {', '.join(sorted(carried & base))}"
+                        if carried & base else ""))
         if not base:
             lines.append("AC ledger: no ids anywhere — a pre-0.42 ticket, or task-context did not write the ledger")
     return lines
@@ -654,6 +674,30 @@ def check_ledger(errs):
     with_struct = empty + "\n## Structural checks  [UI]\n\n- [ ] REQ-3/struct-1 [UI] the sort control exists\n"
     if "AC-3" not in covered_ids(with_struct):
         errs.append("ledger: a REQ covered by a structural line not counted")
+    # 0.70.0: a Risk: REQ carried to the ledger (no observable consequence)
+    # has no case by rule — its id is accounted for, reported on its own
+    # line, never MISSING
+    risk = (LEDGER_TC + "\n## REQ-3 — Risk: amounts may merge in a downstream consumer — "
+            "no observable consequence, carried to the ledger  [UI]\n\nCovers: AC-3\n")
+    carried = set()
+    if "AC-3" in covered_ids(risk, carried) or carried != {"AC-3"}:
+        errs.append("ledger: a carried Risk: REQ's Covers: must be carried, not covered")
+    out_risk = "\n".join(ledger_report(LEDGER_CTX, LEDGER_REQ, risk))
+    if ("MISSING: AC-3" in out_risk or "4 of 5 covered" not in out_risk
+            or "risk carried to the ledger, no case by rule: AC-3" not in out_risk):
+        errs.append(f"ledger: carried Risk: REQ reported wrongly:\n{out_risk}")
+    # the phrase alone, on a non-Risk group or off the heading, is not a carry
+    decoy = LEDGER_TC + "\n## REQ-3 — sorting  [UI]\n\nCovers: AC-3\nNotes: the spec names no observable consequence here\n"
+    carried = set()
+    if "AC-3" in covered_ids(decoy, carried) or carried:
+        errs.append("ledger: a non-Risk group with the phrase in its body counted as carried")
+    if "MISSING: AC-3" not in "\n".join(ledger_report(LEDGER_CTX, LEDGER_REQ, decoy)):
+        errs.append("ledger: decoy group's id should be MISSING")
+    tag_decoy = LEDGER_TC + "\n## REQ-3 — sorting  [risk: Low] — no observable consequence named  [UI]\n\nCovers: AC-3\n"
+    carried = set()
+    covered_ids(tag_decoy, carried)
+    if carried:
+        errs.append("ledger: the [risk: Low] tag must not read as a Risk: label")
     # pre-0.42 files: no ids anywhere → say so, never crash
     out2 = "\n".join(ledger_report("## Requirements\n- plain bullet\n", "- REQ-1: x\n", "## REQ-1 — x\n"))
     if "pre-0.42" not in out2:
