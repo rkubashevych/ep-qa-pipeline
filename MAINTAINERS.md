@@ -41,7 +41,7 @@ skills/
                                #   (source_tools.py, plan_hash.py, skill_stamp.py — 0.47.0)
   qa-refinement/               # pre-estimation mode: stages 1-2 + recon + questions comment + QA sizing
   qa-service-watch/            # weekly QA Service change check (snapshot diff + triage report), first task of the week (0.53.0)
-  qa-api-tests/                # API cases → implemented via QA Service Implement run + frontend test sub-task (0.51.0)
+  qa-api-tests/                # API cases → implemented via QA Service Implement run; backend + frontend test sub-tasks (0.51.0, 0.74.0)
   qa-rc-smoke/                 # release-candidate mode: scope items on RC — code, served build, runtime smoke
   qa-pipeline-docs/            # orchestrator: stages 1, 2, 4 + publish
   qa-pipeline-code/            # orchestrator: stages 5-9 + analyzer + Jira post

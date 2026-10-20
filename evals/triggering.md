@@ -175,6 +175,7 @@ before they run), or Claude names the stage's slash command — the
 - ✅ "write the API tests for this ticket and register them in QA Service"
 - ✅ "make the API cases implemented in QA Service for EP-55889"
 - ✅ "create the frontend test sub-task for EP-57253"
+- ✅ "create the backend and frontend test sub-tasks for EP-55996"
 - ❌ "test the API for EP-1234" / "hit the endpoints" →
   qa-pipeline-code (stage 7 executes cases on a test env, writes no
   test code)

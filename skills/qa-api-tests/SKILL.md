@@ -3,11 +3,13 @@ name: qa-api-tests
 description: >
   Turns a ticket's API-E2E and Contract cases from "planned" into
   "implemented" in QA Service: links tests that already exist, runs QA
-  Service's Implement workflow for the rest (a Bitbucket PR), and files
-  a frontend sub-task for the Component-FE / E2E (UI) cases. Use when
-  the user says "automate the API cases for EP-1234", "write the API
-  tests for this ticket", "make the API cases implemented in QA
-  Service", or "create the frontend test sub-task". Do NOT use to
+  Service's Implement workflow for the rest (a Bitbucket PR), then has
+  QA Service request the remaining levels from the developers as a
+  backend sub-task (Unit / Integration) and a frontend sub-task
+  (Component-FE / E2E). Use when the user says "automate the API cases
+  for EP-1234", "write the API tests for this ticket", "make the API
+  cases implemented in QA Service", or "create the backend / frontend
+  test sub-tasks". Do NOT use to
   execute cases on a test env (qa-pipeline-code, stage 7), to write
   test cases (qa-pipeline-docs), or to register tests already merged
   (qa-manual-results).
@@ -17,15 +19,19 @@ description: >
 
 The pipeline verifies a ticket's API cases at runtime (stage 7), but in
 QA Service those cases stay `planned`: nothing proves them on every
-build. This skill closes that gap for the **API levels only** — `AE`
-(API-E2E) and `C` (Contract) in the backend monolith — and routes the
-frontend levels to the people who own that code.
+build. QA writes the **API levels** itself — `AE` (API-E2E) and `C`
+(Contract) in the backend monolith. Every other automated level goes
+to the developers who own that code: `U` / `I` as a backend sub-task,
+`CFE` / `E2E` as a frontend sub-task, both requested by QA Service
+after the API tests are linked, so neither lists a case QA covered.
 
 QA Service ships the whole workflow — the `bitbucket-test-implementer`
 agent, the `api-e2e-tests-authoring` skill, the docker-local run, the
 PR, and a verification that records a case `implemented` only when its
-test resolves in the repo — and `request_dev_tests` writes the frontend
-task from the suite. This skill scopes, confirms and records.
+test resolves in the repo — and `request_dev_tests` writes each
+developer task from the suite. QA Service files nothing by itself:
+nothing reaches a developer unless this skill calls it. This skill
+scopes, orders, confirms and records.
 
 **This skill holds no test-authoring method.** How to write, name, run
 and register a test comes from QA Service at run time — its
@@ -67,7 +73,7 @@ re-read the work order.
    in `references/local-harness.md` — harness clone, backend clone,
    containers, hosts, one smoke run. Missing any → say what is missing,
    skip Step 3, and still do Steps 1, 1b, 2 and 4 (selection, the claim
-   review, linking, the frontend sub-task — none needs the harness).
+   review, linking, the developer sub-tasks — none needs the harness).
 
 ## Step 1 — Select this ticket's API cases
 
@@ -204,8 +210,8 @@ the scope, the policy and the confirmation:
    never edits product code. `draft`: a human marks the PR ready.
 2. **REQUIRED PAUSE / CONFIRM.** One preview: the cases per level (and
    the ones set aside, with reasons), repo, branch, base, batch count,
-   agent + skill digests, the links from Step 2, and the frontend
-   sub-task of Step 4. One plan file, `r<N>/<KEY>-apitests-plan.json`
+   agent + skill digests, the links from Step 2, and the backend and
+   frontend sub-tasks of Step 4. One plan file, `r<N>/<KEY>-apitests-plan.json`
    (`../qa-pipeline/references/write-plans.md`). The run pushes a
    branch and opens a PR — nothing starts without the yes.
 3. `start_implement_tests` with the `confirmationToken` unchanged and
@@ -279,43 +285,73 @@ cases `pass` or `skipped` (QA)". A draft PR waits while alpha moves:
 later, and turned the step red (`references/local-harness.md` →
 "CI-only skips").
 
-## Step 4 — Frontend cases → the frontend developer
+## Step 4 — Developer levels → a backend and a frontend sub-task
 
-The `CFE` and `E2E` cases of this ticket go to the frontend developer,
-filed by QA Service's own request:
+QA Service's `request_dev_tests` decides what each developer still
+owes: it requests only the cases with no linked test at that level.
+That is why this step runs **after** Step 3: the API cases QA has just
+linked drop out on their own. Asked first, the backend task would list
+API cases QA then writes too, and the work would be done twice.
 
-1. `request_dev_tests {suite, level: "CFE", parentKey: <KEY>,
-   stableIds: <this ticket's CFE cases>}`, then the same for `E2E` —
-   the tool takes one level per call.
-2. Follow its `existingCheck`: search the frontend checkouts it names
-   (`portal-ui`, `admin-ui`, `e2e-testing`) when they exist here; link
-   full matches, pass partial ones back as `existing`, then call again
-   with `checkedExisting: true`.
-3. Follow its `parentCheck` and `dedupe` (an open request for the same
-   suite + level → offer a comment on it instead of a second one).
-4. Show the summary, the test list, the parent and the assignee — by
-   default the assignee of the story's frontend dev sub-task; ask when
-   there is none. Same confirmation as Step 3 when both run.
-5. `createJiraIssue` with its `create.args` + `description`, then
+| Sub-task | Levels, requested in this order | Default assignee |
+|---|---|---|
+| Backend | `U`, then `I` | the assignee of the story's Backend dev sub-task |
+| Frontend | `CFE`, then `E2E` | the assignee of the story's Frontend dev sub-task |
+
+Find the dev sub-tasks and classify them by Discipline as in
+`../pr-summary/references/bitbucket-access.md` → "Finding the branch —
+dev sub-tasks and the fallback (qa-pipeline-code step 0)". When
+Discipline is empty, a `[BE]` / `[FE]` summary prefix decides
+(EP-55996). No dev sub-task on that side → ask; never guess the
+assignee.
+
+1. **Select per level**, with the Step 1 rules: this ticket's cases at
+   that level, not `na` / `deferred`, no resolved link. Set aside, with
+   the reason, the ones blocked by an open bug, an open question or a
+   Step 1b `DRIFT` waiting for an answer: a test cannot be written
+   against an expectation nobody has settled.
+2. **Request** — `request_dev_tests {suite, level, parentKey: <KEY>,
+   stableIds}`, one call per level (the tool takes one), always with
+   `stableIds` (unscoped it picks the whole suite, Step 1). Call it
+   after Step 3's last submit or link. A case Step 3 implemented that
+   still shows in `requested` (a link to the open draft PR not yet
+   counted) is dropped: call again without it.
+3. Follow its `existingCheck`: search the checkouts it names when they
+   exist here (the monolith for `U` / `I`; `portal-ui`, `admin-ui`,
+   `e2e-testing` for the frontend); link full matches, pass partial
+   ones back as `existing`, then call again with
+   `checkedExisting: true`. Then its `parentCheck` and `dedupe` (an
+   open request for the same suite + level → offer a comment on it
+   instead of a second one).
+4. **One sub-task per side.** File the first level's issue and add the
+   second level's list to it as a comment. A side with nothing
+   requested gets no sub-task, only one line in the report ("Frontend:
+   nothing to request — no CFE / E2E case").
+5. The lists, parents and assignees are in the Step 3 preview and its
+   plan file; there is no second confirmation. When Step 3 does not
+   run, this step's own preview takes the same plan file.
+6. `createJiraIssue` with its `create.args` + `description`, then
    `createIssueLink` per `afterCreate`. Jira refuses the Team field
-   (`customfield_10001`) on a sub-task — it is inherited from the parent
-   (EP-58731, 2026-10-14): retry once without it. If the user wants ONE frontend
-   sub-task for both levels, file the first and add the second level's
-   list to it as a comment.
+   (`customfield_10001`) on a sub-task: it is inherited from the parent
+   (EP-58731, 2026-10-14). Retry once without it.
 
-**Backend Unit / Integration cases** are not this skill's scope (API
-only). List them in the report; offer the same `request_dev_tests` call
-for the backend developer, and file it only on an explicit yes.
+**API cases stay with QA.** `AE` / `C` are never requested by default.
+When Step 3 will not run (no harness, or the user answers "skip the
+implement run"), the preview offers to move this ticket's unlinked,
+unblocked API cases into the backend sub-task (`level: "AE"` / `"C"`
+calls, added to it as comments). Declined, they stay a QA To do and a
+ledger row.
 
 ## Step 5 — Report
 
 Write `r<N>/<KEY>-api-tests.md`: the method digests (`qa-implement-tests`,
 agent, authoring skill, `claim-review`); the Step 1b verdict counts and
 every correction, retirement and open question it led to; per case — implemented / partial / linked
-existing / set aside (reason) / requested from frontend (sub-task key),
-and a CI-only skip with its ticket;
+existing / set aside (reason) / requested from backend or frontend
+(sub-task key), and a CI-only skip with its ticket;
 the PR link and its state; the To do and ledger rows. Chat: three lines —
-how many API cases are now implemented, the PR, the frontend sub-task.
+how many API cases are now implemented, the PR, the backend and frontend
+sub-tasks (key, or why none was filed).
 
 ## Rules
 

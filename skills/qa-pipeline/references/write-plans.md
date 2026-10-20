@@ -118,7 +118,7 @@ nothing checks it mechanically.
 | `qa-manual-results` step 4: bugs, verdicts, retractions, the human summary | `r<N>/<KEY>-writeback-plan.json` |
 | `qa-manual-results` step 4b: the handback (story note, transition, reassignment) | `r<N>/<KEY>-handback-plan.json` |
 | `qa-manual-results` step 4d: registering the PR's tests (links and discovery applies) | `r<N>/<KEY>-tests-plan.json` |
-| `qa-api-tests` step 3: the implement run(s), the existing-test links and the frontend sub-task (0.51.0) | `r<N>/<KEY>-apitests-plan.json` |
+| `qa-api-tests` step 3: the implement run(s), the existing-test links and the backend and frontend sub-tasks of step 4 (0.51.0; backend 0.74.0) | `r<N>/<KEY>-apitests-plan.json` |
 | `qa-rc-smoke` step 6: the results comment (the run is covered by the step-1 yes) | `<RC-KEY>-rc-comment-plan.json` |
 
 A pause not in this table still follows the protocol whenever it

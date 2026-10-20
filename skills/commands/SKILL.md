@@ -36,7 +36,7 @@ orchestrators run them for you.
 | `/ep-qa-pipeline:qa-manual-runsheet` | Fixtures + walk plan (the code phase's last step) | "build the walk plan for EP-1234" |
 | `/ep-qa-pipeline:qa-manual-walk` | The guided hand-test, one card at a time | "walk me through EP-1234" |
 | `/ep-qa-pipeline:qa-manual-results` | Writes the walk or a filled run sheet back to QA Service and Jira | "ingest the manual results" |
-| `/ep-qa-pipeline:qa-api-tests` | Turns the ticket's API cases into real tests in QA Service + frontend test sub-task | "automate the API cases for EP-1234" |
+| `/ep-qa-pipeline:qa-api-tests` | Turns the ticket's API cases into real tests in QA Service + backend and frontend test sub-tasks | "automate the API cases for EP-1234" |
 
 **Checks**
 

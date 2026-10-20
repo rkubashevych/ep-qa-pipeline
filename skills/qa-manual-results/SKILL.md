@@ -400,13 +400,13 @@ set cases aside too).
 
 Skip with one line, not silently:
 - connector absent, or no suite → "API automation skipped — <reason>";
-- the ticket has no `AE` / `C` / `CFE` / `E2E` case without a link and
-  no frontend request to file → "API automation: nothing to do";
+- the ticket has no `U` / `I` / `AE` / `C` / `CFE` / `E2E` case
+  without a link → "API automation: nothing to do";
 - RC smoke runs (`qa-rc-smoke`) never reach this stage.
 
 A machine without the docker-local harness still runs qa-api-tests
 Steps 1, 1b, 2 and 4 (selection, the claim review, linking existing
-tests, the frontend sub-task). Only the Implement run waits for the harness; it becomes a
+tests, the backend and frontend sub-tasks). Only the Implement run waits for the harness; it becomes a
 To do and a ledger row.
 
 ## Final response
@@ -420,5 +420,5 @@ template-filed keys, separately); the run id and its final status
 forward; the throwaway fixtures retired (or why not); the PR's tests
 registered, linked or left for after the merge (step 4d); the API
 automation outcome (step 6: cases implemented, the PR, cases set aside,
-the frontend sub-task key — or why it was skipped); and what is still
+the backend and frontend sub-task keys — or why each was skipped); and what is still
 untested.

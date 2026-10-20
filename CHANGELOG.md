@@ -5,6 +5,54 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.74.0 — 2026-10-20 — qa-api-tests: a backend and a frontend test sub-task
+
+**Trigger: the user, on EP-55996.** They expected the new flow to leave
+two test sub-tasks under a story, one backend and one frontend, and
+EP-55996 had neither.
+
+**What was found:**
+- EP-55996 never reached `qa-api-tests`. Only `qa-refinement` ran, and
+  QA Service has no case for the ticket, so `request_dev_tests` would
+  have had nothing to request either.
+- QA Service files nothing by itself. `request_dev_tests` files one
+  task per suite and level, and only when called. 0.51.0 already found
+  that the Backend/Frontend pairs of 2026-10-07 were filed by hand.
+- The pipeline called it only for `CFE` / `E2E`. `U` / `I` were listed
+  and filed on an explicit yes only (0.51.0: "API only"), so a backend
+  test sub-task never appeared, although QA Service's Implement action
+  and `request_dev_tests` both cover `U` and `I`.
+
+**What changes (`qa-api-tests` Step 4, rewritten):**
+- QA Service requests every developer level: `U` + `I` → a backend
+  sub-task, `CFE` + `E2E` → a frontend sub-task. One call per level, the
+  second level of each side added to its sub-task as a comment (the
+  0.51.0 frontend pattern).
+- **Order: after Step 3.** `request_dev_tests` requests only cases
+  with no linked test, so the API cases QA has just linked drop out on
+  their own. Asked first, the backend task would list API cases QA
+  then writes, and the work would be done twice. A case Step 3
+  implemented that still shows (a draft-PR link not yet counted) is
+  dropped by calling again without it.
+- `AE` / `C` stay with QA. They move into the backend sub-task only
+  when Step 3 will not run (no harness, or "skip the implement run")
+  and the user accepts the offer in the preview; otherwise a QA To do.
+- Blocked cases (open bug, open question, a Step 1b `DRIFT` waiting
+  for an answer) are not requested at any level, with the reason.
+- Assignee: the story's Backend / Frontend dev sub-task by Discipline,
+  else a `[BE]` / `[FE]` summary prefix (EP-55996's dev sub-tasks have
+  only the prefix); none → ask.
+- A side with nothing to request gets no sub-task, one report line.
+- The lists are in the Step 3 preview and plan file; no second
+  confirmation.
+
+**Copies updated:** the `qa-api-tests` description, intro, Step 0 and
+Step 5; `qa-manual-results` step 6 (skip condition, harness note, final
+response); `write-plans.md`; README (stage table + API automation
+note); MAINTAINERS layout; the `commands` row; `plugin.json`
+description; `evals/triggering.md` (one ✅ added for the new trigger
+words).
+
 ## 0.73.0 — 2026-10-20 — CI-only skips: tests green locally, blocked in CI
 
 **Trigger:** EP-58756. `qa-api-tests` wrote 8 MEXP V2 export tests
