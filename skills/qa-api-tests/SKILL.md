@@ -175,10 +175,16 @@ response: `../qa-pipeline/references/linking-tests.md`. Per test found:
 
 | The test | Then |
 |---|---|
-| covers the case fully, not `@skip`ped, id in the file | link it; drop the case from Step 3 |
+| covers the case fully, not `@skip`ped (or a CI-only skip this run saw green), id in the file | link it; drop the case from Step 3 |
 | covers it fully, but the id is not in the file | either a PR to that (live) repo stamping the id, after the user's yes, then the link — or leave it unlinked, the ref in `detail.devTests`, a To do "stamp <N> case ids in <repo> (QA)" |
 | covers it partly | keep the case; hand the ref to the implementer in the plan preview ("extend <ref>") |
-| `@skip`ped | never linked; note it on the case (`detail.devTests`, a key of its own so `notes` stay intact) with the skip reason |
+| `@skip`ped for any other reason, or a CI-only skip no run saw green | never linked; note it on the case (`detail.devTests`, a key of its own so `notes` stay intact) with the skip reason |
+
+A **CI-only skip** names a ticket for something CI lacks and the
+product does not — today EP-50538: no DynamoDB in CI, so every
+`/api/v2/` call answers 500. It is linked once a local run sees it
+green with the marker taken out (`references/local-harness.md` →
+"CI-only skips").
 
 ## Step 3 — Implement through QA Service
 
@@ -229,6 +235,12 @@ the scope, the policy and the confirmation:
      If anything overlaps, rebuild the branch on the other work: keep
      only the cases it does not cover and use its base class and seed
      helpers. Don't open a parallel set.
+   - **CI-only skips before the push.** A new test that calls a surface
+     CI cannot serve (today every `/api/v2/` call, EP-50538) carries the
+     skip its folder already uses on alpha. Run the checklist with the
+     marker taken out, then put it back (`references/local-harness.md`
+     → "CI-only skips"). Without it the alpha `api-public` step goes
+     red at the merge (PR #5630, EP-58756, 2026-10-16).
    - **Submit each batch as soon as it is green.** QA Service
      fails a client run that has not finished within about 30 minutes,
      and records nothing (MEXP, CHANGELOG 0.59.0). If the run has
@@ -258,8 +270,14 @@ the scope, the policy and the confirmation:
 `alpha` only unit suites gate, and after the merge `api-public` runs on
 every push while `api-admin` / `api-front` / `api-mob` run only in the
 manual `alpha-full-tests` pipeline. Put a To
-do and a ledger row on it: "Merge PR #<n>; after the merge re-link with
-`landing: merged` (or `discover_tests` on the files) (QA)".
+do and a ledger row on it: "Before the merge, merge current `alpha`
+into the branch and re-check the CI-only skip markers; merge PR #<n>;
+after the merge re-link with `landing: merged` (or `discover_tests` on
+the files) and check that the first alpha `api-public` run reads the
+cases `pass` or `skipped` (QA)". A draft PR waits while alpha moves:
+#5630 was branched before alpha's V2 markers, merged clean two days
+later, and turned the step red (`references/local-harness.md` →
+"CI-only skips").
 
 ## Step 4 — Frontend cases → the frontend developer
 
@@ -294,7 +312,8 @@ for the backend developer, and file it only on an explicit yes.
 Write `r<N>/<KEY>-api-tests.md`: the method digests (`qa-implement-tests`,
 agent, authoring skill, `claim-review`); the Step 1b verdict counts and
 every correction, retirement and open question it led to; per case — implemented / partial / linked
-existing / set aside (reason) / requested from frontend (sub-task key);
+existing / set aside (reason) / requested from frontend (sub-task key),
+and a CI-only skip with its ticket;
 the PR link and its state; the To do and ledger rows. Chat: three lines —
 how many API cases are now implemented, the PR, the frontend sub-task.
 
@@ -304,8 +323,8 @@ how many API cases are now implemented, the PR, the frontend sub-task.
   every Jira issue are in the plan.
 - Never edit product code, never fix a failing assertion to make it
   pass, never report a run you did not observe.
-- Never mark a case implemented by hand, never link a `@skip`ped test,
-  never call `approve_register_entry`, `delete_*` or
+- Never mark a case implemented by hand, never link a `@skip`ped test
+  other than a CI-only skip a run saw green, never call `approve_register_entry`, `delete_*` or
   `merge_duplicate_case`.
 - Credentials stay in `~/.ep-qa/.env.qa-agents` and the git credential
   helper; nothing is echoed (`../qa-pipeline/references/environment.md`).

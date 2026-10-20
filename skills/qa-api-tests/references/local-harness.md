@@ -39,7 +39,8 @@ set to `false` makes v2 run: on MEXP, the v2 export, contract and
 v2/v3 parity Cests went from 500 to green (`API-TESTS.md` §14 lists the
 same fix). Back the file up before the edit, say in the report that it
 was changed, and leave it as the user wants it. In CI v2 stays blocked
-(EP-50538 / EP-50539), so a v2 test is green locally only.
+(EP-50538 / EP-50539), so a v2 test is green locally only and merges
+with a skip marker ("CI-only skips" below).
 **v1 writes that record statistics** (`/api/v1/schedule/save` edit,
 `confirm`) need a reachable DynamoDB whatever the flag says. With
 `false` they fail with "Typed property …Statistics\Providers\Dynamo::
@@ -85,7 +86,7 @@ it). A defect is never "fixed" by loosening an assertion.
 - **Tags:** `@group <tag>` (without `@`), 1–3, approved catalogue only.
 - **Skip:** `@skip <reason> — EP-xxxxx` in the method docblock; never a
   class-level skip, never a skip without a ticket. A skipped test is
-  not linked (`qa-api-tests` Step 2).
+  not linked (`qa-api-tests` Step 2) — except a CI-only skip (below).
 - **Level by path:** `api-*/…/*Cest.php` → AE; `…/contract/…Cest.php` →
   C (register with `level: 'C'` — discovery would file it as AE).
 
@@ -102,3 +103,48 @@ On a PR into `alpha` only the unit suites gate. API tests run:
 
 The report and the To do say which suite the new tests are in and
 whether CI will run them on its own.
+
+## CI-only skips
+
+(0.73.0) Some tests are green here and red in CI for a reason that is
+not the product: CI lacks something the harness has. Today that is
+DynamoDB (EP-50538). Every `/api/v2/` request is logged to
+`api_public_log` in the v2 `ApiBaseController::afterExecuteRoute`, CI
+has no valid AWS token, and the call answers 500 whatever it tested;
+v1 writes that record statistics fail the same way. Such a test merges
+with a skip marker, or the alpha `api-public` step turns red. PR #5630
+(EP-58756) merged 8 unmarked V2 tests on 2026-10-16; the step stayed
+red until PR #5711 added the markers.
+
+- **Which tests.** Every test the PR adds or changes that calls a
+  surface CI cannot serve. The current list is what alpha already
+  skips — `git grep -n "@skip" origin/alpha --
+  universal/Tests/Codeception/<suite>/<folder>` — not a list kept here.
+- **The marker.** Copy the exact skip that alpha's tests in the same
+  folder carry for that ticket: one wording per ticket, so every marker
+  is found and removed together when it is fixed. Two forms exist:
+  the Meetings Cests use a docblock `@skip … — EP-50538` line, the
+  Products Cests a `requiresV2PublicApi($I)` guard in their base Cest.
+  Use the folder's.
+- **The local run.** The marker skips the test here too. Run the
+  checklist (alone, with the folder, with the suite, a second time)
+  with the markers taken out for the run, put them back before the
+  commit, and say in the report that the tests ran green with the
+  marker removed.
+- **Linking.** A CI-only skip is the one `@skip`ped test that is linked:
+  it was seen green and asserts the case. Put `detail.ciSkip` on the
+  case ("<ticket> — skipped in CI; remove the marker when it is
+  fixed"), a key of its own so `notes` stay intact, and a ledger row
+  naming the ticket. A test skipped because the product is wrong, or
+  one no run saw green, is never linked
+  (`../../qa-pipeline/references/linking-tests.md`).
+- **Again before the merge.** A draft PR can wait days while alpha
+  moves. #5630 was branched before PRs #5631 / #5636 put the markers
+  on alpha, the merge had no conflict, and nothing showed the gap. When
+  the PR leaves draft or is about to merge: merge current `alpha` into
+  the branch, run the `git grep` again, and check that every test the PR
+  adds carries its folder's marker.
+- **After the merge.** Read the first alpha `api-public` run after the
+  merge commit: `ci_run_status` (a large answer — save it and filter
+  by branch and commit) → its `testRunId` → `get_test_run`. The PR's
+  cases read `pass` or `skipped`, never `fail`.

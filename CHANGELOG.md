@@ -5,6 +5,55 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.73.0 — 2026-10-20 — CI-only skips: tests green locally, blocked in CI
+
+**Trigger:** EP-58756. `qa-api-tests` wrote 8 MEXP V2 export tests
+(PR #5630, draft 2026-10-14, merged 2026-10-16). Every alpha
+`api-public` run after the merge was red, and the 8 were its only
+case failures. V2 cannot run in CI: every `/api/v2/` request is logged
+to DynamoDB in the v2 `ApiBaseController::afterExecuteRoute`, CI has no
+valid AWS token, and the call answers 500 (EP-50538). Viktor Mikhalkin
+warned on the ticket the day before the merge (comment 153573). The
+other 13 V2 tests on alpha already carried a `@skip … EP-50538` marker
+from PRs #5631 / #5636, but #5630 was branched before those PRs and its
+merge had no conflict. PR #5711 added the markers on 2026-10-20.
+
+**What the skill missed.** `local-harness.md` already said "in CI v2
+stays blocked … a v2 test is green locally only" and drew no
+consequence from it: there was no marker rule and no re-check between
+the push and the merge. And "never link a `@skip`ped test"
+(`SKILL.md` Step 2 + Rules, `local-harness.md` conventions,
+`linking-tests.md`) treated an environment skip like a product skip.
+Under it, the 8 linked cases would have to be unlinked once marked,
+although a run had seen them green and Viktor's 13 V2 tests are linked
+and report `skipped` in CI.
+
+**Changes.**
+- `local-harness.md` → new "CI-only skips". Which tests (whatever
+  alpha already skips in that folder, read with `git grep`, not a list
+  kept here); the marker (copied exactly from the folder, one wording
+  per ticket, docblock `@skip` or the Products `requiresV2PublicApi`
+  guard); the local run with the markers taken out; linking with
+  `detail.ciSkip` + a ledger row; merge current `alpha` and re-check
+  before the merge; after the merge, the first alpha `api-public` run
+  reads the cases `pass` or `skipped`.
+- `qa-api-tests/SKILL.md`: a Step 3 bullet (marker before the push);
+  the Step 2 table and the Rules allow linking a CI-only skip a run
+  saw green; the "Implemented is not merged" To do now says merge
+  alpha + re-check markers before the merge and check the CI run
+  after; the report lists CI-only skips.
+- `linking-tests.md`: the same exception, on the one shared copy that
+  `qa-manual-results` also reads. It runs no tests, so it never meets
+  the "a run saw it green" condition and its behaviour is unchanged.
+- Every copy of the rule fixed: `grep -rn "skip" skills/` →
+  `qa-api-tests/SKILL.md` ×3, `local-harness.md` ×2, `linking-tests.md`.
+  Step 1's "a skipped test proves nothing" is about tests skipped
+  because the product is blocked, and stays.
+
+**Not re-done:** the 5 `api-public/Meetings` Export tests skipped for
+EP-50538 / EP-50539 and left unlinked on 2026-10-14 (EP-55889 ledger
+row 24). They become linkable only after a run sees them green.
+
 ## 0.72.0 — 2026-10-15 — the web-testing review; the analyzer's description
 
 **Trigger:** two skill-reviewer passes, both read-only: `web-testing`

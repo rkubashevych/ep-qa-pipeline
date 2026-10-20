@@ -24,6 +24,12 @@ link_implemented_tests {suiteId, links: [{stableId,
   only when the ref resolves; never set a status by hand.
 - **Never link a `@skip`ped test** — a skipped test proves nothing; note
   it on the case instead (`detail.devTests`, with the skip reason).
+  One exception, the **CI-only skip** (0.73.0): the skip names a ticket
+  for something CI lacks and the product does not (EP-50538: no
+  DynamoDB in CI, so every `/api/v2/` call answers 500), and this run
+  saw the test green with the marker taken out. That test is linked,
+  with `detail.ciSkip` on the case
+  (`../../qa-api-tests/references/local-harness.md` → "CI-only skips").
 
 ## A link resolves only when the case id is IN the test file
 
