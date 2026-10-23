@@ -68,6 +68,14 @@ else differs:
   10 against your one-line verdict, which stage 10 treats as a
   one-row TC / Result / Notes table per mini case, principal = you).
   Verdict flip / bug reopen offers happen at stage 10, as always.
+- **What a FAIL files** (0.75.0, `bug-report-template.md` → "Defect
+  or Bug — decide first, since 0.75.0"). A FAIL on the ticket's
+  own expected result (TC-1 / TC-2) files nothing: the fix fails and
+  the Bug goes back. A regression case failing on behaviour the
+  ticket never asked for and the fix did not cause is already on
+  production: the bug-fix passes and the failure is its own **Bug**,
+  "relates to" the ticket (EP-58774, 2026-10-15). A new fault the
+  fix itself introduced is a **Defect** with `parent` = the Bug.
 
 ## Resume mode
 

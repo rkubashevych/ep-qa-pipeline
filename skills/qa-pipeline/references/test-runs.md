@@ -253,7 +253,9 @@ So, for every roster `fail` about to be recorded:
 1. **Draft and create the ticket** per
    `../../qa-pipeline-code/references/bug-report-template.md`, through
    the Atlassian connector — which authenticates as **the pipeline
-   operator**, so the operator is the reporter. The summary **must
+   operator**, so the operator is the reporter. Its issue type is the
+   template's call: `Defect` under the main task for a fault new in
+   the change, `Bug` for one already on production. The summary **must
    begin with `[<STABLE-ID>]`** (`[TMU-REG-04]`, …): that prefix is the
    dedupe key, and it is what the next step matches on.
 2. **Then `record_case_result`.** The open issue already references the

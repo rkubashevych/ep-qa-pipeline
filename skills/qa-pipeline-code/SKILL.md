@@ -372,6 +372,11 @@ story does not exhaust the orchestrator's context:
      verdict links it rather than filing a second (`test-runs.md` →
      "File the ticket FIRST"); the step-6 `fail` list is the per-bug yes
      and shows the draft. Below is for findings with **no roster case**.
+   - **Defect or Bug, every draft:** a fault new in the change under
+     test → `Defect` with `parent` = the main task; already on
+     production → `Bug`, "relates to"; unsure → ask
+     (`references/bug-report-template.md` → "Defect or Bug — decide
+     first, since 0.75.0").
    - **Preferred path (knowledge-base installed):** `/knowledge-base`
      dedup-searches and creates routed Jira bugs. **Default path:**
      draft per **`references/bug-report-template.md`**, search Jira for

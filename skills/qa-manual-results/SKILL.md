@@ -217,8 +217,11 @@ that list is the per-bug yes. **Show the drafted bug beside each
 so it is part of what the user is saying yes to. Then, on explicit yes:
 
 - **Roster bugs FIRST, before the verdicts that file them.** For every
-  case whose Result is FAIL, create its Jira bug now, per
-  `../qa-pipeline-code/references/bug-report-template.md`, with the
+  case whose Result is FAIL, create its Jira ticket now, per
+  `../qa-pipeline-code/references/bug-report-template.md` — a `Defect`
+  under the main task when the fault is new in the change under test, a
+  `Bug` when it is already on production (its "Defect or Bug" section;
+  unsure → ask) — with the
   summary beginning `[<STABLE-ID>]` and the tracker's structured fields
   filled. It is created through the Atlassian connector, so **the
   operator is the reporter** — the whole point of the order
@@ -376,7 +379,8 @@ promoted, observations the tester confirmed, a FAIL on a run without a
 suite. One offer listing them all — via the `/knowledge-base` skill
 when installed, else per
 `../qa-pipeline-code/references/bug-report-template.md` with duplicate
-search first. File only what the user confirms.
+search first, Defect or Bug decided per draft. File only what the user
+confirms.
 
 **A ticket qa-service filed itself** (an older run, or a `fail`
 recorded out of order) is corrected in place, never re-filed:

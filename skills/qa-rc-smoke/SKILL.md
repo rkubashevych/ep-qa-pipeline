@@ -125,7 +125,10 @@ it before step 1.
   admin.
 - **No new evidence of a defect is filed from here without the user.**
   A smoke FAIL is shown, reproduced once, and offered as a bug
-  (`../qa-pipeline-code/references/bug-report-template.md`). The
+  (`../qa-pipeline-code/references/bug-report-template.md`): a
+  `Defect` under the release item when the fault is in that item's
+  change (RC is its first stop before production), a `Bug` when the
+  released build already has it. The
   `fail` verdict is recorded only after the user has seen it, because
   `record_case_result` files a Jira defect on `fail`.
 - **Scope is the ticket's.** Risk rows and open questions carried from

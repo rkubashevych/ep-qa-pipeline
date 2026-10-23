@@ -44,7 +44,7 @@ side of the badge conflict is JD-1, the comment is CM-1):
 Requirements: runs/EP-0000/docs/EP-0000-requirements.md
 Notes: ⚠️ REQ-2 badge text is an unresolved conflict (Confluence "Featured" / Jira "★ Featured") — one case per version.
 Generated: 2026-10-15
-Skill: qa-test-cases 0.74.0 · sha <short sha>
+Skill: qa-test-cases 0.75.0 · sha <short sha>
 
 ---
 

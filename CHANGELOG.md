@@ -5,6 +5,49 @@ semver; bump BOTH `.claude-plugin/plugin.json` and
 `.claude-plugin/marketplace.json` — the marketplace manifest is what
 signals an update to installed copies.
 
+## 0.75.0 — 2026-10-23 — Defect or Bug: is the fault already on production?
+
+**Trigger: the user.** On EP-57571 (2026-10-20) they corrected a
+write-back: "create a defect not a bug under main task". The plugin
+had no such rule. `bug-report-template.md` set `Issue type: Bug` for
+every finding and linked it to the Story with "relates to", so every
+stage that files through it (qa-pipeline-code step 7, qa-manual-results,
+qa-rc-smoke) filed a Bug. The fix lived only in one operator's session
+memory.
+
+**The rule (the user's words):** a Story on its first testing on alpha
+or RC has never been on production, so a fault in it is a **Defect**
+sub-task under the main task. A fault already on production is a
+**Bug**.
+
+**What changes (`bug-report-template.md`, new section "Defect or Bug —
+decide first, since 0.75.0"):**
+- Defect: `parent` = the Story / Task under test. If the ticket under
+  test is itself a Defect, its parent. For a bug-fix whose fix
+  introduced a new fault, the Bug. No "relates to" link.
+- Bug: standalone, "relates to" the ticket under test. This covers a
+  pre-existing fault the run surfaced, a bug-fix regression case
+  failing on behaviour the fix never touched (EP-58774's rule, now in
+  `run-modes.md`), and an RC finding also present in the released build.
+- How to tell without calling production: the failing code is in the
+  ticket's PR diffs → Defect (the default for a FAIL on the ticket's
+  own requirements). It predates them on the production line, or the
+  user says so → Bug. Unsure → ask in the draft preview. Every draft
+  states its type and a one-line reason, so the yes covers it.
+- The duplicate check searches `issuetype in (Bug, Defect)`. A
+  Bug-only search missed existing Defects and would have filed
+  duplicates.
+- Fields: the Defect-only fields (Environment `customfield_10378`,
+  Development area `10415`, Event ID `12478`), plus Assignee, Team
+  (`customfield_10001`) and Components, which the EP create requires
+  (a 400 on EP-58260, 2026-10-21, also session memory until now).
+
+**Copies updated:** qa-pipeline-code step 7; qa-manual-results (roster
+bugs and the no-roster offer); `test-runs.md` "File the ticket FIRST";
+qa-rc-smoke's filing rule; `run-modes.md` bug-fix mode (what a FAIL
+files); task-context's bug-history scan (`issuetype in (Bug, Defect)`);
+README "Bug filing".
+
 ## 0.74.0 — 2026-10-20 — qa-api-tests: a backend and a frontend test sub-task
 
 **Trigger: the user, on EP-55996.** They expected the new flow to leave

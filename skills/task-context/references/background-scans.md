@@ -29,8 +29,9 @@ affected. It feeds grooming's dependency questions and risk ratings.
    is not installed:** use the Atlassian connector directly:
    `searchConfluenceUsingCql` on the ExpoDoc space
    (`text ~ "<keywords>"`), and `searchJiraIssuesUsingJql` for EP bugs,
-   open and closed (`project = EP AND issuetype = Bug AND
-   text ~ "<keywords>"`), top 5 each.
+   open and closed (`project = EP AND issuetype in (Bug, Defect) AND
+   text ~ "<keywords>"`), top 5 each — a Defect is a bug found before
+   release, filed under its Story.
 4. Write the results into the "Related functionality & bug history"
    section of the output file: which other surfaces/features the
    entity appears in (one line per doc hit, with link), and a bug
